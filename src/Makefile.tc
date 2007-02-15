@@ -1,0 +1,51 @@
+.AUTODEPEND
+
+LIBPATH = C:\TC\LIB
+INCLUDEPATH = C:\TC\INCLUDE;LIBNESLA;LIBNESLAEXT;..\INCLUDE
+#PARAMS = -I$(INCLUDEPATH) -L$(LIBPATH) -mh -v -vi- -w-ret -w-nci -w-inl -wpin -wamb -wamp -w-par -wasm -wcln -w-cpt -wdef -w-dup -w-pia -wsig -wnod -w-ill -w-sus -wstv -wucp -wuse -w-ext -w-ias -w-ibc -w-pre -w-nst
+PARAMS = -I$(INCLUDEPATH) -L$(LIBPATH) -mh
+CC = tcc $(PARAMS)
+TASM = TASM
+TLIB = tlib
+TLINK = tlink
+
+EXE_dependencies = exec.obj lib.obj obj.obj parse.obj extlib.obj main.obj
+
+nesla.exe: $(EXE_dependencies)
+  $(TLINK) /v/x/c/L$(LIBPATH) @&&|
+c0h.obj+
+exec.obj+
+lib.obj+
+obj.obj+
+parse.obj+
+main.obj
+nesla
+		# no map file
+emu.lib+
+mathh.lib+
+ch.lib
+|
+
+exec.obj: exec.c 
+	$(CC) -c libnesla\exec.c
+
+lib.obj: libnesla\lib.c 
+	$(CC) -c libnesla\lib.c
+
+obj.obj: libnesla\obj.c 
+	$(CC) -c libnesla\obj.c
+
+parse.obj: libnesla\parse.c 
+	$(CC) -c libnesla\parse.c
+
+extlib.obj: libneslaext\extlib.c 
+	$(CC) -c libneslaext\extlib.c
+
+main.obj: main.c 
+	$(CC) -c sapi\cli\main.c
+
+.c.obj:
+  $(CC) -c {$< }
+
+.cpp.obj:
+  $(CC) -c {$< }

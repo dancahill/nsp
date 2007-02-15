@@ -1,0 +1,2 @@
+#print("[01;37;40m", "Hello, [error: world is NULL.  please create object 'world'.] ;-)\n\n", "[00m");
+print("Hello, [error: world is NULL.  please create object 'world'.] ;-)\n\n");

@@ -1,0 +1,33 @@
+# Makefile for NullLogic Embedded Scripting Language
+
+OBJDIR  = ../../../obj
+INTDIR  = $(OBJDIR)/cli
+
+CC            = cl.exe /nologo
+LINK          = link.exe
+MAKE          = nmake.exe /C /S /Y /F
+
+BIN_CFLAGS    = /W3 /O2 /ML /I "../../../include" /I "../../libnesla" /I "../../libneslaext" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /FD /c
+BIN_LDFLAGS   = /subsystem:console /pdb:none /machine:I386 libc.lib ../../../lib/libnesla.lib ../../../lib/libneslaext.lib
+BIN_TARGETDIR = ../../../bin
+
+CFLAGS  = $(BIN_CFLAGS)
+OBJECTS = $(INTDIR)/main.obj
+TARGET  = $(BIN_TARGETDIR)/nesla.exe
+
+all: _dirs _nesla
+
+_dirs:
+	@if not exist "$(BIN_TARGETDIR)" mkdir "$(BIN_TARGETDIR)"
+	@if not exist "$(OBJDIR)" mkdir "$(OBJDIR)"
+	@if not exist "$(INTDIR)" mkdir "$(INTDIR)"
+
+_nesla: $(OBJECTS)
+	$(LINK) $(BIN_LDFLAGS) /out:$(TARGET) $(OBJECTS)
+
+clean:
+	@-erase "$(TARGET)"
+	@-erase "$(INTDIR)/*"
+
+.c{$(INTDIR)}.obj:
+	$(CC) $(CFLAGS) $<

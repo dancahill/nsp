@@ -1,0 +1,5 @@
+#define PACKAGE_BUGREPORT "nulllogic@users.sourceforge.net"
+#define PACKAGE_NAME      "nesla"
+#define PACKAGE_STRING    "nesla 0.1.0"
+#define PACKAGE_TARNAME   "nesla"
+#define PACKAGE_VERSION   "0.1.0"

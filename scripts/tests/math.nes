@@ -1,0 +1,52 @@
+function testmath() {
+	local pi = math.asin(1)*2;
+	local n=0;
+
+	n=1+2*4;
+	print("\tn=1+2*4            expect               [ 9 ] : [ ", n, " ](ooo is broken)\n");
+	n=(1+2)*4;
+	print("\tn=(1+2)*4          expect              [ 12 ] : [ ", n, " ]\n");
+	n=1+(2*4);
+	print("\tn=1+(2*4)          expect               [ 9 ] : [ ", n, " ]\n");
+	n=42;
+	print("\tn=42               expect              [ 42 ] : [ ", n, " ]\n");
+	n+=5;
+	print("\tn+=5               expect              [ 47 ] : [ ", (n), " ]\n");
+	n-=2;
+	print("\tn-=2, n+5          expect              [ 50 ] : [ ", n+5, " ]\n");
+	print("\t.., (n+5)          expect              [ 50 ] : [ ", (n+5), " ]\n");
+	n*=3;
+	print("\tn*=3               expect             [ 135 ] : [ ", (n), " ]\n");
+	n/=4;
+	print("\tn/=4               expect           [ 33.75 ] : [ ", (n), " ]\n");
+	n=42;
+	print("\tn=42, n--          expect           [ 42 41 ] : [ ", n--, " ", n, " ]\n");
+	n=42;
+	print("\tn=42, n++          expect           [ 42 43 ] : [ ", n++, " ", n, " ]\n");
+	n=42;
+	print("\tn=42, --n          expect           [ 41 41 ] : [ ", --n, " ", n, " ]\n");
+	n=42;
+	print("\tn=42, ++n          expect           [ 43 43 ] : [ ", ++n, " ", n, " ]\n");
+	print("\t(n++)              expect              [ 43 ] : [ ", (n++), " ]\n");
+	print("\t(n--)              expect              [ 44 ] : [ ", (n--), " ]\n");
+	print("\tn                  expect              [ 43 ] : [ ", n, " ]\n");
+	print("\t3-1.5              expect             [ 1.5 ] : [ ", (3-1.5), " ]\n");
+	print("\t-4+1.5             expect            [ -2.5 ] : [ ", (-4+1.5), " ]\n");
+	print("\t-1.5               expect            [ -1.5 ] : [ ", -1.5, " ]\n");
+	print("\tmath.abs(-4.2)     expect             [ 4.2 ] : [ ", math.abs(-4.2), " ]\n");
+	print("\tmath.ceil(2.1)     expect               [ 3 ] : [ ", math.ceil(2.1), " ]\n");
+	print("\tmath.floor(2.1)    expect               [ 2 ] : [ ", math.floor(2.1), " ]\n");
+	n=(pi*(4+(4-1+2)))/9;
+	print("\t(pi*(4+(4-1+2)))/9 = ", n, "\n");
+	n=pi*(2+(1+1));
+	print("\tpi*(2+(1+1))       = ", n, "\n");
+	print("\tmath.sqrt(2)       = ", math.sqrt(2), "\n");
+	print("\tmath.rand()        = ", math.rand());
+	for (i=0;i<3;i++) { print(", ", math.rand()); }
+	print("\n");
+	print("\tmath.rand(10)      = ", math.rand(10));
+	for (i=0;i<14;i++) { print(", ", math.rand(10)); }
+	print("\n");
+	return;
+}
+testmath();

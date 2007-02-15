@@ -1,0 +1,26 @@
+# ANSI sample prog by Dan Cahill
+global ANSI = {
+	cls="[2J",
+	home="[H",
+}
+global lamemsg="\nHello, ANSI.";
+print(ANSI.cls, ANSI.home);
+print("[00;30;40m", lamemsg);
+print("[01;30;40m", lamemsg);
+print("[00;31;40m", lamemsg);
+print("[01;31;40m", lamemsg);
+print("[00;32;40m", lamemsg);
+print("[01;32;40m", lamemsg);
+print("[00;33;40m", lamemsg);
+print("[01;33;40m", lamemsg);
+print("[00;34;40m", lamemsg);
+print("[01;34;40m", lamemsg);
+print("[00;35;40m", lamemsg);
+print("[01;35;40m", lamemsg);
+print("[00;36;40m", lamemsg);
+print("[01;36;40m", lamemsg);
+print("[00;37;40m", lamemsg);
+print("[01;37;40m", lamemsg);
+
+print("[00;34;46m", lamemsg);
+print("[00m\n\n");

@@ -1,0 +1,10 @@
+function testload() {
+	include("/etc/nullgs/nullgs.conf");
+	global junk = { };
+	for (j=0;j<100;j++) {
+		junk[j] = { a=1, b=2, c=3 }
+	}
+	global junk=0;
+	return;
+}
+testload();

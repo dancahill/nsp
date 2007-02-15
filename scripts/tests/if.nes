@@ -1,0 +1,13 @@
+function testif() {
+	local x=2;
+
+	if (x==1) {
+		print("\tlogic test 1 (bad)\n");
+	} else if (x==2) {
+		print("\tlogic test 2 (good)\n");
+	} else {
+		print("\tlogic test 3 (bad)\n");
+	}
+	return;
+}
+testif();

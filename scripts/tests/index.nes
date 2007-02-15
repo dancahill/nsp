@@ -1,0 +1,38 @@
+if (string.cmp(type(SESSION), 'table')!=0) { global SESSION = { }; }
+if (string.cmp(type(HTVARS), 'table')==0) {
+	print("<H1>INDEX OF ", HTVARS['REQUEST_URI'], "</H1>");
+	print("<PRE><FONT SIZE=2>");
+}
+if (string.cmp(type(HTVARS['PWD']), 'null')!=0) {
+	dirlist('_d', HTVARS['PWD']);
+} else {
+	dirlist('_d', _filepath);
+}
+print("<TABLE BORDER=1 WIDTH=100%>\n");
+for (i=0;i<40;i++) {
+	var x=_d[@i];
+	if (string.cmp(type(_d[x]), 'null')==0) { break; }
+	if (string.cmp(type(_d[x]), 'table')==0) {
+		if (string.cmp(x, '.')==0) {
+		} else if (string.cmp(x, '..')==0) {
+			print("<TR>\n");
+			print("<TD>", _d[x].type, "</TD>");
+			print("<TD><A HREF='", x, "'>", x, "</A></TD>");
+			print("<TD>", _d[x].size, "</TD>");
+			print("<TD>", date(_d[x].mtime), " ", time(_d[x].mtime), "</TD>");
+			print("</TR>\n");
+		} else {
+			print("<TR>\n");
+			print("<TD>", _d[x].type, "</TD>");
+			print("<TD><A HREF='", x, "'>", x, "</A></TD>");
+			print("<TD>", _d[x].size, "</TD>");
+			print("<TD>", date(_d[x].mtime), " ", time(_d[x].mtime), "</TD>");
+			print("</TR>\n");
+		}
+	}
+}
+print("</TABLE>\n");
+print("\truntime = ", runtime(), " seconds\n");
+if (string.cmp(type(HTVARS), 'table')==0) {
+	print("</FONT></PRE>\n");
+}

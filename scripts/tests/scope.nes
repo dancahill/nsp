@@ -1,0 +1,13 @@
+function testscope() {
+	function subf(p1, p2) {
+		local p3="b";
+		print("\ttesting subscope   expect           [5][x][b] : [", p1, "][", p2, "][", p3, "]\n");
+		return;
+	}
+	local p3="a";
+	print("\ttesting scope      expect     [null][null][a] : [", p1, "][", p2, "][", p3, "]\n");
+	subf(5, "x");
+	print("\ttesting scope      expect     [null][null][a] : [", p1, "][", p2, "][", p3, "]\n");
+	return;
+}
+testscope();

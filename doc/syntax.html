@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<title>NESLA NullLogic Embedded Scripting Language 0.1 Reference Manual</title>
+<link rel="stylesheet" href="lua.css">
+</head>
+<body>
+<hr>
+<h1>
+<a href="http://nullgroupware.sf.net/"><img src="logo.gif" alt="" border="0"></a>
+NESLA NullLogic Embedded Scripting Language 0.1 Reference Manual
+</h1>
+by Dan Cahill
+<p>
+<small>
+<a href="http://nullgroupware.sf.net/copyright.html">Copyright</a>
+&copy; 2007 Dan Cahill.  All rights reserved.
+</small>
+<hr>
+
+<b>[highest priority]</b>
+<br>
+<ul>
+  <li>redeclaring a subtable is corrupting the parent nodes</li>
+  <li>fix math order of ops</li>
+  <li>random input = random crashes</li>
+  <li>tables as args or returns is _BROKEN_</li>
+  <li>add something so tab.x can equal tab.x[0] if x turns out to be a table of vars instead of just a regular var</li>
+</ul>
+<b>[high priority]</b>
+<br>
+<ul>
+  <li>need cmps with proper internal handling of true, false, null, etc...</li>
+  <li>boolean vars don't really exist yet</li>
+  <li>there are no checks for div by zero, etc</li>
+  <li>scope and args are functional but kludgy (braces don't affect scope)</li>
+  <li>need a function for cloning tables</li>
+</ul>
+<b>[lower priority]</b>
+<br>
+<ul>
+  <li>some string addition might be fun</li>
+  <li>make better test scripts</li>
+  <li>some api data pointers might be useful</li>
+  <li>read-only vars might be handy</li>
+  <li>flags like hidden and dont_free will be useful for vars</li>
+  <li>should some vars have tables for handler functions?</li>
+</ul>
+
+<h2>ops</h2>
+stuff like n++, --n and n*=42 work ok..<br>
+$ symbols are accepted as normal filename characters (for now), but are not required at all<br>
+<br>
+<h2>functions and keywords (so far..)</h2>
+if.. for.. while..<br>
+still need to add do{}while, switch and goto..<br>
+<br>
+break (accepts an optional unbracketed number parm to define the number of levels to break)<br>
+continue.. return.. function.. global.. local.. var..<br>
+<br>
+internal hackros<br>
+----------------<br>
+	printvars();<br>
+	type();<br>
+<br>
+there is no free() function, but if you take a value holding a large table<br>
+and reassign it to a number (for example), the memory is reclaimed instantly.<br>
+
+<h2>core lib functions</h2>
+<hr><h3><a name="nesla_date"><code>(string) date([number unixtime]);</code></a></h3>
+Accepts an optional number (time in seconds since Jan 1 1970) and returns a
+formatted date string.
+<p>
+<hr><h3><a name="nesla_time"><code>(string) time([number unixtime]);</code></a></h3>
+Accepts an optional number (time in seconds since Jan 1 1970) and returns a
+formatted time string.
+<p>
+<hr><h3><a name="nesla_include"><code>() include(string filename);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_number"><code>(number) number(string|number);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_print"><code>print(...);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_runtime"><code>(string) runtime();</code></a></h3>
+<p>
+<hr><h3><a name="nesla_write"><code>write(string str);</code></a></h3>
+<p>
+
+/* basic io */<br>
+<hr><h3><a name="nesla_io_print"><code>() io.print(...);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_io_write"><code>() io.write(string str);</code></a></h3>
+<p>
+
+/* math functions */<br>
+<hr><h3><a name="nesla_math_abs"><code>(number) math.abs(number n);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_math_acos"><code>(number) math.acos(number n);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_math_asin"><code>(number) math.asin(number n);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_math_atan"><code>(number) math.atan(number n);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_math_ceil"><code>(number) math.ceil(number n);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_math_cos"><code>(number) math.cos(number n);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_math_floor"><code>(number) math.floor(number n);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_math_rand"><code>(number) math.rand([number range]);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_math_sin"><code>(number) math.sin(number n);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_math_sqrt"><code>(number) math.sqrt(number n);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_math_tan"><code>(number) math.tan(number n);</code></a></h3>
+<p>
+
+/* strings */<br>
+<hr><h3><a name="nesla_string_cat"><code>(string) string.cat(string str1, string str2);</code></a></h3>
+<br>
+	string.cat(x, y) will not change x or y.  to set x to the result, use "x=string.cat(x, y)"<br>
+	actually, all string functions should work like this (by not modifying the original arguments.<br>
+<br>
+<p>
+<hr><h3><a name="nesla_string_cmp"><code>(number) string.cmp(string str1, string str2);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_string_icmp"><code>(number) string.icmp(string str1, string str2);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_string_ncmp"><code>(number) string.ncmp(string str1, string str2, number len);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_string_nicmp"><code>(number) string.nicmp(string str1, string str2, number len);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_string_len"><code>(number) string.len(string str);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_string_str"><code>(string) string.str(string stack, string needle);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_string_istr"><code>(string) string.istr(string stack, string needle);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_string_sub"><code>(string) string.sub(string stack, number offset[, number maxlen]);</code></a></h3>
+<p>
+
+<hr>
+</body>
+</html>
