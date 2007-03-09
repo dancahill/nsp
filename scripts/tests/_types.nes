@@ -1,0 +1,17 @@
+#!/usr/bin/nesla
+if (type(expect)=='null') { include("_expect.nes"); }
+function testtypes() {
+#	local a=null;
+	local b=true;
+	local c=42;
+	local d="stringy";
+	local e = { a=1 };
+
+	expect("type(a)", "(null)null",      "("+type(a)+")"+tostring(a));
+	expect("type(b)", "(boolean)true",   "("+type(b)+")"+tostring(b));
+	expect("type(b)", "(number)42",      "("+type(c)+")"+tostring(c));
+	expect("type(c)", "(string)stringy", "("+type(d)+")"+tostring(d));
+	expect("type(c)", "(table)",         "("+type(e)+")"+tostring(e));
+	return;
+}
+testtypes();

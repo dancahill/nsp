@@ -15,18 +15,27 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+#ifndef _NESLA_H
+#define _NESLA_H 1
+
 #include <setjmp.h>
 #ifdef WIN32
-#include <winsock.h> /* just for timeval */
-#include <time.h>
-#include <sys/timeb.h>
+/* from <sys/time.h> (which doesn't exist) */
+struct timeval { long tv_sec; long tv_usec; };
+#else
+#ifdef __TURBOC__
+struct timeval { long tv_sec; long tv_usec; };
 #else
 #include <sys/time.h>
 #endif
+#endif
 
-#define num_t double
+#define NESLA_NAME     "nesla"
+#define NESLA_VERSION  "0.2.0"
 
-#define MAX_OBJNAMLEN 64
+#define MAX_OBJNAMELEN 64
+#define MAX_OUTBUFLEN  8192
+#define OUTBUFLOWAT    7168
 
 /* object storage types */
 #define NT_NULL		0
@@ -41,70 +50,80 @@
 /* object storage modes */
 #define NST_HIDDEN	1
 #define NST_READONLY	2
+#define NST_SYSTEM	4
 
-#define obj_t struct nesla_objrec
-union nesla_object {
-	void  *null;
-	short  boolean;
-	num_t  number;
-	char  *string;
-	char  *chunk;
+#define num_t double
+#define uchar unsigned char
+#define obj_t struct nes_objrec
+union nes_object {
+	char *str;
+	num_t  num;
 	obj_t *table;
-	char  *function;
-	void  *cfunction;
+	void  *cfunc;
 };
-typedef struct nesla_objrec {
-	struct nesla_objrec *parent;
-	struct nesla_objrec *prev;
-	struct nesla_objrec *next;
-	char name[MAX_OBJNAMLEN+1];
+typedef struct nes_objrec {
+	struct nes_objrec *parent;
+	struct nes_objrec *prev;
+	struct nes_objrec *next;
 	unsigned short type;
 	unsigned short mode; /* status: mode (hidden, readonly) */
-	unsigned int   size; /* status: string or chunk size */
-	union nesla_object d;
-} nesla_objrec;
+	unsigned int   size; /* string or chunk size */
+	char name[MAX_OBJNAMELEN+1];
+	union nes_object d;
+} nes_objrec;
 typedef struct {
-	char *readptr;
-	char *lastptr;
+	uchar *readptr;
+	uchar *lastptr;
 	short int debug;
+	short int test_depth;
 	short int warnings;
 	short int err;
 	short int brk;
 	short int ret;
 	obj_t g;
 	obj_t l;
+	obj_t r;
 	short int lastop;
-	char lastname[MAX_OBJNAMLEN+1];
+	char lastname[MAX_OBJNAMELEN+1];
 	jmp_buf savjmp;
 	struct timeval ttime;
+	unsigned short int outbuflen;
+	char numbuf[128];
+	char outbuf[MAX_OUTBUFLEN+1];
 	char errbuf[256];
-	char txtbuf[8193];
-} nesla_state;
+} nes_state;
+
+#define    nes_isnull(o)     (o==NULL||o->type==NT_NULL)
+#define    nes_istable(o)    (o!=NULL&&o->type==NT_TABLE)
+#define    nes_isnum(o)      (o!=NULL&&o->type==NT_NUMBER)
+#define    nes_isstr(o)      (o!=NULL&&o->type==NT_STRING)
+
+#define    nes_tonum(N,o)    (o==NULL?0:o->type==NT_NUMBER?o->d.num:o->type==NT_BOOLEAN?o->d.num?1:0:o->type==NT_STRING?nes_aton(N,o->d.str):0)
+#define    nes_getnum(N,o,n) nes_tonum(N, nes_getobj(N,o,n))
+
+#define    nes_tostr(N,o)    (o==NULL?"":o->type==NT_BOOLEAN?o->d.num?"true":"false":o->type==NT_NUMBER?nes_ntoa(N,N->numbuf,o->d.num,-10,6):o->type==NT_STRING?o->d.str?o->d.str:o->type==NT_NULL?"null":"":"null")
+#define    nes_getstr(N,o,n) nes_tostr(N, nes_getobj(N,o,n))
+
+#define    nes_setnum(N,t,n,v)     nes_setobj(N, t, n, NT_NUMBER, NULL, v, NULL, 0)
+#define    nes_setstr(N,t,n,s,l)   nes_setobj(N, t, n, NT_STRING, NULL, 0, s,    l)
+#define    nes_settable(N,t,n)     nes_setobj(N, t, n, NT_TABLE,  NULL, 0, NULL, 0)
+#define    nes_setcfunc(N,t,n,p)   nes_setobj(N, t, n, NT_CFUNC,  p,    0, NULL, 0)
+#define    nes_setnfunc(N,t,n,s,l) nes_setobj(N, t, n, NT_NFUNC,  NULL, 0, s,    l)
 
 #ifndef NESLA_NOFUNCTIONS
 /* exec */
-nesla_state *nesla_newstate (void);
-nesla_state *nesla_endstate (nesla_state *N);
-char        *nesla_exec     (nesla_state *N, char *string);
-int          nesla_execfile (nesla_state *N, char *file);
+nes_state *nes_newstate (void);
+nes_state *nes_endstate (nes_state *N);
+obj_t     *nes_exec     (nes_state *N, char *string);
+int        nes_execfile (nes_state *N, char *file);
+/* libc */
+num_t      nes_aton     (nes_state *N, const char *str);
+char      *nes_ntoa     (nes_state *N, char *str, num_t num, short base, unsigned short dec);
 /* object */
-void         nesla_freetable(nesla_state *N, obj_t *tobj);
-obj_t       *nesla_getobj   (nesla_state *N, obj_t *tobj, char *oname);
-obj_t       *nesla_getiobj  (nesla_state *N, obj_t *tobj, int oindex);
-obj_t       *nesla_regnull  (nesla_state *N, obj_t *tobj, char *name);
-obj_t       *nesla_regnum   (nesla_state *N, obj_t *tobj, char *name, num_t data);
-obj_t       *nesla_regstr   (nesla_state *N, obj_t *tobj, char *name, char *data);
-obj_t       *nesla_regtable (nesla_state *N, obj_t *tobj, char *name);
-obj_t       *nesla_regnfunc (nesla_state *N, obj_t *tobj, char *name, char *data);
-obj_t       *nesla_regcfunc (nesla_state *N, obj_t *tobj, char *name, void *data);
-num_t        nesla_tofloat  (nesla_state *N, obj_t *cobj);
-int          nesla_toint    (nesla_state *N, obj_t *cobj);
-char        *nesla_tostr    (nesla_state *N, obj_t *cobj);
-num_t        nesla_getfloat (nesla_state *N, obj_t *tobj, char *oname);
-int          nesla_getint   (nesla_state *N, obj_t *tobj, char *oname);
-char        *nesla_getstr   (nesla_state *N, obj_t *tobj, char *oname);
-char        *nesla_getfstr  (nesla_state *N, obj_t *tobj, char *oname);
-char        *nesla_getrstr  (nesla_state *N, obj_t *tobj, char *oname);
-void         nesla_printvars(nesla_state *N, obj_t *cobj);
-void         nesla_sorttable(nesla_state *N, obj_t *tobj, int recurse);
+void       nes_freetable(nes_state *N, obj_t *tobj);
+obj_t     *nes_getobj   (nes_state *N, obj_t *tobj, char *oname);
+obj_t     *nes_getiobj  (nes_state *N, obj_t *tobj, int oindex);
+obj_t     *nes_setobj   (nes_state *N, obj_t *tobj, char *oname, unsigned short otype, void *_fptr, num_t _num, char *_str, int _slen);
 #endif
+
+#endif /* nesla.h */

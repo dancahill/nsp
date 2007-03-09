@@ -1,3 +1,4 @@
+#!/usr/bin/nesla
 if (string.cmp(type(_SERVER), 'null')==0) {
 	global _SERVER = { REQUEST_METHOD="GET", SCRIPT_NAME="/nesla/blah" }
 } # this is a debug block

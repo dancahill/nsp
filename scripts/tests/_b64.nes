@@ -1,0 +1,15 @@
+#!/usr/bin/nesla
+if (type(expect)=='null') { include("_expect.nes"); }
+function testb64() {
+	if (type(base64)!='table') { return; }
+	local bx = { p="stuff:null", e="c3R1ZmY6bnVsbA==" };
+	local by = { p="null:stuff", e="bnVsbDpzdHVmZg==" };
+	expect("base64.decode(bx.e)", "stuff:null",       base64.decode(bx.e));
+	expect("base64.decode(by.e)", "null:stuff",       base64.decode(by.e));
+	expect("base64.encode(bx.p)", "c3R1ZmY6bnVsbA==", base64.encode(bx.p));
+	expect("base64.encode(by.p)", "bnVsbDpzdHVmZg==", base64.encode(by.p));
+#	local joke = "UTogV2hhdCdzIHRoZSBkaWZmZXJlbmNlIGJldHdlZW4gYSBjb2NrZXIgc3BhbmllbCBhbmQgYSBwaXRidWxsIGh1bXBpbmcgeW91ciBsZWc/CkE6IFlvdSBsZXQgdGhlIHBpdGJ1bGwgZmluaXNoLg==";
+#	print("\n", base64.decode(joke), "\n");
+	return;
+}
+testb64();

@@ -15,11 +15,13 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+#ifndef _LIBNESLA_H
+#define _LIBNESLA_H 1
 #include "nesla.h"
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <string.h>
+
+#ifndef NULL
+#define NULL ((void *)0)
+#endif
 
 /* error numbers */
 #define NE_MEM		1
@@ -30,13 +32,15 @@
 /* punctuation */
 #define	OP_POBRACE	254
 #define	OP_POPAREN	253
-#define	OP_PCBRACE	252
-#define	OP_PCPAREN	251
-#define	OP_PCOMMA	250
-#define	OP_PSEMICOL	249
-#define	OP_PDOT		248
-#define	OP_POBRACKET	247
-#define	OP_PCBRACKET	246
+#define	OP_POBRACKET	252
+
+#define	OP_PCBRACE	251
+#define	OP_PCPAREN	250
+#define	OP_PCBRACKET	249
+#define	OP_PCOMMA	248
+#define	OP_PSEMICOL	247
+
+#define	OP_PDOT		246
 #define	OP_PSQUOTE	245
 #define	OP_PDQUOTE	244
 #define	OP_PHASH	243
@@ -85,58 +89,130 @@
 #define OP_ISPUNC(o)	((o>=OP_PHASH)&&(o<=OP_POBRACE))
 #define OP_ISMATH(o)	((o>=OP_MCGT)&&(o<=OP_MEQ))
 #define OP_ISKEY(o)	((o>=OP_KWHILE)&&(o<=OP_KBREAK))
-#define IS_DATA(c)	(isdigit(c)||(c=='\'')||(c=='\"'))
-#define IS_STMTEND(o)	((o==OP_PCPAREN)||(o==OP_PCOMMA)||(o==OP_PSEMICOL)||(o==OP_PCBRACKET)||(o==OP_PCBRACE))
+#define OP_ISEND(o)	((o>=OP_PSEMICOL)&&(o<=OP_PCBRACE))
+#define IS_MATHOP(c)	(c=='='||c=='+'||c=='-'||c=='*'||c=='/'||c=='%'||c=='&'||c=='|'||c=='^'||c=='!'||c=='<'||c=='>')
+#define IS_PUNCOP(c)	(c=='('||c==')'||c==','||c=='{'||c=='}'||c==';'||c=='.'||c=='['||c==']')
+#define IS_DATA(c)	(c=='\''||c=='\"'||nc_isdigit(c))
+#define IS_LABEL(c)	(c=='_'||c=='$'||nc_isalpha(c))
 
 #define n_debug(fn)	n_warn(N, fn, "%10s:%d - %d[ %s ]", __FILE__, __LINE__, N->lastop, N->lastname)
+#define sanetest()	{ if (N->readptr==NULL) n_error(N, NE_SYNTAX, fn, "NULL readptr"); }
+/*
+#define SHOW_RUNTIME 1
+#define SHOW_ENTRY 1
+*/
+#ifdef SHOW_RUNTIME
+#define showruntime() { \
+	struct timeval ttime; \
+	if (N) { \
+N->ttime.tv_usec+=22; \
+if (N->ttime.tv_usec>1000000) { N->ttime.tv_sec++; N->ttime.tv_usec-=1000000; }; \
+		nc_gettimeofday(&ttime, NULL); \
+		ttime.tv_sec-=N->ttime.tv_sec; ttime.tv_usec-=N->ttime.tv_usec; \
+		if (ttime.tv_usec<0) { ttime.tv_sec--; ttime.tv_usec+=1000000; }; \
+		printf("\n[01;34;40m%s:%d %d.%06d secs[00m", __FILE__, __LINE__, (int)ttime.tv_sec, (int)ttime.tv_usec); \
+	} \
+}
+#else
+#define showruntime()
+#endif
 
-typedef int(*NESLA_CFUNC)(nesla_state *);
+#ifdef SHOW_ENTRY
+#define DEBUG_IN() { \
+	char *tabs="................................"; \
+	struct timeval ttime; \
+	if (N) { \
+N->ttime.tv_usec+=22; \
+if (N->ttime.tv_usec>1000000) { N->ttime.tv_sec++; N->ttime.tv_usec-=1000000; }; \
+		N->test_depth++; \
+		nc_gettimeofday(&ttime, NULL); \
+		ttime.tv_sec-=N->ttime.tv_sec; ttime.tv_usec-=N->ttime.tv_usec; \
+		if (ttime.tv_usec<0) { ttime.tv_sec--; ttime.tv_usec+=1000000; }; \
+		printf("\n%s[01;34;40m+%s %d.%06d[00m", tabs+32-N->test_depth, fn, (int)ttime.tv_sec, (int)ttime.tv_usec); \
+	} \
+}
+#define DEBUG_OUT() { \
+	char *tabs="................................"; \
+	struct timeval ttime; \
+	if (N) { \
+N->ttime.tv_usec+=22; \
+if (N->ttime.tv_usec>1000000) { N->ttime.tv_sec++; N->ttime.tv_usec-=1000000; }; \
+		nc_gettimeofday(&ttime, NULL); \
+		ttime.tv_sec-=N->ttime.tv_sec; ttime.tv_usec-=N->ttime.tv_usec; \
+		if (ttime.tv_usec<0) { ttime.tv_sec--; ttime.tv_usec+=1000000; }; \
+		printf("\n%s[01;34;40m-%s %d.%06d (%d)[00m", tabs+32-N->test_depth, fn, (int)ttime.tv_sec, (int)ttime.tv_usec, __LINE__); \
+		N->test_depth--; \
+	} \
+}
+#else
+#define DEBUG_IN()
+#define DEBUG_OUT()
+#endif
+
+typedef int(*NES_CFUNC)(nes_state *);
 
 /* exec.c */
-#ifdef WIN32
-int gettimeofday(struct timeval *tv, void *tz);
-#endif
-obj_t *ne_macros        (nesla_state *N);
-int    n_vsnprintf      (nesla_state *N, char *str, int size, const char *format, va_list ap);
-int    n_snprintf       (nesla_state *N, char *str, int size, const char *format, ...);
-int    n_printf         (nesla_state *N, short dowrite, const char *format, ...);
-void   n_error          (nesla_state *N, short int err, const char *fname, const char *format, ...);
-void   n_warn           (nesla_state *N, const char *fname, const char *format, ...);
-obj_t *ne_execfunction  (nesla_state *N, obj_t *cobj);
+obj_t   *n_macros       (nes_state *N);
+void     n_error        (nes_state *N, short int err, const char *fname, const char *format, ...);
+void     n_warn         (nes_state *N, const char *fname, const char *format, ...);
+obj_t   *n_execfunction (nes_state *N, obj_t *cobj);
 /* lib.c */
-int    nl_write         (nesla_state *N);
-int    nl_print         (nesla_state *N);
-int    nl_math1         (nesla_state *N);
-int    nl_number        (nesla_state *N);
-int    nl_strcat        (nesla_state *N);
-int    nl_strcmp        (nesla_state *N);
-int    nl_strlen        (nesla_state *N);
-int    nl_strstr        (nesla_state *N);
-int    nl_strsub        (nesla_state *N);
-int    nl_datetime      (nesla_state *N);
-int    nl_sleep         (nesla_state *N);
-int    nl_runtime       (nesla_state *N);
-int    nl_include       (nesla_state *N);
+void     n_printvars    (nes_state *N, obj_t *cobj);
+int      nl_flush       (nes_state *N);
+int      nl_print       (nes_state *N);
+int      nl_math1       (nes_state *N);
+int      nl_tonumber    (nes_state *N);
+int      nl_tostring    (nes_state *N);
+int      nl_strcat      (nes_state *N);
+int      nl_strcmp      (nes_state *N);
+int      nl_strlen      (nes_state *N);
+int      nl_strstr      (nes_state *N);
+int      nl_strsub      (nes_state *N);
+int      nl_datetime    (nes_state *N);
+int      nl_sleep       (nes_state *N);
+int      nl_runtime     (nes_state *N);
+int      nl_include     (nes_state *N);
+/* libc.c */
+#define  nc_isdigit(c)  ((c>='0'&&c<='9')?1:0)
+#define  nc_isalpha(c)  ((c>='A'&&c<='Z')||(c>='a'&&c<='z')?1:0)
+#define  nc_isalnum(c)  ((c>='A'&&c<='Z')||(c>='a'&&c<='z')||(c>='0'&&c<='9')?1:0)
+#define  nc_isupper(c)  ((c>='A'&&c<='Z')?1:0)
+#define  nc_islower(c)  ((c>='a'&&c<='z')?1:0)
+#define  nc_isspace(c)  (c=='\r'||c=='\n'||c=='\t'||c==' ')
+#define  nc_tolower(c)  ((c>='A'&&c<='Z')?(c+('a'-'A')):c)
+#define  nc_toupper(c)  ((c>='a'&&c<='z')?(c-('a'-'A')):c)
+int      nc_snprintf    (nes_state *N, char *str, int size, const char *format, ...);
+int      nc_printf      (nes_state *N, const char *format, ...);
+int      nc_gettimeofday(struct timeval *tv, void *tz);
+int      nc_strlen      (char *s);
+char    *nc_strchr      (const char *s, int c);
+char    *nc_strncpy     (char *d, const char *s, int n);
+int      nc_strcmp      (const char *s1, const char *s2);
+int      nc_strncmp     (const char *s1, const char *s2, int n);
+void    *nc_memset      (void *s, int c, int n);
 /* obj.c */
-void  *n_alloc          (nesla_state *N, int size);
-void   n_free           (nesla_state *N, void **ptr);
-obj_t *n_setobject      (nesla_state *N, obj_t *tobj, obj_t *object);
+void    *n_alloc        (nes_state *N, int size);
+void     n_free         (nes_state *N, void **ptr);
 /* parse.c */
-char    *n_skipcomment  (nesla_state *N);
-char    *n_skipblank    (nesla_state *N);
-char    *n_skipto       (nesla_state *N, char c);
-void     n_ungetop      (nesla_state *N);
-short    n_getop        (nesla_state *N);
-num_t    n_getnumber    (nesla_state *N);
-char    *n_getlabel     (nesla_state *N, char *nambuf);
-obj_t   *n_getquote     (nesla_state *N);
-obj_t   *n_getindex     (nesla_state *N, obj_t *cobj, char *lastname);
+void     n_skipto       (nes_state *N, unsigned short c);
+short    n_getop        (nes_state *N);
+num_t    n_getnumber    (nes_state *N);
+obj_t   *n_getquote     (nes_state *N);
+obj_t   *n_getindex     (nes_state *N, obj_t *cobj, char *lastname);
 
-obj_t   *n_evalsub      (nesla_state *N, char *end);
-obj_t   *n_eval         (nesla_state *N, char *end);
-obj_t   *n_evalargs     (nesla_state *N, char *name);
-int      n_storefunction(nesla_state *N);
-int      n_storevar     (nesla_state *N, obj_t *tobj, char *name);
-int      n_storetable   (nesla_state *N, obj_t *tobj);
-int      n_assign2      (nesla_state *N, obj_t *tobj, char *name, short op);
-int      n_assign       (nesla_state *N, obj_t *tobj);
+void     n_prechew      (nes_state *N, uchar *rawtext);
+
+obj_t   *n_evalsub      (nes_state *N);
+obj_t   *n_eval         (nes_state *N);
+obj_t   *n_evalargs     (nes_state *N, char *fname);
+obj_t   *n_storeval     (nes_state *N, obj_t *cobj);
+obj_t   *n_readfunction (nes_state *N);
+obj_t   *n_readtable    (nes_state *N, obj_t *tobj);
+obj_t   *n_readvar      (nes_state *N, obj_t *tobj, obj_t *cobj);
+
+#define  n_freestr(o)   if (o&&((o->type==NT_STRING)||(o->type==NT_NFUNC))) { o->size=0; if (o->d.str!=NULL) n_free(N, (void *)&o->d.str); }
+
+#define nextop()     { if (*N->readptr<128) n_getop(N); else { N->lastop=*N->readptr; N->lastptr=N->readptr++; N->lastname[0]=0; } }
+#define ungetop()    { N->readptr=N->lastptr; N->lastop=OP_UNDEFINED; N->lastname[0]=0; }
+
+#endif /* libnesla.h */

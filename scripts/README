@@ -1,9 +1,0 @@
-These are simple samples of Nesla programs.
-
-   _cards.nes      included file used to define playing cards
-   ansi.nes        simple ANSI codes
-   bj-ajax.nes     blackjack game for web servers using ajax (kinda)
-   hello.nes       the first program in every language
-   htshell.nes     simple shell for web servers
-   poker-ajax.nes  poker game for web servers using ajax (kinda)
-   test.nes        simple test program for common functions

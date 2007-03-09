@@ -1,10 +1,13 @@
 # Makefile for NullLogic Embedded Scripting Language
 
 CC   = gcc
-MAKE = make
+MAKE = gmake
 
 all: _libnesla _libneslaext _nesla
 	@./bin/nesla scripts/samples/hello.nes
+
+install: all
+	@cp -pR bin/nesla /usr/bin/nesla
 
 _nesla:
 	@$(MAKE) -C src/sapi/cli
@@ -15,26 +18,20 @@ _libnesla:
 _libneslaext:
 	@$(MAKE) -C src/libneslaext
 
-install: _libnesla _nesla
-	@cp -av bin/nesla /usr/bin/nesla
-
-nullgw: _libnesla _nesla
+nullgw: all
 	@$(MAKE) -C src/sapi/nullgw
 
-test: _libnesla _nesla
-	@./bin/nesla scripts/test1.nes
+test: all
+	@./bin/nesla scripts/tests/test1.nes
 
-test2: _libnesla _nesla
-	@./bin/nesla scripts/test2.nes
+test2: all
+	@./bin/nesla scripts/tests/test2.nes
 
-test3: _libnesla _nesla
-	@./bin/nesla scripts/test3.nes
+debug: all
+	@gdb --args ./bin/nesla_d scripts/tests/test1.nes
 
-debug: _libnesla _nesla
-	@gdb --args ./bin/nesla_d scripts/test.nes
-
-strace: _libnesla _nesla
-	@strace ./bin/nesla_d scripts/test.nes
+strace: all
+	@strace ./bin/nesla_d scripts/tests/test1.nes
 
 clean:
 	@$(MAKE) -s -C src/libnesla clean
@@ -44,5 +41,9 @@ clean:
 	@rm -rf autom4te.cache config.log config.status *~
 	@rm -f bin/*.exe lib/*.lib
 	@rm -rf obj
+
+ver:
+	@joe `grep -lR "0\.1\." *`
+	@rm `find -name *~`
 
 distclean: clean

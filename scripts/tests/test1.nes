@@ -1,0 +1,77 @@
+#!/usr/bin/nesla
+function vars() {
+	if (type(_SERVER)=='table') {
+		print("</FONT></PRE>");
+		print(
+			"<SCRIPT LANGUAGE=JavaScript>\n<!--\n",
+			"function showdebug() {\n",
+			"	if (document.getElementById('debug').style.display=='none') {\n",
+			"		document.getElementById('debug').style.display='block';\n",
+			"	} else {\n",
+			"		document.getElementById('debug').style.display='none';\n",
+			"	}\n",
+			"}\n",
+			"// -->\n</SCRIPT>\n"
+		);
+		print("<A HREF=javascript:showdebug()>SHOW DEBUG</A>\n");
+		print("<DIV ID=debug STYLE='display:none'><PRE><FONT SIZE=2>\n");
+	}
+	printvars();
+	if (type(_SERVER)=='table') {
+		print("</FONT></PRE></DIV>\n");
+	}
+	return;
+}
+
+function main() {
+	global pi = math.asin(1)*2;
+	include("../samples/_cards.nes");
+	include("_expect.nes");
+	if (type(_SERVER)=='table') {
+		print("<HTML><HEAD><TITLE>NESLA WEB TEST</TITLE></HEAD><BODY>");
+		print("<H1>NESLA WEB TEST</H1><PRE><FONT SIZE=2>");
+	}
+	print("STARTING TESTS\n");
+	print("--------------------------------------------------------\n");
+	include("_types.nes");
+	print("--------------------------------------------------------\n");
+	include("_tables.nes");
+	print("--------------------------------------------------------\n");
+	include("_scope.nes");
+	print("--------------------------------------------------------\n");
+	include("_string.nes");
+	print("--------------------------------------------------------\n");
+	include("_if.nes");
+	print("--------------------------------------------------------\n");
+	include("_loops.nes");
+	print("--------------------------------------------------------\n");
+	include("_cmp.nes");
+	print("--------------------------------------------------------\n");
+	include("_math.nes");
+	print("--------------------------------------------------------\n");
+	include("_b64.nes");
+	print("--------------------------------------------------------\n");
+	include("_rot13.nes");
+	print("--------------------------------------------------------\n");
+	include("_xml.nes");
+	print("--------------------------------------------------------\n");
+	include("_indexes.nes");
+	print("--------------------------------------------------------\n");
+	if (type(sqlquery)=='function') { sqlquery('_q', "SELECT * FROM nullgs_sessions"); }
+#	if (type(dirlist)=='function') { dirlist('_d', _filepath); }
+	print("\t[", date(), " ", time(), "]\n");
+	print("\truntime = ", runtime(), " seconds\n");
+	print("--------------------------------------------------------\n");
+	print("FINISHED TESTS\n");
+	print("--------------------------------------------------------\n");
+	global CARDS="";
+	global _ENV="";
+	global tab="";
+	vars();
+	if (type(_SERVER)=='table') {
+		print("</BODY></HTML>");
+	}
+	local i=0; for (i=1;i<10;i++) { }
+	return;
+}
+main();

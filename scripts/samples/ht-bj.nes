@@ -1,11 +1,12 @@
+#!/usr/bin/nesla
 # blackjack sample prog by Dan Cahill
 include("_cards.nes");
 include("_ajax.nes");
-global false=0;
-global true=1;
+#global false=0;
+#global true=1;
 
 function cardval(p) {
-	local x=number(p)+1;
+	local x=tonumber(p)+1;
 
 	if (string.cmp(type(p), 'null')==0) { return 0; }
 	x=math.ceil((x/4));
@@ -26,7 +27,7 @@ function getcard() {
 }
 
 function regcard(p) {
-	local x=number(p);
+	local x=tonumber(p);
 
 	if (string.cmp(type(p), 'null')!=0) { CARDS[x]['dealt']=true; }
 	return x;
@@ -93,14 +94,27 @@ function prepcards() {
 	return;
 }
 
+function printredraw() {
+	print("<SCRIPT LANGUAGE=JavaScript>\n<!--\n");
+	print("function redraw(c) {\n");
+	print(
+#		"	r=c.responseXML.documentElement;\n"
+		"	r=c.responseText;\n",
+		"	document.getElementById('remstatus').innerHTML=r;\n"
+	);
+	print("}\n");
+	print("// -->\n</SCRIPT>\n");
+	return;
+}
+
 function main() {
 	if (string.cmp(type(_SERVER['REQUEST_METHOD']), 'null')==0) {
 		global _SERVER = { REQUEST_METHOD="GET", SCRIPT_NAME="/nesla/blah" }
 	} # this is a debug block
 	if (string.cmp(type(_SESSION), 'table')!=0) { global _SESSION = { }; }
 	if (string.cmp(type(_SESSION['BJ']), 'table')!=0) { _SESSION['BJ'] = { }; }
-	_SESSION['BJ'].won  = number(_SESSION['BJ'].won);
-	_SESSION['BJ'].lost = number(_SESSION['BJ'].lost);
+	_SESSION['BJ'].won  = tonumber(_SESSION['BJ'].won);
+	_SESSION['BJ'].lost = tonumber(_SESSION['BJ'].lost);
 	prepcards();
 	if (string.cmp(_SERVER['REQUEST_METHOD'], "POST")!=0) {
 		print("<HTML>\n<HEAD>\n<TITLE>Nesla-AJAX Blackjack</TITLE>\n");
@@ -110,6 +124,7 @@ function main() {
 		print("</STYLE>\n");
 		print("</HEAD>\n<BODY>\n<CENTER>\n");
 		printxml();
+		printredraw();
 		print("<SPAN ID='remstatus'>");
 	}
 	print("<FORM ACTION='", _SERVER['SCRIPT_NAME'], "' METHOD='POST' NAME='game'>\n");

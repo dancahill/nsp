@@ -1,0 +1,17 @@
+#!/usr/bin/nesla
+if (type(expect)=='null') { include("_expect.nes"); }
+function testindexing() {
+	local i=0;
+	local x="";
+
+	for (i=0;i<40;i++) {
+		local x=_globals_[@i];
+		local t=type(_globals_[x]);
+		if (t=='null') { break; }
+		if (t!='function') {
+			print("\t", i, "\t", t, "\t", x);
+			print("\r\t\t\t\t\t\t", _globals_[x], "\n");
+		}
+	}
+}
+testindexing();

@@ -1,7 +1,7 @@
 .AUTODEPEND
 
 LIBPATH = C:\TC\LIB
-INCLUDEPATH = C:\TC\INCLUDE;LIBNESLA;LIBNESLAEXT;..\INCLUDE
+INCLUDEPATH = C:\TC\INCLUDE;LIBNESLA;LIBNES~1;..\INCLUDE
 #PARAMS = -I$(INCLUDEPATH) -L$(LIBPATH) -mh -v -vi- -w-ret -w-nci -w-inl -wpin -wamb -wamp -w-par -wasm -wcln -w-cpt -wdef -w-dup -w-pia -wsig -wnod -w-ill -w-sus -wstv -wucp -wuse -w-ext -w-ias -w-ibc -w-pre -w-nst
 PARAMS = -I$(INCLUDEPATH) -L$(LIBPATH) -mh
 CC = tcc $(PARAMS)
@@ -9,15 +9,22 @@ TASM = TASM
 TLIB = tlib
 TLINK = tlink
 
-EXE_dependencies = exec.obj lib.obj obj.obj parse.obj extlib.obj main.obj
+EXE_dependencies = exec.obj lib.obj libc.obj obj.obj parse.obj base64.obj dir.obj misc.obj rot13.obj sys.obj xml.obj main.obj
 
 nesla.exe: $(EXE_dependencies)
   $(TLINK) /v/x/c/L$(LIBPATH) @&&|
 c0h.obj+
 exec.obj+
 lib.obj+
+libc.obj+
 obj.obj+
 parse.obj+
+base64.obj+
+dir.obj+
+misc.obj+
+rot13.obj+
+sys.obj+
+xml.obj+
 main.obj
 nesla
 		# no map file
@@ -26,23 +33,41 @@ mathh.lib+
 ch.lib
 |
 
-exec.obj: exec.c 
-	$(CC) -c libnesla\exec.c
+exec.obj: libnesla\exec.c
+	@$(CC) -c libnesla\exec.c
 
 lib.obj: libnesla\lib.c 
-	$(CC) -c libnesla\lib.c
+	@$(CC) -c libnesla\lib.c
+
+libc.obj: libnesla\libc.c 
+	@$(CC) -c libnesla\libc.c
 
 obj.obj: libnesla\obj.c 
-	$(CC) -c libnesla\obj.c
+	@$(CC) -c libnesla\obj.c
 
 parse.obj: libnesla\parse.c 
-	$(CC) -c libnesla\parse.c
+	@$(CC) -c libnesla\parse.c
 
-extlib.obj: libneslaext\extlib.c 
-	$(CC) -c libneslaext\extlib.c
+base64.obj: libnes~1\base64.c 
+	@$(CC) -c libnes~1\base64.c
 
-main.obj: main.c 
-	$(CC) -c sapi\cli\main.c
+dir.obj: libnes~1\dir.c 
+	@$(CC) -c libnes~1\dir.c
+
+misc.obj: libnes~1\misc.c 
+	@$(CC) -c libnes~1\misc.c
+
+rot13.obj: libnes~1\rot13.c 
+	@$(CC) -c libnes~1\rot13.c
+
+sys.obj: libnes~1\sys.c 
+	@$(CC) -c libnes~1\sys.c
+
+xml.obj: libnes~1\xml.c 
+	@$(CC) -c libnes~1\xml.c
+
+main.obj: sapi\cli\main.c
+	@$(CC) -c sapi\cli\main.c
 
 .c.obj:
   $(CC) -c {$< }

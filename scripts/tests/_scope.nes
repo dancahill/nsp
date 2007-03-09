@@ -1,0 +1,15 @@
+#!/usr/bin/nesla
+if (type(expect)=='null') { include("_expect.nes"); }
+function testscope() {
+	function subf(p1, p2) {
+		local p3="b";
+		expect("testing subscope", "[5][x][b]",     "["+tostring(p1)+"]["+tostring(p2)+"]["+tostring(p3)+"]");
+		return;
+	}
+	local p3="a";
+	expect("testing scope", "[null][null][a]",     "["+tostring(p1)+"]["+tostring(p2)+"]["+tostring(p3)+"]");
+	subf(5, "x");
+	expect("testing scope", "[null][null][a]",     "["+tostring(p1)+"]["+tostring(p2)+"]["+tostring(p3)+"]");
+	return;
+}
+testscope();

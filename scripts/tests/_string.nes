@@ -1,0 +1,33 @@
+#!/usr/bin/nesla
+if (type(expect)=='null') { include("_expect.nes"); }
+function teststring() {
+	local x=string.cat(string.cat("Aa", "Bb"), "CcDd");
+	expect("x",                 "AaBbCcDd", x);
+	expect("string.sub(x,1,2)", "aB",   string.sub(x, 1, 2));
+	expect("string.sub(x,4,1)", "C",    string.sub(x, 4, 1));
+	expect("string.len(x)",     8,      string.len(x));
+	expect("string.cmp(x)",     -32,    string.cmp(x, "aabbccdd"));
+	expect("string.cmp(x)",     32,     string.cmp("aabbccdd", x));
+	expect("string.icmp(x)",    0,      string.icmp(x, "aabbccdd"));
+	expect("string.ncmp(x)",    -32,    string.ncmp(x, "aabb", 4));
+	expect("string.nicmp(x)",   0,      string.nicmp(x, "aabb", 4));
+	expect("string.sub(x)",     "is a", string.sub("this is a test.", 5, 4));
+	expect("string.sub(x)",     "test", string.sub("this is a test.", -5, 4));
+	print("\n");
+	expect("'123'=='456'",  0,        '123'=='456');
+	expect("'123'>='456'",  0,        '123'>='456');
+	expect("'123'>'456'",   0,        '123'>'456');
+	expect("'123'=='123'",  1,        '123'=='123');
+	expect("'123'!='456'",  1,        '123'!='456');
+	expect("'123'<='456'",  1,        '123'<='456');
+	expect("'123'<'456'",   1,        '123'<'456');
+	expect("'123'+'456'",   "123456", '123'+'456');
+	expect("tonumber('123')+1", 124,  tonumber('123')+1);
+	local x="1|2|3|4|5|6|7";
+	while (x==true) {
+		print("\t", x, "\n");
+		x=string.sub(string.str(x, "|"), 1, 42);
+	}
+	return;
+}
+teststring();

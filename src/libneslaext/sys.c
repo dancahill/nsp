@@ -15,17 +15,19 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-/* typedef int(*NES_CFUNC)(nes_state *); */
-/* base64.c */
-int neslaext_base64_decode(nes_state *N);
-int neslaext_base64_encode(nes_state *N);
-/* dir.c */
-int neslaext_dirlist(nes_state *N);
-/* rot13.c */
-int neslaext_rot13(nes_state *N);
-/* sys.c */
-int neslaext_system(nes_state *N);
-/* xml.c */
-int neslaext_xml_read(nes_state *N);
+#include "libnesla.h"
+#include "libneslaext.h"
+#include <stdlib.h>
 
-int neslaext_register_all(nes_state *N);
+int neslaext_system(nes_state *N)
+{
+	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+	int n=-1;
+
+	if (cobj1->type==NT_STRING) {
+		nl_flush(N);
+		n=system(cobj1->d.str);
+	}
+	nes_setnum(N, &N->r, "", n);
+	return 0;
+}

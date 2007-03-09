@@ -1,3 +1,4 @@
+#!/usr/bin/nesla
 function printxml() {
 	print("<SCRIPT LANGUAGE=JavaScript>\n<!--\n");
 	print(
@@ -25,7 +26,7 @@ function printxml() {
 		"	return function () {\n",
 		"		if (c.readyState==4) {\n",
 		"			if (c.status==200) {\n",
-		"				redraw(c.responseXML.documentElement);\n",
+		"				redraw(c);\n",
 		"			} else {\n",
 		"				alert('HTTP status: '+c.status+'\\\nHTTP return: '+c.responseText);\n",
 		"			}\n",

@@ -1,7 +1,8 @@
-if (string.cmp(type(_SERVER), 'table')==0) {
+#!/usr/bin/nesla
+if (type(_SERVER)=='table') {
 	print("<H1>INDEX OF ", _SERVER['REQUEST_URI'], "</H1>");
 	print("<PRE><FONT SIZE=2>");
-	if (string.cmp(type(_SERVER['PWD']), 'null')!=0) {
+	if (type(_SERVER['PWD'])!='null') {
 		dirlist('_d', _SERVER['PWD']);
 	} else {
 		dirlist('_d', _filepath);
@@ -13,6 +14,12 @@ if (string.cmp(type(_SERVER), 'table')==0) {
 		if (string.cmp(type(_d[x]), 'table')==0) {
 			if (string.cmp(x, '.')==0) {
 			} else if (string.cmp(x, '..')==0) {
+				print("<TR>\n");
+				print("<TD>", _d[x].type, "</TD>");
+				print("<TD><A HREF='", x, "'>", x, "</A></TD>");
+				print("<TD>", _d[x].size, "</TD>");
+				print("<TD>", date(_d[x].mtime), " ", time(_d[x].mtime), "</TD>");
+				print("</TR>\n");
 			} else {
 				print("<TR>\n");
 				print("<TD>", _d[x].type, "</TD>");

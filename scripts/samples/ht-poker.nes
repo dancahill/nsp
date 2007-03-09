@@ -1,3 +1,4 @@
+#!/usr/bin/nesla
 # poker sample prog by Dan Cahill
 include("_cards.nes");
 include("_ajax.nes");
@@ -11,13 +12,13 @@ global hand_vals = {
 	{ name="FULL HOUSE",      val=10  },
 	{ name="4 OF A KIND",     val=40  },
 	{ name="STR FLUSH",       val=100 },
-	{ name="ROYAL FLUSH",     val=500 },
+	{ name="ROYAL FLUSH",     val=500 }
 };
 
 function getcard() {
 	while (1) {
 		local x=math.rand(52);
-		if (string.cmp(type(CARDS[x]['dealt']), 'null')==0) {
+		if (type(CARDS[x]['dealt'])=='null') {
 			CARDS[x]['dealt']=true;
 			return x;
 		}
@@ -26,9 +27,9 @@ function getcard() {
 }
 
 function regcard(p) {
-	local x=number(p);
+	local x=tonumber(p);
 
-	if (string.cmp(type(p), 'null')!=0) { CARDS[x]['dealt']=true; }
+	if (type(p)!='null') { CARDS[x]['dealt']=true; }
 	return x;
 }
 
@@ -76,11 +77,11 @@ function ratehand() {
 	for (n=0;n<36;n++) { if ((cards[n]==1)&&(cards[n+4]==1)&&(cards[n+8]==1)&&(cards[n+12]==1)&&(cards[n+16]==1)) { return 8; } }
 #	CHECK FOR 4 OF A KIND
 	for (n=0;n<14;n++) { kind[n]=0; }
-	for (n=0;n<5;n++)  { kind[math.floor(number(c[n])/4)]++; }
+	for (n=0;n<5;n++)  { kind[math.floor(tonumber(c[n])/4)]++; }
 	for (n=0;n<13;n++) { if (kind[n]==4) { return 7; } }
 #	CHECK FOR A FULL HOUSE
 	for (n=0;n<14;n++) { kind[n]=0; }
-	for (n=0;n<5;n++)  { kind[math.floor(number(c[n])/4)]++; }
+	for (n=0;n<5;n++)  { kind[math.floor(tonumber(c[n])/4)]++; }
 	global pair=0;
 	for (n=0;n<13;n++) {
 		if (kind[n]==3) { global pair=pair+1.5; }
@@ -98,54 +99,62 @@ function ratehand() {
 	for (n=0;n<3;n++) { if (flush[n]==5) { return 5; } }
 #	CHECK FOR A STRAIGHT
 	for (n=0;n<14;n++) { straight[n]=0; }
-	for (n=0;n<5;n++)  { straight[math.floor(number(c[n])/4)]=1; }
+	for (n=0;n<5;n++)  { straight[math.floor(tonumber(c[n])/4)]=1; }
 	straight[13]=straight[0];
 	for (n=0;n<10;n++) { if (straight[n]+straight[n+1]+straight[n+2]+straight[n+3]+straight[n+4]==5) { return 4; } }
 #	CHECK FOR 3 OF A KIND
 	for (n=0;n<13;n++) { kind[n]=0; }
-	for (n=0;n<5;n++)  { kind[math.floor(number(c[n])/4)]++; }
+	for (n=0;n<5;n++)  { kind[math.floor(tonumber(c[n])/4)]++; }
 	for (n=0;n<13;n++) { if (kind[n]==3) { return 3; } }
 #	CHECK FOR 2 PAIRS
 	global pair=0;
 	for (n=0;n<13;n++) { kind[n]=0; }
-	for (n=0;n<5;n++)  { kind[math.floor(number(c[n])/4)]++; }
+	for (n=0;n<5;n++)  { kind[math.floor(tonumber(c[n])/4)]++; }
 	for (n=0;n<13;n++) { if (kind[n]==2) { global pair=pair+1; } }
 	if (pair==2) { return 2; }
 #	CHECK FOR HIGH PAIR
 	for (n=0;n<13;n++) { kind[n]=0; }
-	for (n=0;n<5;n++)  { kind[math.floor(number(c[n])/4)]++; }
+	for (n=0;n<5;n++)  { kind[math.floor(tonumber(c[n])/4)]++; }
 	if ((kind[10]==2)||(kind[11]==2)||(kind[12]==2)||(kind[0]==2)) { return 1; }
 	return 0;
 }
 
 function printredraw() {
 	print("<SCRIPT LANGUAGE=JavaScript>\n<!--\n");
-	print("function redraw(r) {\n");
+	print("function redraw(c) {\n");
+
+	print(
+		"	r=c.responseXML.documentElement;\n"
+#		"	r=c.responseText;\n",
+#		"	document.getElementById('remstatus').innerHTML=r;\n",
+	);
 	for (n=0;n<5;n++) {
 		print("	document.game.c",n,".value=r.getElementsByTagName('c",n,"')[0].firstChild.data;\n");
 		print("	document.card",n,".src=r.getElementsByTagName('c",n,"f')[0].firstChild.data;\n");
 		print("	document.card",n,".title=r.getElementsByTagName('c",n,"n')[0].firstChild.data;\n");
 	}
-	print("	rating=r.getElementsByTagName('rating')[0].firstChild.data;\n");
 	print(
+		"	rating=r.getElementsByTagName('rating')[0].firstChild.data;\n",
 		"	for (var i=1;i<10;i++) {\n",
 		"		if (i==rating) {\n",
 		"			document.getElementById('row'+i).bgColor='#00FF7F';\n",
 		"		} else {\n",
 		"			document.getElementById('row'+i).bgColor='#FFFFFF';\n",
 		"		}\n",
-		"	}\n"
+		"	}\n",
+		"}\n"
 	);
-	print("}\n");
-	print("function toggle(hc) {\n");
-	print("	if (document.getElementById('h'+hc).value==0) {\n");
-	print("		document.getElementById('h'+hc).value=1;\n");
-	print("		document.getElementById('hbut'+hc).bgColor='#00FF7F';\n");
-	print("	} else {\n");
-	print("		document.getElementById('h'+hc).value=0;\n");
-	print("		document.getElementById('hbut'+hc).bgColor='#FFFFFF';\n");
-	print("	}\n");
-	print("}\n");
+	print(
+		"function toggle(hc) {\n",
+		"	if (document.getElementById('h'+hc).value==0) {\n",
+		"		document.getElementById('h'+hc).value=1;\n",
+		"		document.getElementById('hbut'+hc).bgColor='#00FF7F';\n",
+		"	} else {\n",
+		"		document.getElementById('h'+hc).value=0;\n",
+		"		document.getElementById('hbut'+hc).bgColor='#FFFFFF';\n",
+		"	}\n",
+		"}\n"
+	);
 	print("// -->\n</SCRIPT>\n");
 	return;
 }
@@ -154,15 +163,15 @@ function xmlmain() {
 	global c = { 0, 0, 0, 0, 0 };
 	global held = { 0, 0, 0, 0, 0 };
 
-	if (number(_POST['h0'])==0) { c[0]=getcard(); } else { c[0]=regcard(_POST['c0']); held[0]=1; }
-	if (number(_POST['h1'])==0) { c[1]=getcard(); } else { c[1]=regcard(_POST['c1']); held[1]=1; }
-	if (number(_POST['h2'])==0) { c[2]=getcard(); } else { c[2]=regcard(_POST['c2']); held[2]=1; }
-	if (number(_POST['h3'])==0) { c[3]=getcard(); } else { c[3]=regcard(_POST['c3']); held[3]=1; }
-	if (number(_POST['h4'])==0) { c[4]=getcard(); } else { c[4]=regcard(_POST['c4']); held[4]=1; }
+	if (tonumber(_POST['h0'])==0) { c[0]=getcard(); } else { c[0]=regcard(_POST['c0']); held[0]=1; }
+	if (tonumber(_POST['h1'])==0) { c[1]=getcard(); } else { c[1]=regcard(_POST['c1']); held[1]=1; }
+	if (tonumber(_POST['h2'])==0) { c[2]=getcard(); } else { c[2]=regcard(_POST['c2']); held[2]=1; }
+	if (tonumber(_POST['h3'])==0) { c[3]=getcard(); } else { c[3]=regcard(_POST['c3']); held[3]=1; }
+	if (tonumber(_POST['h4'])==0) { c[4]=getcard(); } else { c[4]=regcard(_POST['c4']); held[4]=1; }
 	global opt = _POST.opt;
 	global r=ratehand();
 #	if response header isn't text/xml, IE will choke on this
-	HTRESPONSE['CONTENT_TYPE']="text/xml";
+	_HEADER['CONTENT_TYPE']="text/xml";
 	print("<?xml version='1.0' encoding='UTF-8' standalone='yes'?>\n");
 	print("<response>\n");
 	for (n=0;n<5;n++) {
@@ -178,14 +187,14 @@ function main() {
 	global held = { 0,0,0,0,0 };
 	global opt = "";
 
-#	if (string.cmp(type(_SERVER), 'null')==0) { # this is a debug block
+#	if (type(_SERVER)=='null') { # this is a debug block
 #		global _SERVER = { REQUEST_METHOD="POST", SCRIPT_NAME="/nesla/blah" }
 #		global _POST = { c0=12, c1=16, c2=20, c3=24, c4=28, h0=1, h1=1, h2=1, h3=1, h4=1 }
 #	}
 	print("<HTML>\n<HEAD>\n<TITLE>Nesla-AJAX Poker</TITLE>\n");
 	print("<STYLE TYPE=text/css>\n");
-	print("A        { color: #0000FF; text-decoration: none; }\n");
-	print("A:HOVER  { background-color: #E0E0FF; }\n");
+	print("A       { color: #0000FF; text-decoration: none; }\n");
+	print("A:HOVER { background-color: #E0E0FF; }\n");
 	print("</STYLE>\n");
 	print("</HEAD>\n<BODY>\n<CENTER>\n");
 	printxml();
@@ -201,7 +210,7 @@ function main() {
 	print("<TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>\n");
 	print("<TR>");
 	for (n=0;n<5;n++) {
-		local i=number(c[n]);
+		local i=tonumber(c[n]);
 		print("<TD ALIGN=LEFT WIDTH=71><IMG NAME=card", n, " WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[i].file ,"' TITLE='", CARDS[i].name, "'></TD>\n");
 	}
 	print("</TR>\n");
@@ -220,14 +229,14 @@ function main() {
 #		print("<A HREF='", _SERVER['SCRIPT_NAME'], "' 'onClick=location.replace('", _SERVER['SCRIPT_NAME'], "');return false;'>Play again</A>\n");
 #	}
 	print("</FORM>\n");
-	if (string.cmp(_SERVER['REQUEST_METHOD'], "POST")!=0) {
+	if (_SERVER['REQUEST_METHOD']=='GET') {
 		print("</SPAN>\n");
 		print("</CENTER>\n</BODY>\n</HTML>\n");
 	}
 	return;
 }
-if (string.cmp(type(_SERVER), 'table')==0) {
-	if (string.cmp(_SERVER['REQUEST_METHOD'], "POST")==0) {
+if (type(_SERVER)=='table') {
+	if (_SERVER['REQUEST_METHOD']=='POST') {
 		xmlmain();
 	} else {
 		main();

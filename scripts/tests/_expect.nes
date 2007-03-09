@@ -1,0 +1,25 @@
+#!/usr/bin/nesla
+function expect(msg, a, b) {
+	a=tostring(a);
+	b=tostring(b);
+	var sp="                    ";
+	var lm=string.len(msg);
+	var lb=string.len(b);
+
+	print("\t", msg, string.sub(sp, lm, 19-lm));
+	print(" = ", b, " ", string.sub(sp, lb, 17-lb));
+	if (a==b) {
+		if (type(_ENV['TERM'])=='null') {
+			print("[  OK  ]\n");
+		} else {
+			print("[\e[00;32;40m  OK  \e[00m]\n");
+		}
+	} else {
+		if (type(_ENV['TERM'])=='null') {
+			print("[FAILED] expected [ ", a, " ]\n");
+		} else {
+			print("[\e[00;31;40mFAILED\e[00m] expected [ ", a, " ]\n");
+		}
+	}
+	return;
+}

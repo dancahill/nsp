@@ -35,16 +35,18 @@ static CONN *get_sid()
 	return &http_proc->conn[sid];
 }
 
-static int mod_nesla_write(nesla_state *N)
+static int mod_nes_write(nes_state *N)
 {
 	CONN *sid=get_sid();
+	int len;
 
-	prints(sid, "%s", N->txtbuf);
-//	flushbuffer(sid); // remove after debugging
-	return strlen(N->txtbuf);
+	N->outbuf[N->outbuflen]='\0';
+	len=prints(sid, "%s", N->outbuf);
+	N->outbuflen=0;
+	return len;
 }
 
-static int mod_nesla_system(nesla_state *N)
+static int mod_nes_system(nes_state *N)
 {
 	CONN *sid=get_sid();
 	char tempname[255];
@@ -53,7 +55,7 @@ static int mod_nesla_system(nesla_state *N)
 	FILE *fp;
 	obj_t *cobj;
 
-	if ((cobj=nesla_getobj(N, &N->l, "!1"))==NULL) {
+	if ((cobj=nes_getobj(N, &N->l, "!1"))==NULL) {
 		prints(sid, "no arg1\r\n");
 		return 0;
 	}
@@ -64,9 +66,9 @@ static int mod_nesla_system(nesla_state *N)
 	snprintf(tempname, sizeof(tempname)-1, "%s/exec-%d.tmp", config->dir_var_tmp, (int)(time(NULL)%999));
 	fixslashes(tempname);
 #ifdef WIN32
-	snprintf(line, sizeof(line)-1, "\"%s\" > \"%s\"", cobj->d.string, tempname);
+	snprintf(line, sizeof(line)-1, "\"%s\" > \"%s\"", cobj->d.str, tempname);
 #else
-	snprintf(line, sizeof(line)-1, "%s > %s 2>&1", cobj->d.string, tempname);
+	snprintf(line, sizeof(line)-1, "%s > %s 2>&1", cobj->d.str, tempname);
 #endif
 	flushbuffer(sid);
 	err=sys_system(line);
@@ -80,7 +82,7 @@ static int mod_nesla_system(nesla_state *N)
 	return 0;
 }
 
-static void mod_nesla_register_variables(nesla_state *N)
+static void mod_nes_register_variables(nes_state *N)
 {
 	CONN *sid=get_sid();
 	obj_t *cobj;
@@ -88,32 +90,32 @@ static void mod_nesla_register_variables(nesla_state *N)
 	unsigned int i;
 
 	if (sid==NULL) return;
-	cobj=nesla_regtable(N, &N->g, "_SERVER");
-	nesla_regnum(N, cobj, "CONTENT_LENGTH",    sid->dat->in_ContentLength);
+	cobj=nes_settable(N, &N->g, "_SERVER");
+	nes_setnum(N, cobj, "CONTENT_LENGTH",    sid->dat->in_ContentLength);
 	if (!strlen(sid->dat->in_ContentType)) {
-		nesla_regstr(N, cobj, "CONTENT_TYPE", "application/x-www-form-urlencoded");
+		nes_setstr(N, cobj, "CONTENT_TYPE", "application/x-www-form-urlencoded", strlen("application/x-www-form-urlencoded"));
 	} else {
-		nesla_regstr(N, cobj, "CONTENT_TYPE", sid->dat->in_ContentType);
+		nes_setstr(N, cobj, "CONTENT_TYPE", sid->dat->in_ContentType, strlen(sid->dat->in_ContentType));
 	}
-	nesla_regstr(N, cobj, "GATEWAY_INTERFACE", "CGI/1.1");
-	nesla_regstr(N, cobj, "HTTP_COOKIE",       sid->dat->in_Cookie);
-	nesla_regstr(N, cobj, "HTTP_USER_AGENT",   sid->dat->in_UserAgent);
-	nesla_regstr(N, cobj, "PATH_TRANSLATED",   "?");
-	nesla_regstr(N, cobj, "NESLA_SELF",        sid->dat->in_CGIScriptName);
-	nesla_regstr(N, cobj, "QUERY_STRING",      sid->dat->in_QueryString);
-	nesla_regstr(N, cobj, "REMOTE_ADDR",       sid->dat->in_RemoteAddr);
-	nesla_regnum(N, cobj, "REMOTE_PORT",       sid->dat->in_RemotePort);
-	nesla_regstr(N, cobj, "REMOTE_USER",       sid->dat->user_username);
-	nesla_regstr(N, cobj, "REQUEST_METHOD",    sid->dat->in_RequestMethod);
-	nesla_regstr(N, cobj, "REQUEST_URI",       sid->dat->in_RequestURI);
-	nesla_regstr(N, cobj, "SCRIPT_NAME",       sid->dat->in_CGIScriptName);
-	nesla_regstr(N, cobj, "SERVER_PROTOCOL",   "HTTP/1.1");
-	nesla_regstr(N, cobj, "SERVER_SOFTWARE",   PACKAGE_NAME);
-	nesla_regtable(N, &N->g, "_GET");
-	nesla_regtable(N, &N->g, "_POST");
+	nes_setstr(N, cobj, "GATEWAY_INTERFACE", "CGI/1.1", strlen("CGI/1.1"));
+	nes_setstr(N, cobj, "HTTP_COOKIE",       sid->dat->in_Cookie, strlen(sid->dat->in_Cookie));
+	nes_setstr(N, cobj, "HTTP_USER_AGENT",   sid->dat->in_UserAgent, strlen(sid->dat->in_UserAgent));
+	nes_setstr(N, cobj, "PATH_TRANSLATED",   "?", strlen("?"));
+	nes_setstr(N, cobj, "NESLA_SELF",        sid->dat->in_CGIScriptName, strlen(sid->dat->in_CGIScriptName));
+	nes_setstr(N, cobj, "QUERY_STRING",      sid->dat->in_QueryString, strlen(sid->dat->in_QueryString));
+	nes_setstr(N, cobj, "REMOTE_ADDR",       sid->dat->in_RemoteAddr, strlen(sid->dat->in_RemoteAddr));
+	nes_setnum(N, cobj, "REMOTE_PORT",       sid->dat->in_RemotePort);
+	nes_setstr(N, cobj, "REMOTE_USER",       sid->dat->user_username, strlen(sid->dat->user_username));
+	nes_setstr(N, cobj, "REQUEST_METHOD",    sid->dat->in_RequestMethod, strlen(sid->dat->in_RequestMethod));
+	nes_setstr(N, cobj, "REQUEST_URI",       sid->dat->in_RequestURI, strlen(sid->dat->in_RequestURI));
+	nes_setstr(N, cobj, "SCRIPT_NAME",       sid->dat->in_CGIScriptName, strlen(sid->dat->in_CGIScriptName));
+	nes_setstr(N, cobj, "SERVER_PROTOCOL",   "HTTP/1.1", strlen("HTTP/1.1"));
+	nes_setstr(N, cobj, "SERVER_SOFTWARE",   PACKAGE_NAME, strlen(PACKAGE_NAME));
+	nes_settable(N, &N->g, "_GET");
+	nes_settable(N, &N->g, "_POST");
 	if (strlen(sid->dat->in_QueryString)>=0) {
 		ptemp=sid->dat->in_QueryString;
-		if ((cobj=nesla_getobj(N, &N->g, "_GET"))==NULL) {
+		if ((cobj=nes_getobj(N, &N->g, "_GET"))==NULL) {
 			/* good place for an error */
 			return;
 		}
@@ -135,13 +137,13 @@ static void mod_nesla_register_variables(nesla_state *N)
 				ptemp++;
 			}
 			decodeurl(sid->dat->smallbuf[1]);
-			nesla_regstr(N, cobj, sid->dat->smallbuf[0], sid->dat->smallbuf[1]);
+			nes_setstr(N, cobj, sid->dat->smallbuf[0], sid->dat->smallbuf[1], strlen(sid->dat->smallbuf[1]));
 		}
 	}
 	if (strcmp(sid->dat->in_RequestMethod, "POST")==0) {
-		nesla_regstr(N, &N->g, "RAWPOSTDATA", sid->PostData);
+		nes_setstr(N, &N->g, "RAWPOSTDATA", sid->PostData, strlen(sid->PostData));
 		ptemp=sid->PostData;
-		if ((cobj=nesla_getobj(N, &N->g, "_POST"))==NULL) {
+		if ((cobj=nes_getobj(N, &N->g, "_POST"))==NULL) {
 			/* good place for an error */
 			return;
 		}
@@ -163,13 +165,13 @@ static void mod_nesla_register_variables(nesla_state *N)
 				ptemp++;
 			}
 			decodeurl(sid->dat->smallbuf[1]);
-			nesla_regstr(N, cobj, sid->dat->smallbuf[0], sid->dat->smallbuf[1]);
+			nes_setstr(N, cobj, sid->dat->smallbuf[0], sid->dat->smallbuf[1], strlen(sid->dat->smallbuf[1]));
 		}
 	}
 	return;
 }
 
-static void preppath(nesla_state *N, char *name)
+static void preppath(nes_state *N, char *name)
 {
 	char buf[512];
 	char *p;
@@ -195,14 +197,14 @@ static void preppath(nesla_state *N, char *name)
 	for (j=strlen(buf)-1;j>0;j--) {
 		if (buf[j]=='/') { buf[j]='\0'; p=buf+j+1; break; }
 	}
-	nesla_regstr(N, &N->g, "_filename", p);
-	nesla_regstr(N, &N->g, "_filepath", buf);
+	nes_setstr(N, &N->g, "_filename", p, strlen(p));
+	nes_setstr(N, &N->g, "_filepath", buf, strlen(buf));
 	return;
 }
 
 DllExport int mod_main(CONN *sid)
 {
-	nesla_state *N;
+	nes_state *N;
 	struct stat sb;
 	char filename[512];
 	char *ptemp;
@@ -241,19 +243,20 @@ DllExport int mod_main(CONN *sid)
 		return 0;
 	}
 	send_header(sid, 0, 200, "1", "text/html", -1, -1);
-	N=nesla_newstate();
-	nesla_regcfunc(N, &N->g, "system",   mod_nesla_system);
-	cobj=nesla_getobj(N, &N->g, "io");
-	nesla_regcfunc(N, cobj, "write", mod_nesla_write);
-	mod_nesla_register_variables(N);
+	N=nes_newstate();
+	nes_setcfunc(N, &N->g, "system",   mod_nes_system);
+	cobj=nes_getobj(N, &N->g, "io");
+	nes_setcfunc(N, cobj, "write", mod_nes_write);
+	mod_nes_register_variables(N);
 	preppath(N, filename);
 	if (setjmp(N->savjmp)==0) {
-		nesla_execfile(N, filename);
+		nes_execfile(N, filename);
+		mod_nes_write(N);
 	}
 	if (N->err) {
 		prints(sid, "<HR><B>[errno=%d :: %s]</B>\r\n", N->err, N->errbuf);
 	}
-	nesla_endstate(N);
+	nes_endstate(N);
 	return 0;
 }
 

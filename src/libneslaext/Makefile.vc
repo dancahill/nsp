@@ -12,7 +12,7 @@ LIB_LDFLAGS   = -lib
 LIB_TARGETDIR = ../../lib
 
 CFLAGS  = $(LIB_CFLAGS)
-OBJECTS = $(INTDIR)/lib.obj
+OBJECTS = $(INTDIR)/base64.obj $(INTDIR)/dir.obj $(INTDIR)/misc.obj $(INTDIR)/rot13.obj $(INTDIR)/sys.obj $(INTDIR)/xml.obj
 TARGET  = $(LIB_TARGETDIR)/libneslaext.lib
 
 all: _dirs _libneslaext

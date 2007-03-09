@@ -15,455 +15,376 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include <stdio.h>
-#include <fcntl.h>
-#include <sys/stat.h>
 #include "libnesla.h"
-
+#include <fcntl.h>
+#include <stdlib.h>
+#include <sys/stat.h>
 #ifdef WIN32
 #include <io.h>
-#define snprintf _snprintf
-#define vsnprintf _vsnprintf
 #else
-#ifdef __TURBOC__
-#else
+#ifndef __TURBOC__
 #include <unistd.h>
 #endif
 #endif
 
-#ifdef WIN32
-int gettimeofday(struct timeval *tv, void *tz)
+void n_if(nes_state *N)
 {
-	struct timeb tb;
-	struct tm *today;
-
-	if (tv==NULL) return -1;
-	ftime(&tb);
-	today=localtime(&tb.time);
-	tv->tv_sec=tb.time;
-	tv->tv_usec=tb.millitm*1000;
-	return 0;
-}
-#endif
-
-int n_vsnprintf(nesla_state *N, char *str, int size, const char *format, va_list ap)
-{
-	int rc;
-
-#ifdef __TURBOC__
-	rc=vsprintf(str, format, ap);
-#else
-	rc=vsnprintf(str, size, format, ap);
-#endif
-	str[size-1]='\0';
-	return rc;
-}
-
-int n_snprintf(nesla_state *N, char *str, int size, const char *format, ...)
-{
-	va_list ap;
-	int rc;
-
-	va_start(ap, format);
-	rc=n_vsnprintf(N, str, size, format, ap);
-	va_end(ap);
-	return rc;
-}
-
-int n_printf(nesla_state *N, short dowrite, const char *format, ...)
-{
-	va_list ap;
-	int rc;
-
-	va_start(ap, format);
-	rc=n_vsnprintf(N, N->txtbuf, sizeof(N->txtbuf)-1, format, ap);
-	va_end(ap);
-	if (dowrite) nl_write(N);
-	return rc;
-}
-
-void n_error(nesla_state *N, short int err, const char *fname, const char *format, ...)
-{
-	char ptrtxt[MAX_OBJNAMLEN+1];
-	char *ptemp=ptrtxt;
-	va_list ap;
-	int len;
-
-	n_snprintf(N, ptrtxt, sizeof(ptrtxt)-1, "%s", N->readptr);
-	while (*ptemp) {
-		if ((*ptemp=='\n')||(*ptemp=='\r')||(*ptemp=='\t')) *ptemp=' ';
-		ptemp++;
-	}
-	len=n_snprintf(N, N->errbuf, sizeof(N->errbuf)-1, "%-15s : ", fname);
-	va_start(ap, format);
-	len+=n_vsnprintf(N, N->errbuf+len, sizeof(N->errbuf)-len-1, format, ap);
-	va_end(ap);
-	n_snprintf(N, N->errbuf+len, sizeof(N->errbuf)-len-1, "\r\n\tN->readptr=\"%s\"\r\n", ptrtxt);
-	N->err=err;
-	longjmp(N->savjmp, 1);
-	return;
-}
-
-void n_warn(nesla_state *N, const char *fname, const char *format, ...)
-{
-	char ptrtxt[MAX_OBJNAMLEN+1];
-	char *p=ptrtxt;
-	va_list ap;
-
-	if (N->warnings++>10000) n_error(N, NE_SYNTAX, "n_warn", "too many warning lines (%d)\n", N->warnings);
-	n_snprintf(N, ptrtxt, sizeof(ptrtxt)-1, "%s", N->readptr);
-	while (*p) {
-		if ((*p=='\n')||(*p=='\r')||(*p=='\t')) *p=' ';
-		p++;
-	}
-	n_printf(N, 1, "[01;33;40m%-15s : ", fname);
-	va_start(ap, format);
-	n_vsnprintf(N, N->txtbuf, sizeof(N->txtbuf)-1, format, ap);
-	va_end(ap);
-	p=N->txtbuf+strlen(N->txtbuf);
-	while (p<N->txtbuf+40) *p++=' ';
-	N->txtbuf[40]='\0';
-	nl_write(N);
-	n_printf(N, 1, "N->readptr = %s\r\n[00m", ptrtxt);
-	return;
-}
-
-char *ne_if(nesla_state *N)
-{
-	num_t op1=0;
-	short doneif=0;
+	static char *fn="n_if";
+	char done=0, t=0;
 	obj_t *cobj;
 
+	DEBUG_IN();
 l1:
-	n_getop(N);
+	nextop();
 	if (N->lastop==OP_POPAREN) {
 		N->lastop=OP_UNDEFINED;
-		cobj=n_eval(N, ")");
-		if (N->lastop!=OP_PCPAREN) n_warn(N, "ne_if", "expected a closing ) %d", N->lastop);
-		op1+=cobj->d.number;
+		cobj=n_eval(N);
+		if (N->lastop!=OP_PCPAREN) n_warn(N, fn, "expected a closing ) %d", N->lastop);
+		t=cobj->d.num?1:0;
 	}
+	nextop();
 l2:
-	n_getop(N);
 	if (N->lastop==OP_POBRACE) {
-		if ((op1)&&(!doneif)) {
-			nesla_exec(N, N->readptr);
-			doneif=1;
-			if (N->ret) return N->readptr;
+		if ((t)&&(!done)) {
+			nes_exec(N, (char *)N->readptr);
+			done=1;
+			if (N->ret) { DEBUG_OUT(); return; }
 		} else {
-			n_skipto(N, '}');
+			n_skipto(N, OP_PCBRACE);
 		}
-		n_getop(N);
+		nextop();
 		if (N->lastop!=OP_KELSE) {
-			n_ungetop(N);
+			ungetop();
 		} else {
-			n_getop(N);
+			nextop();
 			if (N->lastop!=OP_KIF) {
-				n_ungetop(N);
-				op1=1;
+				t=1;
 				goto l2;
 			} else {
 				goto l1;
 			}
 		}
 	}
-	return N->readptr;
+	DEBUG_OUT();
+	return;
 }
 
-char *ne_for(nesla_state *N)
+void n_for(nes_state *N)
 {
-	char *arginit;
-	char *argcomp;
-	char *argexec;
-	char *blockstart;
-	char *blockend;
+	static char *fn="n_for";
+	uchar *arginit, *argcomp, *argexec;
+	uchar *bs, *be;
 	obj_t *cobj;
 
-	if (N->readptr==NULL) n_error(N, NE_SYNTAX, "ne_for", "NULL readptr");
-	n_getop(N);
-	if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, "ne_for", "missing bracket");
+	DEBUG_IN();
+	if (N->readptr==NULL) n_error(N, NE_SYNTAX, fn, "NULL readptr");
+	nextop();
+	if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "missing bracket");
 	arginit=N->readptr;
-	argcomp=n_skipto(N, ';');
-	argexec=n_skipto(N, ';');
-	n_skipto(N, ')');
-	blockstart=N->readptr;
-	n_getop(N);
-	n_skipto(N, '}');
-	blockend=N->readptr;
+	n_skipto(N, OP_PSEMICOL);
+	argcomp=N->readptr;
+	n_skipto(N, OP_PSEMICOL);
+	argexec=N->readptr;
+	n_skipto(N, OP_PCPAREN);
+	bs=N->readptr;
+	nextop();
+	n_skipto(N, OP_PCBRACE);
+	be=N->readptr;
 	N->readptr=arginit;
-	n_assign(N, &N->l);
+	n_readvar(N, &N->l, NULL);
 	for (;;) {
+showruntime();
+showruntime();
+showruntime();
 		N->readptr=argcomp;
-		cobj=n_eval(N, ";");
-		if (N->lastop!=OP_PSEMICOL) n_error(N, NE_SYNTAX, "ne_for", "expected a closing ;");
-		if (nesla_tofloat(N, cobj)==0) break;
-		N->readptr=blockstart;
-		n_getop(N);
-		nesla_exec(N, N->readptr);
+		cobj=n_eval(N);
+		if (N->lastop!=OP_PSEMICOL) n_error(N, NE_SYNTAX, fn, "expected a closing ;");
+		if (nes_tonum(N, cobj)==0) break;
+		N->readptr=bs;
+		nextop();
+		nes_exec(N, (char *)N->readptr);
 		if (N->brk>0) { N->brk--; break; }
 		if (N->ret) { break; }
 		N->readptr=argexec;
-		n_assign(N, &N->l);
+		n_readvar(N, &N->l, NULL);
+showruntime();
 	}
-	N->readptr=blockend;
-	return N->readptr;
+	N->readptr=be;
+	DEBUG_OUT();
+	return;
 }
 
-char *ne_while(nesla_state *N)
+void n_while(nes_state *N)
 {
-	char *argcomp;
-	char *blockstart;
-	char *blockend;
+	static char *fn="n_while";
+	uchar *argcomp;
+	uchar *bs, *be;
 	obj_t *cobj;
 
-	if (N->readptr==NULL) n_error(N, NE_SYNTAX, "ne_while", "EOF");
-	n_getop(N);
-	if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, "ne_while", "missing bracket");
+	DEBUG_IN();
+	if (N->readptr==NULL) n_error(N, NE_SYNTAX, fn, "EOF");
+	nextop();
+	if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "missing bracket");
 	argcomp=N->readptr;
-	n_skipto(N, ')');
-	blockstart=N->readptr;
-	n_getop(N);
-	n_skipto(N, '}');
-	blockend=N->readptr;
+	n_skipto(N, OP_PCPAREN);
+	bs=N->readptr;
+	nextop();
+	n_skipto(N, OP_PCBRACE);
+	be=N->readptr;
 	for (;;) {
 		N->readptr=argcomp;
-		cobj=n_eval(N, ")");
-		if (N->lastop!=OP_PCPAREN) n_error(N, NE_SYNTAX, "ne_while", "expected a closing ) bracket");
-		if (nesla_tofloat(N, cobj)==0) break;
-		N->readptr=blockstart;
-		n_getop(N);
-		nesla_exec(N, N->readptr);
+		cobj=n_eval(N);
+		if (N->lastop!=OP_PCPAREN) n_error(N, NE_SYNTAX, fn, "expected a closing ) bracket");
+		if (nes_tonum(N, cobj)==0) break;
+		N->readptr=bs;
+		nextop();
+		nes_exec(N, (char *)N->readptr);
 		if (N->brk>0) { N->brk--; break; }
 		if (N->ret) { break; }
 	}
-	N->readptr=blockend;
-	return N->readptr;
+	N->readptr=be;
+	DEBUG_OUT();
+	return;
 }
 
-obj_t *ne_macros(nesla_state *N)
+obj_t *n_macros(nes_state *N)
 {
-	char tmpnam[MAX_OBJNAMLEN+1];
-	obj_t *cobj=NULL, *tobj;
-	char *ptemp;
+	static char *fn="n_macros";
+	obj_t *cobj, *tobj=NULL;
+	char *p;
 
-	if (strcmp("exit", N->lastname)==0) {
-		n_error(N, 0, "ne_macros", "exiting normally");
-	} else if (strcmp("printvars", N->lastname)==0) {
-		/* nesla_sorttable(N, &N->g, 1); */
-		n_getop(N);
-		if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, "ne_macros", "missing ( bracket");
-		n_getop(N);
+	DEBUG_IN();
+	if (nc_strcmp("exit", N->lastname)==0) {
+		n_error(N, 0, fn, "exiting normally");
+	} else if (nc_strcmp("printvars", N->lastname)==0) {
+		nextop();
+		if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "missing ( bracket");
+		nextop();
 		if (N->lastop==OP_LABEL) {
-			n_getlabel(N, tmpnam);
-			n_getop(N);
-			cobj=nesla_getobj(N, &N->l, tmpnam);
-			if (cobj->type==NT_TABLE) {
-				tmpnam[0]='\0';
-				for (;;) {
-					if (strchr("[.", *N->readptr)==NULL) break;
-					cobj=n_getindex(N, cobj, tmpnam);
-					if (cobj->type!=NT_TABLE) break;
-				}
-				nesla_printvars(N, cobj);
+			cobj=nes_getobj(N, &N->l, N->lastname);
+			while (cobj->type==NT_TABLE) {
+				if (*N->readptr!=OP_POBRACKET&&*N->readptr!=OP_PDOT&&*N->readptr!='['&&*N->readptr!='.') break;
+				cobj=n_getindex(N, cobj, NULL);
 			}
+			n_printvars(N, cobj);
+			nextop();
 		} else if (N->lastop==OP_PCPAREN) {
-			nesla_printvars(N, N->g.d.table);
+			n_printvars(N, N->g.d.table);
 		}
-		if (N->lastop!=OP_PCPAREN) n_error(N, NE_SYNTAX, "ne_macros", "missing ) bracket");
+		if (N->lastop!=OP_PCPAREN) n_error(N, NE_SYNTAX, fn, "missing ) bracket");
 		N->lastop=OP_UNDEFINED;
-		return nesla_regnum(N, &N->g, "_retval", 0);
-	} else if (strcmp("type", N->lastname)==0) {
-		n_getop(N);
-		if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, "ne_macros", "missing ( bracket");
-		n_getop(N);
-		if (N->lastop!=OP_LABEL) n_error(N, NE_SYNTAX, "ne_macros", "missing arg1");
-		n_getlabel(N, tmpnam);
-		cobj=nesla_getobj(N, &N->l, tmpnam);
-		if (cobj->type==NT_TABLE) {
-			tmpnam[0]='\0';
-			for (;;) {
-				tobj=cobj;
-				if (strchr("[.", *N->readptr)==NULL) break;
-				cobj=n_getindex(N, tobj, tmpnam);
-				if (cobj->type!=NT_TABLE) break;
-			}
-			if (strlen(tmpnam)) cobj=nesla_getobj(N, tobj, tmpnam);
-		}
+		DEBUG_OUT();
+		return nes_setnum(N, &N->r, "", 0);
+	} else if (nc_strcmp("type", N->lastname)==0) {
+		nextop();
+		if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "missing ( bracket");
+		nextop();
+		if (N->lastop!=OP_LABEL) n_error(N, NE_SYNTAX, fn, "missing arg1");
+		cobj=nes_getobj(N, &N->l, N->lastname);
+		/* devour the whole var name and puke a null type if any part of the name is missing */
+		if (cobj->type!=NT_TABLE) tobj=&N->l;
+		do {
+			if (cobj->type==NT_TABLE) tobj=cobj;
+			if (*N->readptr!=OP_POBRACKET&&*N->readptr!=OP_PDOT&&*N->readptr!='['&&*N->readptr!='.') break;
+			cobj=n_getindex(N, tobj, NULL);
+		} while (tobj->type==NT_TABLE);
 		switch (cobj->type) {
-		case NT_BOOLEAN : ptemp="boolean";   break;
-		case NT_NUMBER  : ptemp="number";    break;
-		case NT_STRING  : ptemp="string";    break;
-		case NT_TABLE   : ptemp="table";     break;
-		case NT_NFUNC   : ptemp="function";  break;
-		case NT_CFUNC   : ptemp="cfunction"; break;
-		default         : ptemp="null";      break;
+		case NT_BOOLEAN : p="boolean";  break;
+		case NT_NUMBER  : p="number";   break;
+		case NT_STRING  : p="string";   break;
+		case NT_TABLE   : p="table";    break;
+		case NT_NFUNC   :
+		case NT_CFUNC   : p="function"; break;
+		default         : p="null";     break;
 		}
-		cobj=nesla_regstr(N, &N->g, "_retval", ptemp);
-		n_getop(N);
-		if (N->lastop!=OP_PCPAREN) n_error(N, NE_SYNTAX, "ne_macros", "missing ) bracket");
+		nextop();
+		if (N->lastop!=OP_PCPAREN) n_error(N, NE_SYNTAX, fn, "missing ) bracket %d %s", N->lastop, p);
 		N->lastop=OP_UNDEFINED;
-		cobj=nesla_regstr(N, &N->g, "_retval", ptemp);
+		DEBUG_OUT();
+		return nes_setstr(N, &N->r, "", p, nc_strlen(p));
 	}
-	return cobj;
+	DEBUG_OUT();
+	return NULL;
 }
 
-obj_t *ne_execfunction(nesla_state *N, obj_t *cobj)
+obj_t *n_execfunction(nes_state *N, obj_t *cobj)
 {
-	char tmpnam[MAX_OBJNAMLEN+1];
-	NESLA_CFUNC cfunc;
+	static char *fn="n_execfunction";
+	NES_CFUNC cfunc;
 	obj_t *cobj2;
 	obj_t *olobj;
 	obj_t *pobj;
-	char *ptemp;
+	uchar *p;
 	unsigned int i;
 
-	if ((cobj->type!=NT_NFUNC)&&(cobj->type!=NT_CFUNC)) n_error(N, NE_SYNTAX, "nesla_execfunction", "'%s' is not a function", cobj->name);
-	n_getop(N);
-	if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, "ne_execfunction", "missing arg bracket");
+	DEBUG_IN();
+	if ((cobj->type!=NT_NFUNC)&&(cobj->type!=NT_CFUNC)) n_error(N, NE_SYNTAX, fn, "'%s' is not a function", cobj->name);
+	nextop();
+	if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "missing arg bracket");
 	pobj=n_evalargs(N, cobj->name);
 	N->lastop=OP_UNDEFINED;
 	olobj=N->l.d.table; N->l.d.table=pobj;
-	ptemp=N->readptr;
-	if (N->debug) n_warn(N, "ne_execfunction", "%s()", cobj->name);
+	p=N->readptr;
+#ifdef DEBUG
+	if (N->debug) n_warn(N, fn, "%s()", cobj->name);
+#endif
 	if (cobj->type==NT_CFUNC) {
-		cfunc=(NESLA_CFUNC)cobj->d.cfunction;
+		cfunc=(NES_CFUNC)cobj->d.cfunc;
 		cfunc(N);
 	} else if (cobj->type==NT_NFUNC) {
-		N->readptr=cobj->d.function;
-		n_getop(N);
-		if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, "ne_execfunction", "missing bracket");
+		N->readptr=(uchar *)cobj->d.str;
+		nextop();
+		if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "missing bracket");
 		for (i=1;;i++) {
-			n_snprintf(N, tmpnam, MAX_OBJNAMLEN, "!%d", i);
-			cobj2=nesla_getobj(N, &N->l, tmpnam);
-			n_getop(N);
+			cobj2=nes_getiobj(N, &N->l, i);
+			nextop();
 			if (N->lastop==OP_LABEL) {
-				n_getlabel(N, tmpnam);
-				n_getop(N);
+				nc_strncpy(cobj2->name, N->lastname, MAX_OBJNAMELEN);
+				nextop();
 			}
-			strncpy(cobj2->name, tmpnam, MAX_OBJNAMLEN);
 			if (N->lastop==OP_PCOMMA) continue;
 			if (N->lastop==OP_PCPAREN) break;
-			n_error(N, NE_SYNTAX, "ne_execfunction", "i'm confused.... %s", tmpnam);
+			n_error(N, NE_SYNTAX, fn, "i'm confused.... %s", N->lastname);
 		}
-		n_getop(N);
-		if (N->lastop==OP_POBRACE) nesla_exec(N, N->readptr);
+		nextop();
+		if (N->lastop==OP_POBRACE) nes_exec(N, (char *)N->readptr);
 		if (N->ret) { N->ret=0; }
 	}
-	nesla_freetable(N, &N->l);
+	nes_freetable(N, &N->l);
 	N->l.d.table=olobj;
-	N->readptr=ptemp;
-	return nesla_getobj(N, &N->g, "_retval");
+	N->readptr=p;
+	DEBUG_OUT();
+	return nes_getobj(N, &N->r, "");
 }
-
-char *nesla_exec(nesla_state *N, char *string)
+
+/*
+ * the following functions are public API functions
+ */
+/*
+int nes_cwrap(nes_state *N, void *fn, char *arg0, ...)
 {
-	obj_t *cobj;
-	short block=0;
+	va_list ap;
+	int x;
 
-	N->readptr=string;
+	va_start(ap, arg0);
+	while ((x=va_arg(ap, int))!=0) {
+		nes_printf(N, "[%d]\n", x);
+	}
+	va_end(ap);
+	return 0;
+}
+*/
+obj_t *nes_exec(nes_state *N, char *string)
+{
+	static char *fn="nes_exec";
+	obj_t *cobj;
+	char block=0;
+
+	DEBUG_IN();
+	N->readptr=(uchar *)string;
 	if (N->lastop==OP_POBRACE) block=1;
 	for (;;) {
 		if (N->readptr==NULL) goto end;
 		if ((block)&&(N->brk>0)) goto end;
-		n_getop(N);
+		nextop();
 		if (*N->readptr=='\0') goto end;
 		if ((block)&&(N->lastop==OP_PCBRACE)) break;
 		if (OP_ISMATH(N->lastop)) {
-			n_warn(N, "nesla_exec", "unexpected math op '%s'", N->lastname);
+			n_warn(N, fn, "unexpected math op '%s'", N->lastname);
 		} else if (OP_ISPUNC(N->lastop)) {
-			n_warn(N, "nesla_exec", "unexpected punctuation '%s'", N->lastname);
+			n_warn(N, fn, "unexpected punctuation '%s'", N->lastname);
 		} else if (OP_ISKEY(N->lastop)) {
 			switch (N->lastop) {
 			case OP_KBREAK:
-				if (!block) n_error(N, NE_SYNTAX, "nesla_exec", "return without block");
-				N->brk=isdigit(*N->readptr)?(short int)n_getnumber(N):1;
-				if (*N->readptr==';') n_getop(N);
+				if (!block) n_error(N, NE_SYNTAX, fn, "return without block");
+				N->brk=nc_isdigit(*N->readptr)?(short int)n_getnumber(N):1;
+				if (*N->readptr==OP_PSEMICOL||*N->readptr==';') nextop();
 				goto end;
 			case OP_KCONT:
-				if (!block) n_error(N, NE_SYNTAX, "nesla_exec", "continue without block");
-				if (*N->readptr==';') n_getop(N);
+				if (!block) n_error(N, NE_SYNTAX, fn, "continue without block");
+				if (*N->readptr==OP_PSEMICOL||*N->readptr==';') nextop();
 				goto end;
 			case OP_KRET:
-				n_storevar(N, &N->g, "_retval");
+				n_storeval(N, &N->r);
 				N->ret=1;
 				goto end;
-			case OP_KFUNC:  n_storefunction(N); break;
-			case OP_KGLOB:  n_assign(N, &N->g); break;
-			case OP_KLOCAL: n_assign(N, &N->l); break;
-			case OP_KVAR:   n_assign(N, &N->l); break;
-			case OP_KIF:    ne_if(N);    if (N->ret) return N->readptr; else break;
-			case OP_KELSE:  n_error(N, NE_SYNTAX, "nesla_exec", "stray else");
-			case OP_KFOR:   ne_for(N);   if (N->ret) return N->readptr; else break;
-			case OP_KWHILE: ne_while(N); if (N->ret) return N->readptr; else break;
+			case OP_KFUNC:  n_readfunction(N); break;
+			case OP_KGLOB:  n_readvar(N, &N->g, NULL); break;
+			case OP_KLOCAL:
+			case OP_KVAR:
+				n_readvar(N, &N->l, NULL); break;
+			case OP_KIF:    n_if(N);     if (N->ret) { goto end; } else break;
+			case OP_KELSE:  n_error(N, NE_SYNTAX, fn, "stray else");
+			case OP_KFOR:   n_for(N);   if (N->ret) { goto end; } else break;
+			case OP_KWHILE: n_while(N); if (N->ret) { goto end; } else break;
 			}
 		} else {
-			if (N->lastname[0]=='\0') n_error(N, NE_SYNTAX, "nesla_exec", "zero length token");
-			if ((cobj=ne_macros(N))!=NULL) {
-				if (*N->readptr==';') n_getop(N);
+			if (N->lastname[0]=='\0') n_error(N, NE_SYNTAX, fn, "zero length token");
+			if (n_macros(N)!=NULL) {
+				if (*N->readptr==OP_PSEMICOL||*N->readptr==';') nextop();
 				continue;
 			}
-			cobj=nesla_getobj(N, &N->g, N->lastname);
+			cobj=nes_getobj(N, &N->g, N->lastname);
 			if ((cobj->type==NT_NFUNC)||(cobj->type==NT_CFUNC)) {
-				ne_execfunction(N, cobj);
-				if (*N->readptr==';') n_getop(N);
+				n_execfunction(N, cobj);
+				if (*N->readptr==OP_PSEMICOL||*N->readptr==';') nextop();
 				continue;
 			} else if (cobj->type==NT_NULL) {
-				/* n_warn(N, "nesla_exec", "reference to undefined symbol '%s'", N->lastname); */
-				N->readptr=N->lastptr;
-				n_assign(N, &N->l);
-				continue;
-			} else {
-				/* n_error(N, NE_SYNTAX, "nesla_exec", "possible breakage here '%s'", N->lastname); */
-				N->readptr=N->lastptr;
-				n_assign(N, &N->l);
-				continue;
+				if (N->lastop!=OP_LABEL) n_error(N, NE_SYNTAX, fn, "expected a label");
+				cobj=nes_setnum(N, &N->l, N->lastname, 0);
 			}
+			n_readvar(N, &N->l, cobj);
 		}
 	}
 end:
-	return N->readptr;
+	DEBUG_OUT();
+	return NULL;
 }
 
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
-int nesla_execfile(nesla_state *N, char *file)
+int nes_execfile(nes_state *N, char *file)
 {
+	obj_t *cobj=nes_getobj(N, &N->g, "_filepath");
 	char buf[512];
 	struct stat sb;
-	char *rawtext;
-	char *ptemp;
+	uchar *rawtext;
+	char *p;
 	int bl;
 	int fp;
 	int r;
-	obj_t *cobj=nesla_getobj(N, &N->g, "_filepath");
 
-	if (stat(file, &sb)!=0) {
-		if (cobj->type==NT_STRING) {
-			strncpy(buf, cobj->d.string, sizeof(buf)-strlen(file)-2);
-			strcat(buf, "/");
-			strcat(buf, file);
-			if (stat(buf, &sb)!=0) {
-				return -1;
-			}
-			file=buf;
-		}
+	if ((stat(file, &sb)!=0)&&(cobj->type==NT_STRING)) {
+		nc_snprintf(N, buf, sizeof(buf), "%s/%s", cobj->d.str, file);
+		if (stat(buf, &sb)!=0) return -1;
+		file=buf;
 	}
 /*	if (sb.st_mode&S_IFDIR) return -1; */
-	if ((fp=open(file, O_RDONLY|O_BINARY))==-1) {
-		return -1;
-	}
+	if ((fp=open(file, O_RDONLY|O_BINARY))==-1) return -1;
 	rawtext=n_alloc(N, (sb.st_size+2)*sizeof(char));
-	ptemp=rawtext;
+	p=(char *)rawtext;
 	bl=sb.st_size;
 	for (;;) {
-		r=read(fp, ptemp, bl);
-		ptemp+=r;
+		r=read(fp, p, bl);
+		p+=r;
 		bl-=r;
 		if (bl<1) break;
 	}
 	close(fp);
-	nesla_exec(N, rawtext);
+	rawtext[sb.st_size]='\0';
+
+	n_prechew(N, rawtext);
+/*
+	if ((fp=open("chewed.nes", O_CREAT|O_TRUNC|O_WRONLY|O_BINARY))==-1) return -1;
+	if ((fp=open("chewed.nes", O_CREAT|O_APPEND|O_WRONLY|O_BINARY))==-1) return -1;
+	write(fp, rawtext, nc_strlen((char *)rawtext));
+	close(fp);
+*/
+
+	nes_exec(N, (char *)rawtext);
 	n_free(N, (void *)&rawtext);
+	if (N->outbuflen) nl_flush(N);
 	return 0;
 }
 
@@ -472,107 +393,106 @@ typedef struct {
 	void *fn_ptr;
 } FUNCTION;
 
-nesla_state *nesla_newstate()
+nes_state *nes_newstate()
 {
 	FUNCTION list[]={
-		/* basic processing */
-		{ "date",	(NESLA_CFUNC *)nl_datetime	},
-		{ "include",	(NESLA_CFUNC *)nl_include	},
-		{ "number",	(NESLA_CFUNC *)nl_number	},
-		{ "print",	(NESLA_CFUNC *)nl_print		},
-		{ "runtime",	(NESLA_CFUNC *)nl_runtime	},
-		{ "sleep",	(NESLA_CFUNC *)nl_sleep		},
-		{ "time",	(NESLA_CFUNC *)nl_datetime	},
+		{ "date",	(NES_CFUNC *)nl_datetime	},
+		{ "include",	(NES_CFUNC *)nl_include		},
+		{ "tonumber",	(NES_CFUNC *)nl_tonumber	},
+		{ "tostring",	(NES_CFUNC *)nl_tostring	},
+		{ "print",	(NES_CFUNC *)nl_print		},
+		{ "write",	(NES_CFUNC *)nl_print		},
+		{ "runtime",	(NES_CFUNC *)nl_runtime		},
+		{ "sleep",	(NES_CFUNC *)nl_sleep		},
+		{ "time",	(NES_CFUNC *)nl_datetime	},
 		{ NULL, NULL }
 	};
 	FUNCTION list_io[]={
-		/* basic io */
-		{ "print",	(NESLA_CFUNC *)nl_print		},
-		{ "write",	(NESLA_CFUNC *)nl_write		},
+		{ "print",	(NES_CFUNC *)nl_print		},
+		{ "write",	(NES_CFUNC *)nl_print		},
+		{ "flush",	(NES_CFUNC *)nl_flush		},
 		{ NULL, NULL }
 	};
 	FUNCTION list_math[]={
-		/* math functions */
-		{ "abs",	(NESLA_CFUNC *)nl_math1		},
-		{ "acos",	(NESLA_CFUNC *)nl_math1		},
-		{ "asin",	(NESLA_CFUNC *)nl_math1		},
-		{ "atan",	(NESLA_CFUNC *)nl_math1		},
-		{ "ceil",	(NESLA_CFUNC *)nl_math1		},
-		{ "cos",	(NESLA_CFUNC *)nl_math1		},
-		{ "floor",	(NESLA_CFUNC *)nl_math1		},
-		{ "rand",	(NESLA_CFUNC *)nl_math1		},
-		{ "sin",	(NESLA_CFUNC *)nl_math1		},
-		{ "sqrt",	(NESLA_CFUNC *)nl_math1		},
-		{ "tan",	(NESLA_CFUNC *)nl_math1		},
+		{ "abs",	(NES_CFUNC *)nl_math1		},
+		{ "acos",	(NES_CFUNC *)nl_math1		},
+		{ "asin",	(NES_CFUNC *)nl_math1		},
+		{ "atan",	(NES_CFUNC *)nl_math1		},
+		{ "ceil",	(NES_CFUNC *)nl_math1		},
+		{ "cos",	(NES_CFUNC *)nl_math1		},
+		{ "floor",	(NES_CFUNC *)nl_math1		},
+		{ "rand",	(NES_CFUNC *)nl_math1		},
+		{ "sin",	(NES_CFUNC *)nl_math1		},
+		{ "sqrt",	(NES_CFUNC *)nl_math1		},
+		{ "tan",	(NES_CFUNC *)nl_math1		},
 		{ NULL, NULL }
 	};
 	FUNCTION list_string[]={
-		/* strings */
-		{ "cat",	(NESLA_CFUNC *)nl_strcat	},
-		{ "cmp",	(NESLA_CFUNC *)nl_strcmp	},
-		{ "icmp",	(NESLA_CFUNC *)nl_strcmp	},
-		{ "ncmp",	(NESLA_CFUNC *)nl_strcmp	},
-		{ "nicmp",	(NESLA_CFUNC *)nl_strcmp	},
-		{ "len",	(NESLA_CFUNC *)nl_strlen	},
-		{ "str",	(NESLA_CFUNC *)nl_strstr	},
-		{ "istr",	(NESLA_CFUNC *)nl_strstr	},
-		{ "sub",	(NESLA_CFUNC *)nl_strsub	},
+		{ "cat",	(NES_CFUNC *)nl_strcat		},
+		{ "cmp",	(NES_CFUNC *)nl_strcmp		},
+		{ "icmp",	(NES_CFUNC *)nl_strcmp		},
+		{ "ncmp",	(NES_CFUNC *)nl_strcmp		},
+		{ "nicmp",	(NES_CFUNC *)nl_strcmp		},
+		{ "len",	(NES_CFUNC *)nl_strlen		},
+		{ "str",	(NES_CFUNC *)nl_strstr		},
+		{ "istr",	(NES_CFUNC *)nl_strstr		},
+		{ "sub",	(NES_CFUNC *)nl_strsub		},
 		{ NULL, NULL }
 	};
-	nesla_state *new_N;
+	nes_state *new_N;
 	obj_t *cobj;
-	int i;
+	short i;
 
-	new_N=n_alloc(NULL, sizeof(nesla_state));
+	new_N=n_alloc(NULL, sizeof(nes_state));
+	nc_memset(new_N, 0, sizeof(nes_state));
+	nc_gettimeofday(&new_N->ttime, NULL);
+	srand(new_N->ttime.tv_usec);
 	new_N->g.type=NT_TABLE;
 	new_N->l.type=NT_TABLE;
-	strncpy(new_N->g.name, "!GLOBALS!", sizeof(new_N->g.name)-1);
-	strncpy(new_N->l.name, "!LOCALS!", sizeof(new_N->l.name)-1);
-	/* io[] functions */
-	cobj=nesla_regtable(new_N, &new_N->g, "_globals_");
+	new_N->r.type=NT_NULL;
+	nc_strncpy(new_N->g.name, "!GLOBALS!", MAX_OBJNAMELEN);
+	nc_strncpy(new_N->l.name, "!LOCALS!", MAX_OBJNAMELEN);
+	nc_strncpy(new_N->r.name, "!RETVAL!", MAX_OBJNAMELEN);
+	cobj=nes_settable(new_N, &new_N->g, "_globals_");
 	cobj->d.table=new_N->g.d.table;
-	cobj=nesla_regtable(new_N, &new_N->g, "io");
+	/* base functions */
+	for (i=0;list[i].fn_name!=NULL;i++) {
+		nes_setcfunc(new_N, &new_N->g, list[i].fn_name, list[i].fn_ptr);
+	}
+	/* io[] functions */
+	cobj=nes_settable(new_N, &new_N->g, "io");
 	cobj->mode|=NST_HIDDEN; /* sets hidden flag */
 /*	cobj->mode^=NST_HIDDEN; */ /* strips hidden flag */
-	for (i=0;;i++) {
-		if ((list_io[i].fn_name==NULL)||(list_io[i].fn_ptr==NULL)) break;
-		nesla_regcfunc(new_N, cobj, list_io[i].fn_name, list_io[i].fn_ptr);
-	}
-	/* base functions */
-	for (i=0;;i++) {
-		if ((list[i].fn_name==NULL)||(list[i].fn_ptr==NULL)) break;
-		nesla_regcfunc(new_N, &new_N->g, list[i].fn_name, list[i].fn_ptr);
+	for (i=0;list_io[i].fn_name!=NULL;i++) {
+		nes_setcfunc(new_N, cobj, list_io[i].fn_name, list_io[i].fn_ptr);
 	}
 	/* math[] functions */
-	cobj=nesla_regtable(new_N, &new_N->g, "math");
+	cobj=nes_settable(new_N, &new_N->g, "math");
 	cobj->mode|=NST_HIDDEN;
-	for (i=0;;i++) {
-		if ((list_math[i].fn_name==NULL)||(list_math[i].fn_ptr==NULL)) break;
-		nesla_regcfunc(new_N, cobj, list_math[i].fn_name, list_math[i].fn_ptr);
+	for (i=0;list_math[i].fn_name!=NULL;i++) {
+		nes_setcfunc(new_N, cobj, list_math[i].fn_name, list_math[i].fn_ptr);
 	}
 	/* str[] functions */
-	cobj=nesla_regtable(new_N, &new_N->g, "string");
+	cobj=nes_settable(new_N, &new_N->g, "string");
 	cobj->mode|=NST_HIDDEN;
-	for (i=0;;i++) {
-		if ((list_string[i].fn_name==NULL)||(list_string[i].fn_ptr==NULL)) break;
-		nesla_regcfunc(new_N, cobj, list_string[i].fn_name, list_string[i].fn_ptr);
+	for (i=0;list_string[i].fn_name!=NULL;i++) {
+		nes_setcfunc(new_N, cobj, list_string[i].fn_name, list_string[i].fn_ptr);
 	}
-	cobj=nesla_regnum(new_N, &new_N->g, "false", 0);
-	cobj->mode|=NST_HIDDEN;
-/*	cobj->type=NT_BOOLEAN; cobj->d.boolean=0; */
-	cobj=nesla_regnum(new_N, &new_N->g, "true", 1);
-	cobj->mode|=NST_HIDDEN;
-/*	cobj->type=NT_BOOLEAN; cobj->d.boolean=1; */
-	gettimeofday(&new_N->ttime, NULL);
-	srand(new_N->ttime.tv_usec);
+	cobj=nes_setnum(new_N, &new_N->g, "null", 0);
+	cobj->type=NT_NULL; cobj->mode|=NST_SYSTEM;
+	cobj=nes_setnum(new_N, &new_N->g, "false", 0);
+	cobj->type=NT_BOOLEAN; cobj->mode|=NST_SYSTEM;
+	cobj=nes_setnum(new_N, &new_N->g, "true", 1);
+	cobj->type=NT_BOOLEAN; cobj->mode|=NST_SYSTEM;
 	return new_N;
 }
 
-nesla_state *nesla_endstate(nesla_state *N)
+nes_state *nes_endstate(nes_state *N)
 {
 	if (N!=NULL) {
-		nesla_freetable(N, &N->l);
-		nesla_freetable(N, &N->g);
+		if (N->outbuflen) nl_flush(N);
+		nes_freetable(N, &N->l);
+		nes_freetable(N, &N->g);
 		n_free(N, (void *)&N);
 	}
 	return NULL;

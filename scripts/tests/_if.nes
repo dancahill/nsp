@@ -1,3 +1,5 @@
+#!/usr/bin/nesla
+if (type(expect)=='null') { include("_expect.nes"); }
 function testif() {
 	local x=2;
 

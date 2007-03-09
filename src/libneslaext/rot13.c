@@ -15,17 +15,26 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-/* typedef int(*NES_CFUNC)(nes_state *); */
-/* base64.c */
-int neslaext_base64_decode(nes_state *N);
-int neslaext_base64_encode(nes_state *N);
-/* dir.c */
-int neslaext_dirlist(nes_state *N);
-/* rot13.c */
-int neslaext_rot13(nes_state *N);
-/* sys.c */
-int neslaext_system(nes_state *N);
-/* xml.c */
-int neslaext_xml_read(nes_state *N);
+#include "libnesla.h"
+#include "libneslaext.h"
 
-int neslaext_register_all(nes_state *N);
+int neslaext_rot13(nes_state *N)
+{
+	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+	obj_t *robj;
+	char *p;
+
+	if (cobj1->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	robj=nes_setstr(N, &N->r, "", cobj1->d.str, cobj1->size);
+	if (robj->d.str==NULL) return 0;
+	p=robj->d.str;
+	while (*p) {
+		if (nc_islower(*p)) {
+			if (*p>'m') *p-=13; else *p+=13; 
+		} else if (nc_isupper(*p)) {
+			if (*p>'M') *p-=13; else *p+=13; 
+		}
+		p++;
+	}
+	return 0;
+}

@@ -1,0 +1,15 @@
+#!/usr/bin/nesla
+if (type(expect)=='null') { include("_expect.nes"); }
+function testrot13() {
+	if (type(rot13)!='function') { return; }
+	local rx = { p="123ABCKLMNOPXYZ", e="123NOPXYZABCKLM" };
+	local ry = { p="123abcklmnopxyz", e="123nopxyzabcklm" };
+	expect("rot13(rx.e)", "123ABCKLMNOPXYZ", rot13(rx.e));
+	expect("rot13(rx.p)", "123NOPXYZABCKLM", rot13(rx.p));
+	expect("rot13(ry.e)", "123abcklmnopxyz", rot13(ry.e));
+	expect("rot13(ry.p)", "123nopxyzabcklm", rot13(ry.p));
+#	local joke = "Nakvrgl, a.: Gur svefg gvzr lbh pna'g qb vg n frpbaq gvzr.\aCnavp, a.  : Gur frpbaq gvzr lbh pna'g qb vg gur svefg gvzr.";
+#	print("\n", rot13(joke), "\n");
+	return;
+}
+testrot13();

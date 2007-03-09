@@ -1,3 +1,4 @@
+#!/usr/bin/nesla
 global CARDS = {
 	{ file="01h.png", name="Ace of Hearts"     },
 	{ file="01d.png", name="Ace of Diamonds"   },
@@ -50,5 +51,5 @@ global CARDS = {
 	{ file="13h.png", name="King of Hearts"    },
 	{ file="13d.png", name="King of Diamonds"  },
 	{ file="13s.png", name="King of Spades"    },
-	{ file="13c.png", name="King of Clubs"     },
-}
+	{ file="13c.png", name="King of Clubs"     }
+};

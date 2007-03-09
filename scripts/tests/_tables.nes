@@ -1,0 +1,35 @@
+#!/usr/bin/nesla
+if (type(expect)=='null') { include("_expect.nes"); }
+function testtables() {
+	function subf() { return 69; }
+	local x=1;
+	local ack = { a="x" };
+
+	expect("type(CARDS)",        "table",           type(CARDS));
+	if (string.cmp(type(CARDS), 'table')!=0) { return; }
+	expect("CARDS['1']['name']", "Ace of Diamonds", CARDS['1']['name']);
+	CARDS[1].name="aa";
+	expect("CARDS[1].name", "aa", CARDS[1].name);
+	expect("CARDS[x]['dealt']", "(null)null", "("+type(CARDS[x]['dealt'])+")"+tostring(CARDS[x]['dealt']));
+	CARDS[x]['dealt']=true;
+	expect("CARDS[x]['dealt']", "(boolean)true", "("+type(CARDS[x]['dealt'])+")"+tostring(CARDS[x]['dealt']));
+	CARDS=0;
+
+	global tab = {
+		{ a1="x", b = pi, [12]=41, [1]=42, 43, 'blah', subf() },
+		{ "x", 'y', x = 41, 42, 43, 'blah', [5]=12, heh=";-)" }
+	};
+	# now add a subtable
+	tab['t'] = {
+		{ a2="x", b = pi, [12]=41, [1]=42, 43, 'blah', subf() },
+		{ "x", 'y', x = 41, 42, 43, 'blah', [5]=12, heh=";-)" }
+	};
+	# overwrite an existing subtable
+	tab['t'] = { [2] = { "x", 'y', x = 41, 42, 43, 'blah', [5]=12, heh=";-)" } };
+	# add another sub
+	tab['t'][3] = { "x", 'y', x = 41, 42, 43, 'blah', [5]=12, heh=";-)" };
+	#printvars();
+
+	return;
+}
+testtables();
