@@ -75,3 +75,8 @@ function main() {
 	return;
 }
 main();
+
+# tests i'm too lazy to add properly
+#http.get(0, "localhost", 80, "/tests/");
+#if (type(http)=='table') { print(http.get(0, "localhost", 80, "/tests/")); }
+print("[", 1/0, "]\n");

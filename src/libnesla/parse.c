@@ -107,6 +107,7 @@ static optab oplist_k[] = {
 			break; \
 		} \
 		N->readptr++; \
+		if (!*N->readptr) n_error(N, NE_SYNTAX, "n_skipquote", "unterminated string"); \
 	}
 
 /* Advance readptr to next specified char */
@@ -236,7 +237,7 @@ num_t n_getnumber(nes_state *N)
 obj_t *n_getquote(nes_state *N)
 {
 	static char *fn="n_getquote";
-	obj_t *cobj=NULL;
+	obj_t *cobj;
 	char q=*N->readptr;
 	char *qs, *qe;
 
@@ -244,14 +245,16 @@ obj_t *n_getquote(nes_state *N)
 	sanetest();
 	if (N->debug) n_warn(N, fn, "snarfing quote");
 	N->lastop=OP_UNDEFINED;
-	if ((q=='\'')||(q=='\"')) {
-		N->readptr++;
-		qs=(char *)N->readptr;
-		n_skipquote(N, q);
-		qe=(char *)N->readptr;
-		cobj=nes_setstr(N, &N->r, "", qs, qe-qs-1);
-		n_skipblank(N);
+	if ((q!='\'')&&(q!='\"')) {
+		DEBUG_OUT();
+		return NULL;
 	}
+	N->readptr++;
+	qs=(char *)N->readptr;
+	n_skipquote(N, q);
+	qe=(char *)N->readptr;
+	cobj=nes_setstr(N, &N->r, "", qs, qe-qs-1);
+	n_skipblank(N);
 	DEBUG_OUT();
 	return cobj;
 }
@@ -274,14 +277,14 @@ obj_t *n_getindex(nes_state *N, obj_t *tobj, char *lastname)
 	} else if (N->lastop==OP_POBRACKET) {
 		if (*N->readptr=='@') {
 			N->readptr++;
-			cobj=n_eval(N);
+			cobj=nes_eval(N, (char *)N->readptr);
 			if ((cobj==NULL)||(cobj->type!=NT_NUMBER)) n_error(N, NE_SYNTAX, fn, "no index");
 			if (N->lastop!=OP_PCBRACKET) n_error(N, NE_SYNTAX, fn, "expected a closing ']'");
 			cobj=nes_getiobj(N, tobj, (unsigned int)cobj->d.num);
 			cobj=nes_setstr(N, &N->r, "", cobj->name, nc_strlen(cobj->name));
 			if (lastname) lastname[0]=0;
 		} else {
-			cobj=n_eval(N);
+			cobj=nes_eval(N, (char *)N->readptr);
 			if (N->lastop!=OP_PCBRACKET) n_error(N, NE_SYNTAX, fn, "expected a closing ']'");
 			if ((cobj->type!=NT_TABLE)&&(lastname)) {
 				nc_strncpy(lastname, nes_tostr(N, cobj), MAX_OBJNAMELEN);
@@ -375,39 +378,36 @@ obj_t *n_evalsub(nes_state *N)
 	nextop();
 	if (N->lastop==OP_POPAREN) {
 		N->lastop=OP_UNDEFINED;
-		cobj=n_eval(N);
+		cobj=nes_eval(N, (char *)N->readptr);
 		if (N->lastop!=OP_PCPAREN) n_warn(N, fn, "2 expected a closing ')'");
 		nextop();
 		DEBUG_OUT();
 		return cobj;
 	} else if (OP_ISEND(N->lastop)) {
-		cobj=NULL;
 		DEBUG_OUT();
-		return cobj;
+		return NULL;
 	}
-	if (*N->readptr==0) { DEBUG_OUT(); return NULL; }
 	preop=0;
 	if (OP_ISMATH(N->lastop)) {
 		preop=N->lastop;
 		nextop();
 	}
 	if (N->lastop==OP_DATA) {
+		if (*N->readptr==0) { DEBUG_OUT(); return NULL; }
 		N->lastop=OP_UNDEFINED;
 		if (nc_isdigit(*N->readptr)) {
 			cobj=&N->r;
 			n_freestr(cobj);
 			cobj->type=NT_NUMBER;
-			if (preop!=OP_MSUB) {
-				cobj->d.num=n_getnumber(N);
-			} else {
-				cobj->d.num=-n_getnumber(N);
-			}
+			cobj->d.num=(preop!=OP_MSUB)?+n_getnumber(N):-n_getnumber(N);
 		} else if ((*N->readptr=='\"')||(*N->readptr=='\'')) {
 			cobj=n_getquote(N);
 		} else {
-			cobj=NULL;
 			n_error(N, NE_SYNTAX, fn, "expected data");
+			cobj=NULL;
 		}
+		DEBUG_OUT();
+		return cobj;
 	} else if (N->lastop==OP_LABEL) {
 		cobj=nes_getobj(N, &N->l, N->lastname);
 		while (*N->readptr==OP_POBRACKET||*N->readptr==OP_PDOT||*N->readptr=='['||*N->readptr=='.') {
@@ -444,125 +444,131 @@ obj_t *n_evalsub(nes_state *N)
 			if (cobj!=&N->r) cobj=nes_setstr(N, &N->r, "", cobj->d.str, cobj->size);
 		} else if ((cobj->type==NT_NFUNC)||(cobj->type==NT_CFUNC)) {
 			cobj=n_execfunction(N, cobj);
-		} else if (cobj->type==NT_TABLE) {
-			cobj=nes_setstr(N, &N->r, "", "", 0);
-		} else if (cobj->type==NT_BOOLEAN) {
 		} else if ((robj=n_macros(N))!=NULL) {
 			cobj=robj;
+		} else if (cobj->type==NT_TABLE) {
+		} else if (cobj->type==NT_BOOLEAN) {
 		} else if (cobj->type==NT_NULL) {
 		} else {
 			n_error(N, NE_SYNTAX, fn, "unhandled type %d [%s]", cobj->type, N->lastname);
 		}
-	} else {
-		cobj=NULL;
-		ungetop();
-		n_warn(N, fn, "premature end of useful data?");
+		DEBUG_OUT();
+		return cobj;
 	}
+	ungetop();
+	n_warn(N, fn, "premature end of useful data?");
 	DEBUG_OUT();
-	return cobj;
+	return NULL;
 }
 
-obj_t *n_eval(nes_state *N)
+obj_t *nes_eval(nes_state *N, char *string)
 {
-	static char *fn="n_eval";
+	static char *fn="nes_eval";
+	char *p1, *p2;
 	obj_t *cobj, *robj;
-	char *str, *p1, *p2;
-	unsigned int len;
-	num_t val;
-	short op, type, rtype;
+	obj_t val;
+	short op;
 
 	DEBUG_IN();
+	N->readptr=(uchar *)string;
 	sanetest();
-	if (*N->readptr==0) { DEBUG_OUT(); return NULL; }
 	cobj=n_evalsub(N);
-	if (cobj==NULL) { DEBUG_OUT(); return cobj; }
+	if ((cobj==NULL)||(*N->readptr==0)) { DEBUG_OUT(); return cobj; }
 	if (N->lastop==OP_UNDEFINED) nextop();
 	if (OP_ISEND(N->lastop)) { DEBUG_OUT(); return cobj; }
 	if (cobj->type==NT_NUMBER) {
-		str=NULL;
-		len=0;
-		val=cobj->d.num;
+		val.type=NT_NUMBER;
+		val.mode=0;
+		val.d.num=cobj->d.num;
 	} else if (cobj->type==NT_STRING) {
+		val.type=NT_STRING;
+		val.mode=0;
+		val.size=cobj->size;
 		if (cobj==&N->r) {
-			str=cobj->d.str;
+			val.d.str=cobj->d.str;
 			cobj->d.str=NULL;
 		} else {
-			str=n_alloc(N, (cobj->size+1)*sizeof(char));
-			nc_strncpy(str, cobj->d.str, cobj->size+1);
+			val.d.str=n_alloc(N, (cobj->size+1)*sizeof(char));
+			nc_strncpy(val.d.str, cobj->d.str, cobj->size+1);
 		}
-		len=cobj->size;
-		val=0;
 	} else {
 		DEBUG_OUT();
 		return cobj;
 	}
-	type=cobj->type;
-	rtype=NT_NUMBER;
 	while (*N->readptr) {
-		op=N->lastop;
-		if (op==OP_UNDEFINED) { nextop(); op=N->lastop; }
-		if (OP_ISEND(N->lastop)) break;
+		if (N->lastop==OP_UNDEFINED) nextop();
 		if (!OP_ISMATH(N->lastop)) break;
+		op=N->lastop;
 		cobj=n_evalsub(N);
 		if (cobj==NULL) break;
-		if (type==NT_NUMBER) {
+		if (val.type==NT_NUMBER) {
 			if (cobj->type==NT_NUMBER) {
 				switch (op) {
-					case OP_MCLT   : val=val <  cobj->d.num;break;
-					case OP_MCLE   : val=val <= cobj->d.num;break;
-					case OP_MCGT   : val=val >  cobj->d.num;break;
-					case OP_MCGE   : val=val >= cobj->d.num;break;
-					case OP_MCEQ   : val=val == cobj->d.num;break;
+				case OP_MCLT   : val.d.num=val.d.num <  cobj->d.num;break;
+				case OP_MCLE   : val.d.num=val.d.num <= cobj->d.num;break;
+				case OP_MCGT   : val.d.num=val.d.num >  cobj->d.num;break;
+				case OP_MCGE   : val.d.num=val.d.num >= cobj->d.num;break;
+				case OP_MCEQ   : val.d.num=val.d.num == cobj->d.num;break;
 
-					case OP_MADD   :
-					case OP_MADDADD:
-					case OP_MADDEQ : val=val+cobj->d.num;break;
-					case OP_MSUB   :
-					case OP_MSUBSUB:
-					case OP_MSUBEQ : val=val-cobj->d.num;break;
-					case OP_MMUL   :
-					case OP_MMULEQ : val=val*cobj->d.num;break;
-					case OP_MDIV   :
-					case OP_MDIVEQ : val=val/cobj->d.num;break;
+				case OP_MADD   :
+				case OP_MADDADD:
+				case OP_MADDEQ : val.d.num=val.d.num+cobj->d.num;break;
+				case OP_MSUB   :
+				case OP_MSUBSUB:
+				case OP_MSUBEQ : val.d.num=val.d.num-cobj->d.num;break;
+				case OP_MMUL   :
+				case OP_MMULEQ : val.d.num=val.d.num*cobj->d.num;break;
+				case OP_MDIV   :
+				case OP_MDIVEQ : val.d.num=val.d.num/cobj->d.num;break;
 
-					case OP_MMOD   : val=fmod(val, cobj->d.num);break;
-					case OP_MAND   : val=(int)val & (int)cobj->d.num;break;
-					case OP_MOR    : val=(int)val | (int)cobj->d.num;break;
-					case OP_MXOR   : val=(int)val ^ (int)cobj->d.num;break;
-					case OP_MLAND  : val=val && cobj->d.num;break;
-					case OP_MLOR   : val=val || cobj->d.num;break;
-					case OP_MCNE   : val=val != cobj->d.num;break;
+				case OP_MMOD   : val.d.num=fmod(val.d.num, cobj->d.num);break;
+				case OP_MAND   : val.d.num=(int)val.d.num & (int)cobj->d.num;break;
+				case OP_MOR    : val.d.num=(int)val.d.num | (int)cobj->d.num;break;
+				case OP_MXOR   : val.d.num=(int)val.d.num ^ (int)cobj->d.num;break;
+				case OP_MLAND  : val.d.num=val.d.num && cobj->d.num;break;
+				case OP_MLOR   : val.d.num=val.d.num || cobj->d.num;break;
+				case OP_MCNE   : val.d.num=val.d.num != cobj->d.num;break;
 				}
 			} else if (cobj->type==NT_BOOLEAN) {
-				if (nc_strcmp(cobj->name, "true")==0) val=val?1:0; else val=val?0:1;
+				if (nc_strcmp(cobj->name, "true")==0) val.d.num=val.d.num?1:0; else val.d.num=val.d.num?0:1;
 			} else {
-				n_warn(N, fn, "mixed types %d %s", cobj->type, cobj->name, cobj->d.str);
+				n_warn(N, fn, "mixed types %d %s", cobj->type, cobj->name);
 			}
-		} else if (type==NT_STRING) {
+		} else if (val.type==NT_STRING) {
 			if (cobj->type==NT_STRING) {
-				p1=str?str:"";
-				p2=(char *)cobj->d.str?(char *)cobj->d.str:"";
+				p1=val.d.str?val.d.str:"";
+				p2=cobj->d.str?cobj->d.str:"";
 				switch (op) {
-				case OP_MCEQ : val=nc_strcmp(p1, p2)?0:1;    break;
-				case OP_MCNE : val=nc_strcmp(p1, p2)?1:0;    break;
-				case OP_MCLE : val=nc_strcmp(p1, p2)<=0?1:0; break;
-				case OP_MCGE : val=nc_strcmp(p1, p2)>=0?1:0; break;
-				case OP_MCLT : val=nc_strcmp(p1, p2)<0?1:0;  break;
-				case OP_MCGT : val=nc_strcmp(p1, p2)>0?1:0;  break;
+				case OP_MCEQ : val.type=NT_NUMBER; val.d.num=nc_strcmp(p1, p2)?0:1;    break;
+				case OP_MCNE : val.type=NT_NUMBER; val.d.num=nc_strcmp(p1, p2)?1:0;    break;
+				case OP_MCLE : val.type=NT_NUMBER; val.d.num=nc_strcmp(p1, p2)<=0?1:0; break;
+				case OP_MCGE : val.type=NT_NUMBER; val.d.num=nc_strcmp(p1, p2)>=0?1:0; break;
+				case OP_MCLT : val.type=NT_NUMBER; val.d.num=nc_strcmp(p1, p2)<0?1:0;  break;
+				case OP_MCGT : val.type=NT_NUMBER; val.d.num=nc_strcmp(p1, p2)>0?1:0;  break;
 				case OP_MADD :
-					rtype=NT_STRING;
-					p1=n_alloc(N, (len+cobj->size+1)*sizeof(char));
-					if (str) nc_strncpy(p1, str, len+1);
-					nc_strncpy(p1+len, p2, cobj->size+1);
-					if (str) n_free(N, (void *)&str);
-					str=p1;
-					len+=cobj->size;
+					p1=n_alloc(N, (val.size+cobj->size+1)*sizeof(char));
+					if (val.d.str) nc_strncpy(p1, val.d.str, val.size+1);
+					nc_strncpy(p1+val.size, p2, cobj->size+1);
+					if (val.mode&NST_LINK) {
+						val.mode^=NST_LINK;
+						val.d.str=NULL;
+					} else if (val.d.str) {
+						n_free(N, (void *)&val.d.str);
+					}
+					val.d.str=p1;
+					val.size+=cobj->size;
 					break;
 				default : n_warn(N, fn, "invalid op for string math");
 				}
 			} else if (cobj->type==NT_BOOLEAN) {
-				p1=str?str:"";
-				if (nc_strcmp(cobj->name, "true")==0) val=p1[0]?1:0; else val=p1[0]?0:1;
+				p1=val.d.str; val.d.str=NULL;
+				val.type=NT_NUMBER;
+				if (nc_strcmp(cobj->name, "true")==0) {
+					val.d.num=(p1&&p1[0])?1:0;
+				} else {
+					val.d.num=(p1&&p1[0])?0:1;
+				}
+				if (p1) n_free(N, (void *)&p1);
 			} else {
 				n_warn(N, fn, "mixed types in math %d %s", cobj->type, cobj->name);
 			}
@@ -570,16 +576,15 @@ obj_t *n_eval(nes_state *N)
 			n_warn(N, fn, "mixed types in math %d %s", cobj->type, cobj->name);
 		}
 	}
-	if (rtype==NT_STRING) {
-		robj=nes_setstr(N, &N->r, "", NULL, 0);
-		robj->size=len;
-		robj->d.str=str;
+	robj=&N->r;
+	n_freestr(robj);
+	if (val.type==NT_STRING) {
+		robj->type=NT_STRING;
+		robj->size=val.size;
+		robj->d.str=val.d.str;
 	} else {
-		if (str) n_free(N, (void *)&str);
-		robj=&N->r;
-		n_freestr(robj);
 		robj->type=NT_NUMBER;
-		robj->d.num=val;
+		robj->d.num=val.d.num;
 	}
 	DEBUG_OUT();
 	return robj;
@@ -602,7 +607,7 @@ obj_t *n_evalargs(nes_state *N, char *fname)
 	nes_setstr(N, &pobj, "0", fname, nc_strlen(fname));
 	for (i=1;;) {
 		N->lastop=OP_UNDEFINED;
-		cobj=n_eval(N);
+		cobj=nes_eval(N, (char *)N->readptr);
 		if ((N->lastop!=OP_PCPAREN)&&(N->lastop!=OP_PCOMMA)) n_error(N, NE_SYNTAX, fn, "expected a closing ')'");
 		if (N->lastop==OP_UNDEFINED) nextop();
 		if (cobj!=NULL) {
@@ -620,7 +625,9 @@ obj_t *n_evalargs(nes_state *N, char *fname)
 			} else if ((cobj->type==NT_NFUNC)||(cobj->type==NT_CFUNC)) {
 				n_error(N, NE_SYNTAX, fn, "storing a value as a func? '%s'", namebuf);
 			} else if (cobj->type==NT_TABLE) {
-				n_error(N, NE_SYNTAX, fn, "can't handle tables properly '%s'", namebuf);
+				nobj=nes_settable(N, &pobj, namebuf);
+				nobj->mode|=NST_LINK;
+				nobj->d.table=cobj->d.table;
 			} else {
 				n_error(N, NE_SYNTAX, fn, "b[%s][%d][%s][%s]", namebuf, cobj->type, cobj->name, nes_tostr(N, cobj));
 			}
@@ -653,34 +660,34 @@ obj_t *n_storeval(nes_state *N, obj_t *cobj)
 		break;
 	case OP_MADDEQ :
 		if (cobj->type!=NT_NUMBER) n_error(N, NE_SYNTAX, fn, "cobj is not a number");
-		nobj=n_eval(N);
+		nobj=nes_eval(N, (char *)N->readptr);
 		if (!OP_ISEND(N->lastop)) n_error(N, NE_SYNTAX, fn, "expected a ';'");
 		if ((nobj==NULL)||(nobj->type!=NT_NUMBER)) n_error(N, NE_SYNTAX, fn, "nobj is not a number");
 		cobj->d.num=cobj->d.num+nobj->d.num;
 		break;
 	case OP_MSUBEQ :
 		if (cobj->type!=NT_NUMBER) n_error(N, NE_SYNTAX, fn, "cobj is not a number");
-		nobj=n_eval(N);
+		nobj=nes_eval(N, (char *)N->readptr);
 		if (!OP_ISEND(N->lastop)) n_error(N, NE_SYNTAX, fn, "expected a ';'");
 		if ((nobj==NULL)||(nobj->type!=NT_NUMBER)) n_error(N, NE_SYNTAX, fn, "nobj is not a number");
 		cobj->d.num=cobj->d.num-nobj->d.num;
 		break;
 	case OP_MMULEQ :
 		if (cobj->type!=NT_NUMBER) n_error(N, NE_SYNTAX, fn, "cobj is not a number");
-		nobj=n_eval(N);
+		nobj=nes_eval(N, (char *)N->readptr);
 		if (!OP_ISEND(N->lastop)) n_error(N, NE_SYNTAX, fn, "expected a ';'");
 		if ((nobj==NULL)||(nobj->type!=NT_NUMBER)) n_error(N, NE_SYNTAX, fn, "nobj is not a number");
 		cobj->d.num=cobj->d.num*nobj->d.num;
 		break;
 	case OP_MDIVEQ :
 		if (cobj->type!=NT_NUMBER) n_error(N, NE_SYNTAX, fn, "cobj is not a number");
-		nobj=n_eval(N);
+		nobj=nes_eval(N, (char *)N->readptr);
 		if (!OP_ISEND(N->lastop)) n_error(N, NE_SYNTAX, fn, "expected a ';'");
 		if ((nobj==NULL)||(nobj->type!=NT_NUMBER)) n_error(N, NE_SYNTAX, fn, "nobj is not a number");
 		cobj->d.num=cobj->d.num/nobj->d.num;
 		break;
 	default: /* OP_MEQ */
-		nobj=n_eval(N);
+		nobj=nes_eval(N, (char *)N->readptr);
 		if (!OP_ISEND(N->lastop)) n_error(N, NE_SYNTAX, fn, "expected a ';'");
 		if (nobj==NULL) break;
 		n_freestr(cobj);
@@ -735,7 +742,7 @@ obj_t *n_readfunction(nes_state *N)
 }
 
 /* read the following list of values into the supplied table */
-obj_t *n_readtable(nes_state *N, obj_t *tobj)
+obj_t *nes_readtable(nes_state *N, obj_t *tobj)
 {
 	static char *fn="n_readtable";
 	char namebuf[MAX_OBJNAMELEN+1];
@@ -744,6 +751,7 @@ obj_t *n_readtable(nes_state *N, obj_t *tobj)
 
 	DEBUG_IN();
 	sanetest();
+	if (N->lastop==OP_UNDEFINED||N->lastop==0) nextop();
 	if (N->lastop!=OP_POBRACE) n_error(N, NE_SYNTAX, fn, "expected an opening brace");
 	nextop();
 	while (*N->readptr) {
@@ -788,7 +796,7 @@ obj_t *n_readtable(nes_state *N, obj_t *tobj)
 			} else {
 				cobj=tobj;
 			}
-			n_readtable(N, cobj);
+			nes_readtable(N, cobj);
 		} else {
 			if (N->lastop==OP_LABEL) ungetop();
 			cobj=nes_getobj(N, tobj, namebuf);
@@ -802,7 +810,7 @@ obj_t *n_readtable(nes_state *N, obj_t *tobj)
 			nextop();
 			break;
 		} else {
-			n_error(N, NE_SYNTAX, fn, " ... [%s][%s]", namebuf, N->lastname);
+			n_error(N, NE_SYNTAX, fn, " error reading table var [%s][%s]", namebuf, N->lastname);
 		}
 	}
 	DEBUG_OUT();
@@ -852,7 +860,7 @@ obj_t *n_readvar(nes_state *N, obj_t *tobj, obj_t *cobj)
 		if (N->lastop==OP_MEQ) {
 			nextop();
 			if (cobj->type!=NT_TABLE) tobj=nes_settable(N, tobj, cobj->name);
-			cobj=n_readtable(N, tobj);
+			cobj=nes_readtable(N, tobj);
 		}
 	} else if (OP_ISMATH(N->lastop)) {
 		cobj=n_storeval(N, cobj);

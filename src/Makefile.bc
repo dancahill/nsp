@@ -35,6 +35,7 @@ clean:
 	-@rmdir $(INTDIR)
 	-@rmdir $(OUTDIR)
 
+$(INTDIR)\api.obj:    $(SRCDIR)\api.c
 $(INTDIR)\exec.obj:    $(SRCDIR)\exec.c
 $(INTDIR)\lib.obj:     $(SRCDIR)\lib.c
 $(INTDIR)\obj.obj:     $(SRCDIR)\obj.c

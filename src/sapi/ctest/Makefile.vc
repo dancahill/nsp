@@ -13,7 +13,7 @@ BIN_TARGETDIR = ../../../bin
 
 CFLAGS  = $(BIN_CFLAGS)
 OBJECTS = $(INTDIR)/main.obj
-TARGET  = $(BIN_TARGETDIR)/nesla.exe
+TARGET  = $(BIN_TARGETDIR)/ctest.exe
 
 all: _dirs _nesla
 

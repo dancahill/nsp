@@ -4,7 +4,7 @@ include ../Rules.mak
 CC      = gcc
 CFLAGS  = -pedantic -Wall -g -O2 -I../../include
 #CFLAGS  = -Wall -g -O2 -I../../include
-OBJECTS = exec.o lib.o libc.o obj.o parse.o
+OBJECTS = api.o exec.o lib.o libc.o obj.o parse.o
 TARGET  = ../../lib/libnesla.a
 
 all: _lib
@@ -14,4 +14,4 @@ _lib: $(OBJECTS)
 	@ranlib $(TARGET)
 
 clean:
-	rm -f $(TARGET) $(OBJECTS) *~
+	@rm -f $(TARGET) $(OBJECTS) *~

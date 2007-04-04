@@ -96,7 +96,7 @@
 #define IS_LABEL(c)	(c=='_'||c=='$'||nc_isalpha(c))
 
 #define n_debug(fn)	n_warn(N, fn, "%10s:%d - %d[ %s ]", __FILE__, __LINE__, N->lastop, N->lastname)
-#define sanetest()	{ if (N->readptr==NULL) n_error(N, NE_SYNTAX, fn, "NULL readptr"); }
+#define sanetest()	/*{ if (N->readptr==NULL) n_error(N, NE_SYNTAX, fn, "NULL readptr"); }*/
 /*
 #define SHOW_RUNTIME 1
 #define SHOW_ENTRY 1
@@ -110,7 +110,7 @@ if (N->ttime.tv_usec>1000000) { N->ttime.tv_sec++; N->ttime.tv_usec-=1000000; };
 		nc_gettimeofday(&ttime, NULL); \
 		ttime.tv_sec-=N->ttime.tv_sec; ttime.tv_usec-=N->ttime.tv_usec; \
 		if (ttime.tv_usec<0) { ttime.tv_sec--; ttime.tv_usec+=1000000; }; \
-		printf("\n[01;34;40m%s:%d %d.%06d secs[00m", __FILE__, __LINE__, (int)ttime.tv_sec, (int)ttime.tv_usec); \
+		printf("\n[01;34;40m%d.%06d %s:%d[00m", (int)ttime.tv_sec, (int)ttime.tv_usec, __FILE__, __LINE__); \
 	} \
 }
 #else
@@ -128,7 +128,7 @@ if (N->ttime.tv_usec>1000000) { N->ttime.tv_sec++; N->ttime.tv_usec-=1000000; };
 		nc_gettimeofday(&ttime, NULL); \
 		ttime.tv_sec-=N->ttime.tv_sec; ttime.tv_usec-=N->ttime.tv_usec; \
 		if (ttime.tv_usec<0) { ttime.tv_sec--; ttime.tv_usec+=1000000; }; \
-		printf("\n%s[01;34;40m+%s %d.%06d[00m", tabs+32-N->test_depth, fn, (int)ttime.tv_sec, (int)ttime.tv_usec); \
+		printf("\n%d.%06d%s[01;34;40m+%s[00m", (int)ttime.tv_sec, (int)ttime.tv_usec, tabs+32-N->test_depth, fn); \
 	} \
 }
 #define DEBUG_OUT() { \
@@ -140,7 +140,7 @@ if (N->ttime.tv_usec>1000000) { N->ttime.tv_sec++; N->ttime.tv_usec-=1000000; };
 		nc_gettimeofday(&ttime, NULL); \
 		ttime.tv_sec-=N->ttime.tv_sec; ttime.tv_usec-=N->ttime.tv_usec; \
 		if (ttime.tv_usec<0) { ttime.tv_sec--; ttime.tv_usec+=1000000; }; \
-		printf("\n%s[01;34;40m-%s %d.%06d (%d)[00m", tabs+32-N->test_depth, fn, (int)ttime.tv_sec, (int)ttime.tv_usec, __LINE__); \
+		printf("\n%d.%06d%s[01;34;40m-%s (%d)[00m", (int)ttime.tv_sec, (int)ttime.tv_usec, tabs+32-N->test_depth, fn, __LINE__); \
 		N->test_depth--; \
 	} \
 }
@@ -203,16 +203,13 @@ obj_t   *n_getindex     (nes_state *N, obj_t *cobj, char *lastname);
 void     n_prechew      (nes_state *N, uchar *rawtext);
 
 obj_t   *n_evalsub      (nes_state *N);
-obj_t   *n_eval         (nes_state *N);
 obj_t   *n_evalargs     (nes_state *N, char *fname);
 obj_t   *n_storeval     (nes_state *N, obj_t *cobj);
 obj_t   *n_readfunction (nes_state *N);
-obj_t   *n_readtable    (nes_state *N, obj_t *tobj);
 obj_t   *n_readvar      (nes_state *N, obj_t *tobj, obj_t *cobj);
 
-#define  n_freestr(o)   if (o&&((o->type==NT_STRING)||(o->type==NT_NFUNC))) { o->size=0; if (o->d.str!=NULL) n_free(N, (void *)&o->d.str); }
-
-#define nextop()     { if (*N->readptr<128) n_getop(N); else { N->lastop=*N->readptr; N->lastptr=N->readptr++; N->lastname[0]=0; } }
-#define ungetop()    { N->readptr=N->lastptr; N->lastop=OP_UNDEFINED; N->lastname[0]=0; }
+#define  n_freestr(o)   if (o&&((o->type==NT_STRING)||(o->type==NT_NFUNC))) { o->size=0; if (o->mode&NST_LINK) { o->mode^=NST_LINK; o->d.str=NULL; } else if (o->d.str!=NULL) { n_free(N, (void *)&o->d.str); } }
+#define  nextop()       { if (*N->readptr<128) n_getop(N); else { N->lastop=*N->readptr; N->lastptr=N->readptr++; N->lastname[0]=0; } }
+#define  ungetop()      N->readptr=N->lastptr; N->lastop=OP_UNDEFINED; N->lastname[0]=0;
 
 #endif /* libnesla.h */

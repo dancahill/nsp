@@ -181,7 +181,7 @@ void *nc_memset(void *s, int c, int n)
 {
 	uchar *a=s;
 
-	while (n) a[n--]=c;
+	while (n) a[--n]=c;
 	return s;
 	/* return memset(s, c, n); */
 }
@@ -207,30 +207,42 @@ void n_error(nes_state *N, short int err, const char *fname, const char *format,
 		nc_snprintf(N, N->errbuf+len, sizeof(N->errbuf)-len-1, "\r\n\tN->readptr=\"%s\"", ptrtxt);
 	}
 	nl_flush(N);
-	longjmp(N->savjmp, 1);
+	if (N->jmpset) {
+		longjmp(N->savjmp, 1);
+	} else {
+		n_warn(N, "n_error", "jmp ptr not set - errno=%d :: \r\n%s", N->err, N->errbuf);
+	}
 	return;
 }
 
 void n_warn(nes_state *N, const char *fname, const char *format, ...)
 {
 	va_list ap;
+/*
 	short i;
 	char *p;
-
+*/
 	if (N->warnings++>10000) n_error(N, NE_SYNTAX, "n_warn", "too many warnings (%d)\n", N->warnings);
 	if (N->outbuflen>OUTBUFLOWAT) nl_flush(N);
 	nc_printf(N, "[01;33;40m%s\r\t\t : ", fname);
 	va_start(ap, format);
 	N->outbuflen+=nc_vsnprintf(N, N->outbuf+N->outbuflen, MAX_OUTBUFLEN-N->outbuflen, format, ap);
 	va_end(ap);
+/*
 	nc_printf(N, "\r\t\t\t\t\t\tN->readptr = ");
 	for (i=0;i<40;i++) {
 		p=(char *)N->readptr+i;
-		if (!*p) break;
 		N->outbuf[N->outbuflen++]=nc_isspace(*p)?' ':*p;
+		if (!*p) break;
 	}
+*/
 	nc_printf(N, "\r\n[00m");
 	nl_flush(N);
+	if (N->strict) {
+		if (N->jmpset) {
+			longjmp(N->savjmp, 1);
+		}
+	}
 	return;
 }
 

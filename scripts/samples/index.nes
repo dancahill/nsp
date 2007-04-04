@@ -8,7 +8,7 @@ if (type(_SERVER)=='table') {
 		dirlist('_d', _filepath);
 	}
 	print("<TABLE BORDER=1 WIDTH=100%>\n");
-	for (i=0;i<40;i++) {
+	for (i=0;;i++) {
 		var x=_d[@i];
 		if (string.cmp(type(_d[x]), 'null')==0) { break; }
 		if (string.cmp(type(_d[x]), 'table')==0) {

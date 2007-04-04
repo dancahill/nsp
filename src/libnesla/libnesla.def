@@ -1,5 +1,5 @@
 LIBRARY		libnesla
-VERSION		0.2.0
+VERSION		0.3.0
 EXPORTS
 	nes_newstate
 	nes_endstate
@@ -11,3 +11,6 @@ EXPORTS
 	nes_getobj
 	nes_getiobj
 	nes_setobj
+	nes_eval
+	nes_readtable
+	nes_readtablef

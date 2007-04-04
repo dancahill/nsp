@@ -110,17 +110,17 @@ static void preppath(nes_state *N, char *name)
 int main(int argc, char *argv[], char *envp[])
 {
 	char tmpbuf[MAX_OBJNAMELEN+1];
-	obj_t *tobj;
+	obj_t *cobj, *tobj;
 	int i;
 	char *p;
 
 	setvbuf(stdout, NULL, _IONBF, 0);
-	if (argc<2) {
-		printf("\r\nNullLogic Embedded Scripting Language Version " NESLA_VERSION);
-		printf("\r\nCopyright (C) 2007 Dan Cahill\r\n\r\n");
-		printf("\tno script was specified.  go away.\r\n\r\n");
-		return -1;
-	}
+//	if (argc<2) {
+//		printf("\r\nNullLogic Embedded Scripting Language Version " NESLA_VERSION);
+//		printf("\r\nCopyright (C) 2007 Dan Cahill\r\n\r\n");
+//		printf("\tno script was specified.  go away.\r\n\r\n");
+//		return -1;
+//	}
 	if ((N=nes_newstate())==NULL) return -1;
 	setsigs();
 	N->debug=0;
@@ -142,6 +142,53 @@ int main(int argc, char *argv[], char *envp[])
 		p=strchr(envp[i], '=')+1;
 		nes_setstr(N, tobj, tmpbuf, p, strlen(p));
 	}
+	/* BEGIN CRASH TESTS */
+
+
+	tobj=nes_settable(N, &N->g, "_TEST1");
+	nes_readtablef(N, tobj, "{ name='[SHOW TABLES] (SQLITE)', query='SELECT tbl_name FROM sqlite_master WHERE type = \\'table\\'' }");
+	if (N->err) { printf("errno=%d :: \r\n%s\r\n", N->err, N->errbuf); N->err=0; }
+
+	cobj=nes_getobj(N, tobj, "query");
+
+	tobj=nes_settable(N, &N->g, "_TEST2");
+	nes_readtablef(N, tobj, "{ a=' }");
+	if (N->err) { printf("errno=%d :: \r\n%s\r\n", N->err, N->errbuf); N->err=0; }
+
+	nes_exec(N, "print(_TEST1['query'],\"\\n\");");
+
+	nes_exec(N, " asdf laiur oiqwur9yh ishdzfu z98xfnszd9 m9sdf7 nasdfyq90E RUIZJZXCH GFKJSAEHF WEYR 8768&SZTdg f98as 8fbsa");
+	if (N->err) { printf("errno=%d :: \r\n%s\r\n", N->err, N->errbuf); N->err=0; }
+
+	/*
+	 * This block repeatedly feeds the parser random strings of garbage.
+	 * If this program doesn't segfault, the test is a success.
+	 * BTW.  The output _will_ be ugly.
+	 */
+	N->strict=0;
+	{
+		char xbuf[512];
+		int j;
+
+		for (i=0;i<1000000;i++) {
+			for (j=0;j<512;j++) { xbuf[j]=rand(); }
+			xbuf[511]=0;
+			printf("\n%d ", i);
+			nes_exec(N, xbuf);
+//			if (N->err) { printf("errno=%d :: ...\r\n", N->err); N->err=0; }
+			if (N->err) {
+				N->err=0;
+				nes_endstate(N);
+				if ((N=nes_newstate())==NULL) return -1;
+			}
+		}
+		printf("\r\ndone random feed crashtest.\r\n");
+	}
+
+	tobj=nes_settable(N, &N->g, "_TEST1");
+	nes_exec(N, "printvars();");
+
+	/* END CRASH TESTS */
 	if (argc>1) {
 		preppath(N, argv[1]);
 		if (setjmp(N->savjmp)==0) {

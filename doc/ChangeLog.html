@@ -16,6 +16,18 @@ NESLA NullLogic Embedded Scripting Language ChangeLog
 </small>
 <hr>
 
+<h2>0.3.0 04/04/2007</h2>
+<ul>
+  <li>fixed segfault caused by unsafe longjmp in n_error</li>
+  <li>table autosorting can now be toggled (on by default)</li>
+  <li>passing a table as a function arg no longer makes the sky catch fire</li>
+  <li>added NST_LINK as a flag for static var links</li>
+  <li>added nes_readtable and nes_readtablef to api</li>
+  <li>added nes_eval to api</li>
+  <li>blank loop conditions (for(;->this<-;)) fixed</li>
+  <li>fixed free table references (free = anything not enslaving table refs to vars)</li>
+  <li>added a basic http client</li>
+</ul>
 <h2>0.2.0 03/09/2007</h2>
 <ul>
   <li>replaced most libc string functions with portable (and faster) substitutes</li>

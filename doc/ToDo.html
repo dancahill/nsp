@@ -16,30 +16,25 @@ NESLA NullLogic Embedded Scripting Language ToDo
 </small>
 <hr>
 
-<b>[highest priority]</b>
-<br>
-<ul>
-  <li>need to add a printf function</li>
-  <li>random input = random crashes</li>
-  <li>tables as args or returns is _BROKEN_</li>
-  <li>add something so table.x can equal table.x[0] if x turns out to be a table of vars instead of just a regular var</li>
-  <li>functions in tables aren't being executed properly from the main exec function</li>
-</ul>
 <b>[high priority]</b>
 <br>
 <ul>
+  <li>need a real var delete function</li>
+  <li>table init pukes on negative numbers</li>
+  <li>need to add a printf function</li>
+  <li>random input = random crashes</li>
+  <li>returning tables doesn't work</li>
   <li>fix math order of ops</li>
-  <li>buffered output may be getting lost</li>
-  <li>for and while loops need to be followed by {} blocks (too strict)</li>
-  <li>punctuation is wacky.  commas and semicolons are lax (stricter is better)</li>
+  <li>commas and semicolons are lax (stricter is better)</li>
   <li>there are no checks for fdiv/nan/inf, etc</li>
-  <li>null string pointers aren't always handled properly</li>
   <li>scope and args are functional but kludgy (braces don't affect scope)</li>
   <li>need a function for cloning tables</li>
 </ul>
-<b>[lower priority]</b>
+<b>[low priority]</b>
 <br>
 <ul>
+  <li>for and while loops currently need to be followed by {} blocks (too strict)</li>
+  <li>add something so table.x can equal table.x[0] if x turns out to be a table of vars instead of just a regular var</li>
   <li>some api data pointers might be useful (for files, sockets, etc..)</li>
   <li>read-only vars might be handy</li>
   <li>should some vars have tables for handler functions?</li>

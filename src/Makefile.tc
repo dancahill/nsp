@@ -9,11 +9,12 @@ TASM = TASM
 TLIB = tlib
 TLINK = tlink
 
-EXE_dependencies = exec.obj lib.obj libc.obj obj.obj parse.obj base64.obj dir.obj misc.obj rot13.obj sys.obj xml.obj main.obj
+EXE_dependencies = api.obj exec.obj lib.obj libc.obj obj.obj parse.obj base64.obj dir.obj misc.obj rot13.obj sys.obj xml.obj main.obj
 
 nesla.exe: $(EXE_dependencies)
   $(TLINK) /v/x/c/L$(LIBPATH) @&&|
 c0h.obj+
+api.obj+
 exec.obj+
 lib.obj+
 libc.obj+
@@ -32,6 +33,9 @@ emu.lib+
 mathh.lib+
 ch.lib
 |
+
+api.obj: libnesla\api.c
+	@$(CC) -c libnesla\api.c
 
 exec.obj: libnesla\exec.c
 	@$(CC) -c libnesla\exec.c

@@ -9,9 +9,9 @@ function testtypes() {
 
 	expect("type(a)", "(null)null",      "("+type(a)+")"+tostring(a));
 	expect("type(b)", "(boolean)true",   "("+type(b)+")"+tostring(b));
-	expect("type(b)", "(number)42",      "("+type(c)+")"+tostring(c));
-	expect("type(c)", "(string)stringy", "("+type(d)+")"+tostring(d));
-	expect("type(c)", "(table)",         "("+type(e)+")"+tostring(e));
+	expect("type(c)", "(number)42",      "("+type(c)+")"+tostring(c));
+	expect("type(d)", "(string)stringy", "("+type(d)+")"+tostring(d));
+	expect("type(e)", "(table)",         "("+type(e)+")"+tostring(e));
 	return;
 }
 testtypes();

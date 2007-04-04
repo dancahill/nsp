@@ -4,7 +4,7 @@ CC      = gcc
 CFLAGS  = -Wall -g -O2 -I../../../include -I../../libnesla -I../../libneslaext -I../../libneslatcp
 LDFLAGS = -L../../../lib -lnesla -lneslaext -lneslatcp -lm
 OBJECTS = main.o
-TARGET  = ../../../bin/nesla
+TARGET  = ../../../bin/ctest
 
 all: _nesla
 

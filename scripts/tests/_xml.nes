@@ -52,8 +52,8 @@ function testxml() {
 <FileZilla>
 <Sites>
 <Folder Name='local'>
-<Site Name='gw.nulllogic.lan' Host='gw.nulllogic.lan' Port='22' User='null' Account='' RemoteDir='' LocalDir='' Pass='000000000000' Logontype='1' FWBypass='0' DontSavePass='0' ServerType='3' PasvMode='0' TimeZoneOffset='0' TimeZoneOffsetMinutes='0' Comments='' UTF8='0' DefaultSite='0'/>
-<Site Name='lt.nulllogic.lan' Host='lt.nulllogic.lan' Port='22' User='null' Account='' RemoteDir='' LocalDir='' Pass='000000000000' Logontype='1' FWBypass='0' DontSavePass='0' ServerType='3' PasvMode='0' TimeZoneOffset='0' TimeZoneOffsetMinutes='0' Comments='' UTF8='0' DefaultSite='0'/>
+<Site Name='gw.nulllogic.lan' Host='gw.nulllogic.lan' Port='22' User='null' Account='' RemoteDir='' LocalDir='' Pass='000000000000'/>
+<Site Name='lt.nulllogic.lan' Host='lt.nulllogic.lan' Port='22' User='null' Account='' RemoteDir='' LocalDir='' Pass='000000000000'/>
 </Folder>
 </Sites>
 <Settings>
@@ -88,16 +88,18 @@ function testxml() {
 </DoDirectPaymentResponse>"
 };
 
-	local z=xml.read('_x', xstr[0]);
+	xml.read('_x', xstr[0]);
 	expect("xml.read(...)", "Lysine", _x['moldb'][0]['molecule'][1]['name'][0]['value']);
 	_x="";
-	local z=xml.read('_x', xstr[1]);
+	# not resetting the var _x will leave old data intact even after recalling the function.
+	# handy quirk if you're expecting it.  a broken monitor with a fist stuck in it if you're not.
+	xml.read('_x', xstr[1]);
 	expect("xml.read(...)", "a1", _x['chapter'][0]['para'][0]['informaltable'][0]['tgroup'][0]['tbody'][0]['row'][0]['entry'][0]['value']);
 	_x="";
-	local z=xml.read('_x', xstr[2]);
+	xml.read('_x', xstr[2]);
 	expect("xml.read(...)", "local", _x['FileZilla'][0]['Sites'][0]['Folder'][0]['!attributes']['Name']);
 	_x="";
-	local z=xml.read('_x', xstr[3]);
+	xml.read('_x', xstr[3]);
 	expect("xml.read(...)", "33638616GW718753G", _x['DoDirectPaymentResponse'][0]['TransactionID'][0]['value']);
 	_x="";
 	return;

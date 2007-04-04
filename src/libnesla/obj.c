@@ -18,7 +18,7 @@
 #include "libnesla.h"
 #include <stdlib.h>
 
-static obj_t _null = { NULL, NULL, NULL, NT_NULL, 0, 0, "null", { NULL } };
+static obj_t _null = { NULL, NULL, NULL, NT_NULL, 0, 0, 0, "null", { NULL } };
 
 void *n_alloc(nes_state *N, int size)
 {
@@ -86,7 +86,7 @@ obj_t *nes_getiobj(nes_state *N, obj_t *tobj, int oindex)
 obj_t *nes_setobj(nes_state *N, obj_t *tobj, char *oname, unsigned short otype, void *_fptr, num_t _num, char *_str, int _slen)
 {
 	obj_t *oobj, *cobj;
-	int cmp=0;
+	int cmp=-1;
 
 	if (tobj==&N->r) {
 		cobj=tobj;
@@ -96,12 +96,13 @@ obj_t *nes_setobj(nes_state *N, obj_t *tobj, char *oname, unsigned short otype, 
 		if ((tobj==NULL)||(tobj->type!=NT_TABLE)) return &_null;
 		if (oname[0]=='\0') { return &_null; }
 		if (tobj->d.table==NULL) {
-			tobj->d.table=n_alloc(N, sizeof(obj_t));
-			cobj=tobj->d.table;
-			cobj->prev=NULL; cobj->next=NULL; cobj->mode=0; cobj->size=0; cobj->d.num=0;
+			cobj=n_alloc(N, sizeof(obj_t));
+			nc_memset(cobj, 0, sizeof(obj_t));
 			nc_strncpy(cobj->name, oname, MAX_OBJNAMELEN);
+			tobj->d.table=cobj;
 			cobj->type=otype;
 			cobj->parent=tobj;
+			if (cobj->type==NT_TABLE) cobj->sort=tobj->sort;
 		} else {
 			oobj=tobj->d.table;
 			for (cobj=oobj; cobj; oobj=cobj,cobj=cobj->next) {
@@ -111,21 +112,22 @@ obj_t *nes_setobj(nes_state *N, obj_t *tobj, char *oname, unsigned short otype, 
 					if (cobj->name[0]!=oname[0]) cmp=cobj->name[0]-oname[0];else
 					cmp=nc_strcmp(cobj->name, oname);
 				}
-				if (cmp>=0) break;
+				if (cmp==0) break;
+				if ((cmp>0)&&(tobj->sort)) break;
 			}
-			if (cmp>0) {
+			if ((cmp>0)&&(tobj->sort)) {
 				oobj=cobj;
 				cobj=n_alloc(N, sizeof(obj_t));
-				if (oobj==tobj->d.table) tobj->d.table=cobj;
-				cobj->prev=NULL; cobj->next=NULL; cobj->mode=0; cobj->size=0; cobj->d.num=0;
+				nc_memset(cobj, 0, sizeof(obj_t));
 				nc_strncpy(cobj->name, oname, MAX_OBJNAMELEN);
+				if (oobj==tobj->d.table) tobj->d.table=cobj;
 				cobj->prev=oobj->prev;
 				if (cobj->prev) cobj->prev->next=cobj;
 				cobj->next=oobj;
 				oobj->prev=cobj;
 			} else if (cobj==NULL) {
 				cobj=n_alloc(N, sizeof(obj_t));
-				cobj->prev=NULL; cobj->next=NULL; cobj->mode=0; cobj->size=0; cobj->d.num=0;
+				nc_memset(cobj, 0, sizeof(obj_t));
 				nc_strncpy(cobj->name, oname, MAX_OBJNAMELEN);
 				if (oobj!=NULL) {
 					oobj->next=cobj;
@@ -136,6 +138,7 @@ obj_t *nes_setobj(nes_state *N, obj_t *tobj, char *oname, unsigned short otype, 
 			}
 			cobj->type=otype;
 			cobj->parent=tobj;
+			if (cobj->type==NT_TABLE) cobj->sort=tobj->sort;
 		}
 	}
 	switch (otype) {
@@ -144,10 +147,13 @@ obj_t *nes_setobj(nes_state *N, obj_t *tobj, char *oname, unsigned short otype, 
 		break;
 	case NT_STRING:
 	case NT_NFUNC:
-		if ((_str==NULL)||(_slen<1)) break;
 		cobj->size=_slen;
-		cobj->d.str=n_alloc(N, (cobj->size+1)*sizeof(char));
-		nc_strncpy(cobj->d.str, _str, cobj->size+1);
+		if (_slen) {
+			cobj->d.str=n_alloc(N, (cobj->size+1)*sizeof(char));
+			nc_strncpy(cobj->d.str, _str, cobj->size+1);
+		} else {
+			cobj->d.str=NULL;
+		}
 		break;
 	case NT_CFUNC :
 		cobj->d.cfunc=_fptr;
@@ -164,7 +170,9 @@ void nes_freetable(nes_state *N, obj_t *tobj)
 	cobj=tobj->d.table;
 	while (cobj!=NULL) {
 		n_freestr(cobj);
-		if (nes_istable(cobj)&&(nc_strcmp(cobj->name, "_globals_")!=0)) nes_freetable(N, cobj);
+		if (nes_istable(cobj)&&(nc_strcmp(cobj->name, "_globals_")!=0)) {
+			if (cobj->mode&NST_LINK) { cobj->mode^=NST_LINK; cobj->d.table=NULL; } else nes_freetable(N, cobj);
+		}
 		oobj=cobj;
 		cobj=cobj->next;
 		n_free(N, (void *)&oobj);

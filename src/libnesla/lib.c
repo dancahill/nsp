@@ -27,6 +27,30 @@
 #endif
 #endif
 
+static int dumpwrite(nes_state *N, const char *str, int len)
+{
+	int i;
+
+	for (i=0;i<len;i++) {
+		if (MAX_OUTBUFLEN-N->outbuflen<32) { nl_flush(N); continue; }
+		switch (str[i]) {
+		case '\"':
+			N->outbuf[N->outbuflen++]='\\';
+			N->outbuf[N->outbuflen++]='\"';
+			break;
+/*
+		case '\'':
+			N->outbuf[N->outbuflen++]='\\';
+			N->outbuf[N->outbuflen++]='\'';
+			break;
+*/
+		default:
+			N->outbuf[N->outbuflen++]=str[i];
+		}
+	}
+	N->outbuf[N->outbuflen]='\0';
+	return len;
+}
 static void dumpvars(nes_state *N, obj_t *tobj, int depth)
 {
 	obj_t *cobj=tobj;
@@ -48,8 +72,9 @@ static void dumpvars(nes_state *N, obj_t *tobj, int depth)
 			nc_printf(N, "%s%s%s%s%s = ", indent, g, b?"[":"", cobj->name, b?"]":"");
 			nc_printf(N, "%s%s\n", nes_tostr(N, cobj), l);
 		} else if (cobj->type==NT_STRING) {
-			nc_printf(N, "%s%s%s%s%s = ", indent, g, b?"[":"", cobj->name, b?"]":"");
-			nc_printf(N, "\"%s\"%s\n", nes_tostr(N, cobj), l);
+			nc_printf(N, "%s%s%s%s%s = \"", indent, g, b?"[":"", cobj->name, b?"]":"");
+			dumpwrite(N, cobj->d.str?cobj->d.str:"", cobj->size);
+			nc_printf(N, "\"%s\n", l);
 		} else if (cobj->type==NT_TABLE) {
 			if (nc_strcmp(cobj->name, "_globals_")==0) continue;
 			nc_printf(N, "%s%s%s%s%s = {\n", indent, g, b?"[":"", cobj->name, b?"]":"");
