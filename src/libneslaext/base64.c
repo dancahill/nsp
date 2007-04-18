@@ -31,14 +31,14 @@ int neslaext_base64_decode(nes_state *N)
 	int ch;
 	int x;
 
-	if (cobj1->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
-	src=cobj1->d.str;
+	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	src=cobj1->val->d.str;
 	robj=nes_setstr(N, &N->r, "", NULL, 0);
-	if (cobj1->size<1) return 0;
-	/* should actually be about 3/4 the size of cobj1->size */
-	if ((robj->d.str=n_alloc(N, (cobj1->size)*sizeof(char)))==NULL) return 0;
-	robj->size=0;
-	dest=robj->d.str;
+	if (cobj1->val->size<1) return 0;
+	/* should actually be about 3/4 the size of cobj1->val->size */
+	if ((robj->val->d.str=n_alloc(N, (cobj1->val->size)*sizeof(char)))==NULL) return 0;
+	robj->val->size=0;
+	dest=robj->val->d.str;
 	while ((ch=*src++)!='\0') {
 		if (nc_isspace(ch)) continue;
 		if (ch=='=') break;
@@ -88,7 +88,7 @@ int neslaext_base64_decode(nes_state *N)
 		}
 	}
 	dest[destidx]='\0';
-	robj->size=destidx;
+	robj->val->size=destidx;
 	return 0;
 }
 
@@ -101,20 +101,20 @@ int neslaext_base64_encode(nes_state *N)
 	uchar a, b, c, d, *cp;
 	int dst, i, enclen, remlen, linelen, maxline=0;
 
-	if (cobj1->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
-	cp=(uchar *)cobj1->d.str;
+	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	cp=(uchar *)cobj1->val->d.str;
 	robj=nes_setstr(N, &N->r, "", NULL, 0);
-	if (cobj1->size<1) return 0;
+	if (cobj1->val->size<1) return 0;
 	dst=0;
 	linelen=0;
-	if (cobj2->type==NT_NUMBER) maxline=(int)cobj2->d.num;
-	enclen=cobj1->size/3;
-	remlen=cobj1->size-3*enclen;
-	/* should actually be about 4/3 the size of cobj1->size */
-	i=maxline?(((cobj1->size+3)/3*4)/maxline):5;
+	if (cobj2->val->type==NT_NUMBER) maxline=(int)cobj2->val->d.num;
+	enclen=cobj1->val->size/3;
+	remlen=cobj1->val->size-3*enclen;
+	/* should actually be about 4/3 the size of cobj1->val->size */
+	i=maxline?(((cobj1->val->size+3)/3*4)/maxline):5;
 	i=i*2+5;
 	if ((dest=n_alloc(N, (enclen*4+i)*sizeof(char)))==NULL) return 0;
-	robj->d.str=dest;
+	robj->val->d.str=dest;
 	for (i=0;i<enclen;i++) {
 		a=(cp[0]>>2);
 	        b=(cp[0]<<4)&0x30;
@@ -156,6 +156,6 @@ int neslaext_base64_encode(nes_state *N)
 		dst+=4;
 	}
 	dest[dst]='\0';
-	robj->size=dst;
+	robj->val->size=dst;
 	return 0;
 }

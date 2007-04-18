@@ -3,9 +3,9 @@ if (type(_SERVER)=='table') {
 	print("<H1>INDEX OF ", _SERVER['REQUEST_URI'], "</H1>");
 	print("<PRE><FONT SIZE=2>");
 	if (type(_SERVER['PWD'])!='null') {
-		dirlist('_d', _SERVER['PWD']);
+		_d=dirlist(_SERVER['PWD']);
 	} else {
-		dirlist('_d', _filepath);
+		_d=dirlist(_filepath);
 	}
 	print("<TABLE BORDER=1 WIDTH=100%>\n");
 	for (i=0;;i++) {

@@ -1,17 +1,15 @@
 # Makefile for NullLogic Embedded Scripting Language
 CC      = gcc
-CFLAGS  = -Wall -g -O2 -I../../../include -I../../libnesla -I../../libneslaext -I../../libneslatcp
-LDFLAGS = -L../../../lib -lnesla -lneslaext -lneslatcp -lm
-# if OSTYPE==cygwin
-# LDFLAGS += -lws2_32
+CFLAGS  = -Wall -g -O2 -I../../../include -I../../libnesla
+LDFLAGS = -L../../../lib -lnesla -lm
 OBJECTS = main.o
-TARGET  = ../../../bin/nesla
+TARGET  = ../../../bin/nesla_m
 
 all: _nesla
 
 _nesla: $(OBJECTS)
 	$(CC) -o $(TARGET) -s $(OBJECTS) $(LDFLAGS)
-	$(CC) -o $(TARGET)_d $(OBJECTS) $(LDFLAGS)
+#	$(CC) -o $(TARGET)_d $(OBJECTS) $(LDFLAGS)
 #	$(CC) -o $(TARGET)_s -s -static $(OBJECTS) $(LDFLAGS)
 
 clean:

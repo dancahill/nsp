@@ -12,7 +12,7 @@ LIB_LDFLAGS   = -lib
 LIB_TARGETDIR = ../../lib
 
 CFLAGS  = $(LIB_CFLAGS)
-OBJECTS = $(INTDIR)/api.obj $(INTDIR)/exec.obj $(INTDIR)/lib.obj $(INTDIR)/libc.obj $(INTDIR)/obj.obj $(INTDIR)/parse.obj
+OBJECTS = $(INTDIR)/api.obj $(INTDIR)/exec.obj $(INTDIR)/lib.obj $(INTDIR)/libc.obj $(INTDIR)/loop.obj $(INTDIR)/obj.obj $(INTDIR)/parse.obj
 TARGET  = $(LIB_TARGETDIR)/libnesla.lib
 
 all: _dirs _libnesla

@@ -24,9 +24,9 @@ int neslaext_system(nes_state *N)
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	int n=-1;
 
-	if (cobj1->type==NT_STRING) {
+	if (cobj1->val->type==NT_STRING) {
 		nl_flush(N);
-		n=system(cobj1->d.str);
+		n=system(cobj1->val->d.str);
 	}
 	nes_setnum(N, &N->r, "", n);
 	return 0;

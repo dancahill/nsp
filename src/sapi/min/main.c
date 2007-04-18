@@ -16,8 +16,6 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nesla.h"
-#include "libneslaext.h"
-#include "libneslatcp.h"
 #include <stdio.h>
 #include <string.h>
 #ifdef WIN32
@@ -107,38 +105,23 @@ static void preppath(nes_state *N, char *name)
 	return;
 }
 
-void do_banner() {
-	printf("\r\nNullLogic Embedded Scripting Language Version " NESLA_VERSION);
-	printf("\r\nCopyright (C) 2007 Dan Cahill\r\n\r\n");
-	return;
-}
-
-void do_help(char *arg0) {
-	printf("Usage : %s [-e] [-f] file.nes\r\n", arg0);
-	printf("  -e  execute string\r\n");
-	printf("  -f  execute file\r\n\r\n");
-	return;
-}
-
 int main(int argc, char *argv[], char *envp[])
 {
 	char tmpbuf[MAX_OBJNAMELEN+1];
 	obj_t *tobj;
 	int i;
 	char *p;
-	char c;
 
 	setvbuf(stdout, NULL, _IONBF, 0);
 	if (argc<2) {
-		do_banner();
-		do_help(argv[0]);
+		printf("\r\nNullLogic Embedded Scripting Language Version " NESLA_VERSION);
+		printf("\r\nCopyright (C) 2007 Dan Cahill\r\n\r\n");
+		printf("\tno script was specified.  go away.\r\n\r\n");
 		return -1;
 	}
 	if ((N=nes_newstate())==NULL) return -1;
 	setsigs();
 	N->debug=0;
-	neslaext_register_all(N);
-	neslatcp_register_all(N);
 	/* add env */
 	tobj=nes_settable(N, &N->g, "_ENV");
 	for (i=0;envp[i]!=NULL;i++) {
@@ -155,36 +138,10 @@ int main(int argc, char *argv[], char *envp[])
 		sprintf(tmpbuf, "%d", i);
 		nes_setstr(N, tobj, tmpbuf, argv[i], strlen(argv[i]));
 	}
-	for (i=1;i<argc;i++) {
-		if (argv[i]==NULL) break;
-		if (argv[i][0]=='-') {
-			c=argv[i][1];
-			if (!c) {
-				break;
-			} else if ((c=='d')||(c=='D')) {
-				N->debug=1;
-			} else if ((c=='e')||(c=='E')) {
-				if (++i<argc) {
-					nes_exec(N, argv[i]);
-					if (N->err) goto err;
-				}
-			} else if ((c=='f')||(c=='F')) {
-				if (++i<argc) {
-					preppath(N, argv[i]);
-					nes_execfile(N, argv[i]);
-					if (N->err) goto err;
-				}
-			} else {
-				do_help(argv[0]);
-				return -1;
-			}
-		} else {
-			preppath(N, argv[i]);
-			nes_execfile(N, argv[i]);
-			if (N->err) goto err;
-		}
+	if (argc>1) {
+		preppath(N, argv[1]);
+		nes_execfile(N, argv[1]);
 	}
-err:
 	if (N->err) printf("errno=%d (%d) :: \r\n%s", N->err, N->warnings, N->errbuf);
 	nes_endstate(N);
 	return 0;

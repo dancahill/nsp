@@ -1,7 +1,10 @@
 #!/usr/bin/nesla
 if (type(expect)=='null') { include("_expect.nes"); }
 function testxml() {
-	if (type(xml)!='table') { return; }
+	if (type(xml)!='table') {
+		print("SKIPPING XML TESTS\n");
+		return;
+	}
 #	print("XML TEST\n\n");
 	local xstr = {
 "<?xml version='1.0'?>
@@ -88,20 +91,14 @@ function testxml() {
 </DoDirectPaymentResponse>"
 };
 
-	xml.read('_x', xstr[0]);
-	expect("xml.read(...)", "Lysine", _x['moldb'][0]['molecule'][1]['name'][0]['value']);
-	_x="";
-	# not resetting the var _x will leave old data intact even after recalling the function.
-	# handy quirk if you're expecting it.  a broken monitor with a fist stuck in it if you're not.
-	xml.read('_x', xstr[1]);
-	expect("xml.read(...)", "a1", _x['chapter'][0]['para'][0]['informaltable'][0]['tgroup'][0]['tbody'][0]['row'][0]['entry'][0]['value']);
-	_x="";
-	xml.read('_x', xstr[2]);
-	expect("xml.read(...)", "local", _x['FileZilla'][0]['Sites'][0]['Folder'][0]['!attributes']['Name']);
-	_x="";
-	xml.read('_x', xstr[3]);
-	expect("xml.read(...)", "33638616GW718753G", _x['DoDirectPaymentResponse'][0]['TransactionID'][0]['value']);
-	_x="";
+	X=xml.read(xstr[0]);
+	expect("xml.read(...)", "Lysine", X['moldb'][0]['molecule'][1]['name'][0]['value']);
+	X=xml.read(xstr[1]);
+	expect("xml.read(...)", "a1", X['chapter'][0]['para'][0]['informaltable'][0]['tgroup'][0]['tbody'][0]['row'][0]['entry'][0]['value']);
+	X=xml.read(xstr[2]);
+	expect("xml.read(...)", "local", X['FileZilla'][0]['Sites'][0]['Folder'][0]['!attributes']['Name']);
+	X=xml.read(xstr[3]);
+	expect("xml.read(...)", "33638616GW718753G", X['DoDirectPaymentResponse'][0]['TransactionID'][0]['value']);
 	return;
 }
 testxml();

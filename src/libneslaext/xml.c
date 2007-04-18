@@ -17,10 +17,15 @@
 */
 #include "libnesla.h"
 #include "libneslaext.h"
+#include <string.h>
+#ifdef WIN32
+#define strcasecmp stricmp
+#endif
 
 /*
  * do NOT use this. this is TEST code.
- * this code is dangerous, sloppy and exists solely for test purposes
+ * this code is dangerous, sloppy and exists solely for test purposes.
+ * please either ignore it until it goes away, or help fix it.
  */
 static char *neslaext_xml_readsub(nes_state *N, obj_t *tobj, char *ptr)
 {
@@ -30,11 +35,12 @@ static char *neslaext_xml_readsub(nes_state *N, obj_t *tobj, char *ptr)
 	obj_t *aobj;
 	int i, j;
 	char *b=ptr, *e, *t, *tb;
+	char *p;
 	int end;
 	char q;
 
 	for (i=0;;i++) {
-	nobj=tobj;
+		nobj=tobj;
 		while (nc_isspace(*b)) b++;
 		if (*b=='\0') break;
 		if ((e=nc_strchr(b, '>'))==NULL) break;
@@ -49,20 +55,23 @@ static char *neslaext_xml_readsub(nes_state *N, obj_t *tobj, char *ptr)
 		if ((t[0]=='<')&&(t[1]!='?')&&(t[1]!='!')) {
 			t++;
 			j=0;
-			while (nc_isalnum(*t)||(*t==':')||(*t=='_')) namebuf[j++]=*t++;
+			while (nc_isspace(*t)) t++;
+			while (nc_isalnum(*t)||(*t==':')||(*t=='_')||(*t=='-')) namebuf[j++]=*t++;
 			namebuf[j]='\0';
 			nobj=nes_settable(N, tobj, namebuf);
+			if (N->debug) n_warn(N, "neslaext_xml_readsub", "new label '%s'", namebuf);
 			j=-1;
-			for (cobj=nobj->d.table; cobj; cobj=cobj->next) {
+			for (cobj=nobj->val->d.table; cobj; cobj=cobj->next) {
 				if (nc_isdigit(cobj->name[0])) j=(int)nes_aton(N, cobj->name);
 			}
 			nobj=nes_settable(N, nobj, nes_ntoa(N, namebuf, ++j, 10, 0));
+			if (N->debug) n_warn(N, "neslaext_xml_readsub", "new node '%s'", namebuf);
 			aobj=NULL;
 			for (;;) {
 				while (nc_isspace(*t)) t++;
 				if ((*t=='\0')||(*t=='>')) break;
 				j=0;
-				while (nc_isalnum(*t)||(*t==':')||(*t=='_')) namebuf[j++]=*t++;
+				while (nc_isalnum(*t)||(*t==':')||(*t=='_')||(*t=='-')) namebuf[j++]=*t++;
 				namebuf[j]='\0';
 				while (nc_isspace(*t)) t++;
 				if ((*t=='\0')||(*t=='>')) break;
@@ -70,29 +79,51 @@ static char *neslaext_xml_readsub(nes_state *N, obj_t *tobj, char *ptr)
 					t++;
 					while (nc_isspace(*t)) t++;
 					if ((*t=='\0')||(*t=='>')) break;
-					if ((*t=='\'')||(*t=='\'')) {
+					if ((*t=='\'')||(*t=='\"')) {
 						q=*t;
 						tb=++t;
-						while (*t&&*t!=q) t++;
-						if (*t) {
-							if (aobj==NULL) aobj=nes_settable(N, nobj, "!attributes");
-							nes_setstr(N, aobj, namebuf, tb, t-tb); t++;
-						}
+						while ((*t)&&(*t!=q)) t++;
+					} else {
+						q='\0';
+						tb=t;
+						while ((*t)&&(*t!='>')&&(!nc_isspace(*t))) t++;
+					}
+					if (*t) {
+						if (aobj==NULL) aobj=nes_settable(N, nobj, "!attributes");
+						cobj=nes_setstr(N, aobj, namebuf, tb, t-tb);
+						if ((q)&&(*t==q)) t++;
+						if (N->debug) n_warn(N, "neslaext_xml_readsub", "new attr  '%s->%s' = '%s'", cobj->parent->parent->parent->name, cobj->name, nes_tostr(N, cobj));
 					}
 				}
-				if (*t=='/') break;
+				while (nc_isspace(*t)) t++;
+				if (*t=='/') {
+					end=1;
+					while (nc_isspace(*t)) t++;
+					break;
+				}
 			}
 		}
 		b=e;
 		t=b;
 		while (nc_isspace(*t)) t++;
 		e=nc_strchr(t, '<');
-		if ((*t!='\0')&&(*t!='<')&&(e!=NULL)) { /* might be actual data */
+		if ((*t)&&(*t!='<')&&(e!=NULL)) { /* might be actual data */
 			nes_setstr(N, nobj, "value", b, e-b);
 			/* if (b[e-b-2]=='/') end=1; */ /* this block is complete */
 			b=e;
 		}
 		/* if no closing tag, then recurse for the next tree level */
+		if ((nobj->parent!=NULL)&&(nobj->parent->name[0]!='!')) {
+			/* this is a HACK. */
+			/* i'm too lazy to research *ml, but these tags arent't expected to have a closing / */
+			p=nobj->parent->name;
+			if (strcasecmp(p, "META")==0) end=1;
+			if (strcasecmp(p, "LINK")==0) end=1;
+			if (strcasecmp(p, "IMG")==0) end=1;
+			if (strcasecmp(p, "BR")==0) end=1;
+			if (strcasecmp(p, "HR")==0) end=1;
+		}
+		if (N->debug) n_warn(N, "neslaext_xml_readsub", "... '%s'", nobj->parent->name);
 		if (!end) b=neslaext_xml_readsub(N, nobj, b);
 		if (b==NULL) break;
 	}
@@ -102,12 +133,14 @@ static char *neslaext_xml_readsub(nes_state *N, obj_t *tobj, char *ptr)
 int neslaext_xml_read(nes_state *N)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
-	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
-	obj_t *tobj=NULL;
+	obj_t tobj;
 
-	if (cobj1->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
-	if (cobj2->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg2");
-	tobj=nes_settable(NULL, &N->g, cobj1->d.str);
-	neslaext_xml_readsub(N, tobj, cobj2->d.str);
+	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	nc_memset((void *)&tobj, 0, sizeof(obj_t));
+	nes_linkval(N, &tobj, NULL);
+	tobj.val->type=NT_TABLE;
+	neslaext_xml_readsub(N, &tobj, cobj1->val->d.str);
+	nes_linkval(N, &N->r, &tobj);
+	nes_unlinkval(N, &tobj);
 	return 0;
 }

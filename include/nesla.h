@@ -33,63 +33,67 @@ struct timeval { long tv_sec; long tv_usec; };
 #include <setjmp.h>
 
 #define NESLA_NAME     "nesla"
-#define NESLA_VERSION  "0.3.0"
+#define NESLA_VERSION  "0.4.0"
 
 #define MAX_OBJNAMELEN 64
 #define MAX_OUTBUFLEN  8192
-#define OUTBUFLOWAT    4096
 
 /* object storage types */
 #define NT_NULL		0
 #define NT_BOOLEAN 	1
 #define NT_NUMBER	2
 #define NT_STRING	3
-#define NT_CHUNK	4
-#define NT_TABLE	5
-#define NT_NFUNC	6
-#define NT_CFUNC	7
+#define NT_NFUNC	4
+#define NT_CFUNC	5
+#define NT_TABLE	6
+#define NT_CHUNK	7
 
 /* object storage modes */
-#define NST_HIDDEN	1
-#define NST_READONLY	2
-#define NST_SYSTEM	4
-#define NST_LINK	8
+#define NST_HIDDEN	0x01
+#define NST_READONLY	0x02
+#define NST_SYSTEM	0x04
+#define NST_AUTOSORT	0x08
+#define NST_LINK	0x10
 
 #define num_t double
 #define uchar unsigned char
 #define obj_t struct nes_objrec
-union nes_object {
-	char  *str;
-	num_t  num;
-	obj_t *table;
-	void  *cfunc;
-};
+#define val_t struct nes_valrec
+
+typedef struct nes_valrec {
+	unsigned short type; /* val type */
+	short refs;          /* number of objects referencing this node - this should be UNSIGNED */
+	unsigned int   size; /* string, nfunc or chunk size - or last autoindex of table */
+	union {
+		num_t  num;
+		char  *str;
+		void  *cfunc;
+		obj_t *table;
+	} d;
+} nes_valrec;
 typedef struct nes_objrec {
-	struct nes_objrec *parent;
-	struct nes_objrec *prev;
-	struct nes_objrec *next;
-	unsigned short type;
+	obj_t *parent;
+	obj_t *prev;
+	obj_t *next;
+	val_t *val;
 	unsigned short mode; /* status: mode (hidden, readonly) */
-	unsigned short sort; /* autosort if true */
-	unsigned int   size; /* string or chunk size */
 	char name[MAX_OBJNAMELEN+1];
-	union nes_object d;
 } nes_objrec;
 typedef struct {
 	uchar *readptr;
 	uchar *lastptr;
-	short int debug;
-	short int strict;
-	short int test_depth;
-	short int warnings;
-	short int err;
-	short int brk;
-	short int ret;
 	obj_t g;
 	obj_t l;
 	obj_t r;
 	short int lastop;
 	char lastname[MAX_OBJNAMELEN+1];
+	short int brk;
+	short int ret;
+	short int err;
+	short int debug;
+	short int strict;
+	short int test_depth;
+	short int warnings;
 	short int jmpset;
 	jmp_buf savjmp;
 	struct timeval ttime;
@@ -99,15 +103,15 @@ typedef struct {
 	char errbuf[256];
 } nes_state;
 
-#define    nes_isnull(o)     (o==NULL||o->type==NT_NULL)
-#define    nes_istable(o)    (o!=NULL&&o->type==NT_TABLE)
-#define    nes_isnum(o)      (o!=NULL&&o->type==NT_NUMBER)
-#define    nes_isstr(o)      (o!=NULL&&o->type==NT_STRING)
+#define    nes_isnull(o)     (o==NULL||o->val==NULL||o->val->type==NT_NULL)
+#define    nes_istable(o)    (o!=NULL&&o->val->type==NT_TABLE)
+#define    nes_isnum(o)      (o!=NULL&&o->val->type==NT_NUMBER)
+#define    nes_isstr(o)      (o!=NULL&&o->val->type==NT_STRING)
 
-#define    nes_tonum(N,o)    (o==NULL?0:o->type==NT_NUMBER?o->d.num:o->type==NT_BOOLEAN?o->d.num?1:0:o->type==NT_STRING?nes_aton(N,o->d.str):0)
+#define    nes_tonum(N,o)    (o==NULL?0:o->val->type==NT_NUMBER?o->val->d.num:o->val->type==NT_BOOLEAN?o->val->d.num?1:0:o->val->type==NT_STRING?nes_aton(N,o->val->d.str):0)
 #define    nes_getnum(N,o,n) nes_tonum(N, nes_getobj(N,o,n))
 
-#define    nes_tostr(N,o)    (o==NULL?"":o->type==NT_TABLE?"":o->type==NT_NUMBER?nes_ntoa(N,N->numbuf,o->d.num,-10,6):o->type==NT_BOOLEAN?o->d.num?"true":"false":o->type==NT_STRING?o->d.str?o->d.str:o->type==NT_NULL?"null":"":"null")
+#define    nes_tostr(N,o)    (o==NULL?"":o->val->type==NT_TABLE?"":o->val->type==NT_NUMBER?nes_ntoa(N,N->numbuf,o->val->d.num,-10,6):o->val->type==NT_BOOLEAN?o->val->d.num?"true":"false":o->val->type==NT_STRING?o->val->d.str?o->val->d.str:o->val->type==NT_NULL?"null":"":"null")
 #define    nes_getstr(N,o,n) nes_tostr(N, nes_getobj(N,o,n))
 
 #define    nes_setnum(N,t,n,v)     nes_setobj(N, t, n, NT_NUMBER, NULL, v, NULL, 0)
@@ -128,6 +132,8 @@ int        nes_execfile  (nes_state *N, char *file);
 num_t      nes_aton      (nes_state *N, const char *str);
 char      *nes_ntoa      (nes_state *N, char *str, num_t num, short base, unsigned short dec);
 /* object */
+void       nes_linkval   (nes_state *N, obj_t *cobj1, obj_t *cobj2);
+void       nes_unlinkval (nes_state *N, obj_t *cobj);
 void       nes_freetable (nes_state *N, obj_t *tobj);
 obj_t     *nes_getobj    (nes_state *N, obj_t *tobj, char *oname);
 obj_t     *nes_getiobj   (nes_state *N, obj_t *tobj, int oindex);

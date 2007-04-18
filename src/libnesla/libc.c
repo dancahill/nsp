@@ -16,6 +16,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "libnesla.h"
+#include <math.h>
 #include <stdarg.h>
 #ifdef WIN32
 #include <time.h>
@@ -117,6 +118,15 @@ int nc_gettimeofday(struct timeval *tv, void *tz)
 #endif
 #endif
 	return 0;
+}
+
+char *nc_memcpy(char *dst, const char *src, int n)
+{
+	uchar *s=(uchar *)src, *d=(uchar *)dst;
+
+	if (src==NULL) return dst;
+	while (n-->0) *d++=*s++;
+	return dst;
 }
 
 int nc_strlen(char *s)
@@ -280,6 +290,15 @@ char *nes_ntoa(nes_state *N, char *str, num_t num, short base, unsigned short de
 	char c, sign='+';
 	char *p, *q;
 
+/*
+	if (isinf(f)) {
+		nc_strncpy(str, "inf", 4);
+		return str;
+	} else if (isnan(f)) {
+		nc_strncpy(str, "nan", 4);
+		return str;
+	}
+*/
 	if ((num<0)&&(base<0)) {
 		sign='-';
 		n*=-1;
@@ -287,6 +306,12 @@ char *nes_ntoa(nes_state *N, char *str, num_t num, short base, unsigned short de
 	}
 	base=base<0?-base:base;
 	p=q=str;
+	/* need a _real_ fix */
+	if (n%base<0) {
+		nc_strncpy(str, "nan", 4);
+		return str;
+	}
+
 	do {
 		*p++=nchars[n%base];
 	} while ((n/=base)>0);

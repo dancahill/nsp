@@ -1,7 +1,10 @@
 #!/usr/bin/nesla
 if (type(expect)=='null') { include("_expect.nes"); }
 function testrot13() {
-	if (type(rot13)!='function') { return; }
+	if (type(rot13)!='function') {
+		print("SKIPPING ROT13 TESTS\n");
+		return;
+	}
 	local rx = { p="123ABCKLMNOPXYZ", e="123NOPXYZABCKLM" };
 	local ry = { p="123abcklmnopxyz", e="123nopxyzabcklm" };
 	expect("rot13(rx.e)", "123ABCKLMNOPXYZ", rot13(rx.e));

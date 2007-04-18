@@ -59,3 +59,18 @@ cleanup:
 	n_free(N, (void *)&buf);
 	return tobj;
 }
+
+/*
+int nes_cwrap(nes_state *N, void *fn, char *arg0, ...)
+{
+	va_list ap;
+	int x;
+
+	va_start(ap, arg0);
+	while ((x=va_arg(ap, int))!=0) {
+		nes_printf(N, "[%d]\n", x);
+	}
+	va_end(ap);
+	return 0;
+}
+*/

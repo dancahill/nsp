@@ -35,11 +35,17 @@
 #include <string.h>
 #include <time.h>
 
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #ifndef socklen_t
 #define socklen_t int
 #endif
 
-int tcp_bind(char *ifname, unsigned short port)
+#define MAXWAIT 10
+
+int tcp_bind(nes_state *N, char *ifname, unsigned short port)
 {
 	struct hostent *hp;
 	struct sockaddr_in sin;
@@ -47,17 +53,14 @@ int tcp_bind(char *ifname, unsigned short port)
 	int option;
 	int sock;
 
-	sock=socket(AF_INET, SOCK_STREAM, 0);
 	memset((char *)&sin, 0, sizeof(sin));
+	sock=socket(AF_INET, SOCK_STREAM, 0);
 	sin.sin_family=AF_INET;
-	if ((strcasecmp("ANY", ifname)==0)||(strcasecmp("INADDR_ANY", ifname)==0)) {
-//		n_warn(N, "tcp_bind", "Binding to 'INADDR_ANY:%d'", port);
+	if (strcasecmp("INADDR_ANY", ifname)==0) {
 		sin.sin_addr.s_addr=htonl(INADDR_ANY);
 	} else {
-//		n_warn(N, "tcp_bind", "Binding to '%s:%d'", ifname, port);
-		hp=gethostbyname(ifname);
-		if (hp==NULL) {
-//			n_warn(N, "tcp_bind", "Error binding to '%s:%d'", ifname, port);
+		if ((hp=gethostbyname(ifname))==NULL) {
+			n_warn(N, "tcp_bind", "Host lookup error for %s", ifname);
 			return -1;
 		}
 		memmove((char *)&sin.sin_addr, hp->h_addr, hp->h_length);
@@ -66,23 +69,19 @@ int tcp_bind(char *ifname, unsigned short port)
 	option=1;
 	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *)&option, sizeof(option));
 	i=0;
-	while (bind(sock, (struct sockaddr *)&sin, sizeof(sin))<0) {
-		sleep(1);
-		i++;
-		if (i>5) {
-//			n_warn(N, "tcp_bind", "bind() error [%s:%d]", ifname, port);
-			return -1;
-		}
+	if (bind(sock, (struct sockaddr *)&sin, sizeof(sin))<0) {
+		n_warn(N, "tcp_bind", "bind() error [%s:%d]", ifname, port);
+		return -1;
 	}
 	if (listen(sock, 50)<0) {
-//		n_warn(N, "tcp_bind", "listen() error");
+		n_warn(N, "tcp_bind", "listen() error");
 		closesocket(sock);
 		return -1;
 	}
 	return sock;
 }
 
-int tcp_accept(int listensock, TCP_SOCKET *sock)
+int tcp_accept(nes_state *N, int listensock, TCP_SOCKET *sock)
 {
 	struct sockaddr addr;
 	struct sockaddr_in host;
@@ -96,14 +95,16 @@ int tcp_accept(int listensock, TCP_SOCKET *sock)
 	fromlen=sizeof(addr);
 	clientsock=accept(listensock, &addr, &fromlen);
 	if (clientsock<0) {
-//		n_warn(N, "tcp_accept", "failed tcp_accept");
+		sock->LocalPort=0;
+		sock->RemotePort=0;
+		n_warn(N, "tcp_accept", "failed tcp_accept");
 		return -1;
 	}
 	sock->socket=clientsock;
-	fromlen=sizeof(addr);
+	fromlen=sizeof(host);
 	getsockname(sock->socket, (struct sockaddr *)&host, &fromlen);
-	strncpy(sock->ServerAddr, inet_ntoa(host.sin_addr), sizeof(sock->ServerAddr)-1);
-	sock->ServerPort=ntohs(host.sin_port);
+	strncpy(sock->LocalAddr, inet_ntoa(host.sin_addr), sizeof(sock->LocalAddr)-1);
+	sock->LocalPort=ntohs(host.sin_port);
 	fromlen=sizeof(peer);
 	getpeername(sock->socket, (struct sockaddr *)&peer, &fromlen);
 	strncpy(sock->RemoteAddr, inet_ntoa(peer.sin_addr), sizeof(sock->RemoteAddr)-1);
@@ -118,8 +119,9 @@ int tcp_accept(int listensock, TCP_SOCKET *sock)
 	return clientsock;
 }
 
-static int tcp_conn(TCP_SOCKET *sock, const struct sockaddr_in *serv_addr, socklen_t addrlen, short int use_ssl)
+static int tcp_conn(nes_state *N, TCP_SOCKET *sock, const struct sockaddr_in *serv_addr, socklen_t addrlen, short int use_ssl)
 {
+	struct sockaddr_in host;
 	struct sockaddr_in peer;
 	unsigned int fromlen;
 	int rc;
@@ -131,20 +133,28 @@ static int tcp_conn(TCP_SOCKET *sock, const struct sockaddr_in *serv_addr, sockl
 	}
 #endif
 	if (rc>-1) {
+		fromlen=sizeof(host);
+		getsockname(sock->socket, (struct sockaddr *)&host, &fromlen);
+		strncpy(sock->LocalAddr, inet_ntoa(host.sin_addr), sizeof(sock->LocalAddr)-1);
+		sock->LocalPort=ntohs(host.sin_port);
 		fromlen=sizeof(peer);
 		getpeername(sock->socket, (struct sockaddr *)&peer, &fromlen);
 		strncpy(sock->RemoteAddr, inet_ntoa(peer.sin_addr), sizeof(sock->RemoteAddr)-1);
 		sock->RemotePort=ntohs(peer.sin_port);
+	} else {
+		sock->LocalPort=0;
+		sock->RemotePort=0;
 	}
 	return rc;
 }
 
-int tcp_connect(TCP_SOCKET *sock, char *host, unsigned short port, short int use_ssl)
+int tcp_connect(nes_state *N, TCP_SOCKET *sock, char *host, unsigned short port, short int use_ssl)
 {
 	struct hostent *hp;
 	struct sockaddr_in serv;
 
 	if ((hp=gethostbyname(host))==NULL) {
+		n_warn(N, "tcp_connect", "Host lookup error for %s", host);
 		return -1;
 	}
 	memset((char *)&serv, 0, sizeof(serv));
@@ -153,20 +163,21 @@ int tcp_connect(TCP_SOCKET *sock, char *host, unsigned short port, short int use
 	serv.sin_port=htons(port);
 	if ((sock->socket=socket(AF_INET, SOCK_STREAM, 0))<0) return -2;
 /*	setsockopt(sock->socket, SOL_SOCKET, SO_KEEPALIVE, 0, 0); */
-	if (tcp_conn(sock, &serv, sizeof(serv), use_ssl)<0) {
+	if (tcp_conn(N, sock, &serv, sizeof(serv), use_ssl)<0) {
+		n_warn(N, "tcp_connect", "Connect error for %s:%d", host, port);
 		return -2;
 	}
 	return 0;
 }
 
-int tcp_recv(TCP_SOCKET *socket, char *buffer, int len, int flags)
+int tcp_recv(nes_state *N, TCP_SOCKET *socket, char *buffer, int len, int flags)
 {
 	int rc;
 
 retry:
 	if (socket->socket==-1) return -1;
 	if (socket->want_close) {
-		tcp_close(socket, 1);
+		tcp_close(N, socket, 1);
 		return -1;
 	}
 	if (len>16384) len=16384;
@@ -179,6 +190,10 @@ retry:
 	}
 #else
 	rc=recv(socket->socket, buffer, len, flags);
+/*
+	buffer[rc]=0;
+	printf("\r\n--============================--\r\nrc=%d [%s]", rc, buffer);
+*/
 #endif
 	if (rc<0) {
 #ifdef WIN32
@@ -186,33 +201,35 @@ retry:
 #else
 		switch (errno) {
 		case ECONNRESET:
-			tcp_close(socket, 1); errno=0; break;
+			tcp_close(N, socket, 1); errno=0; break;
 		case EWOULDBLOCK:
-			msleep(1); errno=0; goto retry;
+			msleep(MAXWAIT); errno=0; goto retry;
 		default:
-//			n_warn(N, "tcp_recv", "[%s:%d] tcp_recv: %.100s", socket->RemoteAddr, socket->RemotePort, strerror(errno));
+			if (N->debug) n_warn(N, "tcp_recv", "[%s:%d] tcp_recv: %.100s", socket->RemoteAddr, socket->RemotePort, strerror(errno));
 			errno=0;
 		}
 		return -1;
 #endif
+/*
 	} else if (rc==0) {
-		msleep(1);
+		msleep(MAXWAIT);
 		goto retry;
+*/
 	} else {
-		socket->atime=time(NULL);
+		socket->mtime=time(NULL);
 		socket->bytes_in+=rc;
 	}
-//	n_warn(N, "tcp_recv", "[%s:%d] tcp_recv: %d bytes of binary data", socket->RemoteAddr, socket->RemotePort, rc);
+	if (N->debug) n_warn(N, "tcp_recv", "[%s:%d] tcp_recv: %d bytes of binary data", socket->RemoteAddr, socket->RemotePort, rc);
 	return rc;
 }
 
-int tcp_send(TCP_SOCKET *socket, const char *buffer, int len, int flags)
+int tcp_send(nes_state *N, TCP_SOCKET *socket, const char *buffer, int len, int flags)
 {
 	int rc;
 
 	if (socket->socket==-1) return -1;
 	if (socket->want_close) {
-		tcp_close(socket, 1);
+		tcp_close(N, socket, 1);
 		return -1;
 	}
 #ifdef HAVE_SSL
@@ -230,41 +247,44 @@ int tcp_send(TCP_SOCKET *socket, const char *buffer, int len, int flags)
 #else
 		if (errno==EWOULDBLOCK) {
 			errno=0;
-			msleep(1);
+			msleep(MAXWAIT);
 		} else if (errno) {
-//			n_warn(N, "tcp_send", "[%s:%d] tcp_send: %d%.100s", socket->RemoteAddr, socket->RemotePort, errno, strerror(errno));
+			if (N->debug) n_warn(N, "tcp_send", "[%s:%d] tcp_send: %d%.100s", socket->RemoteAddr, socket->RemotePort, errno, strerror(errno));
 			errno=0;
 		}
 #endif
 	} else if (rc==0) {
-		msleep(1);
+		msleep(MAXWAIT);
 	} else {
-		socket->atime=time(NULL);
+		socket->mtime=time(NULL);
 		socket->bytes_out+=rc;
 	}
 	return rc;
 }
-/*
-int tcp_fprintf(TCP_SOCKET *socket, const char *format, ...)
+
+/* fix this */
+int nc_vsnprintf(nes_state *N, char *dest, int max, const char *format, va_list ap);
+
+int tcp_fprintf(nes_state *N, TCP_SOCKET *socket, const char *format, ...)
 {
 	char *buffer;
-//	va_list ap;
+	va_list ap;
 	int rc;
 
 	if ((buffer=calloc(2048, sizeof(char)))==NULL) {
-//		log_error(proc.N, "core", __FILE__, __LINE__, 0, "OUT OF MEMORY");
+		n_warn(N, "tcp_send", "OUT OF MEMORY");
 		return -1;
 	}
-//	va_start(ap, format);
-//	vsnprintf(buffer, 2047, format, ap);
-//	va_end(ap);
-//	log_error(proc.N, "tcp", __FILE__, __LINE__, 5, "[%s:%d] tcp_fprintf: %s", socket->RemoteAddr, socket->RemotePort, buffer);
-	rc=tcp_send(socket, buffer, strlen(buffer), 0);
+	va_start(ap, format);
+	nc_vsnprintf(N, buffer, 2047, format, ap);
+	va_end(ap);
+	if (N->debug) n_warn(N, "tcp_fprintf", "[%s:%d] tcp_fprintf: %s", socket->RemoteAddr, socket->RemotePort, buffer);
+	rc=tcp_send(N, socket, buffer, strlen(buffer), 0);
 	free(buffer);
 	return rc;
 }
-*/
-int tcp_fgets(char *buffer, int max, TCP_SOCKET *socket)
+
+int tcp_fgets(nes_state *N, char *buffer, int max, TCP_SOCKET *socket)
 {
 	char *pbuffer=buffer;
 	char *obuffer;
@@ -276,11 +296,22 @@ int tcp_fgets(char *buffer, int max, TCP_SOCKET *socket)
 retry:
 	if (!socket->recvbufsize) {
 		x=sizeof(socket->recvbuf)-socket->recvbufoffset-socket->recvbufsize-2;
+		if (x<1) {
+			memset(socket->recvbuf, 0, sizeof(socket->recvbuf));
+			socket->recvbufoffset=0;
+			socket->recvbufsize=0;
+			x=sizeof(socket->recvbuf)-socket->recvbufoffset-socket->recvbufsize-2;
+		}
 		obuffer=socket->recvbuf+socket->recvbufoffset+socket->recvbufsize;
-		if ((rc=tcp_recv(socket, obuffer, x, 0))<0) {
+		rc=tcp_recv(N, socket, obuffer, x, 0);
+		if (rc<0) {
 			return -1;
 		} else if (rc<1) {
+/*
 			goto retry;
+*/
+			*pbuffer='\0';
+			return n;
 		}
 		socket->recvbufsize+=rc;
 	}
@@ -295,7 +326,7 @@ retry:
 	}
 	*pbuffer='\0';
 	if (n>max-1) {
-//		n_warn(N, "tcp_fgets", "[%s:%d] tcp_fgets: %s", socket->RemoteAddr, socket->RemotePort, buffer);
+		if (N->debug) n_warn(N, "tcp_fgets", "[%s:%d] tcp_fgets: %s", socket->RemoteAddr, socket->RemotePort, buffer);
 		return n;
 	}
 	if (!lf) {
@@ -310,11 +341,11 @@ retry:
 		}
 		goto retry;
 	}
-//	n_warn(N, "tcp_fgets", "[%s:%d] tcp_fgets: %s", socket->RemoteAddr, socket->RemotePort, buffer);
+	if (N->debug) n_warn(N, "tcp_fgets", "[%s:%d] tcp_fgets: %s", socket->RemoteAddr, socket->RemotePort, buffer);
 	return n;
 }
 
-int tcp_close(TCP_SOCKET *socket, short int owner_killed)
+int tcp_close(nes_state *N, TCP_SOCKET *socket, short int owner_killed)
 {
 	if (!owner_killed) {
 		socket->want_close=1;

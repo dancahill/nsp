@@ -163,12 +163,12 @@ function xmlmain() {
 	global c = { 0, 0, 0, 0, 0 };
 	global held = { 0, 0, 0, 0, 0 };
 
-	if (tonumber(_POST['h0'])==0) { c[0]=getcard(); } else { c[0]=regcard(_POST['c0']); held[0]=1; }
-	if (tonumber(_POST['h1'])==0) { c[1]=getcard(); } else { c[1]=regcard(_POST['c1']); held[1]=1; }
-	if (tonumber(_POST['h2'])==0) { c[2]=getcard(); } else { c[2]=regcard(_POST['c2']); held[2]=1; }
-	if (tonumber(_POST['h3'])==0) { c[3]=getcard(); } else { c[3]=regcard(_POST['c3']); held[3]=1; }
-	if (tonumber(_POST['h4'])==0) { c[4]=getcard(); } else { c[4]=regcard(_POST['c4']); held[4]=1; }
-	global opt = _POST.opt;
+	if (tonumber(_POST['H0'])==0) { c[0]=getcard(); } else { c[0]=regcard(_POST['C0']); held[0]=1; }
+	if (tonumber(_POST['H1'])==0) { c[1]=getcard(); } else { c[1]=regcard(_POST['C1']); held[1]=1; }
+	if (tonumber(_POST['H2'])==0) { c[2]=getcard(); } else { c[2]=regcard(_POST['C2']); held[2]=1; }
+	if (tonumber(_POST['H3'])==0) { c[3]=getcard(); } else { c[3]=regcard(_POST['C3']); held[3]=1; }
+	if (tonumber(_POST['H4'])==0) { c[4]=getcard(); } else { c[4]=regcard(_POST['C4']); held[4]=1; }
+	global opt = _POST['OPT'];
 	global r=ratehand();
 #	if response header isn't text/xml, IE will choke on this
 	_HEADER['CONTENT_TYPE']="text/xml";

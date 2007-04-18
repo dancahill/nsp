@@ -2,6 +2,8 @@
 var greeting=")gnikrow s'ti( .alseN morf olleH";
 var i=0;
 
-print("\n\e[01;37;40m")
+print("\n")
+if (type(_ENV['TERM'])!='null') { print("\e[01;37;40m"); }
 for (i=string.len(greeting);i>=0;i--) { print(string.sub(greeting, i, 1)); }
-print("\e[00m\n\n");
+if (type(_ENV['TERM'])!='null') { print("\e[00m"); }
+print("\n\n");

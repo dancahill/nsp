@@ -104,12 +104,14 @@ static int n_dirlist(nes_state *N, obj_t *dobj, const char *dirname)
 int neslaext_dirlist(nes_state *N)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
-	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
-	obj_t *tobj;
+	obj_t tobj;
 
-	if (cobj1->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
-	if (cobj2->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg2");
-	tobj=nes_settable(N, &N->g, cobj1->d.str);
-	n_dirlist(N, tobj, cobj2->d.str);
+	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	nc_memset((void *)&tobj, 0, sizeof(obj_t));
+	nes_linkval(N, &tobj, NULL);
+	tobj.val->type=NT_TABLE;
+	n_dirlist(N, &tobj, cobj1->val->d.str);
+	nes_linkval(N, &N->r, &tobj);
+	nes_unlinkval(N, &tobj);
 	return 0;
 }

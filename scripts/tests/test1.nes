@@ -24,6 +24,7 @@ function vars() {
 }
 
 function main() {
+	function subf() { return 42; }
 	global pi = math.asin(1)*2;
 	include("../samples/_cards.nes");
 	include("_expect.nes");
@@ -55,18 +56,20 @@ function main() {
 	print("--------------------------------------------------------\n");
 	include("_xml.nes");
 	print("--------------------------------------------------------\n");
+	include("_tcp.nes");
+	print("--------------------------------------------------------\n");
 	include("_indexes.nes");
 	print("--------------------------------------------------------\n");
-	if (type(sqlquery)=='function') { sqlquery('_q', "SELECT * FROM nullgs_sessions"); }
-#	if (type(dirlist)=='function') { dirlist('_d', _filepath); }
+	if (type(sqlquery)=='function') { Q=sqlquery("SELECT * FROM nullgs_sessions"); }
+	if (type(dirlist)=='function') { D=dirlist(_filepath); }
 	print("\t[", date(), " ", time(), "]\n");
 	print("\truntime = ", runtime(), " seconds\n");
 	print("--------------------------------------------------------\n");
 	print("FINISHED TESTS\n");
 	print("--------------------------------------------------------\n");
+	expect("errors", 0, tonumber(errors));
 	global CARDS="";
 	global _ENV="";
-	global tab="";
 	vars();
 	if (type(_SERVER)=='table') {
 		print("</BODY></HTML>");
@@ -76,7 +79,10 @@ function main() {
 }
 main();
 
-# tests i'm too lazy to add properly
-#http.get(0, "localhost", 80, "/tests/");
-#if (type(http)=='table') { print(http.get(0, "localhost", 80, "/tests/")); }
-print("[", 1/0, "]\n");
+# below is code to read your /etc/passwd file into a table
+#x=file.read('/etc/passwd');
+#global y=string.split(x, '\n');
+#for (i=0;type(y[i])!='null';i++) {
+#	y[i]=string.split(y[i], ':');
+#}
+#printvars();

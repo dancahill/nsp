@@ -24,10 +24,10 @@ int neslaext_rot13(nes_state *N)
 	obj_t *robj;
 	char *p;
 
-	if (cobj1->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
-	robj=nes_setstr(N, &N->r, "", cobj1->d.str, cobj1->size);
-	if (robj->d.str==NULL) return 0;
-	p=robj->d.str;
+	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	robj=nes_setstr(N, &N->r, "", cobj1->val->d.str, cobj1->val->size);
+	if (robj->val->d.str==NULL) return 0;
+	p=robj->val->d.str;
 	while (*p) {
 		if (nc_islower(*p)) {
 			if (*p>'m') *p-=13; else *p+=13; 

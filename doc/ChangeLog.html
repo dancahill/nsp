@@ -16,7 +16,23 @@ NESLA NullLogic Embedded Scripting Language ChangeLog
 </small>
 <hr>
 
-<h2>0.3.0 04/04/2007</h2>
+<h2>0.4.0 (2007-04-18)</h2>
+<ul>
+  <li>All major core language issues resolved (i think).  Next release will either be the last alpha, or the first beta.</li>
+  <li>added primitive file.read() and file.write() functions</li>
+  <li>added string.split() to turn strings into tables</li>
+  <li>fixed bug declaring signed numbers and functions as vals in new tables</li>
+  <li>nesla now understands the concept of operator precedence</li>
+  <li>functions can now return tables (or just subtables)</li>
+  <li>variables and values are now completely separate from each other.  now multiple vars can point to the address of the same val without conflict</li>
+  <li>minor tweaks to fix cygwin compatibility</li>
+  <li>xml parsing code can now more-or-less read html documents</li>
+  <li>complete rewrite of the http client makes it almost useful</li>
+  <li>fixed a minor mem leak in string comparisons (valgrind rocks)</li>
+  <li>old string vals are freed _after_ the new val has been set</li>
+  <li>escape char processing is now done when the string is read, not on output</li>
+</ul>
+<h2>0.3.0 (2007-04-04)</h2>
 <ul>
   <li>fixed segfault caused by unsafe longjmp in n_error</li>
   <li>table autosorting can now be toggled (on by default)</li>
@@ -28,7 +44,7 @@ NESLA NullLogic Embedded Scripting Language ChangeLog
   <li>fixed free table references (free = anything not enslaving table refs to vars)</li>
   <li>added a basic http client</li>
 </ul>
-<h2>0.2.0 03/09/2007</h2>
+<h2>0.2.0 (2007-03-09)</h2>
 <ul>
   <li>replaced most libc string functions with portable (and faster) substitutes</li>
   <li>added working boolean var handling</li>
@@ -40,7 +56,7 @@ NESLA NullLogic Embedded Scripting Language ChangeLog
   <li>new vars are automatically alphabetized</li>
   <li>added rot13 to the extension lib</li>
 </ul>
-<h2>0.1.0 02/15/2007</h2>
+<h2>0.1.0 (2007-02-15)</h2>
 <ul>
   <li>initial release</li>
 </ul>

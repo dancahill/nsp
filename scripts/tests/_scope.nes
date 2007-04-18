@@ -15,22 +15,33 @@ function testscope() {
 		return;
 	}
 	function subf4(i) {
+		local ack = { aa=1, bb=2 };
+		return ack;
+	}
+	function subf5(i) {
 		print("[", i, "]");
-		if (i<5) { subf4(i+1); }
+		if (i<5) { subf5(i+1); }
 		print("[", i, "]");
-		return;
+		return 42;
 	}
 	local p3="a";
 	local ack = { a=1, b = { c=2 } };
 
-	expect("testing scope", "[null][null][a]",     "["+tostring(p1)+"]["+tostring(p2)+"]["+tostring(p3)+"]");
+	expect("testing scope",    "[null][null][a]",  "["+tostring(p1)+"]["+tostring(p2)+"]["+tostring(p3)+"]");
 	subf1(5, "x");
-	expect("testing scope", "[null][null][a]",     "["+tostring(p1)+"]["+tostring(p2)+"]["+tostring(p3)+"]");
+	expect("testing scope",    "[null][null][a]",  "["+tostring(p1)+"]["+tostring(p2)+"]["+tostring(p3)+"]");
 	subf2(5, "x", ack);
 	subf3(5, "x", ack.b);
-	expect("testing scope", "[null][null][a]",     "["+tostring(p1)+"]["+tostring(p2)+"]["+tostring(p3)+"]");
-	subf4(0);
+	expect("testing scope",    "[null][null][a]",  "["+tostring(p1)+"]["+tostring(p2)+"]["+tostring(p3)+"]");
+	scopetab=subf4(0);
+	expect("testing scopetab", "[table][1][2]",    "["+type(scopetab)+"]["+tostring(scopetab.aa)+"]["+tostring(scopetab.bb)+"]");
+
+	print("\t");
+	i=subf5(0);
 	print("\n");
+
+	expect("subtab=subf4(0)",  "(table)2",         "("+type(scopetab)+")"+tostring(scopetab.bb));
+	expect("i=subf5(0)",       "(number)42",       "("+type(i)+")"+tostring(i));
 	return;
 }
 testscope();

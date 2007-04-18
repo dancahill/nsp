@@ -1,7 +1,10 @@
 #!/usr/bin/nesla
 if (type(expect)=='null') { include("_expect.nes"); }
 function testb64() {
-	if (type(base64)!='table') { return; }
+	if (type(base64)!='table') {
+		print("SKIPPING BASE64 TESTS\n");
+		return;
+	}
 	local bx = { p="stuff:null", e="c3R1ZmY6bnVsbA==" };
 	local by = { p="null:stuff", e="bnVsbDpzdHVmZg==" };
 	expect("base64.decode(bx.e)", "stuff:null",       base64.decode(bx.e));

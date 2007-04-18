@@ -62,7 +62,7 @@ static struct {
 	LIBSSL_WRITE			SSL_write;
 } libssl;
 
-int ssl_dl_init()
+int ssl_dl_init(nes_state *N)
 {
 	obj_t *tobj=nes_getobj(proc.N, &proc.N->g, "CONFIG");
 #ifdef HAVE_SSL
@@ -163,7 +163,7 @@ fail:
 #endif
 }
 
-int ssl_init()
+int ssl_init(nes_state *N)
 {
 	obj_t *tobj=nes_getobj(proc.N, &proc.N->g, "CONFIG");
 	obj_t *cobj1=nes_getobj(proc.N, tobj, "ssl_cert_file");
@@ -197,7 +197,7 @@ int ssl_init()
 	return 0;
 }
 
-int ssl_accept(TCP_SOCKET *sock)
+int ssl_accept(nes_state *N, TCP_SOCKET *sock)
 {
 	if ((sock->ssl=libssl.SSL_new(proc.ssl_ctx))==NULL) {
 		return -1;
@@ -210,7 +210,7 @@ int ssl_accept(TCP_SOCKET *sock)
 	return 0;
 }
 
-int ssl_connect(TCP_SOCKET *sock)
+int ssl_connect(nes_state *N, TCP_SOCKET *sock)
 {
 	/*
 	 * i really need to fix this, but it's hot, and i'm chronically lazy today.
@@ -245,17 +245,17 @@ int ssl_connect(TCP_SOCKET *sock)
 	return 0;
 }
 
-int ssl_read(SSL *ssl, void *buf, int len)
+int ssl_read(nes_state *N, SSL *ssl, void *buf, int len)
 {
 	return libssl.SSL_read(ssl, buf, len);
 }
 
-int ssl_write(SSL *ssl, const void *buf, int len)
+int ssl_write(nes_state *N, SSL *ssl, const void *buf, int len)
 {
 	return libssl.SSL_write(ssl, buf, len);
 }
 
-int ssl_close(TCP_SOCKET *sock)
+int ssl_close(nes_state *N, TCP_SOCKET *sock)
 {
 	if (sock->ssl!=NULL) {
 		if (libssl.SSL_get_shutdown(sock->ssl)&SSL_RECEIVED_SHUTDOWN) {
@@ -276,7 +276,7 @@ int ssl_close(TCP_SOCKET *sock)
 	return 0;
 }
 
-int ssl_shutdown()
+int ssl_shutdown(nes_state *N)
 {
 	libssl.SSL_CTX_free(proc.ssl_ctx);
 	proc.ssl_is_loaded=0;

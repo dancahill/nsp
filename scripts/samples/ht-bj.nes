@@ -2,13 +2,11 @@
 # blackjack sample prog by Dan Cahill
 include("_cards.nes");
 include("_ajax.nes");
-#global false=0;
-#global true=1;
 
 function cardval(p) {
 	local x=tonumber(p)+1;
 
-	if (string.cmp(type(p), 'null')==0) { return 0; }
+	if (type(p)=='null') { return 0; }
 	x=math.ceil((x/4));
 	if (x>10) { x=10; }
 	if (x==1) { x=11; }
@@ -18,7 +16,7 @@ function cardval(p) {
 function getcard() {
 	while (1) {
 		local x=math.rand(52);
-		if (string.cmp(type(CARDS[x]['dealt']), 'null')==0) {
+		if (type(CARDS[x]['dealt'])=='null') {
 			CARDS[x]['dealt']=true;
 			return x;
 		}
@@ -29,36 +27,39 @@ function getcard() {
 function regcard(p) {
 	local x=tonumber(p);
 
-	if (string.cmp(type(p), 'null')!=0) { CARDS[x]['dealt']=true; }
+	if (type(p)=='null') { CARDS[x]['dealt']=true; }
 	return x;
 }
 
 function prepcards() {
-	if (string.cmp(_SERVER['REQUEST_METHOD'], "POST")==0) {
-		global d = { [0]=regcard(_POST['d0']), [1]=regcard(_POST['d1']) };
-		if (string.cmp(type(_POST['d2']), 'null')!=0) { d[2]=regcard(_POST['d2']); }
-		if (string.cmp(type(_POST['d3']), 'null')!=0) { d[3]=regcard(_POST['d3']); }
-		if (string.cmp(type(_POST['d4']), 'null')!=0) { d[4]=regcard(_POST['d4']); }
-		global c = { [0]=regcard(_POST['c0']), [1]=regcard(_POST['c1']) };
-		if (string.cmp(type(_POST['c2']), 'null')!=0) { c[2]=regcard(_POST['c2']); }
-		if (string.cmp(type(_POST['c3']), 'null')!=0) { c[3]=regcard(_POST['c3']); }
-		if (string.cmp(type(_POST['c4']), 'null')!=0) { c[4]=regcard(_POST['c4']); }
+	if (_SERVER['REQUEST_METHOD']=="POST") {
+		global d = { [0]=regcard(_POST['D0']), [1]=regcard(_POST['D1']) };
+		if (type(_POST['D2'])=='null') { d[2]=regcard(_POST['D2']); }
+		if (type(_POST['D3'])=='null') { d[3]=regcard(_POST['D3']); }
+		if (type(_POST['D4'])=='null') { d[4]=regcard(_POST['D4']); }
+		global c = { [0]=regcard(_POST['C0']), [1]=regcard(_POST['C1']) };
+		if (type(_POST['C2'])=='null') { c[2]=regcard(_POST['C2']); }
+		if (type(_POST['C3'])=='null') { c[3]=regcard(_POST['C3']); }
+		if (type(_POST['C4'])=='null') { c[4]=regcard(_POST['C4']); }
 		global dv = { [0]=cardval(d[0]), [1]=cardval(d[1]), [2]=cardval(d[2]), [3]=cardval(d[3]), [4]=cardval(d[4]) };
 		global cv = { [0]=cardval(c[0]), [1]=cardval(c[1]), [2]=cardval(c[2]), [3]=cardval(c[3]), [4]=cardval(c[4]) };
-		global opt = _POST['opt'];
-
+		if (type(_POST['OPT'])!='null') {
+			global opt = _POST['OPT'];
+		} else {
+			global opt = "";
+		}
 		if (string.cmp(opt, "Hit")==0) {
-			if (string.cmp(type(c[0]), 'null')==0) {
+			if (type(c[0])=='null') {
 				print("weird error 1");
-			} else if (string.cmp(type(c[1]), 'null')==0) {
+			} else if (type(c[1])=='null') {
 				print("weird error");
-			} else if (string.cmp(type(c[2]), 'null')==0) {
+			} else if (type(c[2])=='null') {
 				c[2]=getcard();
 				cv[2]=cardval(c[2]);
-			} else if (string.cmp(type(c[3]), 'null')==0) {
+			} else if (type(c[3])=='null') {
 				c[3]=getcard();
 				cv[3]=cardval(c[3]);
-			} else if (string.cmp(type(c[4]), 'null')==0) {
+			} else if (type(c[4])=='null') {
 				c[4]=getcard();
 				cv[4]=cardval(c[4]);
 			}
@@ -108,7 +109,7 @@ function printredraw() {
 }
 
 function main() {
-	if (string.cmp(type(_SERVER['REQUEST_METHOD']), 'null')==0) {
+	if (type(_SERVER['REQUEST_METHOD'])=='null') {
 		global _SERVER = { REQUEST_METHOD="GET", SCRIPT_NAME="/nesla/blah" }
 	} # this is a debug block
 	if (string.cmp(type(_SESSION), 'table')!=0) { global _SESSION = { }; }

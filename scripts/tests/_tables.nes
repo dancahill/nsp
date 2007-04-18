@@ -15,7 +15,7 @@ function testtables() {
 	expect("CARDS[x]['dealt']", "(boolean)true", "("+type(CARDS[x]['dealt'])+")"+tostring(CARDS[x]['dealt']));
 	CARDS=0;
 
-	global tab = {
+	tab = {
 		{ a1="x", b = pi, [12]=41, [1]=42, 43, 'blah', subf() },
 		{ "x", 'y', x = 41, 42, 43, 'blah', [5]=12, heh=";-)" }
 	};
@@ -29,6 +29,9 @@ function testtables() {
 	# add another sub
 	tab['t'][3] = { "x", 'y', x = 41, 42, 43, 'blah', [5]=12, heh=";-)" };
 	#printvars();
+
+	a = { [0]=subf()-1, [1]=subf(), x=+1, y=2, z=-3 };
+	expect("a = { ... }", "68 69 1 2 -3", tostring(a[0])+' '+tostring(a[1])+' '+tostring(a['x'])+' '+tostring(a['y'])+' '+tostring(a['z']));
 
 	return;
 }
