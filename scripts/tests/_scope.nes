@@ -1,5 +1,5 @@
 #!/usr/bin/nesla
-if (type(expect)=='null') { include("_expect.nes"); }
+if (type(expect)!='function') include("_expect.nes");
 function testscope() {
 	function subf1(p1, p2) {
 		local p3="b";
@@ -20,7 +20,7 @@ function testscope() {
 	}
 	function subf5(i) {
 		print("[", i, "]");
-		if (i<5) { subf5(i+1); }
+		if (i<5) subf5(i+1);
 		print("[", i, "]");
 		return 42;
 	}

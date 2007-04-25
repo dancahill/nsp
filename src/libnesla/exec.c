@@ -15,7 +15,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "libnesla.h"
+#include "nesla/libnesla.h"
 #include <fcntl.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -26,65 +26,6 @@
 #include <unistd.h>
 #endif
 #endif
-
-obj_t *n_macros(nes_state *N)
-{
-	static char *fn="n_macros";
-	obj_t *cobj, *tobj;
-	char *p;
-
-	DEBUG_IN();
-	if (nc_strcmp("exit", N->lastname)==0) {
-		n_error(N, 0, fn, "exiting normally");
-	} else if (nc_strcmp("printvars", N->lastname)==0) {
-		nextop();
-		if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "missing ( bracket");
-		nextop();
-		if (N->lastop==OP_LABEL) {
-			cobj=nes_getobj(N, &N->l, N->lastname);
-			while (cobj->val->type==NT_TABLE) {
-				if (*N->readptr!=OP_POBRACKET&&*N->readptr!=OP_PDOT&&*N->readptr!='['&&*N->readptr!='.') break;
-				cobj=n_getindex(N, cobj, NULL);
-			}
-			n_printvars(N, cobj);
-			nextop();
-		} else if (N->lastop==OP_PCPAREN) {
-			n_printvars(N, N->g.val->d.table);
-		}
-		if (N->lastop!=OP_PCPAREN) n_error(N, NE_SYNTAX, fn, "missing ) bracket");
-		N->lastop=OP_UNDEFINED;
-		DEBUG_OUT();
-		return nes_setnum(N, &N->r, "", 0);
-	} else if (nc_strcmp("type", N->lastname)==0) {
-		nextop();
-		if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "missing ( bracket");
-		nextop();
-		if (N->lastop!=OP_LABEL) n_error(N, NE_SYNTAX, fn, "missing arg1");
-		cobj=nes_getobj(N, &N->l, N->lastname);
-		/* devour the whole var name and puke a null type if any part of the name is missing */
-		do {
-			if (cobj->val->type==NT_TABLE) tobj=cobj; else tobj=NULL;
-			if (*N->readptr!=OP_POBRACKET&&*N->readptr!=OP_PDOT&&*N->readptr!='['&&*N->readptr!='.') break;
-			cobj=n_getindex(N, tobj, NULL);
-		} while (1);
-		switch (cobj->val->type) {
-		case NT_BOOLEAN : p="boolean";  break;
-		case NT_NUMBER  : p="number";   break;
-		case NT_STRING  : p="string";   break;
-		case NT_TABLE   : p="table";    break;
-		case NT_NFUNC   :
-		case NT_CFUNC   : p="function"; break;
-		default         : p="null";     break;
-		}
-		nextop();
-		if (N->lastop!=OP_PCPAREN) n_error(N, NE_SYNTAX, fn, "missing ) bracket");
-		N->lastop=OP_UNDEFINED;
-		DEBUG_OUT();
-		return nes_setstr(N, &N->r, "", p, nc_strlen(p));
-	}
-	DEBUG_OUT();
-	return NULL;
-}
 
 obj_t *n_execfunction(nes_state *N, obj_t *cobj)
 {
@@ -99,7 +40,7 @@ obj_t *n_execfunction(nes_state *N, obj_t *cobj)
 	DEBUG_IN();
 	if ((cobj->val->type!=NT_NFUNC)&&(cobj->val->type!=NT_CFUNC)) n_error(N, NE_SYNTAX, fn, "'%s' is not a function", cobj->name);
 	nextop();
-	if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "missing arg bracket");
+	if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "missing '('");
 	pobj=n_evalargs(N, cobj->name);
 	N->lastop=OP_UNDEFINED;
 	olobj=N->l.val; N->l.val=pobj->val; pobj->val=NULL;
@@ -108,7 +49,7 @@ obj_t *n_execfunction(nes_state *N, obj_t *cobj)
 	if (N->debug) n_warn(N, fn, "%s()", cobj->name);
 #endif
 	if (cobj->val->type==NT_CFUNC) {
-		cfunc=(NES_CFUNC)cobj->val->d.cfunc;
+		cfunc=cobj->val->d.cfunc;
 		cfunc(N);
 	} else if (cobj->val->type==NT_NFUNC) {
 		N->readptr=(uchar *)cobj->val->d.str;
@@ -123,7 +64,7 @@ obj_t *n_execfunction(nes_state *N, obj_t *cobj)
 			}
 			if (N->lastop==OP_PCOMMA) continue;
 			if (N->lastop==OP_PCPAREN) break;
-			n_error(N, NE_SYNTAX, fn, "i'm confused.... %s", N->lastname);
+			n_error(N, NE_SYNTAX, fn, "expected a closing ')' or ','");
 		}
 		nextop();
 		if (N->lastop==OP_POBRACE) nes_exec(N, (char *)N->readptr);
@@ -147,8 +88,10 @@ obj_t *nes_exec(nes_state *N, char *string)
 	obj_t *cobj, *tobj;
 	char block;
 	short int jmp=N->jmpset;
+	short int single=N->single;
 
 	DEBUG_IN();
+	N->single=0;
 	if (jmp==0) {
 		if (setjmp(N->savjmp)==0) {
 			N->jmpset=1;
@@ -174,10 +117,11 @@ obj_t *nes_exec(nes_state *N, char *string)
 			case OP_KGLOB:  n_readvar(N, &N->g, NULL); break;
 			case OP_KIF:    n_if(N);    if (N->ret) goto end; else break;
 			case OP_KFOR:   n_for(N);   if (N->ret) goto end; else break;
+			case OP_KDO:    n_do(N);    if (N->ret) goto end; else break;
 			case OP_KWHILE: n_while(N); if (N->ret) goto end; else break;
 			case OP_KFUNC:  n_readfunction(N); break;
 			case OP_KBREAK:
-				if (!block) n_error(N, NE_SYNTAX, fn, "return without block");
+				if ((!block)&&(!single)) n_error(N, NE_SYNTAX, fn, "return without block");
 				N->brk=nc_isdigit(*N->readptr)?(short int)n_getnumber(N):1;
 				if (*N->readptr==OP_PSEMICOL||*N->readptr==';') nextop();
 				goto end;
@@ -189,14 +133,13 @@ obj_t *nes_exec(nes_state *N, char *string)
 				n_storeval(N, &N->r);
 				N->ret=1;
 				goto end;
+			case OP_KEXIT:
+				N->err=nc_isdigit(*N->readptr)?(short int)n_getnumber(N):0;
+				n_error(N, N->err, fn, "exiting normally");
 			case OP_KELSE:  n_error(N, NE_SYNTAX, fn, "stray else");
 			}
 		} else {
 			if (N->lastname[0]=='\0') n_error(N, NE_SYNTAX, fn, "zero length token");
-			if (n_macros(N)!=NULL) {
-				if (*N->readptr==OP_PSEMICOL||*N->readptr==';') nextop();
-				continue;
-			}
 			tobj=&N->l;
 			cobj=nes_getobj(N, tobj, N->lastname);
 			while (cobj->val->type==NT_TABLE) {
@@ -213,10 +156,12 @@ obj_t *nes_exec(nes_state *N, char *string)
 			} else if ((cobj->val->type==NT_NFUNC)||(cobj->val->type==NT_CFUNC)) {
 				n_execfunction(N, cobj);
 				if (*N->readptr==OP_PSEMICOL||*N->readptr==';') nextop();
+				if (single) break;
 				continue;
 			}
 			n_readvar(N, tobj, cobj);
 		}
+		if (single) break;
 	}
 end:
 	if (jmp==0) N->jmpset=0;
@@ -244,6 +189,7 @@ int nes_execfile(nes_state *N, char *file)
 		if (setjmp(N->savjmp)==0) {
 			N->jmpset=1;
 		} else {
+			n_free(N, (void *)&rawtext);
 			if (jmp==0) N->jmpset=0;
 			return 0;
 		}
@@ -265,7 +211,9 @@ int nes_execfile(nes_state *N, char *file)
 		if (bl<1) break;
 	}
 	close(fp);
+	rc=sb.st_size;
 	rawtext[sb.st_size]='\0';
+	while ((rc>0)&&((rawtext[rc-1]=='\r')||(rawtext[rc-1]=='\n'))) rawtext[--rc]='\0';
 	n_prechew(N, rawtext);
 	nes_exec(N, (char *)rawtext);
 	n_free(N, (void *)&rawtext);
@@ -278,59 +226,54 @@ end:
 
 typedef struct {
 	char *fn_name;
-	void *fn_ptr;
+	NES_CFUNC fn_ptr;
 } FUNCTION;
 
 nes_state *nes_newstate()
 {
 	FUNCTION list[]={
-		{ "date",	(NES_CFUNC *)nl_datetime	},
-		{ "include",	(NES_CFUNC *)nl_include		},
-		{ "tonumber",	(NES_CFUNC *)nl_tonumber	},
-		{ "tostring",	(NES_CFUNC *)nl_tostring	},
-		{ "print",	(NES_CFUNC *)nl_print		},
-		{ "write",	(NES_CFUNC *)nl_print		},
-		{ "runtime",	(NES_CFUNC *)nl_runtime		},
-		{ "sleep",	(NES_CFUNC *)nl_sleep		},
-		{ "time",	(NES_CFUNC *)nl_datetime	},
+		{ "date",	(NES_CFUNC)nl_datetime	},
+		{ "include",	(NES_CFUNC)nl_include	},
+		{ "print",	(NES_CFUNC)nl_print	},
+		{ "printvars",	(NES_CFUNC)nl_printvars	},
+		{ "runtime",	(NES_CFUNC)nl_runtime	},
+		{ "sleep",	(NES_CFUNC)nl_sleep	},
+		{ "time",	(NES_CFUNC)nl_datetime	},
+		{ "tonumber",	(NES_CFUNC)nl_tonumber	},
+		{ "tostring",	(NES_CFUNC)nl_tostring	},
+		{ "type",	(NES_CFUNC)nl_type	},
+		{ "write",	(NES_CFUNC)nl_print	},
 		{ NULL, NULL }
 	};
 	FUNCTION list_file[]={
-		{ "read",	(NES_CFUNC *)nl_fileread	},
-		{ "write",	(NES_CFUNC *)nl_filewrite	},
+		{ "read",	(NES_CFUNC)nl_fileread	},
+		{ "write",	(NES_CFUNC)nl_filewrite	},
 		{ NULL, NULL }
 	};
 	FUNCTION list_io[]={
-		{ "print",	(NES_CFUNC *)nl_print		},
-		{ "write",	(NES_CFUNC *)nl_print		},
-		{ "flush",	(NES_CFUNC *)nl_flush		},
+		{ "print",	(NES_CFUNC)nl_print	},
+		{ "write",	(NES_CFUNC)nl_print	},
+		{ "flush",	(NES_CFUNC)nl_flush	},
 		{ NULL, NULL }
 	};
 	FUNCTION list_math[]={
-		{ "abs",	(NES_CFUNC *)nl_math1		},
-		{ "acos",	(NES_CFUNC *)nl_math1		},
-		{ "asin",	(NES_CFUNC *)nl_math1		},
-		{ "atan",	(NES_CFUNC *)nl_math1		},
-		{ "ceil",	(NES_CFUNC *)nl_math1		},
-		{ "cos",	(NES_CFUNC *)nl_math1		},
-		{ "floor",	(NES_CFUNC *)nl_math1		},
-		{ "rand",	(NES_CFUNC *)nl_math1		},
-		{ "sin",	(NES_CFUNC *)nl_math1		},
-		{ "sqrt",	(NES_CFUNC *)nl_math1		},
-		{ "tan",	(NES_CFUNC *)nl_math1		},
+		{ "abs",	(NES_CFUNC)nl_math1	},
+		{ "ceil",	(NES_CFUNC)nl_math1	},
+		{ "floor",	(NES_CFUNC)nl_math1	},
+		{ "rand",	(NES_CFUNC)nl_math1	},
 		{ NULL, NULL }
 	};
 	FUNCTION list_string[]={
-		{ "cat",	(NES_CFUNC *)nl_strcat		},
-		{ "cmp",	(NES_CFUNC *)nl_strcmp		},
-		{ "icmp",	(NES_CFUNC *)nl_strcmp		},
-		{ "ncmp",	(NES_CFUNC *)nl_strcmp		},
-		{ "nicmp",	(NES_CFUNC *)nl_strcmp		},
-		{ "len",	(NES_CFUNC *)nl_strlen		},
-		{ "split",	(NES_CFUNC *)nl_strsplit	},
-		{ "str",	(NES_CFUNC *)nl_strstr		},
-		{ "istr",	(NES_CFUNC *)nl_strstr		},
-		{ "sub",	(NES_CFUNC *)nl_strsub		},
+		{ "cat",	(NES_CFUNC)nl_strcat	},
+		{ "cmp",	(NES_CFUNC)nl_strcmp	},
+		{ "icmp",	(NES_CFUNC)nl_strcmp	},
+		{ "ncmp",	(NES_CFUNC)nl_strcmp	},
+		{ "nicmp",	(NES_CFUNC)nl_strcmp	},
+		{ "len",	(NES_CFUNC)nl_strlen	},
+		{ "split",	(NES_CFUNC)nl_strsplit	},
+		{ "str",	(NES_CFUNC)nl_strstr	},
+		{ "istr",	(NES_CFUNC)nl_strstr	},
+		{ "sub",	(NES_CFUNC)nl_strsub	},
 		{ NULL, NULL }
 	};
 	nes_state *new_N;
@@ -347,51 +290,51 @@ nes_state *nes_newstate()
 	new_N->g.val->type=NT_TABLE;
 	new_N->g.val->d.table=NULL;
 	new_N->g.val->refs=1;
-	new_N->g.mode|=NST_AUTOSORT;
+	new_N->g.val->attr|=NST_AUTOSORT;
 
 	new_N->l.val=n_alloc(new_N, sizeof(val_t));
 	nc_memset(new_N->l.val, 0, sizeof(val_t));
 	new_N->l.val->type=NT_TABLE;
 	new_N->l.val->d.table=NULL;
 	new_N->l.val->refs=1;
-	new_N->l.mode|=NST_AUTOSORT;
+	new_N->l.val->attr|=NST_AUTOSORT;
 
 	nc_strncpy(new_N->g.name, "!GLOBALS!", MAX_OBJNAMELEN);
 	nc_strncpy(new_N->l.name, "!LOCALS!", MAX_OBJNAMELEN);
 	nc_strncpy(new_N->r.name, "!RETVAL!", MAX_OBJNAMELEN);
 	cobj=nes_settable(new_N, &new_N->g, "_GLOBALS");
-	cobj->mode|=NST_HIDDEN;
+	cobj->val->attr|=NST_HIDDEN;
 	nes_linkval(new_N, cobj, &new_N->g);
 
 	for (i=0;list[i].fn_name!=NULL;i++) {
 		nes_setcfunc(new_N, &new_N->g, list[i].fn_name, list[i].fn_ptr);
 	}
 	cobj=nes_settable(new_N, &new_N->g, "file");
-	cobj->mode|=NST_HIDDEN;
+	cobj->val->attr|=NST_HIDDEN;
 	for (i=0;list_file[i].fn_name!=NULL;i++) {
 		nes_setcfunc(new_N, cobj, list_file[i].fn_name, list_file[i].fn_ptr);
 	}
 	cobj=nes_settable(new_N, &new_N->g, "io");
-	cobj->mode|=NST_HIDDEN;
+	cobj->val->attr|=NST_HIDDEN;
 	for (i=0;list_io[i].fn_name!=NULL;i++) {
 		nes_setcfunc(new_N, cobj, list_io[i].fn_name, list_io[i].fn_ptr);
 	}
 	cobj=nes_settable(new_N, &new_N->g, "math");
-	cobj->mode|=NST_HIDDEN;
+	cobj->val->attr|=NST_HIDDEN;
 	for (i=0;list_math[i].fn_name!=NULL;i++) {
 		nes_setcfunc(new_N, cobj, list_math[i].fn_name, list_math[i].fn_ptr);
 	}
 	cobj=nes_settable(new_N, &new_N->g, "string");
-	cobj->mode|=NST_HIDDEN;
+	cobj->val->attr|=NST_HIDDEN;
 	for (i=0;list_string[i].fn_name!=NULL;i++) {
 		nes_setcfunc(new_N, cobj, list_string[i].fn_name, list_string[i].fn_ptr);
 	}
 	cobj=nes_setnum(new_N, &new_N->g, "null", 0);
-	cobj->val->type=NT_NULL; cobj->mode|=NST_SYSTEM;
+	cobj->val->type=NT_NULL; cobj->val->attr|=NST_SYSTEM;
 	cobj=nes_setnum(new_N, &new_N->g, "false", 0);
-	cobj->val->type=NT_BOOLEAN; cobj->mode|=NST_SYSTEM;
+	cobj->val->type=NT_BOOLEAN; cobj->val->attr|=NST_SYSTEM;
 	cobj=nes_setnum(new_N, &new_N->g, "true", 1);
-	cobj->val->type=NT_BOOLEAN; cobj->mode|=NST_SYSTEM;
+	cobj->val->type=NT_BOOLEAN; cobj->val->attr|=NST_SYSTEM;
 	cobj=nes_setstr(new_N, &new_N->g, "_version_", NESLA_VERSION, nc_strlen(NESLA_VERSION));
 	return new_N;
 }

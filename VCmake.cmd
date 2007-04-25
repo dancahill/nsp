@@ -10,24 +10,34 @@ CD SRC\LIBNESLA
 NMAKE /C /S /F MAKEFILE.VC
 CD ..\..
 
-CD SRC\SAPI\MIN
+CD SRC\HOSTS\MIN
 NMAKE /C /S /F MAKEFILE.VC
 CD ..\..\..
 bin\nesla_m.exe scripts\samples\hello.nes
 
+@ECHO libneslamath
+CD SRC\LIBS\MATH
+NMAKE /C /S /F MAKEFILE.VC
+CD ..\..\..
 @ECHO libneslaext
-CD SRC\LIBNESLAEXT
+CD SRC\LIBS\EXT
 NMAKE /C /S /F MAKEFILE.VC
-CD ..\..
+CD ..\..\..
 @ECHO libneslatcp
-CD SRC\LIBNESLATCP
+CD SRC\LIBS\TCP
 NMAKE /C /S /F MAKEFILE.VC
-CD ..\..
+CD ..\..\..
 @ECHO nesla-cli
-CD SRC\SAPI\CLI
+CD SRC\HOSTS\CLI
 NMAKE /C /S /F MAKEFILE.VC
 CD ..\..\..
 bin\nesla.exe scripts\samples\hello.nes
+
+@ECHO nesla-cgi
+CD SRC\HOSTS\CGI
+NMAKE /C /S /F MAKEFILE.VC
+CD ..\..\..
+
 goto end
 
 :test

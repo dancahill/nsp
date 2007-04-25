@@ -1,5 +1,5 @@
 #!/usr/bin/nesla
-if (type(expect)=='null') { include("_expect.nes"); }
+if (type(expect)!='function') include("_expect.nes");
 function testb64() {
 	if (type(base64)!='table') {
 		print("SKIPPING BASE64 TESTS\n");

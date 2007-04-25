@@ -1,12 +1,12 @@
 #!/usr/bin/nesla
-if (type(expect)=='null') { include("_expect.nes"); }
+if (type(expect)!='function') include("_expect.nes");
 function testtables() {
 	function subf() { return 69; }
 	local x=1;
 	local ack = { a="x" };
 
 	expect("type(CARDS)",        "table",           type(CARDS));
-	if (string.cmp(type(CARDS), 'table')!=0) { return; }
+	if (string.cmp(type(CARDS), 'table')!=0) return;
 	expect("CARDS['1']['name']", "Ace of Diamonds", CARDS['1']['name']);
 	CARDS[1].name="aa";
 	expect("CARDS[1].name", "aa", CARDS[1].name);

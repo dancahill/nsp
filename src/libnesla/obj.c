@@ -15,11 +15,11 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "libnesla.h"
+#include "nesla/libnesla.h"
 #include <stdlib.h>
 
-static val_t __null = { NT_NULL, 0, 0, { 0 } };
-static obj_t _null = { NULL, NULL, NULL, &__null, 0, "null" };
+static val_t __null = { NT_NULL, 0, 1, 0, { 0 } };
+static obj_t _null = { NULL, NULL, NULL, &__null, "" };
 
 void *n_alloc(nes_state *N, int size)
 {
@@ -97,8 +97,8 @@ void n_freeval(nes_state *N, obj_t *cobj)
 {
 	if ((cobj==NULL)||(cobj->val==NULL)) return;
 	if ((cobj->val->type==NT_STRING)||(cobj->val->type==NT_NFUNC)) {
-		if (cobj->mode&NST_LINK) {
-			cobj->mode^=NST_LINK;
+		if (cobj->val->attr&NST_LINK) {
+			cobj->val->attr^=NST_LINK;
 			cobj->val->d.str=NULL;
 		} else if (cobj->val->d.str!=NULL) {
 			n_free(N, (void *)&cobj->val->d.str);
@@ -117,6 +117,7 @@ val_t *n_newval(nes_state *N, unsigned short type)
 
 	/* nc_memset(val, 0, sizeof(val_t)); */
 	val->type=type;
+	val->attr=0;
 	val->refs=1;
 	val->size=0;
 	val->d.num=0;
@@ -132,7 +133,6 @@ obj_t *n_newiobj(nes_state *N, int index)
 	obj->prev=NULL;
 	obj->next=NULL;
 	obj->val=NULL;
-	obj->mode=0;
 	nes_ntoa(N, obj->name, index, 10, 0);
 	return obj;
 }
@@ -144,6 +144,7 @@ obj_t *n_newiobj(nes_state *N, int index)
 void nes_linkval(nes_state *N, obj_t *cobj1, obj_t *cobj2)
 {
 	if (cobj1==cobj2) return;
+	if (cobj1&&cobj2&&(cobj1->val==cobj2->val)) return;
 	nes_unlinkval(N, cobj1);
 	if (cobj2) {
 		cobj1->val=cobj2->val;
@@ -202,7 +203,7 @@ obj_t *nes_getiobj(nes_state *N, obj_t *tobj, int oindex)
 
 	if ((tobj==NULL)||(tobj->val->type!=NT_TABLE)) return &_null;
 	for (i=0,cobj=tobj->val->d.table; cobj; i++,cobj=cobj->next) {
-		if (cobj->mode&NST_SYSTEM) { i--; continue; }
+		if (cobj->val->attr&NST_SYSTEM) { i--; continue; }
 		if (i!=oindex) continue;
 		return cobj;
 	}
@@ -210,11 +211,12 @@ obj_t *nes_getiobj(nes_state *N, obj_t *tobj, int oindex)
 }
 
 /* change or create an object and return it */
-obj_t *nes_setobj(nes_state *N, obj_t *tobj, char *oname, unsigned short otype, void *_fptr, num_t _num, char *_str, int _slen)
+obj_t *nes_setobj(nes_state *N, obj_t *tobj, char *oname, unsigned short otype, NES_CFUNC _fptr, num_t _num, char *_str, int _slen)
 {
 	obj_t *oobj, *cobj;
 	int cmp=-1;
 	char *ostr=NULL;
+	unsigned short sortattr;
 
 	if (tobj==&N->r) {
 		cobj=tobj;
@@ -230,27 +232,35 @@ obj_t *nes_setobj(nes_state *N, obj_t *tobj, char *oname, unsigned short otype, 
 	} else {
 		if ((tobj==NULL)||(tobj->val==NULL)||(tobj->val->type!=NT_TABLE)) return &_null;
 		if (oname[0]=='\0') { return &_null; }
+		sortattr=tobj->val->attr&NST_AUTOSORT;
 		if (tobj->val->d.table==NULL) {
 			tobj->val->d.table=cobj=n_alloc(N, sizeof(obj_t));
-			nc_memset(cobj, 0, sizeof(obj_t));
+			cobj->val=n_newval(N, otype);
 			nc_strncpy(cobj->name, oname, MAX_OBJNAMELEN);
+			cobj->prev=NULL;
+			cobj->next=NULL;
 		} else {
 			oobj=tobj->val->d.table;
 			for (cobj=oobj; cobj; oobj=cobj,cobj=cobj->next) {
-				if (nc_isdigit(cobj->name[0])&&nc_isdigit(oname[0])) {
-					cmp=(int)(nes_aton(N, cobj->name)-nes_aton(N, oname));
-				} else {
+				/* both strings must be entirely numeric (not even decimals) */
+//				if (nc_isdigit(cobj->name[0])&&nc_isdigit(oname[0])) {
+//					cmp=(int)(nes_aton(N, cobj->name)-nes_aton(N, oname));
+//				} else {
 					if (cobj->name[0]!=oname[0]) cmp=cobj->name[0]-oname[0];else
 					cmp=nc_strcmp(cobj->name, oname);
-				}
+//				}
 				if (cmp==0) break;
-				if ((cmp>0)&&(tobj->mode&NST_AUTOSORT)) break;
+				if ((cmp>0)&&(sortattr)) break;
 			}
-			if ((cmp>0)&&(tobj->mode&NST_AUTOSORT)) {
+			if ((cmp>0)&&(sortattr)) {
 				oobj=cobj;
 				cobj=n_alloc(N, sizeof(obj_t));
-				nc_memset(cobj, 0, sizeof(obj_t));
+				cobj->val=n_newval(N, otype);
 				nc_strncpy(cobj->name, oname, MAX_OBJNAMELEN);
+/*
+				cobj->prev=NULL;
+				cobj->next=NULL;
+*/
 				if (oobj==tobj->val->d.table) tobj->val->d.table=cobj;
 				cobj->prev=oobj->prev;
 				if (cobj->prev) cobj->prev->next=cobj;
@@ -258,8 +268,10 @@ obj_t *nes_setobj(nes_state *N, obj_t *tobj, char *oname, unsigned short otype, 
 				oobj->prev=cobj;
 			} else if (cobj==NULL) {
 				cobj=n_alloc(N, sizeof(obj_t));
-				nc_memset(cobj, 0, sizeof(obj_t));
+				cobj->val=n_newval(N, otype);
 				nc_strncpy(cobj->name, oname, MAX_OBJNAMELEN);
+				cobj->prev=NULL;
+				cobj->next=NULL;
 				if (oobj!=NULL) {
 					oobj->next=cobj;
 					cobj->prev=oobj;
@@ -271,15 +283,14 @@ obj_t *nes_setobj(nes_state *N, obj_t *tobj, char *oname, unsigned short otype, 
 						cobj->val->size=0;
 						cobj->val->d.str=NULL;
 					}
+					cobj->val->type=otype;
+				} else {
+					cobj->val=n_newval(N, otype);
 				}
 			}
 		}
-		if (cobj->val==NULL) {
-			cobj->val=n_newval(N, otype);
-		}
-		cobj->val->type=otype;
 		cobj->parent=tobj;
-		if ((cobj->val->type==NT_TABLE)&&(tobj->mode&NST_AUTOSORT)) cobj->mode|=NST_AUTOSORT;
+		if (cobj->val->type==NT_TABLE) cobj->val->attr|=sortattr;
 	}
 	switch (otype) {
 	case NT_NUMBER:

@@ -4,12 +4,12 @@ include("_cards.nes");
 include("_ajax.nes");
 
 function cardval(p) {
-	local x=tonumber(p)+1;
-
-	if (type(p)=='null') { return 0; }
+	x=tonumber(p)+1;
+	if (type(p)=='null') return 0;
+	if (x<1) return 0;
 	x=math.ceil((x/4));
-	if (x>10) { x=10; }
-	if (x==1) { x=11; }
+	if (x>10) x=10;
+	if (x==1) x=11;
 	return x;
 }
 
@@ -25,45 +25,38 @@ function getcard() {
 }
 
 function regcard(p) {
-	local x=tonumber(p);
-
-	if (type(p)=='null') { CARDS[x]['dealt']=true; }
-	return x;
+	x=tonumber(p);
+	if (x>=0) CARDS[x]['dealt']=true;
+	return tonumber(p);
 }
 
 function prepcards() {
 	if (_SERVER['REQUEST_METHOD']=="POST") {
-		global d = { [0]=regcard(_POST['D0']), [1]=regcard(_POST['D1']) };
-		if (type(_POST['D2'])=='null') { d[2]=regcard(_POST['D2']); }
-		if (type(_POST['D3'])=='null') { d[3]=regcard(_POST['D3']); }
-		if (type(_POST['D4'])=='null') { d[4]=regcard(_POST['D4']); }
-		global c = { [0]=regcard(_POST['C0']), [1]=regcard(_POST['C1']) };
-		if (type(_POST['C2'])=='null') { c[2]=regcard(_POST['C2']); }
-		if (type(_POST['C3'])=='null') { c[3]=regcard(_POST['C3']); }
-		if (type(_POST['C4'])=='null') { c[4]=regcard(_POST['C4']); }
-		global dv = { [0]=cardval(d[0]), [1]=cardval(d[1]), [2]=cardval(d[2]), [3]=cardval(d[3]), [4]=cardval(d[4]) };
-		global cv = { [0]=cardval(c[0]), [1]=cardval(c[1]), [2]=cardval(c[2]), [3]=cardval(c[3]), [4]=cardval(c[4]) };
+		global d = { regcard(_POST['D0']), regcard(_POST['D1']), regcard(_POST['D2']), regcard(_POST['D3']), regcard(_POST['D4']) };
+		global c = { regcard(_POST['C0']), regcard(_POST['C1']), regcard(_POST['C2']), regcard(_POST['C3']), regcard(_POST['C4']) };
+		global dv = { cardval(d[0]), cardval(d[1]), cardval(d[2]), cardval(d[3]), cardval(d[4]) };
+		global cv = { cardval(c[0]), cardval(c[1]), cardval(c[2]), cardval(c[3]), cardval(c[4]) };
 		if (type(_POST['OPT'])!='null') {
 			global opt = _POST['OPT'];
 		} else {
 			global opt = "";
 		}
-		if (string.cmp(opt, "Hit")==0) {
-			if (type(c[0])=='null') {
+		if (opt=="Hit") {
+			if (c[0]<0) {
 				print("weird error 1");
-			} else if (type(c[1])=='null') {
-				print("weird error");
-			} else if (type(c[2])=='null') {
+			} else if (c[1]<0) {
+				print("weird error 2");
+			} else if (c[2]<0) {
 				c[2]=getcard();
 				cv[2]=cardval(c[2]);
-			} else if (type(c[3])=='null') {
+			} else if (c[3]<0) {
 				c[3]=getcard();
 				cv[3]=cardval(c[3]);
-			} else if (type(c[4])=='null') {
+			} else if (c[4]<0) {
 				c[4]=getcard();
 				cv[4]=cardval(c[4]);
 			}
-		} else if (string.cmp(opt, "Stand")==0) {
+		} else if (opt=="Stand") {
 			for (n=2;n<5;n++) {
 				global dt=dv[0]+dv[1]+dv[2]+dv[3]+dv[4];
 				if ((dt>21)&&(dv[4]==11)) { dv[4]=1; }
@@ -72,16 +65,16 @@ function prepcards() {
 				if ((dt>21)&&(dv[1]==11)) { dv[1]=1; }
 				if ((dt>21)&&(dv[0]==11)) { dv[0]=1; }
 				global dt=dv[0]+dv[1]+dv[2]+dv[3]+dv[4];
-				if (dt>15) { break; }
+				if (dt>15) break;
 				d[n]=getcard();
 				dv[n]=cardval(d[n]);
 			}
 		}
 	} else {
-		global d = { [0]=getcard(), [1]=getcard() };
-		global c = { [0]=getcard(), [1]=getcard() };
-		global dv = { [0]=cardval(d[0]), [1]=cardval(d[1]), [2]=0, [3]=0, [4]=0 };
-		global cv = { [0]=cardval(c[0]), [1]=cardval(c[1]), [2]=0, [3]=0, [4]=0 };
+		global d = { getcard(), getcard(), -1, -1, -1 };
+		global c = { getcard(), getcard(), -1, -1, -1 };
+		global dv = { cardval(d[0]), cardval(d[1]), 0, 0, 0 };
+		global cv = { cardval(c[0]), cardval(c[1]), 0, 0, 0 };
 		global opt = "";
 	}
 	global dt=dv[0]+dv[1]+dv[2]+dv[3]+dv[4];
@@ -98,11 +91,8 @@ function prepcards() {
 function printredraw() {
 	print("<SCRIPT LANGUAGE=JavaScript>\n<!--\n");
 	print("function redraw(c) {\n");
-	print(
-#		"	r=c.responseXML.documentElement;\n"
-		"	r=c.responseText;\n",
-		"	document.getElementById('remstatus').innerHTML=r;\n"
-	);
+	print("	r=c.responseText;\n");
+	print("	document.getElementById('remstatus').innerHTML=r;\n");
 	print("}\n");
 	print("// -->\n</SCRIPT>\n");
 	return;
@@ -112,12 +102,12 @@ function main() {
 	if (type(_SERVER['REQUEST_METHOD'])=='null') {
 		global _SERVER = { REQUEST_METHOD="GET", SCRIPT_NAME="/nesla/blah" }
 	} # this is a debug block
-	if (string.cmp(type(_SESSION), 'table')!=0) { global _SESSION = { }; }
-	if (string.cmp(type(_SESSION['BJ']), 'table')!=0) { _SESSION['BJ'] = { }; }
+	if (type(_SESSION)!='table') global _SESSION = { };
+	if (type(_SESSION['BJ'])!='table') _SESSION['BJ'] = { };
 	_SESSION['BJ'].won  = tonumber(_SESSION['BJ'].won);
 	_SESSION['BJ'].lost = tonumber(_SESSION['BJ'].lost);
 	prepcards();
-	if (string.cmp(_SERVER['REQUEST_METHOD'], "POST")!=0) {
+	if (_SERVER['REQUEST_METHOD']!="POST") {
 		print("<HTML>\n<HEAD>\n<TITLE>Nesla-AJAX Blackjack</TITLE>\n");
 		print("<STYLE TYPE=text/css>\n");
 		print("A        { color: #0000FF; text-decoration: none; }\n");
@@ -130,41 +120,29 @@ function main() {
 	}
 	print("<FORM ACTION='", _SERVER['SCRIPT_NAME'], "' METHOD='POST' NAME='game'>\n");
 	for (n=0;n<5;n++) {
-		if (string.cmp(type(d[n]), 'null')!=0) { print("<INPUT TYPE=hidden NAME=d", n, " VALUE='", d[n], "'>\n"); }
+		if (type(d[n])!='null') print("<INPUT TYPE=hidden NAME=d", n, " VALUE='", d[n], "'>\n");
 	}
 	for (n=0;n<5;n++) {
-		if (string.cmp(type(c[n]), 'null')!=0) { print("<INPUT TYPE=hidden NAME=c", n, " VALUE='", c[n], "'>\n"); }
+		if (type(c[n])!='null') print("<INPUT TYPE=hidden NAME=c", n, " VALUE='", c[n], "'>\n");
 	}
 	print("<TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>\n");
 	print("<TR><TD ALIGN=LEFT COLSPAN=2 WIDTH=355px>");
-	if (string.cmp(opt, "Stand")==0) {
+	if (opt=="Stand") {
 		for (n=0;n<5;n++) {
-			if (string.cmp(type(d[n]), 'null')!=0) {
-				local i=d[n];
-				print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[i]['file'] ,"' TITLE='", CARDS[i]['name'], "'>");
-			}
+			if (d[n]>=0) print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[d[n]]['file'] ,"' TITLE='", CARDS[d[n]]['name'], "'>");
 		}
 	} else if (ct>20) {
 		for (n=0;n<5;n++) {
-			if (string.cmp(type(d[n]), 'null')!=0) {
-				local i=d[n];
-				print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[i]['file'] ,"' TITLE='", CARDS[i]['name'], "'>");
-			}
+			if (d[n]>=0) print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[d[n]]['file'] ,"' TITLE='", CARDS[d[n]]['name'], "'>");
 		}
 	} else {
 		print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/face.png' TITLE='unknown'>");
-		if (string.cmp(type(d[1]), 'null')!=0) {
-			local i=d[1];
-			print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[i]['file'], "' TITLE='", CARDS[i]['name'], "'>");
-		}
+		if (d[1]>=0) print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[d[1]]['file'], "' TITLE='", CARDS[d[1]]['name'], "'>");
 	}
 	print("</TD></TR>\n");
 	print("<TR><TD ALIGN=LEFT COLSPAN=2 WIDTH=355px>");
 	for (n=0;n<5;n++) {
-		if (string.cmp(type(c[n]), 'null')!=0) {
-			local i=c[n];
-			print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[i]['file'], "' TITLE='", CARDS[i]['name'], "'>");
-		}
+		if (c[n]>=0) print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[c[n]]['file'], "' TITLE='", CARDS[c[n]]['name'], "'>");
 	}
 	print("</TD></TR>\n");
 	print("</TABLE>\n");
@@ -176,7 +154,7 @@ function main() {
 		_SESSION['BJ'].won++;
 		print("<B><FONT COLOR=GREEN>21! - YOU WIN</FONT></B><BR>\n");
 		print("<A HREF='", _SERVER['SCRIPT_NAME'], "'>Play again</A>\n");
-	} else if (string.cmp(opt, "Stand")==0) {
+	} else if (opt=="Stand") {
 		if (dt>21) {
 			_SESSION['BJ'].won++;
 			print("<B><FONT COLOR=GREEN>dealer busts - YOU WIN</FONT></B><BR>\n");
@@ -197,10 +175,10 @@ function main() {
 	print("</FORM>\n");
 	print("wins:", _SESSION['BJ'].won, " - losses:", _SESSION['BJ'].lost, "<BR>\n");
 	print("runtime = ", runtime(), " seconds\n");
-	if (string.cmp(_SERVER['REQUEST_METHOD'], "POST")!=0) {
+	if (_SERVER['REQUEST_METHOD']!="POST") {
 		print("</SPAN>\n");
 		print("</CENTER>\n</BODY>\n</HTML>\n");
 	}
 	return;
 }
-if (string.cmp(type(_SERVER), 'table')==0) { main(); }
+if (type(_SERVER)=='table') main();

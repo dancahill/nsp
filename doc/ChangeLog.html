@@ -16,6 +16,22 @@ NESLA NullLogic Embedded Scripting Language ChangeLog
 </small>
 <hr>
 
+<h2>0.5.0 (2007-04-25)</h2>
+<ul>
+  <li>Added a Win32 taskbar host for primitive desktop scripting</li>
+  <li>fixed several possible segfaults triggered by random or malicious data being fed to the parser</li>
+  <li>fixed the limited output size in print()</li>
+  <li>Added a CGI host to serve Nesla scripts via web servers</li>
+  <li>numbers can now be appended directly to strings using + (without tonumber())</li>
+  <li>tostring() now allows an optional decimal precision for numbers</li>
+  <li>core lib can now be used without libm</li>
+  <li>added do loops</li>
+  <li>fixed mixed references to function pointers and data pointers (i think some compilers just like to whine)</li>
+  <li>documentation is 1% less cryptic, and even has a couple examples</li>
+  <li>if, for and while loops no longer require braces for single statements</li>
+  <li>values now hold their own attributes, not the vars that point to them</li>
+  <li>fixed the hugely defective operator precedence resolution stuff (new and improved with 10% less defectiveness)</li>
+</ul>
 <h2>0.4.0 (2007-04-18)</h2>
 <ul>
   <li>All major core language issues resolved (i think).  Next release will either be the last alpha, or the first beta.</li>

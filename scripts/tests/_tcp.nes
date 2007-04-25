@@ -1,5 +1,5 @@
 #!/usr/bin/nesla
-if (type(expect)=='null') { include("_expect.nes"); }
+if (type(expect)!='function') include("_expect.nes");
 function testtcp() {
 	if (type(http)!='table') {
 		print("SKIPPING TCP TESTS\n");
@@ -21,12 +21,11 @@ function testtcp() {
 		} else {
 			X=xml.read(ht.body);
 			expect("Latest Version", _version_, X['version'][0]['major'][0]['value']+'.'+X['version'][0]['minor'][0]['value']+'.'+X['version'][0]['point'][0]['value']);
-#			print("\tstring.len(ht.body) = ", string.len(ht.body), "\n");
 		}
-
 	}
 #	print("[[[", ht.head, "]]]\n");
 #	print("[[[", ht.body, "]]]\n");
+#	printvars(ht);
 	return;
 }
 testtcp();

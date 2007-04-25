@@ -1,5 +1,5 @@
 #!/usr/bin/nesla
-if (type(expect)=='null') { include("_expect.nes"); }
+if (type(expect)!='function') include("_expect.nes");
 function teststring() {
 	local x=string.cat(string.cat("Aa", "Bb"), "CcDd");
 	expect("x",                 "AaBbCcDd", x);
@@ -13,7 +13,6 @@ function teststring() {
 	expect("string.nicmp(x)",   0,      string.nicmp(x, "aabb", 4));
 	expect("string.sub(x)",     "is a", string.sub("this is a test.", 5, 4));
 	expect("string.sub(x)",     "test", string.sub("this is a test.", -5, 4));
-	print("\n");
 	expect("'123'=='456'",  0,        '123'=='456');
 	expect("'123'>='456'",  0,        '123'>='456');
 	expect("'123'>'456'",   0,        '123'>'456');

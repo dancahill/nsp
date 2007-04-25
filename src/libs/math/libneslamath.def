@@ -1,0 +1,4 @@
+LIBRARY		libneslamath
+VERSION		0.5.0
+EXPORTS
+	neslamath_register_all

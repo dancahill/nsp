@@ -17,15 +17,12 @@ function vars() {
 		print("<DIV ID=debug STYLE='display:none'><PRE><FONT SIZE=2>\n");
 	}
 	printvars();
-	if (type(_SERVER)=='table') {
-		print("</FONT></PRE></DIV>\n");
-	}
+	if (type(_SERVER)=='table') print("</FONT></PRE></DIV>\n");
 	return;
 }
 
 function main() {
 	function subf() { return 42; }
-	global pi = math.asin(1)*2;
 	include("../samples/_cards.nes");
 	include("_expect.nes");
 	if (type(_SERVER)=='table') {
@@ -33,51 +30,51 @@ function main() {
 		print("<H1>NESLA WEB TEST</H1><PRE><FONT SIZE=2>");
 	}
 	print("STARTING TESTS\n");
-	print("--------------------------------------------------------\n");
+	print("-------------------------------------------------------------------\n");
 	include("_types.nes");
-	print("--------------------------------------------------------\n");
+	print("-------------------------------------------------------------------\n");
 	include("_tables.nes");
-	print("--------------------------------------------------------\n");
+	print("-------------------------------------------------------------------\n");
 	include("_scope.nes");
-	print("--------------------------------------------------------\n");
+	print("-------------------------------------------------------------------\n");
 	include("_string.nes");
-	print("--------------------------------------------------------\n");
+	print("-------------------------------------------------------------------\n");
 	include("_if.nes");
-	print("--------------------------------------------------------\n");
+	print("-------------------------------------------------------------------\n");
 	include("_loops.nes");
-	print("--------------------------------------------------------\n");
+	print("-------------------------------------------------------------------\n");
 	include("_cmp.nes");
-	print("--------------------------------------------------------\n");
+	print("-------------------------------------------------------------------\n");
 	include("_math.nes");
-	print("--------------------------------------------------------\n");
+	print("-------------------------------------------------------------------\n");
 	include("_b64.nes");
-	print("--------------------------------------------------------\n");
+	print("-------------------------------------------------------------------\n");
 	include("_rot13.nes");
-	print("--------------------------------------------------------\n");
+	print("-------------------------------------------------------------------\n");
 	include("_xml.nes");
-	print("--------------------------------------------------------\n");
+	print("-------------------------------------------------------------------\n");
 	include("_tcp.nes");
-	print("--------------------------------------------------------\n");
+	print("-------------------------------------------------------------------\n");
 	include("_indexes.nes");
-	print("--------------------------------------------------------\n");
-	if (type(sqlquery)=='function') { Q=sqlquery("SELECT * FROM nullgs_sessions"); }
-	if (type(dirlist)=='function') { D=dirlist(_filepath); }
+	print("-------------------------------------------------------------------\n");
+	if (type(sqlquery)=='function') Q=sqlquery("SELECT * FROM nullgs_sessions");
+	if (type(dirlist)=='function') D=dirlist(_filepath);
 	print("\t[", date(), " ", time(), "]\n");
 	print("\truntime = ", runtime(), " seconds\n");
-	print("--------------------------------------------------------\n");
+	print("-------------------------------------------------------------------\n");
 	print("FINISHED TESTS\n");
-	print("--------------------------------------------------------\n");
-	expect("errors", 0, tonumber(errors));
-	global CARDS="";
-	global _ENV="";
+	print("-------------------------------------------------------------------\n");
+	expect("total errors", 0, tonumber(errors));
+	global CARDS={};
+	global _ARGS={};
+	global _ENV={};
 	vars();
-	if (type(_SERVER)=='table') {
-		print("</BODY></HTML>");
-	}
+	if (type(_SERVER)=='table') print("</BODY></HTML>");
 	local i=0; for (i=1;i<10;i++) { }
 	return;
 }
 main();
+exit 0;
 
 # below is code to read your /etc/passwd file into a table
 #x=file.read('/etc/passwd');

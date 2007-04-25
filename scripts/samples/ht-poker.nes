@@ -16,20 +16,17 @@ global hand_vals = {
 };
 
 function getcard() {
-	while (1) {
-		local x=math.rand(52);
-		if (type(CARDS[x]['dealt'])=='null') {
-			CARDS[x]['dealt']=true;
-			return x;
-		}
-	}
-	return 0;
+	do {
+		x=math.rand(52);
+	} while (type(CARDS[x]['dealt'])!='null');
+	CARDS[x]['dealt']=true;
+	return x;
 }
 
 function regcard(p) {
 	local x=tonumber(p);
 
-	if (type(p)!='null') { CARDS[x]['dealt']=true; }
+	if (type(p)!='null') CARDS[x]['dealt']=true;
 	return x;
 }
 

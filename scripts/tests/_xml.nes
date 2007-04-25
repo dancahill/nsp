@@ -1,5 +1,5 @@
 #!/usr/bin/nesla
-if (type(expect)=='null') { include("_expect.nes"); }
+if (type(expect)!='function') include("_expect.nes");
 function testxml() {
 	if (type(xml)!='table') {
 		print("SKIPPING XML TESTS\n");

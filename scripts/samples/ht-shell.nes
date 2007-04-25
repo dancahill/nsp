@@ -1,6 +1,6 @@
 #!/usr/bin/nesla
 if (string.cmp(type(_SERVER), 'null')==0) {
-	global _SERVER = { REQUEST_METHOD="GET", SCRIPT_NAME="/nesla/blah" }
+	global _SERVER = { REQUEST_METHOD="GET", SCRIPT_NAME="/nesla/blah" };
 } # this is a debug block
 if (string.cmp(_SERVER['REQUEST_METHOD'], "POST")==0) {
 	var path=_POST['PATH'];
@@ -27,18 +27,32 @@ print(
 	"<TR><TD ALIGN=CENTER COLSPAN=2><input type='submit' value='go' name='submit'></TD></TR>\n",
 	"</TABLE>\n",
 	"</FORM>\n",
-	"</CENTER>\n",
-	"<PRE>\n"
+	"</CENTER>\n"
 );
+print("<FORM NAME=\"psout\"><TEXTAREA WRAP=PHYSICAL NAME=details ROWS=25 COLS=80 style='width:100%'>\n");
 system(command);
+print("</TEXTAREA></FORM>");
 print(
-	"</PRE>\n",
 	"<SCRIPT LANGUAGE=JavaScript>\n",
 	"<!--\n",
 	"document.shell.command.focus();\n",
 	"// -->\n",
-	"</SCRIPT>\n",
-	"</BODY>\n",
-	"</HTML>\n"
+	"</SCRIPT>\n"
 );
-#print("<PRE>\n");printvars();print("</PRE>\n");
+print(
+	"<SCRIPT LANGUAGE=JavaScript>\n<!--\n",
+	"function showdebug() {\n",
+	"	if (document.getElementById('debug').style.display=='none') {\n",
+	"		document.getElementById('debug').style.display='block';\n",
+	"	} else {\n",
+	"		document.getElementById('debug').style.display='none';\n",
+	"	}\n",
+	"}\n",
+	"// -->\n</SCRIPT>\n"
+);
+print("<A HREF=javascript:showdebug()>DEBUG</A>\n");
+print("</CENTER>\n");
+print("<DIV ID=debug STYLE='display:none'><PRE><FONT SIZE=2>\n");
+printvars();
+print("</FONT></PRE></DIV>\n");
+print("</BODY>\n</HTML>\n");

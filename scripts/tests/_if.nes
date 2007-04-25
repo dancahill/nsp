@@ -1,15 +1,17 @@
 #!/usr/bin/nesla
-if (type(expect)=='null') { include("_expect.nes"); }
+if (type(expect)!='function') include("_expect.nes");
 function testif() {
 	local x=2;
+	local str="";
 
 	if (x==1) {
-		print("\tlogic test 1 (bad)\n");
+		str=str+"test 1 (bad)";
 	} else if (x==2) {
-		print("\tlogic test 2 (good)\n");
+		str=str+"test 2 (good)";
 	} else {
-		print("\tlogic test 3 (bad)\n");
+		str=str+"test 3 (bad)";
 	}
+	expect("simple 'if' test", "test 2 (good)", str);
 	return;
 }
 testif();

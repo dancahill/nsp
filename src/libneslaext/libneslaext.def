@@ -1,4 +1,0 @@
-LIBRARY		libneslaext
-VERSION		0.4.0
-EXPORTS
-	neslaext_register_all

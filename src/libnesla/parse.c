@@ -15,7 +15,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "libnesla.h"
+#include "nesla/libnesla.h"
 #include <math.h>
 
 #define IS_MATHOP(c) (c=='='||c=='+'||c=='-'||c=='*'||c=='/'||c=='%'||c=='&'||c=='|'||c=='^'||c=='!'||c=='<'||c=='>')
@@ -27,6 +27,8 @@ typedef struct {
 	char *name;
 	short val;
 } optab;
+
+static char *typenames[] = { "null", "bool", "number", "string", "nfunc", "cfunc", "table", "chunk" };
 
 static optab oplist_p[] = {
 	/* PUNCTUATION */
@@ -84,6 +86,7 @@ static optab oplist_k[] = {
 	{ "if",       OP_KIF       },
 	{ "else",     OP_KELSE     },
 	{ "for",      OP_KFOR      },
+	{ "do",       OP_KDO       },
 	{ "while",    OP_KWHILE    },
 	{ "exit",     OP_KEXIT     },
 	{ NULL,       0            }
@@ -125,8 +128,8 @@ void n_skipto(nes_state *N, unsigned short c)
 			if ((*N->readptr==';')&&(c==OP_PSEMICOL)) break;
 			if ((*N->readptr==')')&&(c==OP_PCPAREN)) break;
 			if ((*N->readptr=='}')&&(c==OP_PCBRACE)) break;
+			if (*N->readptr=='#') n_skipblank(N);
 			switch (*N->readptr++) {
-			case '#' : n_skipblank(N); break;
 			case '\'': n_skipquote(N, '\''); break;
 			case '\"': n_skipquote(N, '\"'); break;
 			case '{' : n_skipto(N, OP_PCBRACE); break;
@@ -298,7 +301,9 @@ obj_t *n_getindex(nes_state *N, obj_t *tobj, char *lastname)
 		} else {
 			cobj=nes_eval(N, (char *)N->readptr);
 			if (N->lastop!=OP_PCBRACKET) n_error(N, NE_SYNTAX, fn, "expected a closing ']'");
-			if ((cobj->val->type!=NT_TABLE)&&(lastname)) {
+			if (nes_isnull(cobj)) {
+				cobj=nes_getobj(N, tobj, "");
+			} else if ((cobj->val->type!=NT_TABLE)&&(lastname)) {
 				nc_strncpy(lastname, nes_tostr(N, cobj), MAX_OBJNAMELEN);
 				cobj=nes_getobj(N, tobj, lastname);
 			} else {
@@ -317,12 +322,13 @@ obj_t *n_getindex(nes_state *N, obj_t *tobj, char *lastname)
 
 void n_prechew(nes_state *N, uchar *rawtext)
 {
-	/* static char *fn="n_prechew"; */
+	static char *fn="n_prechew";
 	uchar *d=rawtext, *o;
 	char *p;
 	char q;
 	unsigned short op;
 
+	if (N->debug) n_warn(N, fn, "prechewing script text");
 	o=N->readptr;
 	N->readptr=rawtext;
 	while (*N->readptr) {
@@ -335,7 +341,6 @@ void n_prechew(nes_state *N, uchar *rawtext)
 			p=N->lastname;
 			while (*p) *d++=*p++;
 		} else if (nc_isdigit(*N->readptr)) {
-			/* while ((*N->readptr==OP_PDOT)||(*N->readptr=='.')||(nc_isdigit(*N->readptr))) *d++=*N->readptr++; */
 			while ((*N->readptr=='.')||(nc_isdigit(*N->readptr))) *d++=*N->readptr++;
 		} else {
 			*d++=(uchar)op;
@@ -363,7 +368,6 @@ x:
 				*d++=*N->readptr++;
 			}
 			goto x;
-		/* } else if ((strchr(",;(){}[].@", *N->readptr)!=0)||(nc_isdigit(*N->readptr))) { */
 		} else if (*N->readptr=='@') {
 			*d++=*N->readptr++;
 			goto x;
@@ -372,6 +376,7 @@ x:
 	*d=0;
 	N->readptr=o;
 	N->lastop=OP_UNDEFINED;
+	if (N->debug) n_warn(N, fn, "finished prechewing script text");
 	return;
 }
 
@@ -382,51 +387,51 @@ x:
 
 /* i'm probably wrong about this... */
 static char oporder[] = {
-	0, /* OP_MEQ		242 */
-	3, /* OP_MADD		241 */
-	3, /* OP_MSUB		240 */
-	4, /* OP_MMUL		239 */
-	4, /* OP_MDIV		238 */
-	0, /* OP_MADDEQ		237 */
-	0, /* OP_MSUBEQ		236 */
-	0, /* OP_MMULEQ		235 */
-	0, /* OP_MDIVEQ		234 */
-	3, /* OP_MADDADD	233 */
-	3, /* OP_MSUBSUB	232 */
-	4, /* OP_MMOD		231 */
-	5, /* OP_MAND		230 */
-	5, /* OP_MOR		229 */
-	5, /* OP_MXOR		228 */
-	1, /* OP_MLAND		227 */
-	1, /* OP_MLOR		226 */
-	1, /* OP_MLNOT		225 */
-	2, /* OP_MCEQ		224 */
-	2, /* OP_MCNE		223 */
-	2, /* OP_MCLE		222 */
-	2, /* OP_MCGE		221 */
-	2, /* OP_MCLT		220 */
-	2, /* OP_MCGT		219 */
+	0, /* OP_MEQ     */
+	3, /* OP_MADD    */
+	3, /* OP_MSUB    */
+	4, /* OP_MMUL    */
+	4, /* OP_MDIV    */
+	0, /* OP_MADDEQ  */
+	0, /* OP_MSUBEQ  */
+	0, /* OP_MMULEQ  */
+	0, /* OP_MDIVEQ  */
+	3, /* OP_MADDADD should already be done, but we need the placeholder */
+	3, /* OP_MSUBSUB should already be done, but we need the placeholder */
+	4, /* OP_MMOD    */
+	5, /* OP_MAND    */
+	5, /* OP_MOR     */
+	5, /* OP_MXOR    */
+	1, /* OP_MLAND   */
+	1, /* OP_MLOR    */
+	1, /* OP_MLNOT   */
+	2, /* OP_MCEQ    */
+	2, /* OP_MCNE    */
+	2, /* OP_MCLE    */
+	2, /* OP_MCGE    */
+	2, /* OP_MCLT    */
+	2, /* OP_MCGT    */
 };
 
+/* i think i hate this function */
 #define MAXOPS 32
 obj_t *nes_eval(nes_state *N, char *string)
 {
 	static char *fn="nes_eval";
-	obj_t *cobj=NULL, *nobj, *robj;
+	obj_t *cobj=NULL, *nobj, *nnobj;
 	obj_t listobj;
-	unsigned short i, j, k, l, r;
-	unsigned short ops[MAXOPS];
 	int cmp;
 	short preop;
 	short op;
+	unsigned short i, j, k, l, r;
+	unsigned short ops[MAXOPS];
 
 	DEBUG_IN();
 	N->readptr=(uchar *)string;
 	sanetest();
-	listobj.mode=0;
 	listobj.val=n_newval(N, NT_TABLE);
+	listobj.val->attr=0;
 	/* make a list of tokens */
-	nc_memset(ops, 0, sizeof(ops));
 	for (i=0;;) {
 		nextop();
 		if (OP_ISEND(N->lastop)) break;
@@ -440,9 +445,11 @@ obj_t *nes_eval(nes_state *N, char *string)
 			if (cobj==NULL) {
 				cobj=listobj.val->d.table=n_newiobj(N, i);
 			} else {
-				cobj=cobj->next=n_newiobj(N, i);
+				cobj->next=n_newiobj(N, i);
+				cobj->next->prev=cobj;
+				cobj=cobj->next;
 			}
-			n_copyval(N, cobj, nobj);
+			nes_linkval(N, cobj, nobj);
 		} else {
 			if (OP_ISMATH(N->lastop)) {
 				preop=N->lastop;
@@ -453,7 +460,9 @@ obj_t *nes_eval(nes_state *N, char *string)
 			if (cobj==NULL) {
 				cobj=listobj.val->d.table=n_newiobj(N, i);
 			} else {
-				cobj=cobj->next=n_newiobj(N, i);
+				cobj->next=n_newiobj(N, i);
+				cobj->next->prev=cobj;
+				cobj=cobj->next;
 			}
 			if (N->lastop==OP_DATA) {
 				if (nc_isdigit(*N->readptr)) {
@@ -474,9 +483,14 @@ obj_t *nes_eval(nes_state *N, char *string)
 					}
 				}
 				if (nobj->val->type==NT_NFUNC||nobj->val->type==NT_CFUNC) {
-					nobj=n_execfunction(N, nobj);
+					if (*N->readptr==OP_POPAREN||*N->readptr=='(') {
+						nobj=n_execfunction(N, nobj);
+					}
 				}
-				if (nobj->val->type==NT_NUMBER) {
+				if (nes_isnull(nobj)) {
+					nes_unlinkval(N, cobj);
+					cobj->val=n_newval(N, NT_NULL);
+				} else if (nobj->val->type==NT_NUMBER) {
 					cobj->val=n_newval(N, NT_NUMBER);
 					switch (preop) {
 					case OP_MSUB    : cobj->val->d.num=-nobj->val->d.num; break;
@@ -492,17 +506,16 @@ obj_t *nes_eval(nes_state *N, char *string)
 						nobj->val->d.num--;
 					}
 				} else if (nobj->val->type==NT_STRING) {
-					n_copyval(N, cobj, nobj);
-				} else if ((robj=n_macros(N))!=NULL) {
-					n_copyval(N, cobj, robj);
+					if (nobj==&N->r) {
+						nes_linkval(N, cobj, &N->r);
+						nes_unlinkval(N, &N->r);
+					} else {
+						n_copyval(N, cobj, nobj);
+					}
 				} else if (nobj->val->type==NT_TABLE) {
 					nes_linkval(N, cobj, nobj);
-				} else if (nobj->val->type==NT_BOOLEAN) {
-					n_copyval(N, cobj, nobj);
-				} else if (nes_isnull(nobj)) {
-					n_copyval(N, cobj, nobj);
 				} else {
-					n_error(N, NE_SYNTAX, fn, "unhandled type %d [%s]", nobj->val->type, N->lastname);
+					n_copyval(N, cobj, nobj);
 				}
 			}
 			N->lastop=OP_UNDEFINED;
@@ -511,121 +524,212 @@ obj_t *nes_eval(nes_state *N, char *string)
 		if (*N->readptr==0) break;
 		if (N->lastop==OP_UNDEFINED) nextop();
 		if (!OP_ISMATH(N->lastop)) break;
-		i++;
-		ops[i]=N->lastop;
-		if (i>=MAXOPS) n_error(N, NE_SYNTAX, fn, "too many math ops (%d)", MAXOPS);
+		ops[i++]=N->lastop;
+		if (i>MAXOPS-1) n_error(N, NE_SYNTAX, fn, "too many math ops (%d)", MAXOPS);
 	}
+	ops[i]=0;
 	if (listobj.val->d.table==NULL) {
 		nes_unlinkval(N, &listobj);
 		DEBUG_OUT();
 		return NULL;
 	}
 	/* now _use_ the list of tokens */
-redo:
-	r=0;
-	for (j=0;j<i;j++) {
-		cobj=listobj.val->d.table;
-		if ((cobj==NULL)||(cobj->next==NULL)) break;
-		nobj=cobj->next;
-		for (k=1;k<i;k++) {
-			if (OP_ISMATH(ops[k])) break;
-			nobj=nobj->next;
-		}
-		if (nobj==NULL) break;
-		robj=nobj->next;
-		for (l=k+1;l<i;l++) {
-			if (OP_ISMATH(ops[l])) break;
-			robj=robj->next;
-		}
-		/* n_warn(N, fn, "[%d %d]", ops[j], ops[k]); */
-		if (oporder[OP_MEQ-ops[l]]>oporder[OP_MEQ-ops[k]]) {
-			/* if (N->debug) n_warn(N, fn, "[%d %d] order of operations should be fixed HERE", oporder[OP_MEQ-ops[l]], oporder[OP_MEQ-ops[k]]); */
-			r=1;
-			cobj=nobj;
-			nobj=robj;
-			op=ops[l];
-			ops[l]=0;
-		} else {
-			op=ops[k];
-			ops[k]=0;
-		}
-		/* nobj=&N->r;n_warn(N, fn, "proc '%s' %d '%s'", nes_tostr(N, nobj), op, nes_tostr(N, cobj)); */
-		if (cobj->val->type==NT_NUMBER) {
-			if (nobj->val->type==NT_NUMBER) {
-				switch (op) {
-				case OP_MCLT   : cobj->val->d.num=cobj->val->d.num <  nobj->val->d.num;break;
-				case OP_MCLE   : cobj->val->d.num=cobj->val->d.num <= nobj->val->d.num;break;
-				case OP_MCGT   : cobj->val->d.num=cobj->val->d.num >  nobj->val->d.num;break;
-				case OP_MCGE   : cobj->val->d.num=cobj->val->d.num >= nobj->val->d.num;break;
-				case OP_MCEQ   : cobj->val->d.num=cobj->val->d.num == nobj->val->d.num;break;
-
-				case OP_MADD   :
-				case OP_MADDADD:
-				case OP_MADDEQ : cobj->val->d.num=cobj->val->d.num+nobj->val->d.num;break;
-				case OP_MSUB   :
-				case OP_MSUBSUB:
-				case OP_MSUBEQ : cobj->val->d.num=cobj->val->d.num-nobj->val->d.num;break;
-				case OP_MMUL   :
-				case OP_MMULEQ : cobj->val->d.num=cobj->val->d.num*nobj->val->d.num;break;
-				case OP_MDIV   :
-				case OP_MDIVEQ : cobj->val->d.num=cobj->val->d.num/nobj->val->d.num;break;
-
-				case OP_MMOD   : cobj->val->d.num=fmod(cobj->val->d.num, nobj->val->d.num);break;
-				case OP_MAND   : cobj->val->d.num=(int)cobj->val->d.num & (int)nobj->val->d.num;break;
-				case OP_MOR    : cobj->val->d.num=(int)cobj->val->d.num | (int)nobj->val->d.num;break;
-				case OP_MXOR   : cobj->val->d.num=(int)cobj->val->d.num ^ (int)nobj->val->d.num;break;
-				case OP_MLAND  : cobj->val->d.num=cobj->val->d.num && nobj->val->d.num;break;
-				case OP_MLOR   : cobj->val->d.num=cobj->val->d.num || nobj->val->d.num;break;
-				case OP_MCNE   : cobj->val->d.num=cobj->val->d.num != nobj->val->d.num;break;
-				}
-			} else if (nobj->val->type==NT_BOOLEAN) {
-				if (op==OP_MCEQ) {
-					if (nobj->val->d.num) {
-						cobj->val->d.num=cobj->val->d.num?1:0;
-					} else {
-						cobj->val->d.num=cobj->val->d.num?0:1;
-					}
-				}
-			} else {
-				n_warn(N, fn, "mixed types %d %s", nobj->val->type, nobj->name);
+	do {
+		r=0;
+		nobj=cobj=listobj.val->d.table;
+		for (j=0;j<i;j++) {
+			if (nobj) nobj=nobj->next;
+			for (k=j;k<i;k++) {
+				if (!nobj||ops[k]) break;
+				nobj=nobj->next;
 			}
-		} else if (cobj->val->type==NT_STRING) {
-			if (nobj->val->type==NT_STRING) {
-				if (op==OP_MADD) {
-					n_joinstr(N, cobj, nobj->val->d.str, nobj->val->size);
+			/* if there's no next op, there's no next object */ 
+			if (!ops[k]) break;
+			op=0;
+			for (;;) {
+				if (!nobj) break;
+				nnobj=nobj->next;
+				for (l=k+1;l<i;l++) {
+					if (!nnobj||ops[l]) break;
+					nnobj=nnobj->next;
+				}
+				if ((nnobj==NULL)||(ops[l]==0)||(oporder[OP_MEQ-ops[k]]>=oporder[OP_MEQ-ops[l]])) {
+					op=ops[k];
+					ops[k]=0;
+					break;
 				} else {
-					cmp=nc_strcmp(cobj->val->d.str?cobj->val->d.str:"", nobj->val->d.str?nobj->val->d.str:"");
-					n_freeval(N, cobj);
-					cobj->val->type=NT_NUMBER;
-					switch (op) {
-					case OP_MCEQ : cobj->val->d.num=cmp?0:1;    break;
-					case OP_MCNE : cobj->val->d.num=cmp?1:0;    break;
-					case OP_MCLE : cobj->val->d.num=cmp<=0?1:0; break;
-					case OP_MCGE : cobj->val->d.num=cmp>=0?1:0; break;
-					case OP_MCLT : cobj->val->d.num=cmp<0?1:0;  break;
-					case OP_MCGT : cobj->val->d.num=cmp>0?1:0;  break;
-					default : n_warn(N, fn, "invalid op for string math");
-					}
+					/* forget the first one, promote the last two, and keep looking */
+					j=k;
+					k=l;
+					cobj=nobj;
+					nobj=nnobj;
+					r=1;
 				}
-			} else if (nobj->val->type==NT_BOOLEAN) {
-				if (op==OP_MCEQ) {
-					cmp=(cobj->val->d.str&&cobj->val->d.str[0]);
-					n_freeval(N, cobj);
-					cobj->val->type=NT_NUMBER;
-					if (nobj->val->d.num) {
-						cobj->val->d.num=cmp?1:0;
-					} else {
-						cobj->val->d.num=cmp?0:1;
-					}
-				}
-			} else {
-				n_warn(N, fn, "mixed types in math %d %s", nobj->val->type, nobj->name);
 			}
-		} else {
-			n_warn(N, fn, "mixed types in math %d %s", nobj->val->type, nobj->name);
+			/* n_warn(N, fn, "[%s %s] k=%d", cobj->name, nobj->name, k); */
+			/* n_warn(N, fn, "math (%s)%s (%s)%s", typenames[cobj->val->type], nes_tostr(N, cobj), typenames[nobj->val->type], nes_tostr(N, nobj)); */
+			if (nes_isnull(cobj)) {
+				if (op==OP_MCEQ) {
+					nes_unlinkval(N, cobj);
+					cobj->val=n_newval(N, NT_NUMBER);
+					cobj->val->d.num=nes_isnull(nobj)?1:0;
+					continue;
+				} else if (op==OP_MCNE) {
+					nes_unlinkval(N, cobj);
+					cobj->val=n_newval(N, NT_NUMBER);
+					cobj->val->d.num=nes_isnull(nobj)?0:1;
+					continue;
+				} else {
+					n_error(N, NE_SYNTAX, fn, "unhandled null object");
+				}
+			} else if (cobj->val->type==NT_BOOLEAN) {
+				if (nes_isnull(nobj)) {
+					if (op==OP_MCEQ) {
+						nes_unlinkval(N, cobj);
+						cobj->val=n_newval(N, NT_NUMBER);
+						cobj->val->d.num=0;
+						continue;
+					} else if (op==OP_MCNE) {
+						nes_unlinkval(N, cobj);
+						cobj->val=n_newval(N, NT_NUMBER);
+						cobj->val->d.num=1;
+						continue;
+					}
+				} else if (nobj->val->type==NT_NUMBER) {
+					if (op==OP_MCEQ) {
+						if (nobj->val->d.num) {
+							cobj->val->d.num=cobj->val->d.num?1:0;
+						} else {
+							cobj->val->d.num=cobj->val->d.num?0:1;
+						}
+					}
+				} else if (nobj->val->type==NT_STRING) {
+					if (op==OP_MCEQ) {
+						cmp=(cobj->val->d.str&&cobj->val->d.str[0]);
+						n_freeval(N, cobj);
+						if (nobj->val->d.num) {
+							cobj->val->d.num=cmp?1:0;
+						} else {
+							cobj->val->d.num=cmp?0:1;
+						}
+					}
+					continue;
+				}
+			} else if (cobj->val->type==NT_NUMBER) {
+				if (nes_isnull(nobj)) {
+					if (op==OP_MCEQ) {
+						nes_unlinkval(N, cobj);
+						cobj->val=n_newval(N, NT_NUMBER);
+						cobj->val->d.num=0;
+						continue;
+					} else if (op==OP_MCNE) {
+						nes_unlinkval(N, cobj);
+						cobj->val=n_newval(N, NT_NUMBER);
+						cobj->val->d.num=1;
+						continue;
+					} else {
+						n_error(N, NE_SYNTAX, fn, "unhandled null object");
+					}
+				}
+				if (nobj->val->type==NT_NUMBER) {
+					switch (op) {
+					case OP_MCLT   : cobj->val->d.num=cobj->val->d.num <  nobj->val->d.num;break;
+					case OP_MCLE   : cobj->val->d.num=cobj->val->d.num <= nobj->val->d.num;break;
+					case OP_MCGT   : cobj->val->d.num=cobj->val->d.num >  nobj->val->d.num;break;
+					case OP_MCGE   : cobj->val->d.num=cobj->val->d.num >= nobj->val->d.num;break;
+					case OP_MCEQ   : cobj->val->d.num=cobj->val->d.num == nobj->val->d.num;break;
+
+					case OP_MADD   :
+					case OP_MADDADD:
+					case OP_MADDEQ : cobj->val->d.num=cobj->val->d.num + nobj->val->d.num;break;
+					case OP_MSUB   :
+					case OP_MSUBSUB:
+					case OP_MSUBEQ : cobj->val->d.num=cobj->val->d.num - nobj->val->d.num;break;
+					case OP_MMUL   :
+					case OP_MMULEQ : cobj->val->d.num=cobj->val->d.num * nobj->val->d.num;break;
+					case OP_MDIV   :
+					case OP_MDIVEQ : if (nobj->val->d.num) { cobj->val->d.num=cobj->val->d.num / nobj->val->d.num; break; }
+						n_warn(N, fn, "division by zero %f div %f", cobj->val->d.num, nobj->val->d.num);
+						cobj->val->type=NT_NULL;
+						break;
+
+					case OP_MMOD   : if ((int)nobj->val->d.num) { cobj->val->d.num=(int)cobj->val->d.num % (int)nobj->val->d.num; break; }
+						n_warn(N, fn, "division by zero %f mod %f", cobj->val->d.num, nobj->val->d.num);
+						cobj->val->type=NT_NULL;
+						break;
+					case OP_MAND   : cobj->val->d.num=(int)cobj->val->d.num & (int)nobj->val->d.num;break;
+					case OP_MOR    : cobj->val->d.num=(int)cobj->val->d.num | (int)nobj->val->d.num;break;
+					case OP_MXOR   : cobj->val->d.num=(int)cobj->val->d.num ^ (int)nobj->val->d.num;break;
+					case OP_MLAND  : cobj->val->d.num=cobj->val->d.num && nobj->val->d.num;break;
+					case OP_MLOR   : cobj->val->d.num=cobj->val->d.num || nobj->val->d.num;break;
+					case OP_MCNE   : cobj->val->d.num=cobj->val->d.num != nobj->val->d.num;break;
+					}
+					continue;
+				} else if (nobj->val->type==NT_BOOLEAN) {
+					if (op==OP_MCEQ) {
+						if (nobj->val->d.num) {
+							cobj->val->d.num=cobj->val->d.num?1:0;
+						} else {
+							cobj->val->d.num=cobj->val->d.num?0:1;
+						}
+					}
+					continue;
+				}
+			} else if (cobj->val->type==NT_STRING) {
+				if (nes_isnull(nobj)) {
+					if (op==OP_MCEQ) {
+						nes_unlinkval(N, cobj);
+						cobj->val=n_newval(N, NT_NUMBER);
+						cobj->val->d.num=0;
+						continue;
+					} else if (op==OP_MCNE) {
+						nes_unlinkval(N, cobj);
+						cobj->val=n_newval(N, NT_NUMBER);
+						cobj->val->d.num=1;
+						continue;
+					} else {
+						n_error(N, NE_SYNTAX, fn, "unhandled null object");
+					}
+				}
+				if (nobj->val->type==NT_NUMBER) {
+					nes_ntoa(N, N->numbuf, nobj->val->d.num, 10, 6);
+					nobj=nes_setstr(N, &listobj, nobj->name, N->numbuf, nc_strlen(N->numbuf));
+				}
+				if (nobj->val->type==NT_STRING) {
+					if (op==OP_MADD) {
+						n_joinstr(N, cobj, nobj->val->d.str, nobj->val->size);
+					} else {
+						cmp=nc_strcmp(cobj->val->d.str?cobj->val->d.str:"", nobj->val->d.str?nobj->val->d.str:"");
+						n_freeval(N, cobj);
+						cobj->val->type=NT_NUMBER;
+						switch (op) {
+						case OP_MCEQ : cobj->val->d.num=cmp?0:1;    break;
+						case OP_MCNE : cobj->val->d.num=cmp?1:0;    break;
+						case OP_MCLE : cobj->val->d.num=cmp<=0?1:0; break;
+						case OP_MCGE : cobj->val->d.num=cmp>=0?1:0; break;
+						case OP_MCLT : cobj->val->d.num=cmp<0?1:0;  break;
+						case OP_MCGT : cobj->val->d.num=cmp>0?1:0;  break;
+						default : n_warn(N, fn, "invalid op for string math");
+						}
+					}
+					continue;
+				} else if (nobj->val->type==NT_BOOLEAN) {
+					if (op==OP_MCEQ) {
+						cmp=(cobj->val->d.str&&cobj->val->d.str[0]);
+						n_freeval(N, cobj);
+						cobj->val->type=NT_NUMBER;
+						if (nobj->val->d.num) {
+							cobj->val->d.num=cmp?1:0;
+						} else {
+							cobj->val->d.num=cmp?0:1;
+						}
+					}
+					continue;
+				}
+			}
+			n_warn(N, fn, "invalid mix of types in math (%s) (%s)", typenames[nes_isnull(cobj)?NT_NULL:cobj->val->type], typenames[nes_isnull(nobj)?NT_NULL:nobj->val->type]);
 		}
-	}
-	if (r) goto redo;
+	} while (r);
 	nes_linkval(N, &N->r, listobj.val->d.table);
 	nes_unlinkval(N, &listobj);
 	DEBUG_OUT();
@@ -636,45 +740,29 @@ obj_t *n_evalargs(nes_state *N, char *fname)
 {
 	static char *fn="n_evalargs";
 	obj_t listobj;
-	obj_t *cobj=NULL;
-	obj_t *nobj;
+	obj_t *cobj, *nobj;
 	unsigned short i;
 
 	DEBUG_IN();
 	sanetest();
-	if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "missing bracket");
-	listobj.mode=0;
+	if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "missing '('");
 	listobj.val=n_newval(N, NT_TABLE);
+	listobj.val->attr=0;
 	cobj=nes_setstr(N, &listobj, "0", fname, nc_strlen(fname));
 	for (i=1;;) {
 		N->lastop=OP_UNDEFINED;
 		nobj=nes_eval(N, (char *)N->readptr);
-		if ((N->lastop!=OP_PCPAREN)&&(N->lastop!=OP_PCOMMA)) n_error(N, NE_SYNTAX, fn, "expected a closing ')'");
-		if (N->lastop==OP_UNDEFINED) nextop();
 		if (nobj!=NULL) {
 			cobj->next=n_newiobj(N, i);
 			cobj->next->prev=cobj;
-			cobj=cobj->next;;
-			if (nes_isnull(nobj)) {
-				n_copyval(N, cobj, nobj);
-			} else if (nobj->val->type==NT_BOOLEAN) {
-				n_copyval(N, cobj, nobj);
-			} else if (nobj->val->type==NT_NUMBER) {
-				n_copyval(N, cobj, nobj);
-			} else if (nobj->val->type==NT_STRING) {
-				n_copyval(N, cobj, nobj);
-			} else if ((nobj->val->type==NT_NFUNC)||(nobj->val->type==NT_CFUNC)) {
-				n_error(N, NE_SYNTAX, fn, "storing a value as a func?");
-			} else if (nobj->val->type==NT_TABLE) {
-				nes_linkval(N, cobj, nobj);
-			} else {
-				n_error(N, NE_SYNTAX, fn, "b[%d][%s][%s]", nobj->val->type, nobj->name, nes_tostr(N, nobj));
-			}
+			cobj=cobj->next;
+			nes_linkval(N, cobj, nobj);
 		}
-		if (N->debug) n_warn(N, fn, "[%d]", i);
-		if ((N->lastop!=OP_PCPAREN)&&(N->lastop!=OP_PCOMMA)) n_error(N, NE_SYNTAX, fn, "i'm confused [%d][%d]", N->lastop, i);
+		if (N->debug) n_warn(N, fn, "arg [%d]", i);
+		if (N->lastop==OP_UNDEFINED) nextop();
 		if (N->lastop==OP_PCPAREN) break;
-		if (N->lastop==OP_PCOMMA) i++;
+		if (N->lastop==OP_PCOMMA) { i++; continue; }
+		n_error(N, NE_SYNTAX, fn, "expected a closing ')' or ','");
 	}
 	nes_linkval(N, &N->r, &listobj);
 	nes_unlinkval(N, &listobj);
@@ -690,47 +778,47 @@ obj_t *n_storeval(nes_state *N, obj_t *cobj)
 
 	switch (N->lastop) {
 	case OP_MADDADD:
-		if (cobj->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, fn, "cobj is not a number");
+		if ((cobj==NULL)||(cobj->val==NULL)||(cobj->val->type!=NT_NUMBER)) n_error(N, NE_SYNTAX, fn, "object is not a number");
 		nextop();
 		cobj->val->d.num++;
-		break;
+		return cobj;
 	case OP_MSUBSUB:
-		if (cobj->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, fn, "cobj is not a number");
+		if ((cobj==NULL)||(cobj->val==NULL)||(cobj->val->type!=NT_NUMBER)) n_error(N, NE_SYNTAX, fn, "object is not a number");
 		nextop();
 		cobj->val->d.num--;
-		break;
+		return cobj;
 	case OP_MADDEQ :
-		if (cobj->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, fn, "cobj is not a number");
+		if ((cobj==NULL)||(cobj->val==NULL)||(cobj->val->type!=NT_NUMBER)) n_error(N, NE_SYNTAX, fn, "object is not a number");
 		nobj=nes_eval(N, (char *)N->readptr);
-		if ((nobj==NULL)||(nobj->val->type!=NT_NUMBER)) n_error(N, NE_SYNTAX, fn, "nobj is not a number");
+		if ((nobj==NULL)||(nobj->val==NULL)||(nobj->val->type!=NT_NUMBER)) n_error(N, NE_SYNTAX, fn, "object is not a number");
 		if (!OP_ISEND(N->lastop)) n_error(N, NE_SYNTAX, fn, "expected a ';'");
 		cobj->val->d.num=cobj->val->d.num+nobj->val->d.num;
-		break;
+		return cobj;
 	case OP_MSUBEQ :
-		if (cobj->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, fn, "cobj is not a number");
+		if ((cobj==NULL)||(cobj->val==NULL)||(cobj->val->type!=NT_NUMBER)) n_error(N, NE_SYNTAX, fn, "object is not a number");
 		nobj=nes_eval(N, (char *)N->readptr);
-		if ((nobj==NULL)||(nobj->val->type!=NT_NUMBER)) n_error(N, NE_SYNTAX, fn, "nobj is not a number");
+		if ((nobj==NULL)||(nobj->val==NULL)||(nobj->val->type!=NT_NUMBER)) n_error(N, NE_SYNTAX, fn, "object is not a number");
 		if (!OP_ISEND(N->lastop)) n_error(N, NE_SYNTAX, fn, "expected a ';'");
 		cobj->val->d.num=cobj->val->d.num-nobj->val->d.num;
-		break;
+		return cobj;
 	case OP_MMULEQ :
-		if (cobj->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, fn, "cobj is not a number");
+		if ((cobj==NULL)||(cobj->val==NULL)||(cobj->val->type!=NT_NUMBER)) n_error(N, NE_SYNTAX, fn, "object is not a number");
 		nobj=nes_eval(N, (char *)N->readptr);
-		if ((nobj==NULL)||(nobj->val->type!=NT_NUMBER)) n_error(N, NE_SYNTAX, fn, "nobj is not a number");
+		if ((nobj==NULL)||(nobj->val==NULL)||(nobj->val->type!=NT_NUMBER)) n_error(N, NE_SYNTAX, fn, "object is not a number");
 		if (!OP_ISEND(N->lastop)) n_error(N, NE_SYNTAX, fn, "expected a ';'");
 		cobj->val->d.num=cobj->val->d.num*nobj->val->d.num;
-		break;
+		return cobj;
 	case OP_MDIVEQ :
-		if (cobj->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, fn, "cobj is not a number");
+		if ((cobj==NULL)||(cobj->val==NULL)||(cobj->val->type!=NT_NUMBER)) n_error(N, NE_SYNTAX, fn, "object is not a number");
 		nobj=nes_eval(N, (char *)N->readptr);
-		if ((nobj==NULL)||(nobj->val->type!=NT_NUMBER)) n_error(N, NE_SYNTAX, fn, "nobj is not a number");
+		if ((nobj==NULL)||(nobj->val==NULL)||(nobj->val->type!=NT_NUMBER)) n_error(N, NE_SYNTAX, fn, "object is not a number");
 		if (!OP_ISEND(N->lastop)) n_error(N, NE_SYNTAX, fn, "expected a ';'");
 		cobj->val->d.num=cobj->val->d.num/nobj->val->d.num;
-		break;
+		return cobj;
 	default:
 		nobj=nes_eval(N, (char *)N->readptr);
 		if (!OP_ISEND(N->lastop)) n_error(N, NE_SYNTAX, fn, "expected a ';'");
-		if (nobj==NULL) break;
+		if (nes_isnull(nobj)) return cobj;
 		if ((nobj->val->type==NT_TABLE)||(nobj->val->type==NT_STRING)) {
 			if (cobj!=nobj) {
 				nes_linkval(N, cobj, nobj);
@@ -749,6 +837,7 @@ obj_t *n_readfunction(nes_state *N)
 	static char *fn="n_readfunction";
 	char namebuf[MAX_OBJNAMELEN+1];
 	uchar *as, *be;
+	obj_t *cobj;
 
 	DEBUG_IN();
 	sanetest();
@@ -761,15 +850,16 @@ obj_t *n_readfunction(nes_state *N)
 	nextop();
 	if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "expected a '('");
 	n_skipto(N, OP_PCPAREN);
+	n_skipblank(N);
 	/* bs=N->readptr; */
 	nextop();
 	if (N->lastop!=OP_POBRACE) n_error(N, NE_SYNTAX, fn, "expected a '{'");
 	n_skipto(N, OP_PCBRACE);
 	be=N->readptr;
-	nes_setnfunc(N, &N->g, namebuf, (char *)as, be-as);
+	cobj=nes_setnfunc(N, &N->g, namebuf, (char *)as, be-as);
 	/* n_prechew(N, (uchar *)cobj->val->d.str); */
 	DEBUG_OUT();
-	return 0;
+	return cobj;
 }
 
 /* read the following list of values into the supplied table */

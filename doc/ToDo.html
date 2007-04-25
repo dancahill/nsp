@@ -16,25 +16,14 @@ NESLA NullLogic Embedded Scripting Language ToDo
 </small>
 <hr>
 
-<b>[high priority]</b>
-<br>
 <ul>
   <li>need to add a printf function</li>
-  <li>need friendlier errors and return codes on failure</li>
+  <li>need better errors and failure return codes</li>
   <li>need better input checking</li>
   <li>checks for fdiv/nan/inf, etc. are insufficient</li>
-</ul>
-<b>[low priority]</b>
-<br>
-<ul>
-  <li>scope and args are functional but kludgy (braces don't affect scope)</li>
-  <li>commas and semicolons are lax (stricter is better)</li>
-  <li>need a function for cloning tables</li>
-  <li>need a real var delete function</li>
-  <li>for and while loops currently need to be followed by {} blocks (too strict)</li>
+  <li>scope is kludgy (local scope is unaffected by braces)</li>
   <li>some api data pointers might be useful (for files, sockets, etc..)</li>
-  <li>read-only vars might be handy</li>
-  <li>should some vars have tables for handler functions?</li>
+  <li>should some vars have tables for handler functions? (like javascript events?)</li>
   <li>start thinking about a binary storage and transport structure</li>
 </ul>
 

@@ -15,7 +15,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "libnesla.h"
+#include "nesla/libnesla.h"
 
 void n_if(nes_state *N)
 {
@@ -29,6 +29,7 @@ l1:
 	if (N->lastop==OP_POPAREN) {
 		N->lastop=OP_UNDEFINED;
 		cobj=nes_eval(N, (char *)N->readptr);
+		if ((cobj==NULL)||(cobj->val==NULL)) n_error(N, NE_SYNTAX, fn, "null object");
 		if (N->lastop!=OP_PCPAREN) n_error(N, NE_SYNTAX, fn, "missing ) bracket");
 		t=cobj->val->d.num?1:0;
 	}
@@ -42,17 +43,27 @@ l2:
 		} else {
 			n_skipto(N, OP_PCBRACE);
 		}
-		nextop();
-		if (N->lastop!=OP_KELSE) {
-			ungetop();
+	} else {
+		ungetop();
+		if ((t)&&(!done)) {
+			N->single=1;
+			nes_exec(N, (char *)N->readptr);
+			done=1;
+			if (N->ret) { DEBUG_OUT(); return; }
 		} else {
-			nextop();
-			if (N->lastop!=OP_KIF) {
-				t=1;
-				goto l2;
-			} else {
-				goto l1;
-			}
+			n_skipto(N, OP_PSEMICOL);
+		}
+	}
+	nextop();
+	if (N->lastop!=OP_KELSE) {
+		ungetop();
+	} else {
+		nextop();
+		if (N->lastop!=OP_KIF) {
+			t=1;
+			goto l2;
+		} else {
+			goto l1;
 		}
 	}
 	DEBUG_OUT();
@@ -65,6 +76,7 @@ void n_for(nes_state *N)
 	uchar *arginit, *argcomp, *argexec;
 	uchar *bs, *be;
 	obj_t *cobj;
+	short int single;
 
 	DEBUG_IN();
 	if (N->readptr==NULL) n_error(N, NE_SYNTAX, fn, "NULL readptr");
@@ -78,7 +90,14 @@ void n_for(nes_state *N)
 	n_skipto(N, OP_PCPAREN);
 	bs=N->readptr;
 	nextop();
-	n_skipto(N, OP_PCBRACE);
+	if (N->lastop==OP_POBRACE) {
+		n_skipto(N, OP_PCBRACE);
+		single=0;
+	} else {
+		ungetop();
+		n_skipto(N, OP_PSEMICOL);
+		single=1;
+	}
 	be=N->readptr;
 	N->readptr=arginit;
 	n_readvar(N, &N->l, NULL);
@@ -90,8 +109,18 @@ void n_for(nes_state *N)
 			if (nes_tonum(N, cobj)==0) break;
 		}
 		N->readptr=bs;
-		nextop();
-		nes_exec(N, (char *)N->readptr);
+		if (single) {
+			N->lastop=OP_UNDEFINED;
+			N->single=1;
+			nes_exec(N, (char *)N->readptr);
+		} else {
+			nextop();
+			if (N->lastop==OP_POBRACE) {
+				nes_exec(N, (char *)N->readptr);
+			} else {
+				n_error(N, NE_SYNTAX, fn, "...");
+			}
+		}
 		if (N->brk>0) { N->brk--; break; }
 		if (N->ret) { break; }
 		N->readptr=argexec;
@@ -104,6 +133,53 @@ void n_for(nes_state *N)
 
 void n_do(nes_state *N)
 {
+	static char *fn="n_do";
+	uchar *argcomp;
+	uchar *bs, *be;
+	obj_t *cobj;
+	short int single;
+
+	DEBUG_IN();
+	if (N->readptr==NULL) n_error(N, NE_SYNTAX, fn, "EOF");
+	bs=N->readptr;
+	nextop();
+	if (N->lastop==OP_POBRACE) {
+		n_skipto(N, OP_PCBRACE);
+		single=0;
+	} else {
+		ungetop();
+		n_skipto(N, OP_PSEMICOL);
+		single=1;
+	}
+	be=N->readptr;
+	for (;;) {
+		N->readptr=bs;
+		if (single) {
+			N->lastop=OP_UNDEFINED;
+			N->single=1;
+			nes_exec(N, (char *)N->readptr);
+		} else {
+			nextop();
+			if (N->lastop==OP_POBRACE) {
+				nes_exec(N, (char *)N->readptr);
+			} else {
+				n_error(N, NE_SYNTAX, fn, "...");
+			}
+		}
+		if (N->brk>0) { N->brk--; break; }
+		if (N->ret) { break; }
+		nextop();
+		if (N->lastop!=OP_KWHILE) n_error(N, NE_SYNTAX, fn, "expected while");
+		nextop();
+		if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "missing ( bracket");
+		argcomp=N->readptr;
+		cobj=nes_eval(N, (char *)argcomp);
+		if (N->lastop!=OP_PCPAREN) n_error(N, NE_SYNTAX, fn, "missing ) bracket");
+		if (nes_tonum(N, cobj)==0) break;
+	}
+	N->readptr=be;
+	DEBUG_OUT();
+	return;
 }
 
 void n_while(nes_state *N)
@@ -112,6 +188,7 @@ void n_while(nes_state *N)
 	uchar *argcomp;
 	uchar *bs, *be;
 	obj_t *cobj;
+	short int single;
 
 	DEBUG_IN();
 	if (N->readptr==NULL) n_error(N, NE_SYNTAX, fn, "EOF");
@@ -121,15 +198,32 @@ void n_while(nes_state *N)
 	n_skipto(N, OP_PCPAREN);
 	bs=N->readptr;
 	nextop();
-	n_skipto(N, OP_PCBRACE);
+	if (N->lastop==OP_POBRACE) {
+		n_skipto(N, OP_PCBRACE);
+		single=0;
+	} else {
+		ungetop();
+		n_skipto(N, OP_PSEMICOL);
+		single=1;
+	}
 	be=N->readptr;
 	for (;;) {
 		cobj=nes_eval(N, (char *)argcomp);
 		if (N->lastop!=OP_PCPAREN) n_error(N, NE_SYNTAX, fn, "missing ) bracket");
 		if (nes_tonum(N, cobj)==0) break;
 		N->readptr=bs;
-		nextop();
-		nes_exec(N, (char *)N->readptr);
+		if (single) {
+			N->lastop=OP_UNDEFINED;
+			N->single=1;
+			nes_exec(N, (char *)N->readptr);
+		} else {
+			nextop();
+			if (N->lastop==OP_POBRACE) {
+				nes_exec(N, (char *)N->readptr);
+			} else {
+				n_error(N, NE_SYNTAX, fn, "...");
+			}
+		}
 		if (N->brk>0) { N->brk--; break; }
 		if (N->ret) { break; }
 	}

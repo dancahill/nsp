@@ -15,7 +15,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "libnesla.h"
+#include "nesla/libnesla.h"
 #include <math.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -232,7 +232,7 @@ void n_warn(nes_state *N, const char *fname, const char *format, ...)
 	short i;
 	char *p;
 */
-	if (N->warnings++>10000) n_error(N, NE_SYNTAX, "n_warn", "too many warnings (%d)\n", N->warnings);
+	if (++N->warnings>10000) n_error(N, NE_SYNTAX, "n_warn", "too many warnings (%d)\n", N->warnings);
 	if (N->outbuflen>OUTBUFLOWAT) nl_flush(N);
 	nc_printf(N, "[01;33;40m%s\r\t\t : ", fname);
 	va_start(ap, format);

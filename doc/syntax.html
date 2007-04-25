@@ -1,0 +1,458 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<title>NESLA NullLogic Embedded Scripting Language Reference Manual</title>
+<link rel="stylesheet" href="nesla.css">
+</head>
+<body>
+<hr>
+<h1>
+<a href="http://nesla.sourceforge.net/"><img src="nesla.png" alt="" border="0" height="32" width="32"></a>
+NESLA NullLogic Embedded Scripting Language Reference Manual
+</h1>
+<small>
+<a href="copyright.html">Copyright</a>
+&copy; 2007 Dan Cahill.  All rights reserved.
+</small>
+<hr>
+
+<h1>1 - Introduction</h1>
+<p>
+I suck at writing documentation, so this will be short and bitter.
+</p>
+<p>
+Nesla's earliest lines of code were derived from all the configuration file
+parsers I kept writing over and over, and was never happy with.  With the
+hassle of writing new functions to deal with different files, and adding
+callback functions to deal with subsections, and _then_ taking the parsed
+data and making that data accessible to other loaded functions and modules,
+not to mention the whole memory management part, and the need to keep track
+of not only the name and type of variable, but also the size...  Well, I guess
+I'm just lucky I have a sense of humour.
+</p>
+<p>
+So here was a goal: A flexible config parser, a simple and universal data
+storage model, a short and simple command set, a zero effort memory management
+system that didn't suck, and a C api that wouldn't be painful or difficult to
+use in other projects.  Whether or not it became a fully functional scripting
+language of its own was entirely incidental.  What I ended up with is the Nesla
+core library; the scripting language for C programmers.
+</p>
+<p>
+Syntactically, Nesla probably looks more like javascript than it does any other
+language.  Use of the word 'object' may be less than 100% accurate, there are
+no properties, methods, events, or classes in the javascript sense, but the C
+syntax rules are nearly identical.  Nesla is not an emulation of javascript,
+but both language designs do agree that C syntax is good and dollar signs are
+ugly.
+</p>
+
+<h1>2 - The Language</h1>
+
+<h2>Keywords</h2>
+
+<p>
+break continue return function global local var if else for do while exit
+</p>
+<p>
+Working code looks a little like the following sample.
+</p>
+<pre>
+<B>function</B> demo(arg1) {
+	<B>global</B> x=1;
+	<I># you don't actually need <B>local</B> or <B>var</B>, but it makes the code clearer</I>
+	<B>local</B> y=2;
+	<B>var</B> z=3;
+
+	<B>for</B> (i=0;i<10;i++) {
+		<B>if</B> (i<5) {
+			print("less than half ", i, "\n");
+		} <B>else if</B> (i==5) {
+			print("half\n");
+		} <B>else</B> {
+			print("more than half ", i, "\n");
+		}
+		<B>if</B> (i==arg1) <B>break</B>;
+	}
+	<B>return</B>;
+}
+demo(8);
+</pre>
+<p>
+break (accepts an optional unbracketed number arg to define the number of levels to break)<br>
+still need to add switch and goto..
+</p>
+
+<h2>Operators</h2>
+
+<p>
+= + ++ += - -- -= * *= / /= == != <= >= < > % & | ^ && || !
+</p>
+<p>
+Strings can also be handled using the slightly shorter list of ops: = + == != <= >= < >
+</p>
+<p>
+The statement <B>var x="a"+"b";</B> will set x to "ab".
+</p>
+<p>
+Tables have considerably less ops: = {}
+<pre>
+<B>function</B> subf() { <B>return</B> 69; }
+<B>var</B> pi = math.asin(1)*2;
+<B>var</B> table = {
+	{ a1="x", b = pi, [12]=41, [1]=42, 43, 'blah', subf() },
+	{ "x", 'y', x = 41, 42, 43, 'blah', [5]=12, heh=";-)" }
+};
+</pre>
+</p>
+<p>
+there is no free() function, but if you take a value holding a large table or
+string and reassign it to a number (for example), the memory is reclaimed.
+</p>
+
+<h2>core lib functions</h2>
+<hr><h3><a name="nesla_date"><code>(string) date([number unixtime]);</code></a></h3>
+<p>
+Accepts an optional number (time in seconds since Jan 1 1970) and returns a
+formatted date string.
+</p>
+<hr><h3><a name="nesla_include"><code>() include(string filename);</code></a></h3>
+<p>
+Include (and parse) the code in the specified file.
+</p>
+<hr><h3><a name="nesla_print"><code>print(...);</code></a></h3>
+<p>
+Print the complete list of args to the standard output.
+</p>
+<hr><h3><a name="nesla_printvars"><code>printvars([object]);</code></a></h3>
+<p>
+Print the provided var. This will recursively print entire tables.
+</p>
+<hr><h3><a name="nesla_runtime"><code>(string) runtime();</code></a></h3>
+<p>
+Returns the number of seconds the parser has been running.
+</p>
+<hr><h3><a name="nesla_sleep"><code>sleep(number);</code></a></h3>
+<p>
+Sleep for x number of seconds;
+</p>
+<hr><h3><a name="nesla_time"><code>(string) time([number unixtime]);</code></a></h3>
+<p>
+Accepts an optional number (time in seconds since Jan 1 1970) and returns a
+formatted time string.
+</p>
+<hr><h3><a name="nesla_number"><code>(number) tonumber(string|number);</code></a></h3>
+<p>
+Returns a number value equivalent of the source.
+</p>
+<hr><h3><a name="nesla_string"><code>(number) tostring(string|number[, number]);</code></a></h3>
+<p>
+Returns a string value equivalent of the source.
+If both arguments are numbers, the second allows the setting of a decimal precision.
+</p>
+<hr><h3><a name="nesla_type"><code>type(object);</code></a></h3>
+<p>
+Returns the name of the type of object.
+</p>
+<hr><h3><a name="nesla_write"><code>write(...);</code></a></h3>
+<p>
+Print the complete list of args to the standard output.
+Pretty much a synonym for print();
+</p>
+
+<B>/* file functions */</B>
+<hr><h3><a name="nesla_file_read"><code>(string) file.read(string filename);</code></a></h3>
+<p>
+Reads the entire file into a string and returns that string.
+This function is binary safe, but use of string functions to manipulate this string may mangle the data.
+</p>
+<hr><h3><a name="nesla_file_write"><code>(number) file.write(string filename[, object]);</code></a></h3>
+<p>
+Writes the entire file and returns the result code.
+This function is binary safe.
+</p>
+
+
+
+<B>/* basic io */</B>
+<hr><h3><a name="nesla_io_flush"><code>() io.flush(...);</code></a></h3>
+<p>
+Flushes the output buffer.
+</p>
+<hr><h3><a name="nesla_io_print"><code>() io.print(...);</code></a></h3>
+<p>
+Print the complete list of args to the standard output.
+</p>
+<hr><h3><a name="nesla_io_write"><code>() io.write(...);</code></a></h3>
+<p>
+Print the complete list of args to the standard output.
+Pretty much a synonym for print();
+</p>
+
+<B>/* math functions */</B>
+<hr><h3><a name="nesla_math_abs"><code>(number) math.abs(number n);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_math_acos"><code>(number) math.acos(number n);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_math_asin"><code>(number) math.asin(number n);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_math_atan"><code>(number) math.atan(number n);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_math_ceil"><code>(number) math.ceil(number n);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_math_cos"><code>(number) math.cos(number n);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_math_floor"><code>(number) math.floor(number n);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_math_rand"><code>(number) math.rand([number range]);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_math_sin"><code>(number) math.sin(number n);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_math_sqrt"><code>(number) math.sqrt(number n);</code></a></h3>
+<p>
+<hr><h3><a name="nesla_math_tan"><code>(number) math.tan(number n);</code></a></h3>
+<p>
+
+<B>/* strings */</B><br>
+<hr><h3><a name="nesla_string_cat"><code>(string) string.cat(string str1, string str2);</code></a></h3>
+<br>
+	string.cat(x, y) will not change x or y.  to set x to the result, use "x=string.cat(x, y)"<br>
+	actually, all string functions should work like this (by not modifying the original arguments.<br>
+<br>
+<p>
+<hr><h3><a name="nesla_string_cmp"><code>(number) string.cmp(string str1, string str2);</code></a></h3>
+<p>
+Case sensitive string comparison.
+</p>
+<hr><h3><a name="nesla_string_icmp"><code>(number) string.icmp(string str1, string str2);</code></a></h3>
+<p>
+Case insensitive string comparison.
+</p>
+<hr><h3><a name="nesla_string_ncmp"><code>(number) string.ncmp(string str1, string str2, number len);</code></a></h3>
+<p>
+Case sensitive substring comparison up to <I>len</I> characters.
+</p>
+<hr><h3><a name="nesla_string_nicmp"><code>(number) string.nicmp(string str1, string str2, number len);</code></a></h3>
+<p>
+Case insensitive substring comparison up to <I>len</I> characters.
+</p>
+<hr><h3><a name="nesla_string_len"><code>(number) string.len(string str);</code></a></h3>
+<p>
+Length of the string (binary safe).
+</p>
+<hr><h3><a name="nesla_string_split"><code>(table) string.split(string str, string sep);</code></a></h3>
+<p>
+This will separate the string into substrings and put those substrings in the returned table.
+</p>
+<hr><h3><a name="nesla_string_str"><code>(string) string.str(string stack, string needle);</code></a></h3>
+<p>
+Case sensitive substring search.
+</p>
+<hr><h3><a name="nesla_string_istr"><code>(string) string.istr(string stack, string needle);</code></a></h3>
+<p>
+Case insensitive substring search.
+</p>
+<hr><h3><a name="nesla_string_sub"><code>(string) string.sub(string stack, number offset[, number maxlen]);</code></a></h3>
+<p>
+Returns a substring ranging from <I>offset</I> to <I>maxlen</I>.
+</p>
+
+<h1>3 - The C API</h1>
+<p>
+I'm lazy, so here's the long ugly version.  This is everything your C program
+will ever need to know about Nesla.  Actually, it needs to know a lot less, but
+hey.
+</p>
+<PRE>
+
+/*
+    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+#ifndef _NESLA_H
+#define _NESLA_H 1
+
+#ifdef WIN32
+/* always include winsock2 before windows, or bad stuff will happen */
+#include &lt;winsock2.h>
+#include &lt;windows.h>
+#include &lt;time.h>
+#else
+#ifdef __TURBOC__
+struct timeval { long tv_sec; long tv_usec; };
+#else
+#include &lt;sys/time.h>
+#endif
+#endif
+#include &lt;setjmp.h>
+
+#define NESLA_NAME     "nesla"
+#define NESLA_VERSION  "0.5.0"
+
+#define MAX_OBJNAMELEN 64
+#define MAX_OUTBUFLEN  8192
+
+/* object storage types */
+#define NT_NULL		0
+#define NT_BOOLEAN 	1
+#define NT_NUMBER	2
+#define NT_STRING	3
+#define NT_NFUNC	4
+#define NT_CFUNC	5
+#define NT_TABLE	6
+#define NT_CHUNK	7
+
+/* object storage modes */
+#define NST_HIDDEN	0x01
+#define NST_READONLY	0x02
+#define NST_SYSTEM	0x04
+#define NST_AUTOSORT	0x08
+#define NST_LINK	0x10
+
+#define num_t double
+#define uchar unsigned char
+#define obj_t struct nes_objrec
+#define val_t struct nes_valrec
+#define nes_t struct nes_state
+
+/* should be typedef int(*NES_CFUNC)(nes_state *); */
+typedef int(*NES_CFUNC)(void *);
+
+typedef struct nes_valrec {
+	unsigned short type; /* val type */
+	unsigned short attr; /* status: attributes (hidden, readonly, system, autosort, etc...) */
+	unsigned short refs; /* number of objects referencing this node */
+	unsigned int   size; /* string, nfunc or chunk size - or number of vars in table */
+	union {
+		num_t  num;
+		char  *str;
+		NES_CFUNC cfunc;
+		obj_t *table;
+	} d;
+} nes_valrec;
+typedef struct nes_objrec {
+	obj_t *parent; /* it's unsafe to use parent (but useful for debugging) */
+	obj_t *prev;
+	obj_t *next;
+	val_t *val;
+	char name[MAX_OBJNAMELEN+1];
+} nes_objrec;
+typedef struct nes_state {
+	uchar *readptr;
+	uchar *lastptr;
+	obj_t g;
+	obj_t l;
+	obj_t r;
+	short int lastop;
+	char lastname[MAX_OBJNAMELEN+1];
+	short int brk;
+	short int ret;
+	short int err;
+	short int debug;
+	short int single;
+	short int strict;
+	short int test_depth;
+	short int warnings;
+	short int jmpset;
+	jmp_buf savjmp;
+	struct timeval ttime;
+	unsigned short int outbuflen;
+	char numbuf[128];
+	char outbuf[MAX_OUTBUFLEN+1];
+	char errbuf[256];
+} nes_state;
+
+#define    nes_isnull(o)     (o==NULL||o->val==NULL||o->val->type==NT_NULL)
+#define    nes_istable(o)    (o!=NULL&&o->val->type==NT_TABLE)
+#define    nes_isnum(o)      (o!=NULL&&o->val->type==NT_NUMBER)
+#define    nes_isstr(o)      (o!=NULL&&o->val->type==NT_STRING)
+
+#define    nes_tonum(N,o)    (o==NULL?0:o->val->type==NT_NUMBER?o->val->d.num:o->val->type==NT_BOOLEAN?o->val->d.num?1:0:o->val->type==NT_STRING?nes_aton(N,o->val->d.str):0)
+#define    nes_getnum(N,o,n) nes_tonum(N, nes_getobj(N,o,n))
+
+#define    nes_tostr(N,o)    (o==NULL?"":o->val->type==NT_TABLE?"":o->val->type==NT_NUMBER?nes_ntoa(N,N->numbuf,o->val->d.num,-10,6):o->val->type==NT_BOOLEAN?o->val->d.num?"true":"false":o->val->type==NT_STRING?o->val->d.str?o->val->d.str:o->val->type==NT_NULL?"null":"":"null")
+#define    nes_getstr(N,o,n) nes_tostr(N, nes_getobj(N,o,n))
+
+#define    nes_setnum(N,t,n,v)     nes_setobj(N, t, n, NT_NUMBER, NULL, v, NULL, 0)
+#define    nes_setstr(N,t,n,s,l)   nes_setobj(N, t, n, NT_STRING, NULL, 0, s,    l)
+#define    nes_settable(N,t,n)     nes_setobj(N, t, n, NT_TABLE,  NULL, 0, NULL, 0)
+#define    nes_setcfunc(N,t,n,p)   nes_setobj(N, t, n, NT_CFUNC,  p,    0, NULL, 0)
+#define    nes_setnfunc(N,t,n,s,l) nes_setobj(N, t, n, NT_NFUNC,  NULL, 0, s,    l)
+
+#ifndef NESLA_NOFUNCTIONS
+/* api */
+obj_t     *nes_readtablef(nes_state *N, obj_t *tobj, const char *fmt, ...);
+/* exec */
+nes_state *nes_newstate  (void);
+nes_state *nes_endstate  (nes_state *N);
+obj_t     *nes_exec      (nes_state *N, char *string);
+int        nes_execfile  (nes_state *N, char *file);
+/* libc */
+num_t      nes_aton      (nes_state *N, const char *str);
+char      *nes_ntoa      (nes_state *N, char *str, num_t num, short base, unsigned short dec);
+/* object */
+void       nes_linkval   (nes_state *N, obj_t *cobj1, obj_t *cobj2);
+void       nes_unlinkval (nes_state *N, obj_t *cobj);
+void       nes_freetable (nes_state *N, obj_t *tobj);
+obj_t     *nes_getobj    (nes_state *N, obj_t *tobj, char *oname);
+obj_t     *nes_getiobj   (nes_state *N, obj_t *tobj, int oindex);
+obj_t     *nes_setobj    (nes_state *N, obj_t *tobj, char *oname, unsigned short otype, NES_CFUNC _fptr, num_t _num, char *_str, int _slen);
+/* object */
+obj_t     *nes_eval      (nes_state *N, char *string);
+obj_t     *nes_readtable (nes_state *N, obj_t *tobj);
+#endif
+
+#endif /* nesla.h */
+
+</PRE>
+
+<h1>4 - The Extension Libraries</h1>
+
+<h2>neslaext functions</h2>
+<hr><h3><a name="nesla_base64_decode"><code>(string) base64.decode(string encoded);</code></a></h3>
+<p>
+Return a decoded value from a base64-encoded string.
+</p>
+<hr><h3><a name="nesla_base64_encode"><code>(string) base64.encode(string decoded);</code></a></h3>
+<p>
+Return an encoded value from a raw string.
+</p>
+<hr><h3><a name="nesla_dirlist"><code>(table) dirlist(string dirname);</code></a></h3>
+<p>
+Returns a table containing files and attributes in the supplied dirname.
+</p>
+<hr><h3><a name="nesla_rot13"><code>(string) rot13(string str);</code></a></h3>
+<p>
+Returns a rot13 *cough* encoded string from str.
+</p>
+<hr><h3><a name="nesla_system"><code>(number) system(string str);</code></a></h3>
+<p>
+Performs an operating system call and returns the resulting errorcode.
+</p>
+<hr><h3><a name="nesla_xml_read"><code>(table) xml.read(string str);</code></a></h3>
+<p>
+Read the supplied XML text and return a digested table.
+This is _not_ a pretty function.
+</p>
+
+<hr><h3><a name="nesla_http_get"><code>(table) http.get(number ssl, string host, number port, string uri);</code></a></h3>
+<p>
+Connect to an HTTP server and retrieve the requested uri. Returns a table with { head, body } elements.
+</p>
+
+<hr>
+</body>
+</html>

@@ -1,7 +1,7 @@
 .AUTODEPEND
 
 LIBPATH = C:\TC\LIB
-INCLUDEPATH = C:\TC\INCLUDE;LIBNESLA;LIBNES~1;..\INCLUDE
+INCLUDEPATH = C:\TC\INCLUDE;..\INCLUDE
 #PARAMS = -I$(INCLUDEPATH) -L$(LIBPATH) -mh -v -vi- -w-ret -w-nci -w-inl -wpin -wamb -wamp -w-par -wasm -wcln -w-cpt -wdef -w-dup -w-pia -wsig -wnod -w-ill -w-sus -wstv -wucp -wuse -w-ext -w-ias -w-ibc -w-pre -w-nst
 PARAMS = -I$(INCLUDEPATH) -L$(LIBPATH) -mh
 CC = tcc $(PARAMS)
@@ -56,26 +56,26 @@ obj.obj: libnesla\obj.c
 parse.obj: libnesla\parse.c 
 	@$(CC) -c libnesla\parse.c
 
-base64.obj: libnes~1\base64.c 
-	@$(CC) -c libnes~1\base64.c
+base64.obj: libs\etc\base64.c 
+	@$(CC) -c libs\etc\base64.c
 
-dir.obj: libnes~1\dir.c 
-	@$(CC) -c libnes~1\dir.c
+dir.obj: libs\etc\dir.c 
+	@$(CC) -c libs\etc\dir.c
 
-misc.obj: libnes~1\misc.c 
-	@$(CC) -c libnes~1\misc.c
+misc.obj: libs\etc\misc.c 
+	@$(CC) -c libs\etc\misc.c
 
-rot13.obj: libnes~1\rot13.c 
-	@$(CC) -c libnes~1\rot13.c
+rot13.obj: libs\etc\rot13.c 
+	@$(CC) -c libs\etc\rot13.c
 
-sys.obj: libnes~1\sys.c 
-	@$(CC) -c libnes~1\sys.c
+sys.obj: libs\etc\sys.c 
+	@$(CC) -c libs\etc\sys.c
 
-xml.obj: libnes~1\xml.c 
-	@$(CC) -c libnes~1\xml.c
+xml.obj: libs\etc\xml.c 
+	@$(CC) -c libs\etc\xml.c
 
-main.obj: sapi\cli\main.c
-	@$(CC) -c sapi\cli\main.c
+main.obj: hosts\cli\main.c
+	@$(CC) -c hosts\cli\main.c
 
 .c.obj:
   $(CC) -c {$< }
