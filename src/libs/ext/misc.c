@@ -16,11 +16,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nesla/libnesla.h"
-#ifdef __TURBOC__
-#include "nesla/libnes~1.h"
-#else
-#include "nesla/libneslaext.h"
-#endif
+#include "nesla/libext.h"
 
 int neslaext_register_all(nes_state *N)
 {
@@ -33,7 +29,6 @@ int neslaext_register_all(nes_state *N)
 
 	nes_setcfunc(N, &N->g, "dirlist", (NES_CFUNC)neslaext_dirlist);
 	nes_setcfunc(N, &N->g, "rot13",   (NES_CFUNC)neslaext_rot13);
-	nes_setcfunc(N, &N->g, "system",  (NES_CFUNC)neslaext_system);
 
 	tobj=nes_settable(N, &N->g, "xml");
 	tobj->val->attr|=NST_HIDDEN;

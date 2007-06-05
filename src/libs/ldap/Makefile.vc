@@ -1,7 +1,7 @@
 # Makefile for NullLogic Embedded Scripting Language
 
 OBJDIR  = ../../../obj
-INTDIR  = $(OBJDIR)/libneslaext
+INTDIR  = $(OBJDIR)/libneslaldap
 
 CC            = cl.exe /nologo
 LINK          = link.exe
@@ -12,17 +12,17 @@ LIB_LDFLAGS   = -lib
 LIB_TARGETDIR = ../../../lib
 
 CFLAGS  = $(LIB_CFLAGS)
-OBJECTS = $(INTDIR)/base64.obj $(INTDIR)/dir.obj $(INTDIR)/misc.obj $(INTDIR)/rot13.obj $(INTDIR)/xml.obj
-TARGET  = $(LIB_TARGETDIR)/libneslaext.lib
+OBJECTS = $(INTDIR)/ldap.obj
+TARGET  = $(LIB_TARGETDIR)/libneslaldap.lib
 
-all: _dirs _libneslaext
+all: _dirs _libneslaldap
 
 _dirs:
 	@if not exist "$(LIB_TARGETDIR)" mkdir "$(LIB_TARGETDIR)"
 	@if not exist "$(OBJDIR)" mkdir "$(OBJDIR)"
 	@if not exist "$(INTDIR)" mkdir "$(INTDIR)"
 
-_libneslaext: $(OBJECTS)
+_libneslaldap: $(OBJECTS)
 	$(LINK) $(LIB_LDFLAGS) /nologo /out:$(TARGET) $(OBJECTS)
 
 clean:

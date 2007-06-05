@@ -22,10 +22,39 @@
 #ifdef WIN32
 #include <io.h>
 #else
-#ifndef __TURBOC__
+#ifdef __TURBOC__
+#else
 #include <unistd.h>
 #endif
 #endif
+
+static obj_t *n_setargs(nes_state *N, char *fname)
+{
+	static char *fn="n_evalargs";
+	obj_t listobj;
+	obj_t *cobj, *nobj;
+	unsigned short i;
+
+	if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "missing '('");
+	listobj.val=n_newval(N, NT_TABLE);
+	listobj.val->attr=0;
+	cobj=nes_setstr(N, &listobj, "0", fname, nc_strlen(fname));
+	for (i=1;;i++) {
+		N->lastop=OP_UNDEFINED;
+		if ((nobj=nes_eval(N, (char *)N->readptr))!=NULL) {
+			cobj->next=n_newiobj(N, i);
+			cobj->next->prev=cobj;
+			cobj=cobj->next;
+			nes_linkval(N, cobj, nobj);
+		}
+		if (N->lastop==OP_UNDEFINED) nextop();
+		if (N->lastop==OP_PCPAREN) break;
+		if (N->lastop!=OP_PCOMMA) n_error(N, NE_SYNTAX, fn, "missing ')' or ','");
+	}
+	nes_linkval(N, &N->r, &listobj);
+	nes_unlinkval(N, &listobj);
+	return &N->r;
+}
 
 obj_t *n_execfunction(nes_state *N, obj_t *cobj)
 {
@@ -41,20 +70,18 @@ obj_t *n_execfunction(nes_state *N, obj_t *cobj)
 	if ((cobj->val->type!=NT_NFUNC)&&(cobj->val->type!=NT_CFUNC)) n_error(N, NE_SYNTAX, fn, "'%s' is not a function", cobj->name);
 	nextop();
 	if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "missing '('");
-	pobj=n_evalargs(N, cobj->name);
+	pobj=n_setargs(N, cobj->name);
 	N->lastop=OP_UNDEFINED;
 	olobj=N->l.val; N->l.val=pobj->val; pobj->val=NULL;
 	p=N->readptr;
-#ifdef DEBUG
 	if (N->debug) n_warn(N, fn, "%s()", cobj->name);
-#endif
 	if (cobj->val->type==NT_CFUNC) {
 		cfunc=cobj->val->d.cfunc;
 		cfunc(N);
 	} else if (cobj->val->type==NT_NFUNC) {
 		N->readptr=(uchar *)cobj->val->d.str;
 		nextop();
-		if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "missing bracket");
+		if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "missing '('");
 		for (i=1;;i++) {
 			cobj2=nes_getiobj(N, &N->l, i);
 			nextop();
@@ -64,7 +91,7 @@ obj_t *n_execfunction(nes_state *N, obj_t *cobj)
 			}
 			if (N->lastop==OP_PCOMMA) continue;
 			if (N->lastop==OP_PCPAREN) break;
-			n_error(N, NE_SYNTAX, fn, "expected a closing ')' or ','");
+			n_error(N, NE_SYNTAX, fn, "missing ')' or ','");
 		}
 		nextop();
 		if (N->lastop==OP_POBRACE) nes_exec(N, (char *)N->readptr);
@@ -235,9 +262,11 @@ nes_state *nes_newstate()
 		{ "date",	(NES_CFUNC)nl_datetime	},
 		{ "include",	(NES_CFUNC)nl_include	},
 		{ "print",	(NES_CFUNC)nl_print	},
-		{ "printvars",	(NES_CFUNC)nl_printvars	},
+		{ "printvar",	(NES_CFUNC)nl_printvar	},
 		{ "runtime",	(NES_CFUNC)nl_runtime	},
+		{ "size",	(NES_CFUNC)nl_size	},
 		{ "sleep",	(NES_CFUNC)nl_sleep	},
+		{ "system",	(NES_CFUNC)nl_system	},
 		{ "time",	(NES_CFUNC)nl_datetime	},
 		{ "tonumber",	(NES_CFUNC)nl_tonumber	},
 		{ "tostring",	(NES_CFUNC)nl_tostring	},

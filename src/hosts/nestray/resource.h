@@ -16,6 +16,8 @@
 #define IDC_TRADEMARK                   403
 #define IDC_LABEL                       404
 #define IDC_STATIC                      -1
+#define IDI_STATE                       500 /* icon state change */
+#define IDM_STATE                       501 /* menu state change */
 
 // Next default values for new objects
 // 

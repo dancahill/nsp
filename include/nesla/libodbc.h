@@ -15,19 +15,26 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "nesla/libnesla.h"
-#include "nesla/libneslaext.h"
-#include <stdlib.h>
+#ifdef HAVE_ODBC
 
-int neslaext_system(nes_state *N)
-{
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
-	int n=-1;
+#ifdef WIN32
+#  pragma comment(lib, "odbc32.lib")
+#endif
+#include <sql.h>
+#include <sqlext.h>
 
-	if (cobj1->val->type==NT_STRING) {
-		nl_flush(N);
-		n=system(cobj1->val->d.str);
-	}
-	nes_setnum(N, &N->r, "", n);
-	return 0;
-}
+void odbc_murder(nes_state *N, obj_t *cobj);
+
+typedef struct ODBC_CONN {
+	/* standard header info for CDATA object */
+	char      obj_type[16]; /* tell us all about yourself in 15 characters or less */
+	NES_CFREE obj_term;     /* now tell us how to kill you */
+	/* now begin the stuff that's socket-specific */
+	SQLHENV  hENV;
+	SQLHDBC  hDBC;
+	SQLHSTMT hSTMT;
+} ODBC_CONN;
+
+int neslaodbc_register_all(nes_state *N);
+
+#endif /* HAVE_ODBC */

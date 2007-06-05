@@ -152,8 +152,10 @@ int      nl_datetime    (nes_state *N);
 int      nl_sleep       (nes_state *N);
 int      nl_runtime     (nes_state *N);
 int      nl_include     (nes_state *N);
-int      nl_printvars   (nes_state *N);
+int      nl_printvar    (nes_state *N);
+int      nl_size        (nes_state *N);
 int      nl_type        (nes_state *N);
+int      nl_system      (nes_state *N);
 /* libc.c */
 #define  nc_isdigit(c)  ((c>='0'&&c<='9')?1:0)
 #define  nc_isalpha(c)  ((c>='A'&&c<='Z')||(c>='a'&&c<='z')?1:0)
@@ -198,8 +200,6 @@ obj_t   *n_getindex     (nes_state *N, obj_t *cobj, char *lastname);
 
 void     n_prechew      (nes_state *N, uchar *rawtext);
 
-obj_t   *n_evalsub      (nes_state *N);
-obj_t   *n_evalargs     (nes_state *N, char *fname);
 obj_t   *n_storeval     (nes_state *N, obj_t *cobj);
 obj_t   *n_readfunction (nes_state *N);
 obj_t   *n_readvar      (nes_state *N, obj_t *tobj, obj_t *cobj);

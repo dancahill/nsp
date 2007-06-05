@@ -1,0 +1,4 @@
+LIBRARY		libneslaldap
+VERSION		0.6.0
+EXPORTS
+	neslaldap_register_all

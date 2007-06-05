@@ -1,0 +1,12 @@
+#!/usr/bin/nesla
+if (type(expect)!='function') include("_expect.nes");
+function testldap() {
+	if (type(ldap.search)!='function') {
+		print("SKIPPING LDAP TESTS\n");
+		return;
+	}
+#	L=ldap.search("localhost", 389, "o=gw.nulllogic.lan", "(cn=*)");
+	global L=ldap.search("localhost", 389, "ou=users,ou=people,o=gw.nulllogic.lan", "(sn=Cahill)");
+	return;
+}
+testldap();

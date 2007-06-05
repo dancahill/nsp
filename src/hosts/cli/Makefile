@@ -3,15 +3,13 @@ CC      = gcc
 CFLAGS  = -Wall -g -O2 -I../../../include
 LDFLAGS = -L../../../lib -lnesla -lneslaext -lneslatcp
 
-#disabling these two lines removes libm math functions
-CFLAGS += -DHAVE_MATH
-LDFLAGS += -lneslamath -lm
-
 # if OSTYPE==cygwin
 # LDFLAGS += -lws2_32
 
 OBJECTS = main.o
 TARGET  = ../../../bin/nesla
+
+include ../../Rules.mak
 
 all: _nesla
 

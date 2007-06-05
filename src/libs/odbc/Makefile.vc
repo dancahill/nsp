@@ -1,28 +1,28 @@
 # Makefile for NullLogic Embedded Scripting Language
 
 OBJDIR  = ../../../obj
-INTDIR  = $(OBJDIR)/libneslaext
+INTDIR  = $(OBJDIR)/libneslaodbc
 
 CC            = cl.exe /nologo
 LINK          = link.exe
 MAKE          = nmake.exe /C /S /Y /F
 
-LIB_CFLAGS    = /W3 /O2 /ML /GX /I "../../../include" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /FD /c
+LIB_CFLAGS    = /W3 /O2 /ML /GX /I "../../../include" /D "HAVE_ODBC" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /FD /c
 LIB_LDFLAGS   = -lib
 LIB_TARGETDIR = ../../../lib
 
 CFLAGS  = $(LIB_CFLAGS)
-OBJECTS = $(INTDIR)/base64.obj $(INTDIR)/dir.obj $(INTDIR)/misc.obj $(INTDIR)/rot13.obj $(INTDIR)/xml.obj
-TARGET  = $(LIB_TARGETDIR)/libneslaext.lib
+OBJECTS = $(INTDIR)/odbc.obj
+TARGET  = $(LIB_TARGETDIR)/libneslaodbc.lib
 
-all: _dirs _libneslaext
+all: _dirs _libneslaodbc
 
 _dirs:
 	@if not exist "$(LIB_TARGETDIR)" mkdir "$(LIB_TARGETDIR)"
 	@if not exist "$(OBJDIR)" mkdir "$(OBJDIR)"
 	@if not exist "$(INTDIR)" mkdir "$(INTDIR)"
 
-_libneslaext: $(OBJECTS)
+_libneslaodbc: $(OBJECTS)
 	$(LINK) $(LIB_LDFLAGS) /nologo /out:$(TARGET) $(OBJECTS)
 
 clean:

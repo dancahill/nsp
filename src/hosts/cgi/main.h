@@ -46,9 +46,9 @@
 #endif
 #include "config.h"
 #include "nesla/nesla.h"
-#include "nesla/libneslaext.h"
-#include "nesla/libneslamath.h"
-#include "nesla/libneslatcp.h"
+#include "nesla/libext.h"
+#include "nesla/libmath.h"
+#include "nesla/libtcp.h"
 
 extern nes_state *N;
 

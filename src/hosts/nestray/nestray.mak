@@ -1,19 +1,16 @@
 # Microsoft Developer Studio Generated NMAKE File, Based on nestray.dsp
-!IF "$(CFG)" == ""
-CFG=nestray - Win32 Release
-!MESSAGE No configuration specified. Defaulting to nestray - Win32 Release.
-!ENDIF 
+CFG=NesTray - Win32 Release
 
-!IF "$(CFG)" != "nestray - Win32 Release"
+!IF "$(CFG)" != "NesTray - Win32 Release"
 !MESSAGE Invalid configuration "$(CFG)" specified.
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "nestray.mak" CFG="nestray - Win32 Release"
+!MESSAGE NMAKE /f "nestray.mak" CFG="NesTray - Win32 Release"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "nestray - Win32 Release" (based on "Win32 (x86) Application")
+!MESSAGE "NesTray - Win32 Release" (based on "Win32 (x86) Application")
 !MESSAGE 
 !ERROR An invalid configuration is specified.
 !ENDIF 
@@ -25,7 +22,7 @@ NULL=nul
 !ENDIF 
 
 OUTDIR=.\..\..\..\bin
-INTDIR=.\..\..\..\obj\nestray
+INTDIR=.\..\..\..\obj\NesTray
 # Begin Custom Macros
 OutDir=.\..\..\..\bin
 # End Custom Macros
@@ -46,7 +43,7 @@ CLEAN :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 
 CPP=cl.exe
-CPP_PROJ=/nologo /ML /W3 /GX /O2 /I "..\..\..\include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /ML /W3 /GX /O2 /I "..\..\..\include" /D "HAVE_ODBC" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 
 .c{$(INTDIR)}.obj::
    $(CPP) @<<
@@ -92,9 +89,10 @@ LINK32_OBJS= \
 	"$(INTDIR)\nestray.obj" \
 	"$(INTDIR)\nestray.res" \
 	"..\..\..\lib\libnesla.lib" \
-	"..\..\..\lib\libneslatcp.lib" \
 	"..\..\..\lib\libneslaext.lib" \
-	"..\..\..\lib\libneslamath.lib"
+	"..\..\..\lib\libneslamath.lib" \
+	"..\..\..\lib\libneslaodbc.lib" \
+	"..\..\..\lib\libneslatcp.lib"
 
 "$(OUTDIR)\nestray.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -102,7 +100,7 @@ LINK32_OBJS= \
 <<
 
 
-!IF "$(CFG)" == "nestray - Win32 Release"
+!IF "$(CFG)" == "NesTray - Win32 Release"
 SOURCE=.\nestray.c
 
 "$(INTDIR)\nestray.obj" : $(SOURCE) "$(INTDIR)"

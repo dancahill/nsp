@@ -79,10 +79,14 @@ if (_SERVER['REQUEST_METHOD']=='POST') {
 	var opt=_POST['OPT'];
 	if (opt=='browse') {
 		# limit browsing to docroot
-		if (string.ncmp(_SERVER['DOCUMENT_ROOT'], _POST['PATH'], string.len(_SERVER['DOCUMENT_ROOT']))!=0) {
-			print("<B><font color=red>refusing to leave document root</font></B>");
-			parent=_SERVER['DOCUMENT_ROOT'];
-			_POST['PATH']=parent;
+		if (type(_SERVER['DOCUMENT_ROOT'])=='null') {
+			print("you have no docroot");
+		} else {
+			if (string.ncmp(_SERVER['DOCUMENT_ROOT'], _POST['PATH'], string.len(_SERVER['DOCUMENT_ROOT']))!=0) {
+				print("<B><font color=red>refusing to leave document root</font></B>");
+				parent=_SERVER['DOCUMENT_ROOT'];
+				_POST['PATH']=parent;
+			}
 		}
 		dir=dirlist(_POST['PATH']);
 		x=string.split(_POST['PATH'], "/");
@@ -96,9 +100,13 @@ if (_SERVER['REQUEST_METHOD']=='POST') {
 		}
 		if (parent=='') parent='/';
 		# limit browsing to docroot
-		if (string.ncmp(_SERVER['DOCUMENT_ROOT'], parent, string.len(_SERVER['DOCUMENT_ROOT']))!=0) {
-			parent=_SERVER['DOCUMENT_ROOT'];
-			_POST['PATH']=parent;
+		if (type(_SERVER['DOCUMENT_ROOT'])=='null') {
+			print("you have no docroot");
+		} else {
+			if (string.ncmp(_SERVER['DOCUMENT_ROOT'], parent, string.len(_SERVER['DOCUMENT_ROOT']))!=0) {
+				parent=_SERVER['DOCUMENT_ROOT'];
+				_POST['PATH']=parent;
+			}
 		}
 		print("<TABLE BORDER=1 CELLPADDING=0 CELLSPACING=0 WIDTH=100%>\n");
 		for (i=0;;i++) {
@@ -165,7 +173,7 @@ if (_SERVER['REQUEST_METHOD']=='POST') {
 	} else {
 		print("INVALID REQUEST");
 		print("<pre>");
-		printvars();
+		printvar(_GLOBALS);
 		print("</pre>");
 	}
 	exit 0;
@@ -379,6 +387,6 @@ nexthand('browse');
 print("<A HREF='javascript:showdebug();'>DEBUG</A>\n");
 print("</CENTER>\n");
 print("<DIV ID=debug STYLE='display:none'><PRE><FONT SIZE=2>\n");
-printvars();
+printvar(_GLOBALS);
 print("</FONT></PRE></DIV>\n");
 print("</BODY>\n</HTML>\n");

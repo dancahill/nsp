@@ -15,17 +15,5 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-/* typedef int(*NES_CFUNC)(nes_state *); */
-/* base64.c */
-int neslaext_base64_decode(nes_state *N);
-int neslaext_base64_encode(nes_state *N);
-/* dir.c */
-int neslaext_dirlist(nes_state *N);
-/* rot13.c */
-int neslaext_rot13(nes_state *N);
-/* sys.c */
-int neslaext_system(nes_state *N);
-/* xml.c */
-int neslaext_xml_read(nes_state *N);
 
-int neslaext_register_all(nes_state *N);
+int neslaldap_register_all(nes_state *N);

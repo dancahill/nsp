@@ -19,7 +19,7 @@
 #include <stdlib.h>
 
 static val_t __null = { NT_NULL, 0, 1, 0, { 0 } };
-static obj_t _null = { NULL, NULL, NULL, &__null, "" };
+static obj_t _null = { NULL, NULL, &__null, "" };
 
 void *n_alloc(nes_state *N, int size)
 {
@@ -64,6 +64,17 @@ void n_copyval(nes_state *N, obj_t *cobj1, obj_t *cobj2)
 	case NT_BOOLEAN :
 		cobj1->val->d.num=cobj2->val->d.num;
 		break;
+	case NT_CDATA :
+		n_warn(N, "n_copyval", "copying cdata '%s'?", cobj2->val->d.str);
+		cobj1->val->size=cobj2->val->size;
+		if (cobj2->val->size) {
+			cobj1->val->d.str=n_alloc(N, (cobj2->val->size+1)*sizeof(char));
+			nc_memcpy(cobj1->val->d.str, cobj2->val->d.str, cobj2->val->size);
+			cobj1->val->d.str[cobj1->val->size]=0;
+		} else {
+			cobj1->val->d.str=NULL;
+		}
+		break;
 	default:
 		n_error(N, NE_SYNTAX, "n_copyval", "unhandled object type");
 	}
@@ -95,6 +106,9 @@ void n_joinstr(nes_state *N, obj_t *cobj, char *str, int len)
 
 void n_freeval(nes_state *N, obj_t *cobj)
 {
+	NES_CDATA *chead;
+	NES_CFREE cfunc;
+
 	if ((cobj==NULL)||(cobj->val==NULL)) return;
 	if ((cobj->val->type==NT_STRING)||(cobj->val->type==NT_NFUNC)) {
 		if (cobj->val->attr&NST_LINK) {
@@ -105,6 +119,17 @@ void n_freeval(nes_state *N, obj_t *cobj)
 		}
 	} else if (cobj->val->type==NT_TABLE) {
 		nes_freetable(N, cobj);
+	} else if (cobj->val->type==NT_CDATA) {
+		/* try to call this object's reaper function */
+		if ((chead=(NES_CDATA *)cobj->val->d.cdata)!=NULL) {
+			if ((cfunc=chead->obj_term)!=NULL) {
+				cfunc(N, cobj);
+			}
+		}
+		/* last call */
+		if (cobj->val->d.str!=NULL) {
+			n_free(N, (void *)&cobj->val->d.str);
+		}
 	}
 	cobj->val->type=NT_NULL;
 	cobj->val->size=0;
@@ -129,7 +154,6 @@ obj_t *n_newiobj(nes_state *N, int index)
 	obj_t *obj=n_alloc(N, sizeof(obj_t));
 
 	/* nc_memset(obj, 0, sizeof(obj_t)); */
-	obj->parent=NULL;
 	obj->prev=NULL;
 	obj->next=NULL;
 	obj->val=NULL;
@@ -289,7 +313,6 @@ obj_t *nes_setobj(nes_state *N, obj_t *tobj, char *oname, unsigned short otype, 
 				}
 			}
 		}
-		cobj->parent=tobj;
 		if (cobj->val->type==NT_TABLE) cobj->val->attr|=sortattr;
 	}
 	switch (otype) {
@@ -313,6 +336,10 @@ obj_t *nes_setobj(nes_state *N, obj_t *tobj, char *oname, unsigned short otype, 
 	case NT_CFUNC :
 		cobj->val->d.cfunc=_fptr;
 		break;
+	case NT_CDATA :
+		cobj->val->size=_slen;
+		cobj->val->d.str=_str;
+		break;
 	}
 	if (ostr) n_free(N, (void *)&ostr);
 	return cobj;
@@ -332,4 +359,34 @@ void nes_freetable(nes_state *N, obj_t *tobj)
 	}
 	tobj->val->d.table=NULL;
 	return;
+}
+
+num_t nes_tonum(nes_state *N, obj_t *cobj)
+{
+	if (nes_isnull(cobj)) return 0;
+	switch (cobj->val->type) {
+	case NT_BOOLEAN : return cobj->val->d.num?1:0;
+	case NT_NUMBER  : return cobj->val->d.num;
+	case NT_STRING  : return nes_aton(N,cobj->val->d.str);
+	case NT_TABLE   : return 0;
+	case NT_NFUNC   :
+	case NT_CFUNC   : return 0;
+	default         : return 0;
+	}
+	return 0;
+}
+
+char *nes_tostr(nes_state *N, obj_t *cobj)
+{
+	if (nes_isnull(cobj)) return "null";
+	switch (cobj->val->type) {
+	case NT_BOOLEAN : return cobj->val->d.num?"true":"false";
+	case NT_NUMBER  : return nes_ntoa(N,N->numbuf,cobj->val->d.num,-10,6);
+	case NT_STRING  : return cobj->val->d.str?cobj->val->d.str:"";
+	case NT_TABLE   : return "";
+	case NT_NFUNC   :
+	case NT_CFUNC   : return "";
+	default         : return "";
+	}
+	return "";
 }

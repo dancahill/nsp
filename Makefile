@@ -3,11 +3,14 @@
 CC   = gcc
 MAKE = make
 
-all: _libnesla min _libneslamath _libneslaext _libneslatcp cli
+#all: _libnesla min deps _libneslaext _libneslamath _libneslatcp cli
+all: _libnesla min deps _libneslaext _libneslaldap _libneslamath _libneslaodbc _libneslatcp cli
 #	@./bin/nesla scripts/samples/hello.nes
-	@echo
 	@echo "	Run 'make targets' to list more options."
 	@echo
+
+deps:
+	@./bin/nesla_m -f config.nes
 
 targets:
 	@echo
@@ -25,15 +28,18 @@ targets:
 
 _libnesla:
 	@cd src/libnesla  && $(MAKE) && cd ../..
-	@echo
-	@echo "Core Library built"
-	@echo
+
+_libneslaext:
+	@cd src/libs/ext  && $(MAKE) && cd ../..
+
+_libneslaldap:
+	@cd src/libs/ldap && $(MAKE) && cd ../..
 
 _libneslamath:
 	@cd src/libs/math && $(MAKE) && cd ../..
 
-_libneslaext:
-	@cd src/libs/ext  && $(MAKE) && cd ../..
+_libneslaodbc:
+	@cd src/libs/odbc && $(MAKE) && cd ../..
 
 _libneslatcp:
 	@cd src/libs/tcp  && $(MAKE) && cd ../..
@@ -50,7 +56,7 @@ cli:
 	@echo
 
 min:
-	@cd src/hosts/min     && $(MAKE) && cd ../../..
+	@cd src/hosts/min     && $(MAKE) -s && cd ../../..
 	@echo
 	@echo -n "Minimal Interpreter built"
 	@./bin/nesla_m -e "var x='gnikrow dna ';for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));"
@@ -76,24 +82,27 @@ test2:
 distclean: clean
 
 clean:
-	@cd src/libnesla     && $(MAKE) -s clean && cd ../..
-	@cd src/libs/math && $(MAKE) -s clean && cd ../..
-	@cd src/libs/ext  && $(MAKE) -s clean && cd ../..
-	@cd src/libs/tcp  && $(MAKE) -s clean && cd ../..
+	@touch src/Rules.mak
+	@cd src/libnesla      && $(MAKE) -s clean && cd ../..
+	@cd src/libs/ext      && $(MAKE) -s clean && cd ../../..
+	@cd src/libs/ldap     && $(MAKE) -s clean && cd ../../..
+	@cd src/libs/math     && $(MAKE) -s clean && cd ../../..
+	@cd src/libs/odbc     && $(MAKE) -s clean && cd ../../..
+	@cd src/libs/tcp      && $(MAKE) -s clean && cd ../../..
 	@cd src/hosts/cgi     && $(MAKE) -s clean && cd ../../..
 	@cd src/hosts/cli     && $(MAKE) -s clean && cd ../../..
 	@cd src/hosts/min     && $(MAKE) -s clean && cd ../../..
 	@cd src/hosts/ctest   && $(MAKE) -s clean && cd ../../..
 	@cd src/hosts/nullgw  && $(MAKE) -s clean && cd ../../..
-	@rm -rf autom4te.cache config.log config.status *~
-	@rm -f bin/*.exe lib/*.lib
+	@rm -f autom4te.cache config.log config.status *~
+	@rm -f bin/*.exe lib/*.lib src/Rules.mak
 	@rm -rf obj
 
 # the rest are more useful to me than they are to you
 
 ver:
 	@make clean
-	@joe `grep -lR "0\.4\." *`
+	@joe `grep -lR "0\.5\." *`
 	@rm `find -name *~`
 
 showbug:
@@ -114,8 +123,10 @@ ctest: all
 
 wc:
 	@wc `find src/libnesla  -name *.[ch]`
-	@wc `find src/libs/math -name *.[ch]`
 	@wc `find src/libs/ext  -name *.[ch]`
+	@wc `find src/libs/ldap -name *.[ch]`
+	@wc `find src/libs/math -name *.[ch]`
+	@wc `find src/libs/odbc -name *.[ch]`
 	@wc `find src/libs/tcp  -name *.[ch]`
 
 time:

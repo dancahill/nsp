@@ -16,9 +16,12 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nesla/libnesla.h"
-#include "nesla/libneslaext.h"
+#include "nesla/libext.h"
 #include <string.h>
 #ifdef WIN32
+#define strcasecmp stricmp
+#endif
+#ifdef __TURBOC__
 #define strcasecmp stricmp
 #endif
 
@@ -92,7 +95,7 @@ static char *neslaext_xml_readsub(nes_state *N, obj_t *tobj, char *ptr)
 						if (aobj==NULL) aobj=nes_settable(N, nobj, "!attributes");
 						cobj=nes_setstr(N, aobj, namebuf, tb, t-tb);
 						if ((q)&&(*t==q)) t++;
-						if (N->debug) n_warn(N, "neslaext_xml_readsub", "new attr  '%s->%s' = '%s'", cobj->parent->parent->parent->name, cobj->name, nes_tostr(N, cobj));
+						/* if (N->debug) n_warn(N, "neslaext_xml_readsub", "new attr  '%s->%s' = '%s'", cobj->parent->parent->parent->name, cobj->name, nes_tostr(N, cobj)); */
 					}
 				}
 				while (nc_isspace(*t)) t++;
@@ -113,17 +116,17 @@ static char *neslaext_xml_readsub(nes_state *N, obj_t *tobj, char *ptr)
 			b=e;
 		}
 		/* if no closing tag, then recurse for the next tree level */
-		if ((nobj->parent!=NULL)&&(nobj->parent->name[0]!='!')) {
+		if ((tobj!=NULL)&&(tobj->name[0]!='!')) {
 			/* this is a HACK. */
-			/* i'm too lazy to research *ml, but these tags arent't expected to have a closing / */
-			p=nobj->parent->name;
+			/* i'm too lazy to research *ml, but these tags aren't expected to have a closing / */
+			p=tobj->name;
 			if (strcasecmp(p, "META")==0) end=1;
 			if (strcasecmp(p, "LINK")==0) end=1;
 			if (strcasecmp(p, "IMG")==0) end=1;
 			if (strcasecmp(p, "BR")==0) end=1;
 			if (strcasecmp(p, "HR")==0) end=1;
 		}
-		if (N->debug) n_warn(N, "neslaext_xml_readsub", "... '%s'", nobj->parent->name);
+		if (N->debug) n_warn(N, "neslaext_xml_readsub", "... '%s'", tobj->name);
 		if (!end) b=neslaext_xml_readsub(N, nobj, b);
 		if (b==NULL) break;
 	}

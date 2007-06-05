@@ -1,6 +1,4 @@
 # Makefile for NullLogic Embedded Scripting Language
-include ../Rules.mak
-
 CC      = gcc
 CFLAGS  = -Wall -g -O2 -I../../include
 OBJECTS = api.o exec.o lib.o libc.o loop.o obj.o parse.o

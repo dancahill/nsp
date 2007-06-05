@@ -27,11 +27,15 @@ void n_if(nes_state *N)
 l1:
 	nextop();
 	if (N->lastop==OP_POPAREN) {
-		N->lastop=OP_UNDEFINED;
-		cobj=nes_eval(N, (char *)N->readptr);
-		if ((cobj==NULL)||(cobj->val==NULL)) n_error(N, NE_SYNTAX, fn, "null object");
-		if (N->lastop!=OP_PCPAREN) n_error(N, NE_SYNTAX, fn, "missing ) bracket");
-		t=cobj->val->d.num?1:0;
+		if (!done) {
+			N->lastop=OP_UNDEFINED;
+			cobj=nes_eval(N, (char *)N->readptr);
+			if ((cobj==NULL)||(cobj->val==NULL)) n_error(N, NE_SYNTAX, fn, "null object");
+			if (N->lastop!=OP_PCPAREN) n_error(N, NE_SYNTAX, fn, "missing ) bracket");
+			t=cobj->val->d.num?1:0;
+		} else {
+			n_skipto(N, OP_PCPAREN);
+		}
 	}
 	nextop();
 l2:

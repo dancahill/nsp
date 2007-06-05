@@ -1,31 +1,224 @@
 #!/usr/bin/nesla
 if (type(expect)!='function') include("_expect.nes");
 function testtcp() {
+	function test_tcpserv() {
+		# requires _tcpserv.nes to be running
+		sock=tcp.open("localhost", 1234, 0);
+		if (type(sock)!='sock4') {
+			print("can't connect to test server - try running _tcpserv.nes first\n");
+			return;
+		}
+		o=tcp.write(sock, "ping\r\n");
+		print("wrote ", o, " bytes\n");
+		i=tcp.gets(sock);
+		print("read: ", i, "\n");
+		tcp.close(sock);
+		io.flush();
+		return;
+	}
+	function test_http() {
+		sock=tcp.open("localhost", 80, 0);
+		if (type(sock)!='sock4') {
+			print("can't connect to http server\n");
+			return;
+		}
+		o=tcp.write(sock, "GET /nesla/version.php HTTP/1.0\r\n\r\n");
+		print("wrote ", o, " bytes\n");
+
+		i=tcp.gets(sock);
+		x=string.str(i, " ");
+		p=string.sub(i, 0, size(i)-size(x));
+		c=string.sub(x, 1, size(x));
+		x=string.str(c, " ");
+		c=string.sub(c, 0, size(c)-size(x));
+		x=string.sub(x, 1, size(x));
+		print("[", i, "]\n");
+		print("[", p, "][", c, "][", x, "]\n");
+
+		while (1) {
+			i=tcp.gets(sock);
+			if (i=="") break;
+			print("read: ", i, "\n");
+		}
+		while (1) {
+			i=tcp.read(sock);
+			if (i=="") break;
+			print("read body :\n", i, "\n");
+		}
+		tcp.close(sock);
+		io.flush();
+		return;
+	}
+	function test_ftp() {
+		sock=tcp.open("localhost", 21, 0);
+		if (type(sock)!='sock4') {
+			print("can't connect to ftp server\n");
+			return;
+		}
+		i=tcp.gets(sock);
+		print("read: ", i, "\n");
+		o=tcp.write(sock, "USER anonymous\r\n");
+		i=tcp.gets(sock);
+		print("read: ", i, "\n");
+		o=tcp.write(sock, "PASS nobody@nowhere.com\r\n");
+		i=tcp.gets(sock);
+		print("read: ", i, "\n");
+		o=tcp.write(sock, "SYST\r\n");
+		i=tcp.gets(sock);
+		print("read: ", i, "\n");
+		o=tcp.write(sock, "FEAT\r\n");
+		while (1) {
+			i=tcp.gets(sock);
+			print("read: ", i, "\n");
+			if (string.sub(i, 0, 4)=="211 ") break;
+			if (string.cmp(i, "211")==0) break;
+		}
+		o=tcp.write(sock, "PWD\r\n");
+		i=tcp.gets(sock);
+		print("read: ", i, "\n");
+		o=tcp.write(sock, "TYPE A\r\n");
+		i=tcp.gets(sock);
+		print("read: ", i, "\n");
+		o=tcp.write(sock, "PASV\r\n");
+		i=tcp.gets(sock);
+		print("read: ", i, "\n");
+		i=string.split(i, "(");
+		y=string.split(i[1], ")");
+		addr=string.split(y[0], ",");
+		if (size(addr)!=6) {
+			print("couldn't parse the host address\n");
+			printvar(addr);
+			print(size(addr));
+		} else {
+			o=tcp.write(sock, "LIST\r\n");
+			sock2=tcp.open(addr[0]+'.'+addr[1]+'.'+addr[2]+'.'+addr[3], tonumber(addr[4])*256+tonumber(addr[5]), 0);
+			i=tcp.read(sock2);
+			print("read ", size(i), " bytes of data:\n", i, "\n");
+			tcp.close(sock2);
+		}
+		while (1) {
+			i=tcp.gets(sock);
+			print("read: ", i, "\n");
+			if (string.sub(i, 0, 4)=="226 ") break;
+			if (string.cmp(i, "226")==0) break;
+		}
+		o=tcp.write(sock, "REST 0\r\n");
+		i=tcp.gets(sock);
+		print("read: ", i, "\n");
+		o=tcp.write(sock, "QUIT\r\n");
+		i=tcp.gets(sock);
+		print("read: ", i, "\n");
+		tcp.close(sock);
+		io.flush();
+		return;
+	}
+	function test_pop3() {
+		sock=tcp.open("localhost", 110, 0);
+		if (type(sock)!='sock4') {
+			print("can't connect to pop3 server\n");
+			return;
+		}
+		i=tcp.gets(sock);
+		print("read: ", i, "\n");
+		tcp.write(sock, "user null\r\n");
+		i=tcp.gets(sock);
+		print("read: ", i, "\n");
+		o=tcp.write(sock, "pass secret\r\n");
+		i=tcp.gets(sock);
+		print("read: ", i, "\n");
+		if (string.sub(i, 0, 3)=="+OK") {
+			o=tcp.write(sock, "list\r\n");
+			i=tcp.gets(sock);
+			print("read: ", i, "\n");
+		}
+		o=tcp.write(sock, "QUIT\r\n");
+		i=tcp.gets(sock);
+		print("read: ", i, "\n");
+		tcp.close(sock);
+		io.flush();
+		return;
+	}
+	function test_smtp() {
+		sock=tcp.open("localhost", 25, 0);
+		if (type(sock)!='sock4') {
+			print("can't connect to smtp server\n");
+			return;
+		}
+		i=tcp.gets(sock);
+		o=tcp.write(sock, "HELO <localhost>\r\n");
+		i=tcp.gets(sock);
+		print("read: ", i, "\n");
+		o=tcp.write(sock, "MAIL From: <nulllogic@localhost>\r\n");
+		i=tcp.gets(sock);
+		print("read: ", i, "\n");
+		o=tcp.write(sock, "RCPT To: <nulllogic@localhost>\r\n");
+		i=tcp.gets(sock);
+		print("read: ", i, "\n");
+		o=tcp.write(sock, "DATA\r\n");
+		i=tcp.gets(sock);
+		print("read: ", i, "\n");
+		o=tcp.write(sock, "From: Dan Cahill <nulllogic@localhost>\r\n");
+		o=tcp.write(sock, "To: Dan Cahill <nulllogic@localhost>\r\n");
+		o=tcp.write(sock, "Subject: Testing\r\n");
+		o=tcp.write(sock, "\r\n");
+		o=tcp.write(sock, "This is a test.\r\n");
+		o=tcp.write(sock, "\r\n.\r\n");
+		i=tcp.gets(sock);
+		print("read: ", i, "\n");
+		o=tcp.write(sock, "QUIT\r\n");
+		i=tcp.gets(sock);
+		print("read: ", i, "\n");
+		tcp.close(sock);
+		io.flush();
+		return;
+	}
+
 	if (type(http)!='table') {
 		print("SKIPPING TCP TESTS\n");
 		return;
 	}
 	print("\tsucking http://nesla.sourceforge.net/nesla/\n");
 	ht=http.get(0, "nesla.sourceforge.net", 80, "/nesla/");
+#	expect("ht.status",     "HTTP/1.1 200 OK",   ht.status);
 	if (type(ht)!='table') {
 		print("\t[", ht, "]\n");
 	} else {
-		X=xml.read(ht.body);
-		expect("xml.read(...)", "NullLogic - NESLA", X['HTML'][0]['HEAD'][0]['TITLE'][0]['value']);
-		print("\tstring.len(ht.body) = ", string.len(ht.body), "\n");
-
+		status=string.split(ht.status, " ");
+		expect("status",     "200",   status[1]);
+		if (tonumber(status[1])==200) {
+			X=xml.read(ht.body);
+			expect("xml.read(...)", "NullLogic - NESLA", X['HTML'][0]['HEAD'][0]['TITLE'][0]['value']);
+		}
 		print("\tsucking http://nesla.sourceforge.net/nesla/version.php\n");
 		ht=http.get(0, "nesla.sourceforge.net", 80, "/nesla/version.php");
+#		expect("ht.status",     "HTTP/1.1 200 OK",   ht.status);
 		if (type(ht)!='table') {
 			print("\t[", ht, "]\n");
 		} else {
-			X=xml.read(ht.body);
-			expect("Latest Version", _version_, X['version'][0]['major'][0]['value']+'.'+X['version'][0]['minor'][0]['value']+'.'+X['version'][0]['point'][0]['value']);
+			status=string.split(ht.status, " ");
+			expect("status",     "200",   status[1]);
+			if (tonumber(status[1])==200) {
+				X=xml.read(ht.body);
+				expect("Latest Version", _version_, X['version'][0]['major'][0]['value']+'.'+X['version'][0]['minor'][0]['value']+'.'+X['version'][0]['point'][0]['value']);
+			}
 		}
 	}
 #	print("[[[", ht.head, "]]]\n");
 #	print("[[[", ht.body, "]]]\n");
-#	printvars(ht);
+#	printvar(ht);
+	if (type(tcp.open)=='function') {
+		print("\truntime = ", runtime(), " seconds\n");
+		test_tcpserv();
+		print("\truntime = ", runtime(), " seconds\n");
+		test_http();
+		print("\truntime = ", runtime(), " seconds\n");
+#		test_ftp();
+#		print("\truntime = ", runtime(), " seconds\n");
+#		test_pop3();
+#		print("\truntime = ", runtime(), " seconds\n");
+#		test_smtp();
+#		print("\truntime = ", runtime(), " seconds\n");
+	}
 	return;
 }
 testtcp();

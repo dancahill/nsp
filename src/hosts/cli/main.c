@@ -16,9 +16,17 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nesla/nesla.h"
-#include "nesla/libneslamath.h"
-#include "nesla/libneslaext.h"
-#include "nesla/libneslatcp.h"
+#include "nesla/libext.h"
+#ifdef HAVE_LDAP
+#include "nesla/libldap.h"
+#endif
+#ifdef HAVE_MATH
+#include "nesla/libmath.h"
+#endif
+#include "nesla/libodbc.h"
+#ifndef __TURBOC__
+#include "nesla/libtcp.h"
+#endif
 #include <stdio.h>
 #include <string.h>
 #ifdef WIN32
@@ -138,11 +146,19 @@ int main(int argc, char *argv[], char *envp[])
 	if ((N=nes_newstate())==NULL) return -1;
 	setsigs();
 	N->debug=0;
+	neslaext_register_all(N);
+#ifdef HAVE_LDAP
+	neslaldap_register_all(N);
+#endif
 #ifdef HAVE_MATH
 	neslamath_register_all(N);
 #endif
-	neslaext_register_all(N);
+#ifdef HAVE_ODBC
+	neslaodbc_register_all(N);
+#endif
+#ifndef __TURBOC__
 	neslatcp_register_all(N);
+#endif
 	/* add env */
 	tobj=nes_settable(N, &N->g, "_ENV");
 	for (i=0;envp[i]!=NULL;i++) {

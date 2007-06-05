@@ -12,6 +12,16 @@ function testif() {
 		str=str+"test 3 (bad)";
 	}
 	expect("simple 'if' test", "test 2 (good)", str);
+
+	x=0;
+	if (x==0) {
+	} else if (x==x++) {
+	} else if (x==x++) {
+	} else if (x==x++) {
+	}
+	# this actually returned 3 in 0.5.0
+	expect("simple 'if' test 2", 0, x);
+
 	return;
 }
 testif();

@@ -13,14 +13,18 @@ CD ..\..
 CD SRC\HOSTS\MIN
 NMAKE /C /S /F MAKEFILE.VC
 CD ..\..\..
-bin\nesla_m.exe scripts\samples\hello.nes
+bin\nesla_m.exe -e "var x='\n\ngnikrow dna ';print('Minimal Interpreter built');for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));"
 
+@ECHO libneslaext
+CD SRC\LIBS\EXT
+NMAKE /C /S /F MAKEFILE.VC
+CD ..\..\..
 @ECHO libneslamath
 CD SRC\LIBS\MATH
 NMAKE /C /S /F MAKEFILE.VC
 CD ..\..\..
-@ECHO libneslaext
-CD SRC\LIBS\EXT
+@ECHO libneslaodbc
+CD SRC\LIBS\ODBC
 NMAKE /C /S /F MAKEFILE.VC
 CD ..\..\..
 @ECHO libneslatcp
@@ -31,11 +35,17 @@ CD ..\..\..
 CD SRC\HOSTS\CLI
 NMAKE /C /S /F MAKEFILE.VC
 CD ..\..\..
-bin\nesla.exe scripts\samples\hello.nes
+bin\nesla.exe -e "var x='\n\ngnikrow dna ';print('Standard Interpreter built');for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));"
+rem bin\nesla.exe scripts\samples\hello.nes
 
 @ECHO nesla-cgi
 CD SRC\HOSTS\CGI
 NMAKE /C /S /F MAKEFILE.VC
+CD ..\..\..
+
+@ECHO NesTray
+CD SRC\HOSTS\NESTRAY
+NMAKE /C /S /F NESTRAY.MAK
 CD ..\..\..
 
 goto end

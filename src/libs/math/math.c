@@ -16,11 +16,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nesla/libnesla.h"
-#ifdef __TURBOC__
-#include "nesla/libnes~1.h"
-#else
-#include "nesla/libneslamath.h"
-#endif
+#include "nesla/libmath.h"
 #include <math.h>
 int neslamath_math2(nes_state *N)
 {

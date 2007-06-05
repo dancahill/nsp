@@ -7,8 +7,8 @@ CC            = cl.exe /nologo
 LINK          = link.exe /nologo
 MAKE          = nmake.exe /C /S /Y /F
 
-BIN_CFLAGS    = /W3 /O2 /ML /I "../../../include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /FD /c
-BIN_LDFLAGS   = /subsystem:console /pdb:none /machine:I386 libc.lib ../../../lib/libnesla.lib ../../../lib/libneslamath.lib ../../../lib/libneslaext.lib ../../../lib/libneslatcp.lib
+BIN_CFLAGS    = /W3 /O2 /ML /I "../../../include" /D "HAVE_ODBC" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /FD /c
+BIN_LDFLAGS   = /subsystem:console /pdb:none /machine:I386 libc.lib ../../../lib/libnesla.lib ../../../lib/libneslaext.lib ../../../lib/libneslamath.lib ../../../lib/libneslaodbc.lib ../../../lib/libneslatcp.lib
 BIN_TARGETDIR = ../../../bin
 
 CFLAGS  = $(BIN_CFLAGS)

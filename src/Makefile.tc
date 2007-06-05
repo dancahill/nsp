@@ -1,19 +1,46 @@
 .AUTODEPEND
 
-LIBPATH = C:\TC\LIB
-INCLUDEPATH = C:\TC\INCLUDE;..\INCLUDE
-#PARAMS = -I$(INCLUDEPATH) -L$(LIBPATH) -mh -v -vi- -w-ret -w-nci -w-inl -wpin -wamb -wamp -w-par -wasm -wcln -w-cpt -wdef -w-dup -w-pia -wsig -wnod -w-ill -w-sus -wstv -wucp -wuse -w-ext -w-ias -w-ibc -w-pre -w-nst
-PARAMS = -I$(INCLUDEPATH) -L$(LIBPATH) -mh
-CC = tcc $(PARAMS)
+#		*Translator Definitions*
+CC = tcc +NESLA.CFG
 TASM = TASM
 TLIB = tlib
 TLINK = tlink
+LIBPATH = C:\TC\LIB
+INCLUDEPATH = C:\TC\INCLUDE;..\INCLUDE
 
-EXE_dependencies = api.obj exec.obj lib.obj libc.obj loop.obj obj.obj parse.obj base64.obj dir.obj misc.obj rot13.obj sys.obj xml.obj main.obj
 
-nesla.exe: $(EXE_dependencies)
+#		*Implicit Rules*
+.c.obj:
+  $(CC) -c {$< }
+
+.cpp.obj:
+  $(CC) -c {$< }
+
+#		*List Macros*
+
+
+EXE_dependencies =  \
+ main.obj \
+ api.obj \
+ exec.obj \
+ lib.obj \
+ libc.obj \
+ loop.obj \
+ obj.obj \
+ parse.obj \
+ math.obj \
+ base64.obj \
+ dir.obj \
+ misc.obj \
+ rot13.obj \
+ sys.obj \
+ xml.obj
+
+#		*Explicit Rules*
+nesla.exe: nesla.cfg $(EXE_dependencies)
   $(TLINK) /v/x/c/L$(LIBPATH) @&&|
-c0h.obj+
+c0l.obj+
+main.obj+
 api.obj+
 exec.obj+
 lib.obj+
@@ -21,64 +48,102 @@ libc.obj+
 loop.obj+
 obj.obj+
 parse.obj+
+math.obj+
 base64.obj+
 dir.obj+
 misc.obj+
 rot13.obj+
 sys.obj+
-xml.obj+
-main.obj
+xml.obj
 nesla
 		# no map file
-emu.lib+
-mathh.lib+
-ch.lib
+fp87.lib+
+mathl.lib+
+cl.lib
 |
 
-api.obj: libnesla\api.c
-	@$(CC) -c libnesla\api.c
 
-exec.obj: libnesla\exec.c
-	@$(CC) -c libnesla\exec.c
+#		*Individual File Dependencies*
+main.obj: nesla.cfg hosts\cli\main.c
+	$(CC) -c hosts\cli\main.c
 
-lib.obj: libnesla\lib.c 
-	@$(CC) -c libnesla\lib.c
+api.obj: nesla.cfg libnesla\api.c
+	$(CC) -c libnesla\api.c
 
-libc.obj: libnesla\libc.c 
-	@$(CC) -c libnesla\libc.c
+exec.obj: nesla.cfg libnesla\exec.c
+	$(CC) -c libnesla\exec.c
 
-loop.obj: libnesla\loop.c 
-	@$(CC) -c libnesla\loop.c
+lib.obj: nesla.cfg libnesla\lib.c
+	$(CC) -c libnesla\lib.c
 
-obj.obj: libnesla\obj.c 
-	@$(CC) -c libnesla\obj.c
+libc.obj: nesla.cfg libnesla\libc.c
+	$(CC) -c libnesla\libc.c
 
-parse.obj: libnesla\parse.c 
-	@$(CC) -c libnesla\parse.c
+loop.obj: nesla.cfg libnesla\loop.c
+	$(CC) -c libnesla\loop.c
 
-base64.obj: libs\etc\base64.c 
-	@$(CC) -c libs\etc\base64.c
+obj.obj: nesla.cfg libnesla\obj.c
+	$(CC) -c libnesla\obj.c
 
-dir.obj: libs\etc\dir.c 
-	@$(CC) -c libs\etc\dir.c
+parse.obj: nesla.cfg libnesla\parse.c
+	$(CC) -c libnesla\parse.c
 
-misc.obj: libs\etc\misc.c 
-	@$(CC) -c libs\etc\misc.c
+math.obj: nesla.cfg libs\math\math.c
+	$(CC) -c libs\math\math.c
 
-rot13.obj: libs\etc\rot13.c 
-	@$(CC) -c libs\etc\rot13.c
+base64.obj: nesla.cfg libs\ext\base64.c
+	$(CC) -c libs\ext\base64.c
 
-sys.obj: libs\etc\sys.c 
-	@$(CC) -c libs\etc\sys.c
+dir.obj: nesla.cfg libs\ext\dir.c
+	$(CC) -c libs\ext\dir.c
 
-xml.obj: libs\etc\xml.c 
-	@$(CC) -c libs\etc\xml.c
+misc.obj: nesla.cfg libs\ext\misc.c
+	$(CC) -c libs\ext\misc.c
 
-main.obj: hosts\cli\main.c
-	@$(CC) -c hosts\cli\main.c
+rot13.obj: nesla.cfg libs\ext\rot13.c
+	$(CC) -c libs\ext\rot13.c
 
-.c.obj:
-  $(CC) -c {$< }
+sys.obj: nesla.cfg libs\ext\sys.c
+	$(CC) -c libs\ext\sys.c
 
-.cpp.obj:
-  $(CC) -c {$< }
+xml.obj: nesla.cfg libs\ext\xml.c
+	$(CC) -c libs\ext\xml.c
+
+#		*Compiler Configuration File*
+nesla.cfg: makefile.tc
+  copy &&|
+-ml
+-2
+-f287
+-v
+-vi-
+-w-ret
+-w-nci
+-w-inl
+-wpin
+-wamb
+-wamp
+-w-par
+-wasm
+-wcln
+-w-cpt
+-wdef
+-w-dup
+-w-pia
+-wsig
+-wnod
+-w-ill
+-w-sus
+-wstv
+-wucp
+-wuse
+-w-ext
+-w-ias
+-w-ibc
+-w-pre
+-w-nst
+-I$(INCLUDEPATH)
+-L$(LIBPATH)
+| nesla.cfg
+
+

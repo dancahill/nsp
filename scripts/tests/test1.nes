@@ -1,4 +1,11 @@
 #!/usr/bin/nesla
+
+// comment
+
+/*
+multiline comment
+*/
+
 function vars() {
 	if (type(_SERVER)=='table') {
 		print("</FONT></PRE>");
@@ -16,7 +23,8 @@ function vars() {
 		print("<A HREF=javascript:showdebug()>SHOW DEBUG</A>\n");
 		print("<DIV ID=debug STYLE='display:none'><PRE><FONT SIZE=2>\n");
 	}
-	printvars();
+	print("global _GLOBALS = ");
+	printvar(_GLOBALS);
 	if (type(_SERVER)=='table') print("</FONT></PRE></DIV>\n");
 	return;
 }
@@ -55,8 +63,13 @@ function main() {
 	print("-------------------------------------------------------------------\n");
 	include("_tcp.nes");
 	print("-------------------------------------------------------------------\n");
+	include("_ldap.nes");
+	print("-------------------------------------------------------------------\n");
 	include("_indexes.nes");
 	print("-------------------------------------------------------------------\n");
+	expect("size(CARDS)", 52, size(CARDS));
+	global CARDS={};
+	expect("size(CARDS)", 0, size(CARDS));
 	if (type(sqlquery)=='function') Q=sqlquery("SELECT * FROM nullgs_sessions");
 	if (type(dirlist)=='function') D=dirlist(_filepath);
 	print("\t[", date(), " ", time(), "]\n");
@@ -65,16 +78,22 @@ function main() {
 	print("FINISHED TESTS\n");
 	print("-------------------------------------------------------------------\n");
 	expect("total errors", 0, tonumber(errors));
-	global CARDS={};
+
+	if (type(odbc.query)=='function') {
+		io.flush();
+		DSN="DRIVER=MySQL;DATABASE=nullgroupware;USER=root;PASSWORD=shit";
+		Q=odbc.query(DSN, "SELECT * FROM gw_users ORDER BY userid");
+#		Q=odbc.query(DSN, "INSERT INTO gw_users () VALUES ();");
+#		Q=odbc.query(DSN, "DELETE FROM gw_users WHERE userid > 2;");
+	}
 	global _ARGS={};
 	global _ENV={};
 	vars();
 	if (type(_SERVER)=='table') print("</BODY></HTML>");
-	local i=0; for (i=1;i<10;i++) { }
 	return;
 }
 main();
-exit 0;
+#exit 0;
 
 # below is code to read your /etc/passwd file into a table
 #x=file.read('/etc/passwd');
@@ -82,4 +101,4 @@ exit 0;
 #for (i=0;type(y[i])!='null';i++) {
 #	y[i]=string.split(y[i], ':');
 #}
-#printvars();
+#printvar();

@@ -258,7 +258,7 @@ int main(int argc, char *argv[], char *envp[])
 	} else {
 err:
 		send_header(0, "text/html", -1, -1);
-		/* nes_exec(N, "print('<pre>');printvars();print('</pre>');"); */
+		/* nes_exec(N, "print('<pre>');printvar();print('</pre>');"); */
 		printf("Unknown command");
 	}
 	fflush(stdout);

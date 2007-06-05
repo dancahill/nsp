@@ -1,23 +1,23 @@
-# Microsoft Developer Studio Project File - Name="nestray" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="NesTray" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Application" 0x0101
 
-CFG=nestray - Win32 Release
+CFG=NesTray - Win32 Release
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "nestray.mak".
+!MESSAGE NMAKE /f "NesTray.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "nestray.mak" CFG="nestray - Win32 Release"
+!MESSAGE NMAKE /f "NesTray.mak" CFG="NesTray - Win32 Release"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "nestray - Win32 Release" (based on "Win32 (x86) Application")
+!MESSAGE "NesTray - Win32 Release" (based on "Win32 (x86) Application")
 !MESSAGE 
 
 # Begin Project
@@ -35,11 +35,11 @@ RSC=rc.exe
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir "..\..\..\bin"
-# PROP Intermediate_Dir "..\..\..\obj\nestray"
+# PROP Intermediate_Dir "..\..\..\obj\NesTray"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /W3 /GX /O2 /I "..\..\..\include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
+# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "HAVE_ODBC" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
+# ADD CPP /nologo /W3 /GX /O2 /I "..\..\..\include" /D "HAVE_ODBC" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
 # SUBTRACT CPP /YX /Yc /Yu
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
@@ -54,7 +54,7 @@ LINK32=link.exe
 # SUBTRACT LINK32 /map
 # Begin Target
 
-# Name "nestray - Win32 Release"
+# Name "NesTray - Win32 Release"
 # Begin Group "Headers"
 
 # PROP Default_Filter "*.h"
@@ -93,15 +93,19 @@ SOURCE=..\..\..\lib\libnesla.lib
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\lib\libneslatcp.lib
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\lib\libneslaext.lib
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\lib\libneslamath.lib
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\lib\libneslaodbc.lib
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\lib\libneslatcp.lib
 # End Source File
 # End Target
 # End Project

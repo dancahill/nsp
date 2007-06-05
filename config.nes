@@ -1,0 +1,50 @@
+#!./bin/nesla
+
+function testsub(title, l, c) {
+	if (type(_ENV['CC'])=='string') {
+		cc=_ENV['CC'];
+	} else {
+		cc="cc";
+	}
+	system("rm -f conftest.c conftest.out");
+	file.write("conftest.c", c);
+	r1=system(cc+" conftest.c "+l+" -o conftest.out 2>/dev/null");
+	r2=file.read("conftest.out");
+	system("rm -f conftest.c conftest.out");
+	if ((r1==0)&&(size(r2)>0)) {
+		expect("testing "+title, true, true);
+		return 1;
+	} else {
+		expect("testing "+title, true, false);
+		return 0;
+	}
+}
+
+function dotests() {
+	include("scripts/tests/_expect.nes");
+	Rules_mak="";
+	if (testsub("-pipe", "-pipe", "int main() { return 0; }\n")) {
+		Rules_mak=Rules_mak+"CFLAGS += -pipe\n\n";
+	}
+	if (testsub("-pedantic", "-pedantic", "int main() { return 0; }\n")) {
+		Rules_mak=Rules_mak+"CFLAGS += -pedantic\n\n";
+	}
+	if (testsub("LDAP", "-lldap", "#include <ldap.h>\nint main() { return 0; }\n")) {
+		Rules_mak=Rules_mak+"CFLAGS += -DHAVE_LDAP\nLDFLAGS += -lneslaldap -lldap\n\n";
+	}
+	if (testsub("MATH", "-lm", "#include <math.h>\nint main() { return 0; }\n")) {
+		Rules_mak=Rules_mak+"CFLAGS += -DHAVE_MATH\nLDFLAGS += -lneslamath -lm\n\n";
+	}
+	if (testsub("ODBC", "-lodbc", "#ifdef __CYGWIN__\n#include <windows.h>\n#endif\n#include <sql.h>\n#include <sqlext.h>\nint main() { return 0; }\n")) {
+		Rules_mak=Rules_mak+"CFLAGS += -DHAVE_ODBC\nLDFLAGS += -lneslaodbc -lodbc\n\n";
+	}
+	if (testsub("SSL", "-lssl -lcrypto", "#include <openssl/ssl.h>\nint main() { return 0; }\n")) {
+		Rules_mak=Rules_mak+"CFLAGS += -DHAVE_SSL\nLDFLAGS += -lcrypto -lssl\n\n";
+	}
+	file.write("src/Rules.mak", Rules_mak);
+	print("\n");
+	return;
+}
+
+r=file.read("src/Rules.mak");
+if (type(r)!='string') dotests();

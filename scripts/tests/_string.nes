@@ -26,6 +26,8 @@ function teststring() {
 	expect("string.split()",  "aa+bb+cc+dd+null", x[0]+'+'+x[1]+'+'+x[2]+'+'+x[3]+'+'+tostring(x[4]));
 	x=string.split("aa|bb|cc|dd|", "|");
 	expect("string.split()",  "aa+bb+cc+dd+", x[0]+'+'+x[1]+'+'+x[2]+'+'+x[3]+'+'+tostring(x[4]));
+	x=string.split("aaz|zbbz|zccz|zddz|z", "z|z");
+	expect("string.split()",  "aa+bb+cc+dd+", x[0]+'+'+x[1]+'+'+x[2]+'+'+x[3]+'+'+tostring(x[4]));
 	local x="1|2|3|4|5|6|7";
 	while (x==true) {
 		print("\t", x, "\n");

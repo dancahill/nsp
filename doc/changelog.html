@@ -16,6 +16,20 @@ NESLA NullLogic Embedded Scripting Language ChangeLog
 </small>
 <hr>
 
+<h2>0.6.0 (2007-06-05)</h2>
+<ul>
+  <li>'else if' is no longer evaluated after a previous comparison returns true</li>
+  <li>added a simple dependency tester written in nesla</li>
+  <li>added support for Windows ODBC and unixODBC (tested with mysql and mdb)</li>
+  <li>added working tcp functions, i.e. open, close, read, write, bind, accept ...</li>
+  <li>basic ssl client and server code is now working</li>
+  <li>added working demos of raw http, ftp, pop3, etc...  controlled entirely by nesla code</li>
+  <li>added working management for externally defined c structures</li>
+  <li>added a very basic ldap.search() function</li>
+  <li>changed nes_tostr from macro to function.  it was making my binaries look fat.</li>
+  <li>minor improvements to the Win32 taskbar host</li>
+  <li>added support for c comments</li>
+</ul>
 <h2>0.5.0 (2007-04-25)</h2>
 <ul>
   <li>Added a Win32 taskbar host for primitive desktop scripting</li>

@@ -1,14 +1,14 @@
 # Makefile for NullLogic Embedded Scripting Language
 CC      = gcc
 CFLAGS  = -Wall -g -O2 -I../../../include
-OBJECTS = http.o misc.o ssl.o tcp.o
-TARGET  = ../../../lib/libneslatcp.a
+OBJECTS = odbc.o
+TARGET  = ../../../lib/libneslaodbc.a
 
 include ../../Rules.mak
 
-all: _libneslatcp
+all: _libneslaodbc
 
-_libneslatcp: $(OBJECTS)
+_libneslaodbc: $(OBJECTS)
 	@ar cru $(TARGET) $(OBJECTS)
 	@ranlib $(TARGET)
 

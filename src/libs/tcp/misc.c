@@ -16,11 +16,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nesla/libnesla.h"
-#ifdef __TURBOC__
-#include "nesla/libnes~1.h"
-#else
-#include "nesla/libneslatcp.h"
-#endif
+#include "nesla/libtcp.h"
 
 int neslatcp_register_all(nes_state *N)
 {
@@ -38,5 +34,15 @@ int neslatcp_register_all(nes_state *N)
 	tobj=nes_settable(N, &N->g, "http");
 	tobj->val->attr|=NST_HIDDEN;
 	nes_setcfunc(N, tobj,  "get", (NES_CFUNC)neslatcp_http_get);
+
+	tobj=nes_settable(N, &N->g, "tcp");
+	tobj->val->attr|=NST_HIDDEN;
+	nes_setcfunc(N, tobj,  "bind",   (NES_CFUNC)neslatcp_tcp_bind);
+	nes_setcfunc(N, tobj,  "accept", (NES_CFUNC)neslatcp_tcp_accept);
+	nes_setcfunc(N, tobj,  "open",   (NES_CFUNC)neslatcp_tcp_open);
+	nes_setcfunc(N, tobj,  "close",  (NES_CFUNC)neslatcp_tcp_close);
+	nes_setcfunc(N, tobj,  "read",   (NES_CFUNC)neslatcp_tcp_read);
+	nes_setcfunc(N, tobj,  "gets",   (NES_CFUNC)neslatcp_tcp_gets);
+	nes_setcfunc(N, tobj,  "write",  (NES_CFUNC)neslatcp_tcp_write);
 	return 0;
 }

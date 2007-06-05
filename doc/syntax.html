@@ -1,24 +1,146 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
-<html>
-<head>
-<title>NESLA NullLogic Embedded Scripting Language Reference Manual</title>
-<link rel="stylesheet" href="nesla.css">
-</head>
-<body>
-<hr>
-<h1>
-<a href="http://nesla.sourceforge.net/"><img src="nesla.png" alt="" border="0" height="32" width="32"></a>
-NESLA NullLogic Embedded Scripting Language Reference Manual
-</h1>
-<small>
-<a href="copyright.html">Copyright</a>
-&copy; 2007 Dan Cahill.  All rights reserved.
-</small>
-<hr>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>NullLogic - Welcome</TITLE>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; CHARSET=us-ascii">
+<META HTTP-EQUIV="Keywords" CONTENT="nulllogic, nesla, groupware, webmail">
+<META HTTP-EQUIV="Description" CONTENT="Nesla is the script language for C programmers.">
+<LINK REL="SHORTCUT ICON" HREF="/favicon.ico">
+<STYLE TYPE="text/css">
+A                { COLOR: #0000FF; TEXT-DECORATION: underline }
+A.SIDEMENU       { COLOR: #FFFFFF; TEXT-DECORATION: none; }
+A.SIDEMENU:HOVER { COLOR: #399CDE; TEXT-DECORATION: none; }
+P { text-align:justify }
+</STYLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="/style.css">
+<SCRIPT LANGUAGE=JavaScript TYPE="text/javascript">
+<!--
+function showpage(c,p) {
+	var coll=document.all.tags("DIV");
+	if (coll==null) return;
+	for (i=0;i<coll.length;i++) {
+		if (coll[i].id=='c'+c+'m') {
+			coll[i].style.display='block';
+		} else if (coll[i].id=='c'+c+'p'+p) {
+			coll[i].style.display='block';
+		} else {
+			coll[i].style.display='none';
+		}
+	}
+}
+// -->
+</SCRIPT>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="#000066" VLINK="#606060" MARGINWIDTH="0" MARGINHEIGHT="0" TOPMARGIN="0" LEFTMARGIN="0" RIGHTMARGIN="0" BOTTOMMARGIN="0">
 
+<BASEFONT FACE="Verdana, Arial, Helvetica, sans-serif" SIZE="2">
+<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0" HEIGHT="100%" WIDTH="100%">
+<TR>
+	<TD BGCOLOR="#003399" COLSPAN=3 ALIGN="CENTER" VALIGN="TOP" HEIGHT=40 WIDTH="99%" CLASS="welcome" NOWRAP>
+	<h2><a href="http://nesla.sourceforge.net/nesla/" CLASS="sidemenu">NullLogic Embedded Scripting Language - Reference</a></h2>
+	</TD>
+	<TD WIDTH="10" BGCOLOR="#003399" ALIGN="RIGHT" VALIGN="BOTTOM"><IMG SRC="/images/blue-rounder1.gif" WIDTH="14" HEIGHT="20" BORDER="0" ALT=""></TD>
+</TR>
+<TR>
+	<TD HEIGHT="100%" WIDTH="200" BGCOLOR="#003399" VALIGN=TOP>
+		<HR NOSHADE SIZE="0.5" WIDTH="160">
+		<H2 CLASS="lefttitle"><FONT COLOR="#399CDE">&nbsp;Site Menu</FONT></H2>
+		<P CLASS="sidemenu">
+		<A CLASS="sidemenu" HREF="#c1p0"              onClick="showpage('1', '0');             return false;"><NOBR>Introduction</NOBR></A><BR>
+<DIV ID=c1m STYLE='display: block'>
+</DIV>
+		<A CLASS="sidemenu" HREF="#c2p0"              onClick="showpage('2', '0');             return false;"><NOBR>Functions - misc</NOBR></A><BR>
+<DIV ID=c2m STYLE='display: block'>
+		<A CLASS="sidemenu" HREF="#c2p_date"          onClick="showpage('2', '_date');         return false;">&nbsp;&nbsp;date();</A><BR>
+		<A CLASS="sidemenu" HREF="#c2p_include"       onClick="showpage('2', '_include');      return false;">&nbsp;&nbsp;include();</A><BR>
+		<A CLASS="sidemenu" HREF="#c2p_print"         onClick="showpage('2', '_print');        return false;">&nbsp;&nbsp;print();</A><BR>
+		<A CLASS="sidemenu" HREF="#c2p_printvar"      onClick="showpage('2', '_printvar');     return false;">&nbsp;&nbsp;printvar();</A><BR>
+		<A CLASS="sidemenu" HREF="#c2p_runtime"       onClick="showpage('2', '_runtime');      return false;">&nbsp;&nbsp;runtime();</A><BR>
+		<A CLASS="sidemenu" HREF="#c2p_size"          onClick="showpage('2', '_size');         return false;">&nbsp;&nbsp;size();</A><BR>
+		<A CLASS="sidemenu" HREF="#c2p_sleep"         onClick="showpage('2', '_sleep');        return false;">&nbsp;&nbsp;sleep();</A><BR>
+		<A CLASS="sidemenu" HREF="#c2p_time"          onClick="showpage('2', '_time');         return false;">&nbsp;&nbsp;time();</A><BR>
+		<A CLASS="sidemenu" HREF="#c2p_tonumber"      onClick="showpage('2', '_tonumber');     return false;">&nbsp;&nbsp;tonumber();</A><BR>
+		<A CLASS="sidemenu" HREF="#c2p_tostring"      onClick="showpage('2', '_tostring');     return false;">&nbsp;&nbsp;tostring();</A><BR>
+		<A CLASS="sidemenu" HREF="#c2p_type"          onClick="showpage('2', '_type');         return false;">&nbsp;&nbsp;type();</A><BR>
+		<A CLASS="sidemenu" HREF="#c2p_write"         onClick="showpage('2', '_write');        return false;">&nbsp;&nbsp;write();</A><BR>
+</DIV>
+		<A CLASS="sidemenu" HREF="#c3p0"              onClick="showpage('3', '0');             return false;"><NOBR>Functions - io</NOBR></A><BR>
+<DIV ID=c3m STYLE='display: block'>
+		<A CLASS="sidemenu" HREF="#c3p_io_flush"      onClick="showpage('3', '_io_flush');     return false;">&nbsp;&nbsp;io.flush();</A><BR>
+		<A CLASS="sidemenu" HREF="#c3p_io_print"      onClick="showpage('3', '_io_print');     return false;">&nbsp;&nbsp;io.print();</A><BR>
+		<A CLASS="sidemenu" HREF="#c3p_io_write"      onClick="showpage('3', '_io_write');     return false;">&nbsp;&nbsp;io.write();</A><BR>
+</DIV>
+		<A CLASS="sidemenu" HREF="#c4p0"              onClick="showpage('4', '0');             return false;"><NOBR>Functions - file</NOBR></A><BR>
+<DIV ID=c4m STYLE='display: block'>
+		<A CLASS="sidemenu" HREF="#c4p_file_read"     onClick="showpage('4', '_file_read');    return false;">&nbsp;&nbsp;file.read();</A><BR>
+		<A CLASS="sidemenu" HREF="#c4p_file_write"    onClick="showpage('4', '_file_write');   return false;">&nbsp;&nbsp;file.write();</A><BR>
+</DIV>
+		<A CLASS="sidemenu" HREF="#c5p0"              onClick="showpage('5', '0');             return false;"><NOBR>Functions - string</NOBR></A><BR>
+<DIV ID=c5m STYLE='display: block'>
+		<A CLASS="sidemenu" HREF="#c5p_string_cat"    onClick="showpage('5', '_string_cat');   return false;">&nbsp;&nbsp;string.cat();</A><BR>
+		<A CLASS="sidemenu" HREF="#c5p_string_cmp"    onClick="showpage('5', '_string_cmp');   return false;">&nbsp;&nbsp;string.cmp();</A><BR>
+		<A CLASS="sidemenu" HREF="#c5p_string_icmp"   onClick="showpage('5', '_string_icmp');  return false;">&nbsp;&nbsp;string.icmp();</A><BR>
+		<A CLASS="sidemenu" HREF="#c5p_string_ncmp"   onClick="showpage('5', '_string_ncmp');  return false;">&nbsp;&nbsp;string.ncmp();</A><BR>
+		<A CLASS="sidemenu" HREF="#c5p_string_nicmp"  onClick="showpage('5', '_string_nicmp'); return false;">&nbsp;&nbsp;string.nicmp();</A><BR>
+		<A CLASS="sidemenu" HREF="#c5p_string_len"    onClick="showpage('5', '_string_len');   return false;">&nbsp;&nbsp;string.len();</A><BR>
+		<A CLASS="sidemenu" HREF="#c5p_string_split"  onClick="showpage('5', '_string_split'); return false;">&nbsp;&nbsp;string.split();</A><BR>
+		<A CLASS="sidemenu" HREF="#c5p_string_str"    onClick="showpage('5', '_string_str');   return false;">&nbsp;&nbsp;string.str();</A><BR>
+		<A CLASS="sidemenu" HREF="#c5p_string_istr"   onClick="showpage('5', '_string_istr');  return false;">&nbsp;&nbsp;string.istr();</A><BR>
+		<A CLASS="sidemenu" HREF="#c5p_string_sub"    onClick="showpage('5', '_string_sub');   return false;">&nbsp;&nbsp;string.sub();</A><BR>
+</DIV>
+		<A CLASS="sidemenu" HREF="#c6p0"              onClick="showpage('6', '0');             return false;"><NOBR>Functions - math</NOBR></A><BR>
+<DIV ID=c6m STYLE='display: block'>
+		<A CLASS="sidemenu" HREF="#c6p_math_abs"      onClick="showpage('6', '_math_abs');     return false;">&nbsp;&nbsp;math.abs();</A><BR>
+		<A CLASS="sidemenu" HREF="#c6p_math_acos"     onClick="showpage('6', '_math_acos');    return false;">&nbsp;&nbsp;math.acos();</A><BR>
+		<A CLASS="sidemenu" HREF="#c6p_math_asin"     onClick="showpage('6', '_math_asin');    return false;">&nbsp;&nbsp;math.asin();</A><BR>
+		<A CLASS="sidemenu" HREF="#c6p_math_atan"     onClick="showpage('6', '_math_atan');    return false;">&nbsp;&nbsp;math.atan();</A><BR>
+		<A CLASS="sidemenu" HREF="#c6p_math_ceil"     onClick="showpage('6', '_math_ceil');    return false;">&nbsp;&nbsp;math.ceil();</A><BR>
+		<A CLASS="sidemenu" HREF="#c6p_math_cos"      onClick="showpage('6', '_math_cos');     return false;">&nbsp;&nbsp;math.cos();</A><BR>
+		<A CLASS="sidemenu" HREF="#c6p_math_floor"    onClick="showpage('6', '_math_floor');   return false;">&nbsp;&nbsp;math.floor();</A><BR>
+		<A CLASS="sidemenu" HREF="#c6p_math_rand"     onClick="showpage('6', '_math_rand');    return false;">&nbsp;&nbsp;math.rand();</A><BR>
+		<A CLASS="sidemenu" HREF="#c6p_math_sin"      onClick="showpage('6', '_math_sin');     return false;">&nbsp;&nbsp;math.sin();</A><BR>
+		<A CLASS="sidemenu" HREF="#c6p_math_sqrt"     onClick="showpage('6', '_math_sqrt');    return false;">&nbsp;&nbsp;math.sqrt();</A><BR>
+		<A CLASS="sidemenu" HREF="#c6p_math_tan"      onClick="showpage('6', '_math_tan');     return false;">&nbsp;&nbsp;math.tan();</A><BR>
+</DIV>
+		<A CLASS="sidemenu" HREF="#c7p0"              onClick="showpage('7', '0');             return false;"><NOBR>Functions - tcp</NOBR></A><BR>
+<DIV ID=c7m STYLE='display: block'>
+		<A CLASS="sidemenu" HREF="#c7p_tcp_bind"      onClick="showpage('7', '_tcp_bind');     return false;">&nbsp;&nbsp;tcp.bind();</A><BR>
+		<A CLASS="sidemenu" HREF="#c7p_tcp_accept"    onClick="showpage('7', '_tcp_accept');   return false;">&nbsp;&nbsp;tcp.accept();</A><BR>
+		<A CLASS="sidemenu" HREF="#c7p_tcp_open"      onClick="showpage('7', '_tcp_open');     return false;">&nbsp;&nbsp;tcp.open();</A><BR>
+		<A CLASS="sidemenu" HREF="#c7p_tcp_close"     onClick="showpage('7', '_tcp_close');    return false;">&nbsp;&nbsp;tcp.close();</A><BR>
+		<A CLASS="sidemenu" HREF="#c7p_tcp_read"      onClick="showpage('7', '_tcp_read');     return false;">&nbsp;&nbsp;tcp.read();</A><BR>
+		<A CLASS="sidemenu" HREF="#c7p_tcp_gets"      onClick="showpage('7', '_tcp_gets');     return false;">&nbsp;&nbsp;tcp.gets();</A><BR>
+		<A CLASS="sidemenu" HREF="#c7p_tcp_write"     onClick="showpage('7', '_tcp_write');    return false;">&nbsp;&nbsp;tcp.write();</A><BR>
+</DIV>
+		<A CLASS="sidemenu" HREF="#c8p0"              onClick="showpage('8', '0');             return false;"><NOBR>libext</NOBR></A><BR>
+<DIV ID=c8m STYLE='display: block'>
+		<A CLASS="sidemenu" HREF="#c8p_base64_decode" onClick="showpage('8', '_base64_decode');return false;">&nbsp;&nbsp;base64.decode();</A><BR>
+		<A CLASS="sidemenu" HREF="#c8p_base64_encode" onClick="showpage('8', '_base64_encode');return false;">&nbsp;&nbsp;base64.encode();</A><BR>
+		<A CLASS="sidemenu" HREF="#c8p_dirlist"       onClick="showpage('8', '_dirlist');      return false;">&nbsp;&nbsp;dirlist();</A><BR>
+		<A CLASS="sidemenu" HREF="#c8p_rot13"         onClick="showpage('8', '_rot13');        return false;">&nbsp;&nbsp;rot13();</A><BR>
+		<A CLASS="sidemenu" HREF="#c8p_system"        onClick="showpage('8', '_system');       return false;">&nbsp;&nbsp;system();</A><BR>
+		<A CLASS="sidemenu" HREF="#c8p_xml_read"      onClick="showpage('8', '_xml_read');     return false;">&nbsp;&nbsp;xml.read();</A><BR>
+		<A CLASS="sidemenu" HREF="#c8p_http_get"      onClick="showpage('8', '_http_get');     return false;">&nbsp;&nbsp;http.get();</A><BR>
+</DIV>
+		<A CLASS="sidemenu" HREF="#c9p0"              onClick="showpage('9', '0');             return false;"><NOBR>C API</NOBR></A><BR>
+<DIV ID=c9m STYLE='display: block'>
+</DIV>
+		</p>
+		<HR NOSHADE SIZE="0.5" WIDTH="160">
+	</TD>
+	<TD HEIGHT="100%" VALIGN=TOP width="100%">
+
+
+
+
+
+
+
+<DIV ID=c1p0 STYLE='display: block'>
 <h1>1 - Introduction</h1>
 <p>
-I suck at writing documentation, so this will be short and bitter.
+I suck at writing documentation, so this will be short and bitter.  For working
+samples, check out scripts/tests/*.nes
 </p>
 <p>
 Nesla's earliest lines of code were derived from all the configuration file
@@ -46,7 +168,9 @@ syntax rules are nearly identical.  Nesla is not an emulation of javascript,
 but both language designs do agree that C syntax is good and dollar signs are
 ugly.
 </p>
+</DIV>
 
+<DIV ID=c2p0 STYLE='display: block'>
 <h1>2 - The Language</h1>
 
 <h2>Keywords</h2>
@@ -66,11 +190,11 @@ Working code looks a little like the following sample.
 
 	<B>for</B> (i=0;i<10;i++) {
 		<B>if</B> (i<5) {
-			print("less than half ", i, "\n");
+			<B>print</B>("less than half ", i, "\n");
 		} <B>else if</B> (i==5) {
-			print("half\n");
+			<B>print</B>("half\n");
 		} <B>else</B> {
-			print("more than half ", i, "\n");
+			<B>print</B>("more than half ", i, "\n");
 		}
 		<B>if</B> (i==arg1) <B>break</B>;
 	}
@@ -98,7 +222,7 @@ The statement <B>var x="a"+"b";</B> will set x to "ab".
 Tables have considerably less ops: = {}
 <pre>
 <B>function</B> subf() { <B>return</B> 69; }
-<B>var</B> pi = math.asin(1)*2;
+<B>var</B> pi = <B>math.asin</B>(1)*2;
 <B>var</B> table = {
 	{ a1="x", b = pi, [12]=41, [1]=42, 43, 'blah', subf() },
 	{ "x", 'y', x = 41, 42, 43, 'blah', [5]=12, heh=";-)" }
@@ -109,63 +233,249 @@ Tables have considerably less ops: = {}
 there is no free() function, but if you take a value holding a large table or
 string and reassign it to a number (for example), the memory is reclaimed.
 </p>
+</DIV>
 
-<h2>core lib functions</h2>
-<hr><h3><a name="nesla_date"><code>(string) date([number unixtime]);</code></a></h3>
+<DIV ID=c2p_date STYLE='display: block'>
+<!-- CONTENTS_START -->
+<A NAME="nesla_date"></A>
+<H2>date<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Returns a string representation of <VAR>timestamp</VAR> in the format 'YYYY-MM-DD'.
+If <VAR>timestamp</VAR> is not defined, the function will use the current local
+system date.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>string</I> <B>=</B> <B>date(</B><I>[number timestamp]</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>timestamp</I> </TD><TD>The <B>number</B> of seconds since January 1, 1970 UTC (commonly called a UNIX timestamp).</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns a formatted date <VAR>string</VAR> in the format 'YYYY-MM-DD'.
+</BLOCKQUOTE><P>
+
+<H4>Remarks</H4>
+<BLOCKQUOTE><P>
+<P>No remarks.
+</BLOCKQUOTE><P>
+
+<H4>Examples</H4>
+<BLOCKQUOTE><P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	<B>print</B>(<B>date</B>());
+</CODE></TD></TR></TABLE>
+<P>The above example will output something similar to: "<B>2007-07-01</B>"</P>
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	<B>print</B>(<B>date</B>(0)+" "+<B>time</B>(0));
+</CODE></TD></TR></TABLE>
+<P>The above example will output something similar to (note the adjustment for local time): "<B>1969-12-31 19:00:00</B>"</P>
+</BLOCKQUOTE><P>
+
+<H4>See Also</H4>
+<BLOCKQUOTE><P>
+<B><A HREF="#c2p_time"          onClick="showpage('2', '_time');         return false;">time()</A></B>
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
+</DIV>
+<DIV ID=c2p_include STYLE='display: block'>
+<!-- CONTENTS_START -->
+<a name="nesla_include"></a>
+<H2>include<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Include (and interpret) the code in the specified file.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>number</I> <B>=</B> <B>include(</B><I>filename</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>filename</I> </TD><TD>String containing the name of the file to be included.</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns zero if the file has been successfully included.  Any non-zero return code indicates an error.
+</BLOCKQUOTE><P>
+
+<H4>Remarks</H4>
+<BLOCKQUOTE><P>
+<P>Return codes indicating failure are almost always caused by a nonexistent
+or unreadable script file, not errors in the script itself.
+</BLOCKQUOTE><P>
+
+<H4>Example</H4>
+<BLOCKQUOTE><P>
+The following example demonstrates how to load a script and verify its success.
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	rval=<B>include</B>("./somefile.nes");<BR>
+	<B>if</B> (rval!=0) <B>print</B>("error loading ./somefile.nes\n");
+</CODE></TD></TR></TABLE>
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
+</DIV>
+<DIV ID=c2p_print STYLE='display: block'>
+<!-- CONTENTS_START -->
+<a name="nesla_print"></a>
+<H2>print<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Print the complete list of arguments to the standard output.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>number</I> <B>=</B> <B>print(</B><I>...</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>...</I> </TD><TD>List of objects to be printed.</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns the number of characters printed.
+</BLOCKQUOTE><P>
+
+<H4>Remarks</H4>
+<BLOCKQUOTE><P>
+<P>Any argument that is not a string will be formatted automatically.  Boolean
+values will be 'true' or 'false' and numbers will have up to 6 digits past the
+decimal.  Most string functions may be binary safe, but this function _will_
+terminate its output at the first \0 character.
+</BLOCKQUOTE><P>
+
+<H4>Examples</H4>
+<BLOCKQUOTE><P>
+The following example demonstrates how to print multiple objects.
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	<B>print</B>("Hello", "world.\n");<BR>
+</CODE></TD></TR></TABLE>
+</BLOCKQUOTE><P>
+<BLOCKQUOTE><P>
+The following example gives the same output as above, but note that using + to
+concatenate the strings means that print only receives one argument.
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	<B>print</B>("Hello"+"world.\n");<BR>
+</CODE></TD></TR></TABLE>
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
+</DIV>
+<DIV ID=c2p_printvar STYLE='display: block'>
+<hr><h3><a name="nesla_printvar"><code>printvar(object var);</code></a></h3>
 <p>
-Accepts an optional number (time in seconds since Jan 1 1970) and returns a
-formatted date string.
+Print the provided var in a format appropriate to a nesla script file. This will recursively print entire tables.
 </p>
-<hr><h3><a name="nesla_include"><code>() include(string filename);</code></a></h3>
-<p>
-Include (and parse) the code in the specified file.
-</p>
-<hr><h3><a name="nesla_print"><code>print(...);</code></a></h3>
-<p>
-Print the complete list of args to the standard output.
-</p>
-<hr><h3><a name="nesla_printvars"><code>printvars([object]);</code></a></h3>
-<p>
-Print the provided var. This will recursively print entire tables.
-</p>
+</DIV>
+<DIV ID=c2p_runtime STYLE='display: block'>
 <hr><h3><a name="nesla_runtime"><code>(string) runtime();</code></a></h3>
 <p>
 Returns the number of seconds the parser has been running.
 </p>
+</DIV>
+<DIV ID=c2p_size STYLE='display: block'>
+<hr><h3><a name="nesla_size"><code>size(object);</code></a></h3>
+<p>
+Returns the size of the object.  For strings, this is the string length;
+for tables, the number of non-null objects in the table.  Null values
+are zero size.
+</p>
+</DIV>
+<DIV ID=c2p_sleep STYLE='display: block'>
 <hr><h3><a name="nesla_sleep"><code>sleep(number);</code></a></h3>
 <p>
 Sleep for x number of seconds;
 </p>
+</DIV>
+<DIV ID=c2p_time STYLE='display: block'>
 <hr><h3><a name="nesla_time"><code>(string) time([number unixtime]);</code></a></h3>
 <p>
 Accepts an optional number (time in seconds since Jan 1 1970) and returns a
 formatted time string.
 </p>
-<hr><h3><a name="nesla_number"><code>(number) tonumber(string|number);</code></a></h3>
+</DIV>
+<DIV ID=c2p_tonumber STYLE='display: block'>
+<hr><h3><a name="nesla_tonumber"><code>(number) tonumber(string|number);</code></a></h3>
 <p>
 Returns a number value equivalent of the source.
 </p>
-<hr><h3><a name="nesla_string"><code>(number) tostring(string|number[, number]);</code></a></h3>
+</DIV>
+<DIV ID=c2p_tostring STYLE='display: block'>
+<hr><h3><a name="nesla_tostring"><code>(number) tostring(string|number[, number]);</code></a></h3>
 <p>
 Returns a string value equivalent of the source.
 If both arguments are numbers, the second allows the setting of a decimal precision.
 </p>
+</DIV>
+<DIV ID=c2p_type STYLE='display: block'>
 <hr><h3><a name="nesla_type"><code>type(object);</code></a></h3>
 <p>
 Returns the name of the type of object.
 </p>
+</DIV>
+<DIV ID=c2p_write STYLE='display: block'>
 <hr><h3><a name="nesla_write"><code>write(...);</code></a></h3>
 <p>
 Print the complete list of args to the standard output.
 Pretty much a synonym for print();
 </p>
 
+</DIV>
+<DIV ID=c3p0 STYLE='display: block'>
+<h1>3 - io.*()</h1>
+
+</DIV>
+<DIV ID=c3p_io_flush STYLE='display: block'>
+<B>/* basic io */</B>
+<hr><h3><a name="nesla_io_flush"><code>() io.flush(...);</code></a></h3>
+<p>
+Flushes the output buffer.
+</p>
+</DIV>
+<DIV ID=c3p_io_print STYLE='display: block'>
+<hr><h3><a name="nesla_io_print"><code>() io.print(...);</code></a></h3>
+<p>
+Print the complete list of args to the standard output.
+</p>
+</DIV>
+<DIV ID=c3p_io_write STYLE='display: block'>
+<hr><h3><a name="nesla_io_write"><code>() io.write(...);</code></a></h3>
+<p>
+Print the complete list of args to the standard output.
+Pretty much a synonym for print();
+</p>
+
+</DIV>
+<DIV ID=c4p0 STYLE='display: block'>
+<h1>4 - file.*()</h1>
+
+</DIV>
+<DIV ID=c4p_file_read STYLE='display: block'>
 <B>/* file functions */</B>
 <hr><h3><a name="nesla_file_read"><code>(string) file.read(string filename);</code></a></h3>
 <p>
 Reads the entire file into a string and returns that string.
 This function is binary safe, but use of string functions to manipulate this string may mangle the data.
 </p>
+</DIV>
+<DIV ID=c4p_file_write STYLE='display: block'>
 <hr><h3><a name="nesla_file_write"><code>(number) file.write(string filename[, object]);</code></a></h3>
 <p>
 Writes the entire file and returns the result code.
@@ -174,45 +484,12 @@ This function is binary safe.
 
 
 
-<B>/* basic io */</B>
-<hr><h3><a name="nesla_io_flush"><code>() io.flush(...);</code></a></h3>
-<p>
-Flushes the output buffer.
-</p>
-<hr><h3><a name="nesla_io_print"><code>() io.print(...);</code></a></h3>
-<p>
-Print the complete list of args to the standard output.
-</p>
-<hr><h3><a name="nesla_io_write"><code>() io.write(...);</code></a></h3>
-<p>
-Print the complete list of args to the standard output.
-Pretty much a synonym for print();
-</p>
+</DIV>
+<DIV ID=c5p0 STYLE='display: block'>
+<h1>5 - string.*()</h1>
 
-<B>/* math functions */</B>
-<hr><h3><a name="nesla_math_abs"><code>(number) math.abs(number n);</code></a></h3>
-<p>
-<hr><h3><a name="nesla_math_acos"><code>(number) math.acos(number n);</code></a></h3>
-<p>
-<hr><h3><a name="nesla_math_asin"><code>(number) math.asin(number n);</code></a></h3>
-<p>
-<hr><h3><a name="nesla_math_atan"><code>(number) math.atan(number n);</code></a></h3>
-<p>
-<hr><h3><a name="nesla_math_ceil"><code>(number) math.ceil(number n);</code></a></h3>
-<p>
-<hr><h3><a name="nesla_math_cos"><code>(number) math.cos(number n);</code></a></h3>
-<p>
-<hr><h3><a name="nesla_math_floor"><code>(number) math.floor(number n);</code></a></h3>
-<p>
-<hr><h3><a name="nesla_math_rand"><code>(number) math.rand([number range]);</code></a></h3>
-<p>
-<hr><h3><a name="nesla_math_sin"><code>(number) math.sin(number n);</code></a></h3>
-<p>
-<hr><h3><a name="nesla_math_sqrt"><code>(number) math.sqrt(number n);</code></a></h3>
-<p>
-<hr><h3><a name="nesla_math_tan"><code>(number) math.tan(number n);</code></a></h3>
-<p>
-
+</DIV>
+<DIV ID=c5p_string_cat STYLE='display: block'>
 <B>/* strings */</B><br>
 <hr><h3><a name="nesla_string_cat"><code>(string) string.cat(string str1, string str2);</code></a></h3>
 <br>
@@ -220,44 +497,269 @@ Pretty much a synonym for print();
 	actually, all string functions should work like this (by not modifying the original arguments.<br>
 <br>
 <p>
+</DIV>
+<DIV ID=c5p_string_cmp STYLE='display: block'>
 <hr><h3><a name="nesla_string_cmp"><code>(number) string.cmp(string str1, string str2);</code></a></h3>
 <p>
 Case sensitive string comparison.
 </p>
+</DIV>
+<DIV ID=c5p_string_icmp STYLE='display: block'>
 <hr><h3><a name="nesla_string_icmp"><code>(number) string.icmp(string str1, string str2);</code></a></h3>
 <p>
 Case insensitive string comparison.
 </p>
+</DIV>
+<DIV ID=c5p_string_ncmp STYLE='display: block'>
 <hr><h3><a name="nesla_string_ncmp"><code>(number) string.ncmp(string str1, string str2, number len);</code></a></h3>
 <p>
 Case sensitive substring comparison up to <I>len</I> characters.
 </p>
+</DIV>
+<DIV ID=c5p_string_nicmp STYLE='display: block'>
 <hr><h3><a name="nesla_string_nicmp"><code>(number) string.nicmp(string str1, string str2, number len);</code></a></h3>
 <p>
 Case insensitive substring comparison up to <I>len</I> characters.
 </p>
+</DIV>
+<DIV ID=c5p_string_len STYLE='display: block'>
 <hr><h3><a name="nesla_string_len"><code>(number) string.len(string str);</code></a></h3>
 <p>
 Length of the string (binary safe).
 </p>
+</DIV>
+<DIV ID=c5p_string_split STYLE='display: block'>
 <hr><h3><a name="nesla_string_split"><code>(table) string.split(string str, string sep);</code></a></h3>
 <p>
 This will separate the string into substrings and put those substrings in the returned table.
 </p>
+
+
+
+
+
+
+
+
+
+
+
+
+<A NAME="nesla_date"></A>
+<H1>date</H1>
+date -- Print a date in SQL format
+<H2>Description</H2>
+string <B>date</B> ( [number timestamp] )<BR>
+<P>Returns a string representation of timestamp in the format 'YYYY-MM-DD'.  If
+<VAR>timestamp</VAR> is not defined, the function will use the current system date.</P>
+<H2>Parameters</H2>
+<P>
+<DL>
+<DT><VAR>timestamp</VAR></DT>
+<DD><P>The <B>number</B> of seconds since January 1, 1970 (commonly called a UNIX timestamp).</P></DD>
+</DL>
+</P>
+<H2>Return Values</H2>
+<P>Returns a formatted date <VAR>string</VAR> in the format 'YYYY-MM-DD'.</P>
+<H2>Examples</H2>
+<P>
+<TABLE  WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0" CLASS="EXAMPLE" >
+<TR><TD><P><B>Example 1. A <B>strlen()</B> example</B></P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5" ><TR><TD><code ><span  style="color: #000000"><span  style="color: #0000BB">&lt;?php<br
+	/>$str&nbsp;</span><span  style="color: #007700">=&nbsp;</span><span  style="color: #DD0000">'abcdef'</span><span  style="color: #007700">;<br
+	/>echo&nbsp;</span><span  style="color: #0000BB">strlen</span><span  style="color: #007700">(</span><span  style="color: #0000BB">$str</span
+	><span  style="color: #007700">);&nbsp;</span><span  style="color: #FF8000">//&nbsp;6<br  /><br  /></span><span  style="color: #0000BB">$str&nbsp;</span
+	><span  style="color: #007700">=&nbsp;</span><span  style="color: #DD0000">'&nbsp;ab&nbsp;cd&nbsp;'</span><span  style="color: #007700">;<br
+	/>echo&nbsp;</span><span  style="color: #0000BB">strlen</span><span  style="color: #007700">(</span><span  style="color: #0000BB">$str</span
+	><span  style="color: #007700">);&nbsp;</span><span  style="color: #FF8000">//&nbsp;7<br  /></span><span style="color: #0000BB">?&gt;</span
+	></span></code>
+</TD></TR></TABLE>
+</TD></TR></TABLE>
+<BR>
+<TABLE  BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD><PRE  CLASS="screen" >Array
+(
+    [0] =&gt; f'oo
+    [1] =&gt; b'ar
+    [2] =&gt; Array
+        (
+            [0] =&gt; fo'o
+            [1] =&gt; b'ar
+        )
+)</PRE></TD></TR></TABLE>
+</P>
+<H2>See Also</H2>
+<P>
+<TABLE  BORDER="0">
+<TR><TD><A HREF="function.count.html" ><B CLASS="function" >count()</B></A></TD></TR>
+<TR><TD><A HREF="function.mb-strlen.html" ><B CLASS="function" >mb_strlen()</B></A></TD></TR>
+</TABLE>
+
+
+
+
+
+
+
+
+</DIV>
+<DIV ID=c5p_string_str STYLE='display: block'>
 <hr><h3><a name="nesla_string_str"><code>(string) string.str(string stack, string needle);</code></a></h3>
 <p>
 Case sensitive substring search.
 </p>
+</DIV>
+<DIV ID=c5p_string_istr STYLE='display: block'>
 <hr><h3><a name="nesla_string_istr"><code>(string) string.istr(string stack, string needle);</code></a></h3>
 <p>
 Case insensitive substring search.
 </p>
+</DIV>
+<DIV ID=c5p_string_sub STYLE='display: block'>
 <hr><h3><a name="nesla_string_sub"><code>(string) string.sub(string stack, number offset[, number maxlen]);</code></a></h3>
 <p>
 Returns a substring ranging from <I>offset</I> to <I>maxlen</I>.
 </p>
 
-<h1>3 - The C API</h1>
+</DIV>
+<DIV ID=c6p0 STYLE='display: block'>
+<h1>6 - math.*()</h1>
+
+</DIV>
+<DIV ID=c6p_math_abs STYLE='display: block'>
+<B>/* math functions */</B>
+<hr><h3><a name="nesla_math_abs"><code>(number) math.abs(number n);</code></a></h3>
+<p>
+</DIV>
+<DIV ID=c6p_math_acos STYLE='display: block'>
+<hr><h3><a name="nesla_math_acos"><code>(number) math.acos(number n);</code></a></h3>
+<p>
+</DIV>
+<DIV ID=c6p_math_asin STYLE='display: block'>
+<hr><h3><a name="nesla_math_asin"><code>(number) math.asin(number n);</code></a></h3>
+<p>
+</DIV>
+<DIV ID=c6p_math_atan STYLE='display: block'>
+<hr><h3><a name="nesla_math_atan"><code>(number) math.atan(number n);</code></a></h3>
+<p>
+</DIV>
+<DIV ID=c6p_math_ceil STYLE='display: block'>
+<hr><h3><a name="nesla_math_ceil"><code>(number) math.ceil(number n);</code></a></h3>
+<p>
+</DIV>
+<DIV ID=c6p_math_cos STYLE='display: block'>
+<hr><h3><a name="nesla_math_cos"><code>(number) math.cos(number n);</code></a></h3>
+<p>
+</DIV>
+<DIV ID=c6p_math_floor STYLE='display: block'>
+<hr><h3><a name="nesla_math_floor"><code>(number) math.floor(number n);</code></a></h3>
+<p>
+</DIV>
+<DIV ID=c6p_math_rand STYLE='display: block'>
+<hr><h3><a name="nesla_math_rand"><code>(number) math.rand([number range]);</code></a></h3>
+<p>
+</DIV>
+<DIV ID=c6p_math_sin STYLE='display: block'>
+<hr><h3><a name="nesla_math_sin"><code>(number) math.sin(number n);</code></a></h3>
+<p>
+</DIV>
+<DIV ID=c6p_math_sqrt STYLE='display: block'>
+<hr><h3><a name="nesla_math_sqrt"><code>(number) math.sqrt(number n);</code></a></h3>
+<p>
+</DIV>
+<DIV ID=c6p_math_tan STYLE='display: block'>
+<hr><h3><a name="nesla_math_tan"><code>(number) math.tan(number n);</code></a></h3>
+<p>
+
+</DIV>
+<DIV ID=c7p0 STYLE='display: block'>
+<h1>7 - tcp.*()</h1>
+
+</DIV>
+<DIV ID=c7p_tcp_bind STYLE='display: block'>
+<B>/* tcp functions */</B>
+<hr><h3><a name="nesla_tcp_bind"><code>(sock4) tcp.bind(string host, number port, number ssl);</code></a></h3>
+<p>
+</DIV>
+<DIV ID=c7p_tcp_accept STYLE='display: block'>
+<hr><h3><a name="nesla_tcp_accept"><code>(sock4) tcp.accept(sock4 bindsock);</code></a></h3>
+<p>
+</DIV>
+<DIV ID=c7p_tcp_open STYLE='display: block'>
+<hr><h3><a name="nesla_tcp_open"><code>(sock4) tcp.open(string host, number port, number ssl);</code></a></h3>
+<p>
+</DIV>
+<DIV ID=c7p_tcp_close STYLE='display: block'>
+<hr><h3><a name="nesla_tcp_close"><code>(number) tcp.close(sock4 socket);</code></a></h3>
+<p>
+</DIV>
+<DIV ID=c7p_tcp_read STYLE='display: block'>
+<hr><h3><a name="nesla_tcp_read"><code>(string) tcp.read(sock4 socket);</code></a></h3>
+<p>
+</DIV>
+<DIV ID=c7p_tcp_gets STYLE='display: block'>
+<hr><h3><a name="nesla_tcp_gets"><code>(string) tcp.gets(sock4 socket);</code></a></h3>
+<p>
+</DIV>
+<DIV ID=c7p_tcp_write STYLE='display: block'>
+<hr><h3><a name="nesla_tcp_write"><code>(number) tcp.write(sock4 socket, string str);</code></a></h3>
+<p>
+</DIV>
+<DIV ID=c8p0 STYLE='display: block'>
+<h1>8 - The Extension Libraries</h1>
+
+<h2>neslaext functions</h2>
+</DIV>
+<DIV ID=c8p_base64_decode STYLE='display: block'>
+<hr><h3><a name="nesla_base64_decode"><code>(string) base64.decode(string encoded);</code></a></h3>
+<p>
+Return a decoded value from a base64-encoded string.
+</p>
+</DIV>
+<DIV ID=c8p_base64_encode STYLE='display: block'>
+<hr><h3><a name="nesla_base64_encode"><code>(string) base64.encode(string decoded);</code></a></h3>
+<p>
+Return an encoded value from a raw string.
+</p>
+</DIV>
+<DIV ID=c8p_dirlist STYLE='display: block'>
+<hr><h3><a name="nesla_dirlist"><code>(table) dirlist(string dirname);</code></a></h3>
+<p>
+Returns a table containing files and attributes in the supplied dirname.
+</p>
+</DIV>
+<DIV ID=c8p_rot13 STYLE='display: block'>
+<hr><h3><a name="nesla_rot13"><code>(string) rot13(string str);</code></a></h3>
+<p>
+Returns a rot13 *cough* encoded string from str.
+</p>
+<p>
+Double-rot13 encryption is so stealthy, you won't even know it's been encrypted.
+</p>
+</DIV>
+<DIV ID=c8p_system STYLE='display: block'>
+<hr><h3><a name="nesla_system"><code>(number) system(string str);</code></a></h3>
+<p>
+Performs an operating system call and returns the resulting errorcode.
+</p>
+</DIV>
+<DIV ID=c8p_xml_read STYLE='display: block'>
+<hr><h3><a name="nesla_xml_read"><code>(table) xml.read(string str);</code></a></h3>
+<p>
+Read the supplied XML text and return a digested table.
+This is _not_ a pretty function.
+</p>
+
+</DIV>
+<DIV ID=c8p_http_get STYLE='display: block'>
+<hr><h3><a name="nesla_http_get"><code>(table) http.get(number ssl, string host, number port, string uri);</code></a></h3>
+<p>
+Connect to an HTTP server and retrieve the requested uri. Returns a table with { head, body } elements.
+</p>
+
+<hr>
+</DIV>
+<DIV ID=c9p0 STYLE='display: block'>
+<h1>9 - The C API</h1>
 <p>
 I'm lazy, so here's the long ugly version.  This is everything your C program
 will ever need to know about Nesla.  Actually, it needs to know a lot less, but
@@ -313,7 +815,7 @@ struct timeval { long tv_sec; long tv_usec; };
 #define NT_NFUNC	4
 #define NT_CFUNC	5
 #define NT_TABLE	6
-#define NT_CHUNK	7
+#define NT_CDATA	7
 
 /* object storage modes */
 #define NST_HIDDEN	0x01
@@ -335,7 +837,7 @@ typedef struct nes_valrec {
 	unsigned short type; /* val type */
 	unsigned short attr; /* status: attributes (hidden, readonly, system, autosort, etc...) */
 	unsigned short refs; /* number of objects referencing this node */
-	unsigned int   size; /* string, nfunc or chunk size - or number of vars in table */
+	unsigned int   size; /* string, nfunc or cdata size - or number of vars in table */
 	union {
 		num_t  num;
 		char  *str;
@@ -375,22 +877,19 @@ typedef struct nes_state {
 	char errbuf[256];
 } nes_state;
 
-#define    nes_isnull(o)     (o==NULL||o->val==NULL||o->val->type==NT_NULL)
-#define    nes_istable(o)    (o!=NULL&&o->val->type==NT_TABLE)
-#define    nes_isnum(o)      (o!=NULL&&o->val->type==NT_NUMBER)
-#define    nes_isstr(o)      (o!=NULL&&o->val->type==NT_STRING)
+#define    nes_isnull(o)           (o==NULL||o->val==NULL||o->val->type==NT_NULL)
+#define    nes_istable(o)          (o!=NULL&&o->val!=NULL&&o->val->type==NT_TABLE)
+#define    nes_isnum(o)            (o!=NULL&&o->val!=NULL&&o->val->type==NT_NUMBER)
+#define    nes_isstr(o)            (o!=NULL&&o->val!=NULL&&o->val->type==NT_STRING)
 
-#define    nes_tonum(N,o)    (o==NULL?0:o->val->type==NT_NUMBER?o->val->d.num:o->val->type==NT_BOOLEAN?o->val->d.num?1:0:o->val->type==NT_STRING?nes_aton(N,o->val->d.str):0)
-#define    nes_getnum(N,o,n) nes_tonum(N, nes_getobj(N,o,n))
+#define    nes_getnum(N,o,n)       nes_tonum(N, nes_getobj(N,o,n))
+#define    nes_getstr(N,o,n)       nes_tostr(N, nes_getobj(N,o,n))
 
-#define    nes_tostr(N,o)    (o==NULL?"":o->val->type==NT_TABLE?"":o->val->type==NT_NUMBER?nes_ntoa(N,N->numbuf,o->val->d.num,-10,6):o->val->type==NT_BOOLEAN?o->val->d.num?"true":"false":o->val->type==NT_STRING?o->val->d.str?o->val->d.str:o->val->type==NT_NULL?"null":"":"null")
-#define    nes_getstr(N,o,n) nes_tostr(N, nes_getobj(N,o,n))
-
-#define    nes_setnum(N,t,n,v)     nes_setobj(N, t, n, NT_NUMBER, NULL, v, NULL, 0)
-#define    nes_setstr(N,t,n,s,l)   nes_setobj(N, t, n, NT_STRING, NULL, 0, s,    l)
-#define    nes_settable(N,t,n)     nes_setobj(N, t, n, NT_TABLE,  NULL, 0, NULL, 0)
-#define    nes_setcfunc(N,t,n,p)   nes_setobj(N, t, n, NT_CFUNC,  p,    0, NULL, 0)
-#define    nes_setnfunc(N,t,n,s,l) nes_setobj(N, t, n, NT_NFUNC,  NULL, 0, s,    l)
+#define    nes_setnum(N,t,n,v)     nes_setobj(N, t, n, NT_NUMBER, (NES_CFUNC)NULL, v, NULL, 0)
+#define    nes_setstr(N,t,n,s,l)   nes_setobj(N, t, n, NT_STRING, (NES_CFUNC)NULL, 0, s,    l)
+#define    nes_settable(N,t,n)     nes_setobj(N, t, n, NT_TABLE,  (NES_CFUNC)NULL, 0, NULL, 0)
+#define    nes_setcfunc(N,t,n,p)   nes_setobj(N, t, n, NT_CFUNC,  (NES_CFUNC)p,    0, NULL, 0)
+#define    nes_setnfunc(N,t,n,s,l) nes_setobj(N, t, n, NT_NFUNC,  (NES_CFUNC)NULL, 0, s,    l)
 
 #ifndef NESLA_NOFUNCTIONS
 /* api */
@@ -410,6 +909,8 @@ void       nes_freetable (nes_state *N, obj_t *tobj);
 obj_t     *nes_getobj    (nes_state *N, obj_t *tobj, char *oname);
 obj_t     *nes_getiobj   (nes_state *N, obj_t *tobj, int oindex);
 obj_t     *nes_setobj    (nes_state *N, obj_t *tobj, char *oname, unsigned short otype, NES_CFUNC _fptr, num_t _num, char *_str, int _slen);
+num_t      nes_tonum     (nes_state *N, obj_t *cobj);
+char      *nes_tostr     (nes_state *N, obj_t *cobj);
 /* object */
 obj_t     *nes_eval      (nes_state *N, char *string);
 obj_t     *nes_readtable (nes_state *N, obj_t *tobj);
@@ -418,41 +919,41 @@ obj_t     *nes_readtable (nes_state *N, obj_t *tobj);
 #endif /* nesla.h */
 
 </PRE>
+</DIV>
 
-<h1>4 - The Extension Libraries</h1>
 
-<h2>neslaext functions</h2>
-<hr><h3><a name="nesla_base64_decode"><code>(string) base64.decode(string encoded);</code></a></h3>
-<p>
-Return a decoded value from a base64-encoded string.
-</p>
-<hr><h3><a name="nesla_base64_encode"><code>(string) base64.encode(string decoded);</code></a></h3>
-<p>
-Return an encoded value from a raw string.
-</p>
-<hr><h3><a name="nesla_dirlist"><code>(table) dirlist(string dirname);</code></a></h3>
-<p>
-Returns a table containing files and attributes in the supplied dirname.
-</p>
-<hr><h3><a name="nesla_rot13"><code>(string) rot13(string str);</code></a></h3>
-<p>
-Returns a rot13 *cough* encoded string from str.
-</p>
-<hr><h3><a name="nesla_system"><code>(number) system(string str);</code></a></h3>
-<p>
-Performs an operating system call and returns the resulting errorcode.
-</p>
-<hr><h3><a name="nesla_xml_read"><code>(table) xml.read(string str);</code></a></h3>
-<p>
-Read the supplied XML text and return a digested table.
-This is _not_ a pretty function.
-</p>
 
-<hr><h3><a name="nesla_http_get"><code>(table) http.get(number ssl, string host, number port, string uri);</code></a></h3>
-<p>
-Connect to an HTTP server and retrieve the requested uri. Returns a table with { head, body } elements.
-</p>
 
-<hr>
-</body>
-</html>
+
+	</TD>
+	<TD HEIGHT="100%" WIDTH="10" ALIGN=CENTER>&nbsp;</TD>
+</TR>
+<TR>
+	<TD WIDTH="200" BGCOLOR="#003399" ALIGN=RIGHT VALIGN=BOTTOM><IMG SRC="/images/blue-rounder1.gif" WIDTH="14" HEIGHT="20" BORDER="0" ALT=""></TD>
+	<TD width="100%">
+		<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH="100%">
+		<TR>
+		<TD>&nbsp;</TD>
+		<TD ALIGN=left VALIGN=BOTTOM WIDTH="50%">
+		<FONT FACE=Arial COLOR="#000000" SIZE=-2>
+		Please direct feedback to:<BR>
+		<A HREF="mailto:nulllogic%40users.sourceforge.net">nulllogic@users.sourceforge.net</A>
+		</FONT>
+		</TD><TD ALIGN="right" VALIGN="BOTTOM" WIDTH="50%">
+		<FONT FACE=Arial COLOR="#000000" SIZE=-2>
+		Copyright &copy; 2007 NullLogic<BR>
+		All rights reserved
+		</FONT>
+		</TD></TR>
+		</TABLE>
+	</TD>
+	<TD WIDTH="10" ALIGN=CENTER>&nbsp;</TD>
+</TR>
+</TABLE>
+<SCRIPT LANGUAGE=JavaScript TYPE="text/javascript">
+<!--
+showpage(1, 0);
+// -->
+</SCRIPT>
+</BODY>
+</HTML>
