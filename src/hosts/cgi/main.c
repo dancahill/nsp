@@ -30,6 +30,8 @@
 
 nes_state *N;
 
+extern char **environ;
+
 static int nescgi_flush(nes_state *N)
 {
 	static short headersent=0;
@@ -179,15 +181,15 @@ static void setsigs()
 
 int htnes_runscript(char *file)
 {
-	nes_setcfunc(N, nes_settable(N, &N->g, "io"), "flush", (void *)nescgi_flush);
-	nes_setcfunc(N, &N->g, "sendfile", (void *)nescgi_sendfile);
+	nes_setcfunc(N, nes_settable(N, &N->g, "io"), "flush", nescgi_flush);
+	nes_setcfunc(N, &N->g, "sendfile", nescgi_sendfile);
 	preppath(N, file);
 	nes_execfile(N, file);
 	if (N->err) printf("<HR /><B>[errno=%d :: %s]</B>\r\n", N->err, N->errbuf);
 	return 0;
 }
 
-int main(int argc, char *argv[], char *envp[])
+int main(int argc, char *argv[])
 {
 	char tmpbuf[MAX_OBJNAMELEN+1];
 	obj_t *cobj, *confobj, *headobj, *servobj, *tobj;
@@ -213,12 +215,12 @@ int main(int argc, char *argv[], char *envp[])
 	neslaext_register_all(N);
 	neslatcp_register_all(N);
 	/* add env */
-	for (i=0;envp[i]!=NULL;i++) {
-		strncpy(tmpbuf, envp[i], MAX_OBJNAMELEN);
+	for (i=0;environ[i]!=NULL;i++) {
+		strncpy(tmpbuf, environ[i], MAX_OBJNAMELEN);
 		p=strchr(tmpbuf, '=');
 		if (!p) continue;
 		*p='\0';
-		p=strchr(envp[i], '=')+1;
+		p=strchr(environ[i], '=')+1;
 		nes_setstr(N, servobj, tmpbuf, p, strlen(p));
 	}
 	/* add args */

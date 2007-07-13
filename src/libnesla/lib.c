@@ -25,6 +25,7 @@
 #include <io.h>
 #else
 #ifdef __TURBOC__
+#include <stdio.h>
 #else
 #include <unistd.h>
 #endif
@@ -37,18 +38,16 @@ static int dumpwrite(nes_state *N, const char *str, int len)
 	for (i=0;i<len;i++) {
 		if (MAX_OUTBUFLEN-N->outbuflen<32) { nl_flush(N); continue; }
 		switch (str[i]) {
-		case '\"':
-			N->outbuf[N->outbuflen++]='\\';
-			N->outbuf[N->outbuflen++]='\"';
-			break;
-/*
-		case '\'':
-			N->outbuf[N->outbuflen++]='\\';
-			N->outbuf[N->outbuflen++]='\'';
-			break;
-*/
-		default:
-			N->outbuf[N->outbuflen++]=str[i];
+		case '\a' : N->outbuf[N->outbuflen++]='\\'; N->outbuf[N->outbuflen++]='a'; break;
+		case '\t' : N->outbuf[N->outbuflen++]='\\'; N->outbuf[N->outbuflen++]='t'; break;
+		case '\f' : N->outbuf[N->outbuflen++]='\\'; N->outbuf[N->outbuflen++]='f'; break;
+		case 27   : N->outbuf[N->outbuflen++]='\\'; N->outbuf[N->outbuflen++]='e'; break;
+		case '\r' : N->outbuf[N->outbuflen++]='\\'; N->outbuf[N->outbuflen++]='r'; break;
+		case '\n' : N->outbuf[N->outbuflen++]='\\'; N->outbuf[N->outbuflen++]='n'; break;
+		case '\'' : N->outbuf[N->outbuflen++]='\\'; N->outbuf[N->outbuflen++]='\''; break;
+		case '\"' : N->outbuf[N->outbuflen++]='\\'; N->outbuf[N->outbuflen++]='\"'; break;
+		case '\\' : N->outbuf[N->outbuflen++]='\\'; N->outbuf[N->outbuflen++]='\\'; break;
+		default: N->outbuf[N->outbuflen++]=str[i];
 		}
 	}
 	N->outbuf[N->outbuflen]='\0';
@@ -69,16 +68,16 @@ static void dumpvars(nes_state *N, obj_t *tobj, int depth)
 		if ((cobj->val->attr&NST_HIDDEN)||(cobj->val->attr&NST_SYSTEM)) continue;
 		if ((depth==1)&&(nc_strcmp(cobj->name, "filename")==0)) continue;
 		g=(depth<1)?"global ":"";
-		l=(depth<1)?";":(cobj->next)?",":"";
+		l=(depth<1)?"":(cobj->next)?",\n":"\n";
 		if (nc_isdigit(cobj->name[0])) b=1; else b=0;
 		if (nes_isnull(cobj)||(cobj->val->type==NT_BOOLEAN)||(cobj->val->type==NT_NUMBER)) {
 			if (depth) nc_printf(N, "%s%s%s%s%s = ", indent, g, b?"[":"", cobj->name, b?"]":"");
-			nc_printf(N, "%s%s\n", nes_tostr(N, cobj), l);
+			nc_printf(N, "%s%s", nes_tostr(N, cobj), l);
 		} else if (cobj->val->type==NT_STRING) {
 			if (depth) nc_printf(N, "%s%s%s%s%s = ", indent, g, b?"[":"", cobj->name, b?"]":"");
 			nc_printf(N, "\"");
 			dumpwrite(N, cobj->val->d.str?cobj->val->d.str:"", cobj->val->size);
-			nc_printf(N, "\"%s\n", l);
+			nc_printf(N, "\"%s", l);
 		} else if (cobj->val->type==NT_TABLE) {
 			if (nc_strcmp(cobj->name, "_GLOBALS")==0) continue;
 			if (depth) nc_printf(N, "%s%s%s%s%s = ", indent, g, b?"[":"", cobj->name, b?"]":"");
@@ -86,9 +85,9 @@ static void dumpvars(nes_state *N, obj_t *tobj, int depth)
 			if (cobj->val->d.table) {
 				nc_printf(N, "\n");
 				dumpvars(N, cobj->val->d.table, depth+1);
-				nc_printf(N, "%s}%s\n", indent, l);
+				nc_printf(N, "%s}%s", indent, l);
 			} else {
-				nc_printf(N, " }%s\n", l);
+				nc_printf(N, " }%s", l);
 			}
 		}
 	}
@@ -140,17 +139,25 @@ int nl_flush(nes_state *N)
 {
 	obj_t *cobj=nes_getobj(N, &N->g, "io");
 	NES_CFUNC cfunc=(NES_CFUNC)nl_flush;
+	int rc;
 
-	if (cobj->val->type==NT_TABLE) {
-		cobj=nes_getobj(N, cobj, "flush");
-		if (cobj->val->type==NT_CFUNC) {
-			cfunc=cobj->val->d.cfunc;
-			if (cfunc!=(NES_CFUNC)nl_flush) return cfunc(N);
+	if (cobj->val->type!=NT_TABLE) {
+		nes_setnum(N, &N->r, "", -1);
+		return -1;
+	}
+	cobj=nes_getobj(N, cobj, "flush");
+	if (cobj->val->type==NT_CFUNC) {
+		cfunc=cobj->val->d.cfunc;
+		if (cfunc!=(NES_CFUNC)nl_flush) {
+			rc=cfunc(N);
+			nes_setnum(N, &N->r, "", rc);
+			return rc;
 		}
 	}
 	N->outbuf[N->outbuflen]='\0';
 	write(STDOUT_FILENO, N->outbuf, N->outbuflen);
 	N->outbuflen=0;
+	nes_setnum(N, &N->r, "", 0);
 	return 0;
 }
 
@@ -185,6 +192,31 @@ int nl_print(nes_state *N)
 	return 0;
 }
 
+int nl_write(nes_state *N)
+{
+	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+	unsigned int len=0;
+	unsigned int i;
+	char *p=NULL;
+
+	if (cobj1->val->type==NT_STRING) {
+		p=cobj1->val->d.str;
+		len=cobj1->val->size;
+	} else {
+		p=nes_tostr(N, cobj1);
+		len=nc_strlen(p);
+	}
+	if (p) {
+		for (i=0;i<len;i++) {
+			if (N->outbuflen>OUTBUFLOWAT) nl_flush(N);
+			N->outbuf[N->outbuflen++]=p[i];
+		}
+		N->outbuf[N->outbuflen]='\0';
+	}
+	nes_setnum(N, &N->r, "", len);
+	return 0;
+}
+
 /*
  * file functions
  */
@@ -194,12 +226,14 @@ int nl_print(nes_state *N)
 int nl_fileread(nes_state *N)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
 	obj_t *robj;
 	struct stat sb;
 	char *p;
 	int bl;
 	int fd;
 	int r;
+	int offset=0;
 
 	if ((cobj1->val->type!=NT_STRING)||(cobj1->val->size<1)) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
 	if (stat(cobj1->val->d.str, &sb)!=0) {
@@ -210,10 +244,15 @@ int nl_fileread(nes_state *N)
 		nes_setnum(N, &N->r, "", -1);
 		return -1;
 	}
+	if (cobj2->val->type==NT_NUMBER) {
+		offset=(int)cobj2->val->d.num;
+		lseek(fd, offset, SEEK_SET);
+	}
 	robj=nes_setstr(N, &N->r, "", NULL, 0);
-	robj->val->d.str=n_alloc(N, (sb.st_size+2)*sizeof(char));
+	bl=sb.st_size-offset;
+	robj->val->d.str=n_alloc(N, (bl+2)*sizeof(char));
+	robj->val->size=bl;
 	p=(char *)robj->val->d.str;
-	bl=sb.st_size;
 	for (;;) {
 		r=read(fd, p, bl);
 		p+=r;
@@ -222,7 +261,73 @@ int nl_fileread(nes_state *N)
 	}
 	close(fd);
 	robj->val->d.str[sb.st_size]='\0';
-	robj->val->size=sb.st_size;
+	return 0;
+}
+
+int nl_filestat(nes_state *N)
+{
+	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+	obj_t tobj;
+	struct stat sb;
+	int rc;
+	int sym=0;
+	char *file;
+
+	if ((cobj1->val->type!=NT_STRING)||(cobj1->val->size<1)) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	file=cobj1->val->d.str;
+#ifdef WIN32
+	rc=stat(file, &sb);
+	if (rc!=0) {
+		nes_setnum(N, &N->r, "", rc);
+		return 0;
+	}
+#else
+#ifdef __TURBOC__
+	rc=stat(file, &sb);
+	if (rc!=0) {
+		nes_setnum(N, &N->r, "", rc);
+		return 0;
+	}
+#else
+	rc=lstat(file, &sb);
+	if (rc!=0) {
+		nes_setnum(N, &N->r, "", rc);
+		return 0;
+	}
+	if (!(~sb.st_mode&S_IFLNK)) {
+		sym=1;
+		if (stat(file, &sb)!=0) sym=2;
+	}
+#endif
+#endif
+	nc_memset((void *)&tobj, 0, sizeof(obj_t));
+	nes_linkval(N, &tobj, NULL);
+	tobj.val->type=NT_TABLE;
+	tobj.val->attr|=NST_AUTOSORT;
+	nes_setnum(N, &tobj, "mtime", sb.st_mtime);
+	if (sym==2) {
+		nes_setnum(N, &tobj, "size", 0);
+		nes_setstr(N, &tobj, "type", "broken", 6);
+	} else if ((sb.st_mode&S_IFDIR)) {
+		nes_setnum(N, &tobj, "size", 0);
+		nes_setstr(N, &tobj, "type", sym?"dirp":"dir", sym?4:3);
+	} else {
+		nes_setnum(N, &tobj, "size", sb.st_size);
+		nes_setstr(N, &tobj, "type", sym?"filep":"file", sym?5:4);
+	}
+	nes_linkval(N, &N->r, &tobj);
+	nes_unlinkval(N, &tobj);
+	return 0;
+}
+
+int nl_fileunlink(nes_state *N)
+{
+	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+	int rc;
+
+	if ((cobj1->val->type!=NT_STRING)||(cobj1->val->size<1)) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	rc=unlink(cobj1->val->d.str);
+	nes_setnum(N, &N->r, "", rc);
 	return 0;
 }
 
@@ -230,16 +335,22 @@ int nl_filewrite(nes_state *N)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
+	obj_t *cobj3=nes_getiobj(N, &N->l, 3);
 	int fd;
 	int w=0;
+	int offset=0;
 
 	/* umask(022); */
 	if ((cobj1->val->type!=NT_STRING)||(cobj1->val->size<1)) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
-	if ((fd=open(cobj1->val->d.str, O_WRONLY|O_BINARY|O_CREAT|O_TRUNC))==-1) {
+	if ((fd=open(cobj1->val->d.str, O_WRONLY|O_BINARY|O_CREAT|O_TRUNC, S_IREAD|S_IWRITE))==-1) {
 		nes_setnum(N, &N->r, "", -1);
 		return -1;
 	}
 	if (cobj2->val->type==NT_STRING) {
+		if (cobj3->val->type==NT_NUMBER) {
+			offset=(int)cobj3->val->d.num;
+			lseek(fd, offset, SEEK_SET);
+		}
 		w=write(fd, cobj2->val->d.str, cobj2->val->size);
 	}
 	close(fd);
@@ -526,7 +637,7 @@ int nl_sleep(nes_state *N)
 
 	if (cobj1->val->type==NT_NUMBER) n=(int)cobj1->val->d.num;
 #ifdef WIN32
-	_sleep(n);
+	Sleep(n*1000);
 #else
 	sleep(n);
 #endif
@@ -551,7 +662,10 @@ int nl_include(nes_state *N)
 
 int nl_printvar(nes_state *N)
 {
-	dumpvars(N, nes_getiobj(N, &N->l, 1), 0);
+	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+
+	if (nes_isnull(cobj1)) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected an object for arg1");
+	dumpvars(N, cobj1, 0);
 	nes_setnum(N, &N->r, "", 0);
 	return 0;
 }
@@ -573,8 +687,7 @@ int nl_size(nes_state *N)
 	case NT_CFUNC   : size=1; break;
 	case NT_TABLE   :
 		for (cobj=cobj->val->d.table;cobj;cobj=cobj->next) {
-			if (nes_isnull(cobj)) continue;
-			size++;
+			if (!nes_isnull(cobj)) size++;
 		}
 		break;
 	case NT_CDATA   : size=cobj->val->size; break;

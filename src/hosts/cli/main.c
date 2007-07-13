@@ -23,9 +23,20 @@
 #ifdef HAVE_MATH
 #include "nesla/libmath.h"
 #endif
+#ifdef HAVE_MYSQL
+#include "nesla/libmysql.h"
+#endif
+#ifdef HAVE_ODBC
 #include "nesla/libodbc.h"
+#endif
+#ifdef HAVE_SQLITE3
+#include "nesla/libsqlite3.h"
+#endif
 #ifndef __TURBOC__
 #include "nesla/libtcp.h"
+#endif
+#ifdef HAVE_ZLIB
+#include "nesla/libzip.h"
 #endif
 #include <stdio.h>
 #include <string.h>
@@ -43,6 +54,8 @@
 
 #include <signal.h>
 nes_state *N;
+
+extern char **environ;
 
 #ifndef STDOUT_FILENO
 #define STDOUT_FILENO 1
@@ -129,7 +142,7 @@ void do_help(char *arg0) {
 	return;
 }
 
-int main(int argc, char *argv[], char *envp[])
+int main(int argc, char *argv[])
 {
 	char tmpbuf[MAX_OBJNAMELEN+1];
 	obj_t *tobj;
@@ -153,20 +166,31 @@ int main(int argc, char *argv[], char *envp[])
 #ifdef HAVE_MATH
 	neslamath_register_all(N);
 #endif
+#ifdef HAVE_MYSQL
+	neslamysql_register_all(N);
+#endif
 #ifdef HAVE_ODBC
 	neslaodbc_register_all(N);
 #endif
+#ifdef HAVE_SQLITE3
+	neslasqlite3_register_all(N);
+#endif
 #ifndef __TURBOC__
+#ifndef TINYCC
 	neslatcp_register_all(N);
+#endif
+#endif
+#ifdef HAVE_ZLIB
+	neslazip_register_all(N);
 #endif
 	/* add env */
 	tobj=nes_settable(N, &N->g, "_ENV");
-	for (i=0;envp[i]!=NULL;i++) {
-		strncpy(tmpbuf, envp[i], MAX_OBJNAMELEN);
+	for (i=0;environ[i]!=NULL;i++) {
+		strncpy(tmpbuf, environ[i], MAX_OBJNAMELEN);
 		p=strchr(tmpbuf, '=');
 		if (!p) continue;
 		*p='\0';
-		p=strchr(envp[i], '=')+1;
+		p=strchr(environ[i], '=')+1;
 		nes_setstr(N, tobj, tmpbuf, p, strlen(p));
 	}
 	/* add args */

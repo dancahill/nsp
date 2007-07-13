@@ -31,6 +31,9 @@ typedef int socklen_t;
 #include <arpa/inet.h>
 #define closesocket close
 #define msleep(x) usleep(x*1000)
+#ifdef MISSING_SOCKLEN
+typedef int socklen_t;
+#endif
 #endif
 
 #include <errno.h>
@@ -197,7 +200,9 @@ int tcp_recv(nes_state *N, TCP_SOCKET *socket, char *buffer, int len, int flags)
 {
 	int rc;
 
+#ifndef WIN32
 retry:
+#endif
 	if (socket->socket==-1) return -1;
 	if (socket->want_close) {
 		tcp_close(N, socket, 1);
@@ -544,5 +549,34 @@ int neslatcp_tcp_write(nes_state *N)
 	} else {
 		nes_setnum(N, &N->r, "", rc);
 	}
+	return 0;
+}
+
+int neslatcp_register_all(nes_state *N)
+{
+#ifdef WIN32
+	static WSADATA wsaData;
+#endif
+	obj_t *tobj;
+
+#ifdef WIN32
+	if (WSAStartup(0x101, &wsaData)) {
+		/* printf("Winsock init error\r\n"); */
+		return -1;
+	}
+#endif
+	tobj=nes_settable(N, &N->g, "http");
+	tobj->val->attr|=NST_HIDDEN;
+	nes_setcfunc(N, tobj,  "get", (NES_CFUNC)neslatcp_http_get);
+
+	tobj=nes_settable(N, &N->g, "tcp");
+	tobj->val->attr|=NST_HIDDEN;
+	nes_setcfunc(N, tobj,  "bind",   (NES_CFUNC)neslatcp_tcp_bind);
+	nes_setcfunc(N, tobj,  "accept", (NES_CFUNC)neslatcp_tcp_accept);
+	nes_setcfunc(N, tobj,  "open",   (NES_CFUNC)neslatcp_tcp_open);
+	nes_setcfunc(N, tobj,  "close",  (NES_CFUNC)neslatcp_tcp_close);
+	nes_setcfunc(N, tobj,  "read",   (NES_CFUNC)neslatcp_tcp_read);
+	nes_setcfunc(N, tobj,  "gets",   (NES_CFUNC)neslatcp_tcp_gets);
+	nes_setcfunc(N, tobj,  "write",  (NES_CFUNC)neslatcp_tcp_write);
 	return 0;
 }

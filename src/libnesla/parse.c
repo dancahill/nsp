@@ -100,35 +100,52 @@ static optab oplist_k[] = {
 };
 
 /* Advance readptr to next non-blank */
-#define n_skipblank(N) \
-	while (*N->readptr) { \
-		if (*N->readptr=='#'||(N->readptr[0]=='/'&&N->readptr[1]=='/')) { \
-			while (*N->readptr) { \
-				if (*N->readptr=='\r'||*N->readptr=='\n') break; \
-				N->readptr++; \
-			} \
-		} else if (N->readptr[0]=='/'&&N->readptr[1]=='*') { \
-			while (*N->readptr) { \
-				if (N->readptr[0]=='*'&&N->readptr[1]=='/') { N->readptr+=2; break; } \
-				N->readptr++; \
-			} \
-		} \
-		if (!nc_isspace(*N->readptr)) break; \
-		N->readptr++; \
+static void n_skipblank(nes_state *N)
+{
+	uchar *p=N->readptr;
+
+	while (*p) {
+		if (p[0]=='#') {
+			p++;
+			while (*p) {
+				if (*p=='\r'||*p=='\n') { break; }
+				p++;
+			}
+		} else if (p[0]=='/'&&p[1]=='/') {
+			p+=2;
+			while (*p) {
+				if (*p=='\r'||*p=='\n') { break; }
+				p++;
+			}
+		} else if (p[0]=='/'&&p[1]=='*') {
+			p+=2;
+			while (*p) {
+				if (p[0]=='*'&&p[1]=='/') { p+=2; break; }
+				p++;
+			}
+		}
+		if (!nc_isspace(*p)) break;
+		p++;
 	}
+	N->readptr=p;
+	return;
+}
 
 /* Advance readptr to next matching quote */
-#define n_skipquote(N,c) \
-	while (*N->readptr) { \
-		if (*N->readptr=='\\') { \
-			N->readptr++; \
-		} else if (*N->readptr==c) { \
-			N->readptr++; \
-			break; \
-		} \
-		N->readptr++; \
-		if (!*N->readptr) n_error(N, NE_SYNTAX, "n_skipquote", "unterminated string"); \
+static void n_skipquote(nes_state *N, unsigned short c)
+{
+	while (*N->readptr) {
+		if (*N->readptr=='\\') {
+			N->readptr++;
+		} else if (*N->readptr==c) {
+			N->readptr++;
+			break;
+		}
+		N->readptr++;
+		if (!*N->readptr) n_error(N, NE_SYNTAX, "n_skipquote", "unterminated string");
 	}
+	return;
+}
 
 /* Advance readptr to next specified char */
 void n_skipto(nes_state *N, unsigned short c)
@@ -437,7 +454,8 @@ obj_t *nes_eval(nes_state *N, char *string)
 	int cmp;
 	short preop;
 	short op;
-	unsigned short i, j, k, l, r;
+	unsigned short j, k, l, r;
+	unsigned short numops=0;
 	unsigned short ops[MAXOPS];
 
 	DEBUG_IN();
@@ -446,7 +464,7 @@ obj_t *nes_eval(nes_state *N, char *string)
 	listobj.val=n_newval(N, NT_TABLE);
 	listobj.val->attr=0;
 	/* make a list of tokens */
-	for (i=0;;) {
+	for (;;) {
 		nextop();
 		if (OP_ISEND(N->lastop)) break;
 		if (*N->readptr==0) break;
@@ -457,9 +475,9 @@ obj_t *nes_eval(nes_state *N, char *string)
 			if (nobj==NULL) break;
 			nextop();
 			if (cobj==NULL) {
-				cobj=listobj.val->d.table=n_newiobj(N, i);
+				cobj=listobj.val->d.table=n_newiobj(N, numops);
 			} else {
-				cobj->next=n_newiobj(N, i);
+				cobj->next=n_newiobj(N, numops);
 				cobj->next->prev=cobj;
 				cobj=cobj->next;
 			}
@@ -472,9 +490,9 @@ obj_t *nes_eval(nes_state *N, char *string)
 				preop=0;
 			}
 			if (cobj==NULL) {
-				cobj=listobj.val->d.table=n_newiobj(N, i);
+				cobj=listobj.val->d.table=n_newiobj(N, numops);
 			} else {
-				cobj->next=n_newiobj(N, i);
+				cobj->next=n_newiobj(N, numops);
 				cobj->next->prev=cobj;
 				cobj=cobj->next;
 			}
@@ -502,7 +520,6 @@ obj_t *nes_eval(nes_state *N, char *string)
 					}
 				}
 				if (nes_isnull(nobj)) {
-					nes_unlinkval(N, cobj);
 					cobj->val=n_newval(N, NT_NULL);
 				} else if (nobj->val->type==NT_NUMBER) {
 					cobj->val=n_newval(N, NT_NUMBER);
@@ -521,8 +538,8 @@ obj_t *nes_eval(nes_state *N, char *string)
 					}
 				} else if (nobj->val->type==NT_STRING) {
 					if (nobj==&N->r) {
-						nes_linkval(N, cobj, &N->r);
-						nes_unlinkval(N, &N->r);
+						cobj->val=N->r.val;
+						N->r.val=NULL;
 					} else {
 						n_copyval(N, cobj, nobj);
 					}
@@ -536,14 +553,14 @@ obj_t *nes_eval(nes_state *N, char *string)
 			}
 			N->lastop=OP_UNDEFINED;
 		}
-		if (N->debug) n_warn(N, fn, "[%d]", i);
+		if (N->debug) n_warn(N, fn, "[%d]", numops);
 		if (*N->readptr==0) break;
 		if (N->lastop==OP_UNDEFINED) nextop();
 		if (!OP_ISMATH(N->lastop)) break;
-		ops[i++]=N->lastop;
-		if (i>MAXOPS-1) n_error(N, NE_SYNTAX, fn, "too many math ops (%d)", MAXOPS);
+		ops[numops++]=N->lastop;
+		if (numops>MAXOPS-1) n_error(N, NE_SYNTAX, fn, "too many math ops (%d)", MAXOPS);
 	}
-	ops[i]=0;
+	ops[numops]=0;
 	if (listobj.val->d.table==NULL) {
 		nes_unlinkval(N, &listobj);
 		DEBUG_OUT();
@@ -553,9 +570,9 @@ obj_t *nes_eval(nes_state *N, char *string)
 	do {
 		r=0;
 		nobj=cobj=listobj.val->d.table;
-		for (j=0;j<i;j++) {
+		for (j=0;j<numops;j++) {
 			if (nobj) nobj=nobj->next;
-			for (k=j;k<i;k++) {
+			for (k=j;k<numops;k++) {
 				if (!nobj||ops[k]) break;
 				nobj=nobj->next;
 			}
@@ -565,7 +582,7 @@ obj_t *nes_eval(nes_state *N, char *string)
 			for (;;) {
 				if (!nobj) break;
 				nnobj=nobj->next;
-				for (l=k+1;l<i;l++) {
+				for (l=k+1;l<numops;l++) {
 					if (!nnobj||ops[l]) break;
 					nnobj=nnobj->next;
 				}
@@ -666,12 +683,11 @@ obj_t *nes_eval(nes_state *N, char *string)
 					case OP_MMULEQ : cobj->val->d.num=cobj->val->d.num * nobj->val->d.num;break;
 					case OP_MDIV   :
 					case OP_MDIVEQ : if (nobj->val->d.num) { cobj->val->d.num=cobj->val->d.num / nobj->val->d.num; break; }
-						n_warn(N, fn, "division by zero %f div %f", cobj->val->d.num, nobj->val->d.num);
+						/* n_warn(N, fn, "division by zero %f div %f", cobj->val->d.num, nobj->val->d.num); */
 						cobj->val->type=NT_NULL;
 						break;
-
 					case OP_MMOD   : if ((int)nobj->val->d.num) { cobj->val->d.num=(int)cobj->val->d.num % (int)nobj->val->d.num; break; }
-						n_warn(N, fn, "division by zero %f mod %f", cobj->val->d.num, nobj->val->d.num);
+						/* n_warn(N, fn, "division by zero %f mod %f", cobj->val->d.num, nobj->val->d.num); */
 						cobj->val->type=NT_NULL;
 						break;
 					case OP_MAND   : cobj->val->d.num=(int)cobj->val->d.num & (int)nobj->val->d.num;break;
@@ -716,7 +732,7 @@ obj_t *nes_eval(nes_state *N, char *string)
 					if (op==OP_MADD) {
 						n_joinstr(N, cobj, nobj->val->d.str, nobj->val->size);
 					} else {
-						cmp=nc_strcmp(cobj->val->d.str?cobj->val->d.str:"", nobj->val->d.str?nobj->val->d.str:"");
+						cmp=nc_strcmp(cobj->val->d.str, nobj->val->d.str);
 						n_freeval(N, cobj);
 						cobj->val->type=NT_NUMBER;
 						switch (op) {

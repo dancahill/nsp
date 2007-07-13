@@ -1,10 +1,12 @@
 # Makefile for NullLogic Embedded Scripting Language
-CC      = gcc
-CFLAGS  = -Wall -g -O2 -I../../../include
-OBJECTS = http.o misc.o ssl.o tcp.o
-TARGET  = ../../../lib/libneslatcp.a
 
-include ../../Rules.mak
+include ../../config.mak
+
+#CC      = gcc
+#CFLAGS  = -Wall -g -O2 -I../../../include
+CFLAGS  += -I../../../include
+OBJECTS = http.o ssl.o tcp.o
+TARGET  = ../../../lib/libneslatcp.a
 
 all: _libneslatcp
 

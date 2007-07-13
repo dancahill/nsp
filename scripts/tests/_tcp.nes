@@ -178,6 +178,7 @@ function testtcp() {
 		return;
 	}
 	print("\tsucking http://nesla.sourceforge.net/nesla/\n");
+	io.flush();
 	ht=http.get(0, "nesla.sourceforge.net", 80, "/nesla/");
 #	expect("ht.status",     "HTTP/1.1 200 OK",   ht.status);
 	if (type(ht)!='table') {
@@ -222,3 +223,4 @@ function testtcp() {
 	return;
 }
 testtcp();
+io.flush();

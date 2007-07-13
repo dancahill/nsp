@@ -166,6 +166,7 @@ int nc_strcmp(const char *s1, const char *s2)
 
 	if (a==b) return 0;
 	if (!a) a=(uchar *)"";
+	if (!b) b=(uchar *)"";
 	do {
 		if (*a!=*b) return *a-*b;
 		if (*a==0) break;

@@ -271,11 +271,13 @@ nes_state *nes_newstate()
 		{ "tonumber",	(NES_CFUNC)nl_tonumber	},
 		{ "tostring",	(NES_CFUNC)nl_tostring	},
 		{ "type",	(NES_CFUNC)nl_type	},
-		{ "write",	(NES_CFUNC)nl_print	},
+		{ "write",	(NES_CFUNC)nl_write	},
 		{ NULL, NULL }
 	};
 	FUNCTION list_file[]={
 		{ "read",	(NES_CFUNC)nl_fileread	},
+		{ "stat",	(NES_CFUNC)nl_filestat  },
+		{ "unlink",	(NES_CFUNC)nl_fileunlink},
 		{ "write",	(NES_CFUNC)nl_filewrite	},
 		{ NULL, NULL }
 	};

@@ -44,6 +44,8 @@
 #include <signal.h>
 nes_state *N;
 
+extern char **environ;
+
 #ifndef STDOUT_FILENO
 #define STDOUT_FILENO 1
 #endif
@@ -116,7 +118,7 @@ static void preppath(nes_state *N, char *name)
 	return;
 }
 
-int main(int argc, char *argv[], char *envp[])
+int main(int argc, char *argv[])
 {
 	char tmpbuf[MAX_OBJNAMELEN+1];
 	obj_t *cobj, *tobj;
@@ -140,12 +142,12 @@ int main(int argc, char *argv[], char *envp[])
 	neslatcp_register_all(N);
 	/* add env */
 	tobj=nes_settable(N, &N->g, "_ENV");
-	for (i=0;envp[i]!=NULL;i++) {
-		strncpy(tmpbuf, envp[i], MAX_OBJNAMELEN);
+	for (i=0;environ[i]!=NULL;i++) {
+		strncpy(tmpbuf, environ[i], MAX_OBJNAMELEN);
 		p=strchr(tmpbuf, '=');
 		if (!p) continue;
 		*p='\0';
-		p=strchr(envp[i], '=')+1;
+		p=strchr(environ[i], '=')+1;
 		nes_setstr(N, tobj, tmpbuf, p, strlen(p));
 	}
 	/* add args */

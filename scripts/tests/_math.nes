@@ -69,9 +69,11 @@ function testmath() {
 	print("\n");
 	print("\tmath.rand(10)       = ", math.rand(10));
 	for (i=0;i<14;i++) print(", ", math.rand(10));
+	print("\n");
 
-	print("\nexpect a divided by zero warning and a null return val\n");
+//	print("\nexpect a divided by zero warning and a null return val\n");
 	expect("1/0",                'null',     tostring(1/0));
 	return;
 }
 testmath();
+io.flush();

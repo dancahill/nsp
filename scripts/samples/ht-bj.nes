@@ -129,20 +129,20 @@ function main() {
 	print("<TR><TD ALIGN=LEFT COLSPAN=2 WIDTH=355px>");
 	if (opt=="Stand") {
 		for (n=0;n<5;n++) {
-			if (d[n]>=0) print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[d[n]]['file'] ,"' TITLE='", CARDS[d[n]]['name'], "'>");
+			if (d[n]>=0) print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[d[n]]['file'] ,"' ALT='", CARDS[d[n]]['name'], " TITLE='", CARDS[d[n]]['name'], "'>");
 		}
 	} else if (ct>20) {
 		for (n=0;n<5;n++) {
-			if (d[n]>=0) print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[d[n]]['file'] ,"' TITLE='", CARDS[d[n]]['name'], "'>");
+			if (d[n]>=0) print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[d[n]]['file'] ,"' ALT='", CARDS[d[n]]['name'], " TITLE='", CARDS[d[n]]['name'], "'>");
 		}
 	} else {
 		print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/face.png' TITLE='unknown'>");
-		if (d[1]>=0) print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[d[1]]['file'], "' TITLE='", CARDS[d[1]]['name'], "'>");
+		if (d[1]>=0) print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[d[1]]['file'], "' ALT='", CARDS[d[n]]['name'], " TITLE='", CARDS[d[1]]['name'], "'>");
 	}
 	print("</TD></TR>\n");
 	print("<TR><TD ALIGN=LEFT COLSPAN=2 WIDTH=355px>");
 	for (n=0;n<5;n++) {
-		if (c[n]>=0) print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[c[n]]['file'], "' TITLE='", CARDS[c[n]]['name'], "'>");
+		if (c[n]>=0) print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[c[n]]['file'], "' ALT='", CARDS[d[n]]['name'], " TITLE='", CARDS[c[n]]['name'], "'>");
 	}
 	print("</TD></TR>\n");
 	print("</TABLE>\n");

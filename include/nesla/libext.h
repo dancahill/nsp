@@ -20,8 +20,15 @@ int neslaext_base64_decode(nes_state *N);
 int neslaext_base64_encode(nes_state *N);
 /* dir.c */
 int neslaext_dirlist(nes_state *N);
+/* md5.c */
+int neslaext_md5_file(nes_state *N);
+int neslaext_md5_string(nes_state *N);
+int neslaext_md5_passwd(nes_state *N);
 /* rot13.c */
 int neslaext_rot13(nes_state *N);
+/* sort.c */
+int neslaext_sort_byname(nes_state *N);
+int neslaext_sort_bykey(nes_state *N);
 /* xml.c */
 int neslaext_xml_read(nes_state *N);
 

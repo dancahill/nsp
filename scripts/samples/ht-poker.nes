@@ -128,6 +128,7 @@ function printredraw() {
 	for (n=0;n<5;n++) {
 		print("	document.game.c",n,".value=r.getElementsByTagName('c",n,"')[0].firstChild.data;\n");
 		print("	document.card",n,".src=r.getElementsByTagName('c",n,"f')[0].firstChild.data;\n");
+		print("	document.card",n,".alt=r.getElementsByTagName('c",n,"n')[0].firstChild.data;\n");
 		print("	document.card",n,".title=r.getElementsByTagName('c",n,"n')[0].firstChild.data;\n");
 	}
 	print(
@@ -208,7 +209,7 @@ function main() {
 	print("<TR>");
 	for (n=0;n<5;n++) {
 		local i=tonumber(c[n]);
-		print("<TD ALIGN=LEFT WIDTH=71><IMG NAME=card", n, " WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[i].file ,"' TITLE='", CARDS[i].name, "'></TD>\n");
+		print("<TD ALIGN=LEFT WIDTH=71><IMG NAME=card", n, " WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[i].file ,"' ALT='", CARDS[i].name, "' TITLE='", CARDS[i].name, "'></TD>\n");
 	}
 	print("</TR>\n");
 #	if (string.cmp(opt, "Deal")!=0) {

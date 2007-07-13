@@ -1,22 +1,24 @@
 #!/usr/bin/nesla
 
-# CMS sample prog by Dan Cahill
-# This is the Crappy Management system.
-# It lets you browse the filesystem, execute shell commands, and edit files,
-# and since there's no security, it lets everyone else do it, too... :-)
+/*
+ * CMS sample prog by Dan Cahill
+ * This is the Crappy Management system.
+ * It lets you browse the filesystem, execute shell commands, and edit files,
+ * and since there's no security, it lets everyone else do it, too... :-)
+ *
+ * build nesla.cgi and put it in /cgi-bin/
+ * make a .htaccess file, add these three lines,
+ *
+ * Options +ExecCGI
+ * AddHandler nes-script .nes
+ * Action nes-script /cgi-bin/nesla.cgi
+ *
+ * and that'a about it..
+ *
+ * the most likely problem is file permissions, but you're on your own there.
+ */
 
-# build nesla.cgi and put it in /cgi-bin/
-# make a .htaccess file, add these three lines,
-#
-# Options +ExecCGI
-# AddHandler nes-script .nes
-# Action nes-script /cgi-bin/nesla.cgi
-#
-# and that'a about it..
-#
-# the most likely problem is file permissions, but you're on your own there.
-
-# This thing has serious limits that make its usefuless rather limited.
+// This thing has serious limits that make its usefuless rather limited.
 
 global MASTERPASSWORD="nesla";
 if (type(_SERVER)!='table') exit 0;

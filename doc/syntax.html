@@ -7,9 +7,9 @@
 <META HTTP-EQUIV="Description" CONTENT="Nesla is the script language for C programmers.">
 <LINK REL="SHORTCUT ICON" HREF="/favicon.ico">
 <STYLE TYPE="text/css">
-A                { COLOR: #0000FF; TEXT-DECORATION: underline }
-A.SIDEMENU       { COLOR: #FFFFFF; TEXT-DECORATION: none; }
-A.SIDEMENU:HOVER { COLOR: #399CDE; TEXT-DECORATION: none; }
+A             { COLOR: #0000FF; TEXT-DECORATION: underline }
+A.SMENU       { COLOR: #FFFFFF; TEXT-DECORATION: none; }
+A.SMENU:HOVER { COLOR: #399CDE; TEXT-DECORATION: none; }
 P { text-align:justify }
 </STYLE>
 <LINK REL="stylesheet" TYPE="text/css" HREF="/style.css">
@@ -37,92 +37,96 @@ function showpage(c,p) {
 <TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0" HEIGHT="100%" WIDTH="100%">
 <TR>
 	<TD BGCOLOR="#003399" COLSPAN=3 ALIGN="CENTER" VALIGN="TOP" HEIGHT=40 WIDTH="99%" CLASS="welcome" NOWRAP>
-	<h2><a href="http://nesla.sourceforge.net/nesla/" CLASS="sidemenu">NullLogic Embedded Scripting Language - Reference</a></h2>
+	<h2><a href="http://nesla.sourceforge.net/nesla/" CLASS="smenu">NullLogic Embedded Scripting Language - Reference</a></h2>
 	</TD>
 	<TD WIDTH="10" BGCOLOR="#003399" ALIGN="RIGHT" VALIGN="BOTTOM"><IMG SRC="/images/blue-rounder1.gif" WIDTH="14" HEIGHT="20" BORDER="0" ALT=""></TD>
 </TR>
 <TR>
 	<TD HEIGHT="100%" WIDTH="200" BGCOLOR="#003399" VALIGN=TOP>
 		<HR NOSHADE SIZE="0.5" WIDTH="160">
-		<H2 CLASS="lefttitle"><FONT COLOR="#399CDE">&nbsp;Site Menu</FONT></H2>
-		<P CLASS="sidemenu">
-		<A CLASS="sidemenu" HREF="#c1p0"              onClick="showpage('1', '0');             return false;"><NOBR>Introduction</NOBR></A><BR>
+		<H2 CLASS="lefttitle"><FONT COLOR="#399CDE">&nbsp;Menu</FONT></H2>
+		<P CLASS="smenu">
+		<A CLASS="smenu" HREF="#c1p0"              onClick="showpage('1', '0');             return false;"><NOBR>Introduction</NOBR></A><BR>
 <DIV ID=c1m STYLE='display: block'>
 </DIV>
-		<A CLASS="sidemenu" HREF="#c2p0"              onClick="showpage('2', '0');             return false;"><NOBR>Functions - misc</NOBR></A><BR>
+		<A CLASS="smenu" HREF="#c2p0"              onClick="showpage('2', '0');             return false;"><NOBR>Functions - core</NOBR></A><BR>
 <DIV ID=c2m STYLE='display: block'>
-		<A CLASS="sidemenu" HREF="#c2p_date"          onClick="showpage('2', '_date');         return false;">&nbsp;&nbsp;date();</A><BR>
-		<A CLASS="sidemenu" HREF="#c2p_include"       onClick="showpage('2', '_include');      return false;">&nbsp;&nbsp;include();</A><BR>
-		<A CLASS="sidemenu" HREF="#c2p_print"         onClick="showpage('2', '_print');        return false;">&nbsp;&nbsp;print();</A><BR>
-		<A CLASS="sidemenu" HREF="#c2p_printvar"      onClick="showpage('2', '_printvar');     return false;">&nbsp;&nbsp;printvar();</A><BR>
-		<A CLASS="sidemenu" HREF="#c2p_runtime"       onClick="showpage('2', '_runtime');      return false;">&nbsp;&nbsp;runtime();</A><BR>
-		<A CLASS="sidemenu" HREF="#c2p_size"          onClick="showpage('2', '_size');         return false;">&nbsp;&nbsp;size();</A><BR>
-		<A CLASS="sidemenu" HREF="#c2p_sleep"         onClick="showpage('2', '_sleep');        return false;">&nbsp;&nbsp;sleep();</A><BR>
-		<A CLASS="sidemenu" HREF="#c2p_time"          onClick="showpage('2', '_time');         return false;">&nbsp;&nbsp;time();</A><BR>
-		<A CLASS="sidemenu" HREF="#c2p_tonumber"      onClick="showpage('2', '_tonumber');     return false;">&nbsp;&nbsp;tonumber();</A><BR>
-		<A CLASS="sidemenu" HREF="#c2p_tostring"      onClick="showpage('2', '_tostring');     return false;">&nbsp;&nbsp;tostring();</A><BR>
-		<A CLASS="sidemenu" HREF="#c2p_type"          onClick="showpage('2', '_type');         return false;">&nbsp;&nbsp;type();</A><BR>
-		<A CLASS="sidemenu" HREF="#c2p_write"         onClick="showpage('2', '_write');        return false;">&nbsp;&nbsp;write();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_date"          onClick="showpage('2', '_date');         return false;">&nbsp;&nbsp;date();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_include"       onClick="showpage('2', '_include');      return false;">&nbsp;&nbsp;include();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_print"         onClick="showpage('2', '_print');        return false;">&nbsp;&nbsp;print();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_printvar"      onClick="showpage('2', '_printvar');     return false;">&nbsp;&nbsp;printvar();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_runtime"       onClick="showpage('2', '_runtime');      return false;">&nbsp;&nbsp;runtime();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_size"          onClick="showpage('2', '_size');         return false;">&nbsp;&nbsp;size();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_sleep"         onClick="showpage('2', '_sleep');        return false;">&nbsp;&nbsp;sleep();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_system"        onClick="showpage('2', '_system');       return false;">&nbsp;&nbsp;system();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_time"          onClick="showpage('2', '_time');         return false;">&nbsp;&nbsp;time();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_tonumber"      onClick="showpage('2', '_tonumber');     return false;">&nbsp;&nbsp;tonumber();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_tostring"      onClick="showpage('2', '_tostring');     return false;">&nbsp;&nbsp;tostring();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_type"          onClick="showpage('2', '_type');         return false;">&nbsp;&nbsp;type();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_write"         onClick="showpage('2', '_write');        return false;">&nbsp;&nbsp;write();</A><BR>
 </DIV>
-		<A CLASS="sidemenu" HREF="#c3p0"              onClick="showpage('3', '0');             return false;"><NOBR>Functions - io</NOBR></A><BR>
+		<A CLASS="smenu" HREF="#c3p0"              onClick="showpage('3', '0');             return false;"><NOBR>Functions - io</NOBR></A><BR>
 <DIV ID=c3m STYLE='display: block'>
-		<A CLASS="sidemenu" HREF="#c3p_io_flush"      onClick="showpage('3', '_io_flush');     return false;">&nbsp;&nbsp;io.flush();</A><BR>
-		<A CLASS="sidemenu" HREF="#c3p_io_print"      onClick="showpage('3', '_io_print');     return false;">&nbsp;&nbsp;io.print();</A><BR>
-		<A CLASS="sidemenu" HREF="#c3p_io_write"      onClick="showpage('3', '_io_write');     return false;">&nbsp;&nbsp;io.write();</A><BR>
+		<A CLASS="smenu" HREF="#c3p_io_flush"      onClick="showpage('3', '_io_flush');     return false;">&nbsp;&nbsp;io.flush();</A><BR>
+		<A CLASS="smenu" HREF="#c3p_io_print"      onClick="showpage('3', '_io_print');     return false;">&nbsp;&nbsp;io.print();</A><BR>
+		<A CLASS="smenu" HREF="#c3p_io_write"      onClick="showpage('3', '_io_write');     return false;">&nbsp;&nbsp;io.write();</A><BR>
 </DIV>
-		<A CLASS="sidemenu" HREF="#c4p0"              onClick="showpage('4', '0');             return false;"><NOBR>Functions - file</NOBR></A><BR>
+		<A CLASS="smenu" HREF="#c4p0"              onClick="showpage('4', '0');             return false;"><NOBR>Functions - file</NOBR></A><BR>
 <DIV ID=c4m STYLE='display: block'>
-		<A CLASS="sidemenu" HREF="#c4p_file_read"     onClick="showpage('4', '_file_read');    return false;">&nbsp;&nbsp;file.read();</A><BR>
-		<A CLASS="sidemenu" HREF="#c4p_file_write"    onClick="showpage('4', '_file_write');   return false;">&nbsp;&nbsp;file.write();</A><BR>
+		<A CLASS="smenu" HREF="#c4p_file_read"     onClick="showpage('4', '_file_read');    return false;">&nbsp;&nbsp;file.read();</A><BR>
+		<A CLASS="smenu" HREF="#c4p_file_stat"     onClick="showpage('4', '_file_stat');    return false;">&nbsp;&nbsp;file.stat();</A><BR>
+		<A CLASS="smenu" HREF="#c4p_file_unlink"   onClick="showpage('4', '_file_unlink');  return false;">&nbsp;&nbsp;file.unlink();</A><BR>
+		<A CLASS="smenu" HREF="#c4p_file_write"    onClick="showpage('4', '_file_write');   return false;">&nbsp;&nbsp;file.write();</A><BR>
 </DIV>
-		<A CLASS="sidemenu" HREF="#c5p0"              onClick="showpage('5', '0');             return false;"><NOBR>Functions - string</NOBR></A><BR>
+		<A CLASS="smenu" HREF="#c5p0"              onClick="showpage('5', '0');             return false;"><NOBR>Functions - string</NOBR></A><BR>
 <DIV ID=c5m STYLE='display: block'>
-		<A CLASS="sidemenu" HREF="#c5p_string_cat"    onClick="showpage('5', '_string_cat');   return false;">&nbsp;&nbsp;string.cat();</A><BR>
-		<A CLASS="sidemenu" HREF="#c5p_string_cmp"    onClick="showpage('5', '_string_cmp');   return false;">&nbsp;&nbsp;string.cmp();</A><BR>
-		<A CLASS="sidemenu" HREF="#c5p_string_icmp"   onClick="showpage('5', '_string_icmp');  return false;">&nbsp;&nbsp;string.icmp();</A><BR>
-		<A CLASS="sidemenu" HREF="#c5p_string_ncmp"   onClick="showpage('5', '_string_ncmp');  return false;">&nbsp;&nbsp;string.ncmp();</A><BR>
-		<A CLASS="sidemenu" HREF="#c5p_string_nicmp"  onClick="showpage('5', '_string_nicmp'); return false;">&nbsp;&nbsp;string.nicmp();</A><BR>
-		<A CLASS="sidemenu" HREF="#c5p_string_len"    onClick="showpage('5', '_string_len');   return false;">&nbsp;&nbsp;string.len();</A><BR>
-		<A CLASS="sidemenu" HREF="#c5p_string_split"  onClick="showpage('5', '_string_split'); return false;">&nbsp;&nbsp;string.split();</A><BR>
-		<A CLASS="sidemenu" HREF="#c5p_string_str"    onClick="showpage('5', '_string_str');   return false;">&nbsp;&nbsp;string.str();</A><BR>
-		<A CLASS="sidemenu" HREF="#c5p_string_istr"   onClick="showpage('5', '_string_istr');  return false;">&nbsp;&nbsp;string.istr();</A><BR>
-		<A CLASS="sidemenu" HREF="#c5p_string_sub"    onClick="showpage('5', '_string_sub');   return false;">&nbsp;&nbsp;string.sub();</A><BR>
+		<A CLASS="smenu" HREF="#c5p_string_cat"    onClick="showpage('5', '_string_cat');   return false;">&nbsp;&nbsp;string.cat();</A><BR>
+		<A CLASS="smenu" HREF="#c5p_string_cmp"    onClick="showpage('5', '_string_cmp');   return false;">&nbsp;&nbsp;string.cmp();</A><BR>
+		<A CLASS="smenu" HREF="#c5p_string_icmp"   onClick="showpage('5', '_string_icmp');  return false;">&nbsp;&nbsp;string.icmp();</A><BR>
+		<A CLASS="smenu" HREF="#c5p_string_ncmp"   onClick="showpage('5', '_string_ncmp');  return false;">&nbsp;&nbsp;string.ncmp();</A><BR>
+		<A CLASS="smenu" HREF="#c5p_string_nicmp"  onClick="showpage('5', '_string_nicmp'); return false;">&nbsp;&nbsp;string.nicmp();</A><BR>
+		<A CLASS="smenu" HREF="#c5p_string_len"    onClick="showpage('5', '_string_len');   return false;">&nbsp;&nbsp;string.len();</A><BR>
+		<A CLASS="smenu" HREF="#c5p_string_split"  onClick="showpage('5', '_string_split'); return false;">&nbsp;&nbsp;string.split();</A><BR>
+		<A CLASS="smenu" HREF="#c5p_string_str"    onClick="showpage('5', '_string_str');   return false;">&nbsp;&nbsp;string.str();</A><BR>
+		<A CLASS="smenu" HREF="#c5p_string_istr"   onClick="showpage('5', '_string_istr');  return false;">&nbsp;&nbsp;string.istr();</A><BR>
+		<A CLASS="smenu" HREF="#c5p_string_sub"    onClick="showpage('5', '_string_sub');   return false;">&nbsp;&nbsp;string.sub();</A><BR>
 </DIV>
-		<A CLASS="sidemenu" HREF="#c6p0"              onClick="showpage('6', '0');             return false;"><NOBR>Functions - math</NOBR></A><BR>
+		<A CLASS="smenu" HREF="#c6p0"              onClick="showpage('6', '0');             return false;"><NOBR>Functions - math</NOBR></A><BR>
 <DIV ID=c6m STYLE='display: block'>
-		<A CLASS="sidemenu" HREF="#c6p_math_abs"      onClick="showpage('6', '_math_abs');     return false;">&nbsp;&nbsp;math.abs();</A><BR>
-		<A CLASS="sidemenu" HREF="#c6p_math_acos"     onClick="showpage('6', '_math_acos');    return false;">&nbsp;&nbsp;math.acos();</A><BR>
-		<A CLASS="sidemenu" HREF="#c6p_math_asin"     onClick="showpage('6', '_math_asin');    return false;">&nbsp;&nbsp;math.asin();</A><BR>
-		<A CLASS="sidemenu" HREF="#c6p_math_atan"     onClick="showpage('6', '_math_atan');    return false;">&nbsp;&nbsp;math.atan();</A><BR>
-		<A CLASS="sidemenu" HREF="#c6p_math_ceil"     onClick="showpage('6', '_math_ceil');    return false;">&nbsp;&nbsp;math.ceil();</A><BR>
-		<A CLASS="sidemenu" HREF="#c6p_math_cos"      onClick="showpage('6', '_math_cos');     return false;">&nbsp;&nbsp;math.cos();</A><BR>
-		<A CLASS="sidemenu" HREF="#c6p_math_floor"    onClick="showpage('6', '_math_floor');   return false;">&nbsp;&nbsp;math.floor();</A><BR>
-		<A CLASS="sidemenu" HREF="#c6p_math_rand"     onClick="showpage('6', '_math_rand');    return false;">&nbsp;&nbsp;math.rand();</A><BR>
-		<A CLASS="sidemenu" HREF="#c6p_math_sin"      onClick="showpage('6', '_math_sin');     return false;">&nbsp;&nbsp;math.sin();</A><BR>
-		<A CLASS="sidemenu" HREF="#c6p_math_sqrt"     onClick="showpage('6', '_math_sqrt');    return false;">&nbsp;&nbsp;math.sqrt();</A><BR>
-		<A CLASS="sidemenu" HREF="#c6p_math_tan"      onClick="showpage('6', '_math_tan');     return false;">&nbsp;&nbsp;math.tan();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_math_abs"      onClick="showpage('6', '_math_abs');     return false;">&nbsp;&nbsp;math.abs();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_math_acos"     onClick="showpage('6', '_math_acos');    return false;">&nbsp;&nbsp;math.acos();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_math_asin"     onClick="showpage('6', '_math_asin');    return false;">&nbsp;&nbsp;math.asin();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_math_atan"     onClick="showpage('6', '_math_atan');    return false;">&nbsp;&nbsp;math.atan();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_math_ceil"     onClick="showpage('6', '_math_ceil');    return false;">&nbsp;&nbsp;math.ceil();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_math_cos"      onClick="showpage('6', '_math_cos');     return false;">&nbsp;&nbsp;math.cos();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_math_floor"    onClick="showpage('6', '_math_floor');   return false;">&nbsp;&nbsp;math.floor();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_math_rand"     onClick="showpage('6', '_math_rand');    return false;">&nbsp;&nbsp;math.rand();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_math_sin"      onClick="showpage('6', '_math_sin');     return false;">&nbsp;&nbsp;math.sin();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_math_sqrt"     onClick="showpage('6', '_math_sqrt');    return false;">&nbsp;&nbsp;math.sqrt();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_math_tan"      onClick="showpage('6', '_math_tan');     return false;">&nbsp;&nbsp;math.tan();</A><BR>
 </DIV>
-		<A CLASS="sidemenu" HREF="#c7p0"              onClick="showpage('7', '0');             return false;"><NOBR>Functions - tcp</NOBR></A><BR>
+		<A CLASS="smenu" HREF="#c7p0"              onClick="showpage('7', '0');             return false;"><NOBR>Functions - tcp</NOBR></A><BR>
 <DIV ID=c7m STYLE='display: block'>
-		<A CLASS="sidemenu" HREF="#c7p_tcp_bind"      onClick="showpage('7', '_tcp_bind');     return false;">&nbsp;&nbsp;tcp.bind();</A><BR>
-		<A CLASS="sidemenu" HREF="#c7p_tcp_accept"    onClick="showpage('7', '_tcp_accept');   return false;">&nbsp;&nbsp;tcp.accept();</A><BR>
-		<A CLASS="sidemenu" HREF="#c7p_tcp_open"      onClick="showpage('7', '_tcp_open');     return false;">&nbsp;&nbsp;tcp.open();</A><BR>
-		<A CLASS="sidemenu" HREF="#c7p_tcp_close"     onClick="showpage('7', '_tcp_close');    return false;">&nbsp;&nbsp;tcp.close();</A><BR>
-		<A CLASS="sidemenu" HREF="#c7p_tcp_read"      onClick="showpage('7', '_tcp_read');     return false;">&nbsp;&nbsp;tcp.read();</A><BR>
-		<A CLASS="sidemenu" HREF="#c7p_tcp_gets"      onClick="showpage('7', '_tcp_gets');     return false;">&nbsp;&nbsp;tcp.gets();</A><BR>
-		<A CLASS="sidemenu" HREF="#c7p_tcp_write"     onClick="showpage('7', '_tcp_write');    return false;">&nbsp;&nbsp;tcp.write();</A><BR>
+		<A CLASS="smenu" HREF="#c7p_tcp_bind"      onClick="showpage('7', '_tcp_bind');     return false;">&nbsp;&nbsp;tcp.bind();</A><BR>
+		<A CLASS="smenu" HREF="#c7p_tcp_accept"    onClick="showpage('7', '_tcp_accept');   return false;">&nbsp;&nbsp;tcp.accept();</A><BR>
+		<A CLASS="smenu" HREF="#c7p_tcp_open"      onClick="showpage('7', '_tcp_open');     return false;">&nbsp;&nbsp;tcp.open();</A><BR>
+		<A CLASS="smenu" HREF="#c7p_tcp_close"     onClick="showpage('7', '_tcp_close');    return false;">&nbsp;&nbsp;tcp.close();</A><BR>
+		<A CLASS="smenu" HREF="#c7p_tcp_read"      onClick="showpage('7', '_tcp_read');     return false;">&nbsp;&nbsp;tcp.read();</A><BR>
+		<A CLASS="smenu" HREF="#c7p_tcp_gets"      onClick="showpage('7', '_tcp_gets');     return false;">&nbsp;&nbsp;tcp.gets();</A><BR>
+		<A CLASS="smenu" HREF="#c7p_tcp_write"     onClick="showpage('7', '_tcp_write');    return false;">&nbsp;&nbsp;tcp.write();</A><BR>
 </DIV>
-		<A CLASS="sidemenu" HREF="#c8p0"              onClick="showpage('8', '0');             return false;"><NOBR>libext</NOBR></A><BR>
+		<A CLASS="smenu" HREF="#c8p0"              onClick="showpage('8', '0');             return false;"><NOBR>libext</NOBR></A><BR>
 <DIV ID=c8m STYLE='display: block'>
-		<A CLASS="sidemenu" HREF="#c8p_base64_decode" onClick="showpage('8', '_base64_decode');return false;">&nbsp;&nbsp;base64.decode();</A><BR>
-		<A CLASS="sidemenu" HREF="#c8p_base64_encode" onClick="showpage('8', '_base64_encode');return false;">&nbsp;&nbsp;base64.encode();</A><BR>
-		<A CLASS="sidemenu" HREF="#c8p_dirlist"       onClick="showpage('8', '_dirlist');      return false;">&nbsp;&nbsp;dirlist();</A><BR>
-		<A CLASS="sidemenu" HREF="#c8p_rot13"         onClick="showpage('8', '_rot13');        return false;">&nbsp;&nbsp;rot13();</A><BR>
-		<A CLASS="sidemenu" HREF="#c8p_system"        onClick="showpage('8', '_system');       return false;">&nbsp;&nbsp;system();</A><BR>
-		<A CLASS="sidemenu" HREF="#c8p_xml_read"      onClick="showpage('8', '_xml_read');     return false;">&nbsp;&nbsp;xml.read();</A><BR>
-		<A CLASS="sidemenu" HREF="#c8p_http_get"      onClick="showpage('8', '_http_get');     return false;">&nbsp;&nbsp;http.get();</A><BR>
+		<A CLASS="smenu" HREF="#c8p_base64_decode" onClick="showpage('8', '_base64_decode');return false;">&nbsp;&nbsp;base64.decode();</A><BR>
+		<A CLASS="smenu" HREF="#c8p_base64_encode" onClick="showpage('8', '_base64_encode');return false;">&nbsp;&nbsp;base64.encode();</A><BR>
+		<A CLASS="smenu" HREF="#c8p_dirlist"       onClick="showpage('8', '_dirlist');      return false;">&nbsp;&nbsp;dirlist();</A><BR>
+		<A CLASS="smenu" HREF="#c8p_rot13"         onClick="showpage('8', '_rot13');        return false;">&nbsp;&nbsp;rot13();</A><BR>
+		<A CLASS="smenu" HREF="#c8p_sort_bykey"    onClick="showpage('8', '_sort_bykey');   return false;">&nbsp;&nbsp;sort.bykey();</A><BR>
+		<A CLASS="smenu" HREF="#c8p_sort_byname"   onClick="showpage('8', '_sort_byname');  return false;">&nbsp;&nbsp;sort.byname();</A><BR>
+		<A CLASS="smenu" HREF="#c8p_xml_read"      onClick="showpage('8', '_xml_read');     return false;">&nbsp;&nbsp;xml.read();</A><BR>
+		<A CLASS="smenu" HREF="#c8p_http_get"      onClick="showpage('8', '_http_get');     return false;">&nbsp;&nbsp;http.get();</A><BR>
 </DIV>
-		<A CLASS="sidemenu" HREF="#c9p0"              onClick="showpage('9', '0');             return false;"><NOBR>C API</NOBR></A><BR>
+		<A CLASS="smenu" HREF="#c9p0"              onClick="showpage('9', '0');             return false;"><NOBR>C API</NOBR></A><BR>
 <DIV ID=c9m STYLE='display: block'>
 </DIV>
 		</p>
@@ -376,114 +380,492 @@ concatenate the strings means that print only receives one argument.
 	<B>print</B>("Hello"+"world.\n");<BR>
 </CODE></TD></TR></TABLE>
 </BLOCKQUOTE><P>
+
+<H4>See Also</H4>
+<BLOCKQUOTE><P>
+<B><A HREF="#c3p_io_print"          onClick="showpage('3', '_io_print');         return false;">io.print()</A></B>
+</BLOCKQUOTE><P>
 <!-- CONTENTS_END -->
 </DIV>
 <DIV ID=c2p_printvar STYLE='display: block'>
-<hr><h3><a name="nesla_printvar"><code>printvar(object var);</code></a></h3>
-<p>
-Print the provided var in a format appropriate to a nesla script file. This will recursively print entire tables.
-</p>
+<!-- CONTENTS_START -->
+<a name="nesla_printvar"></a>
+<H2>printvar<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Print the provided var in a format appropriate for use in a nesla script. This will recursively print entire tables.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><B>printvar(</B><I>object var</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>var</I> </TD><TD>Object to be printed.  Can be any object type, including table.</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns zero.
+</BLOCKQUOTE><P>
+
+<H4>Remarks</H4>
+<BLOCKQUOTE><P>
+<P>Any argument that is not a string will be formatted automatically.  Boolean
+values will be 'true' or 'false' and numbers will have up to 6 digits past the
+decimal.  Most string functions may be binary safe, but this function _will_
+terminate its output at the first \0 character.
+</BLOCKQUOTE><P>
+
+<H4>Examples</H4>
+<BLOCKQUOTE><P>
+The following examples demonstrate the difference between print and printvar.
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	<B>var x</B>="this \"is a\" test\n";<BR>
+	<B>print</B>(x);<BR>
+	<BR>will display<BR><BR>this "is a" test
+</CODE></TD></TR></TABLE>
+</BLOCKQUOTE><P>
+<BLOCKQUOTE><P>
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	<B>var x</B>="this \"is a\" test\n";<BR>
+	<B>printvar</B>(x);<BR>
+	<BR>will display<BR><BR>"this \"is a\" test\n"
+</CODE></TD></TR></TABLE>
+</BLOCKQUOTE><P>
+<BLOCKQUOTE><P>
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	<B>var x</B>={ { key='c' }, { key='a' }, { key='b' } };<BR>
+	<B>printvar</B>(x);<BR>
+	<BR>will display<BR><BR>
+<pre>{
+        [0] = {
+                key = "c"
+        },
+        [1] = {
+                key = "a"
+        },
+        [2] = {
+                key = "b"
+        }
+}</pre>
+</CODE></TD></TR></TABLE>
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
 </DIV>
 <DIV ID=c2p_runtime STYLE='display: block'>
-<hr><h3><a name="nesla_runtime"><code>(string) runtime();</code></a></h3>
-<p>
-Returns the number of seconds the parser has been running.
-</p>
+<!-- CONTENTS_START -->
+<a name="nesla_runtime"></a>
+<H2>runtime<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Returns the elapsed time the parser has been running.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>number</I> <B>=</B> <B>runtime(</B><B>)<BR></B></BLOCKQUOTE><P>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns the time in seconds (with microsecond precision) the parser has been running.
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
 </DIV>
 <DIV ID=c2p_size STYLE='display: block'>
-<hr><h3><a name="nesla_size"><code>size(object);</code></a></h3>
-<p>
-Returns the size of the object.  For strings, this is the string length;
+<!-- CONTENTS_START -->
+<a name="nesla_size"></a>
+<H2>size<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Returns the size of the object.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>number</I> <B>=</B> <B>size(</B><I>object</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>object</I> </TD><TD>Object to be sized.  The return value's meaning will vary depending on this object's type.</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns the size of the object.  For strings, this is the string length;
 for tables, the number of non-null objects in the table.  Null values
 are zero size.
-</p>
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
 </DIV>
 <DIV ID=c2p_sleep STYLE='display: block'>
-<hr><h3><a name="nesla_sleep"><code>sleep(number);</code></a></h3>
-<p>
-Sleep for x number of seconds;
-</p>
+<!-- CONTENTS_START -->
+<a name="nesla_sleep"></a>
+<H2>sleep<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Sleep for a specified number of seconds.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><B>sleep(</B><I>number seconds</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>seconds</I> </TD><TD>Number of seconds the script should pause execution.</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns zero.
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
+</DIV>
+<DIV ID=c2p_system STYLE='display: block'>
+<!-- CONTENTS_START -->
+<a name="nesla_system"></a>
+<H2>system<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Performs an operating system call and returns the resulting errorcode.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>number</I> <B>=</B> <B>system(</B><I>string command</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>command</I> </TD><TD>Operating system command to be executed.</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns the errorcode after execution of <I>command</I>.
+</BLOCKQUOTE><P>
+
+<H4>Remarks</H4>
+<BLOCKQUOTE><P>
+<P>This function does not include or easily allow any sophisticated methods
+such as piping, signal handling, or interactivity.
+</BLOCKQUOTE><P>
+
+<H4>Examples</H4>
+<BLOCKQUOTE><P>
+The following example demonstrates a way to list a directory and then read the results.
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	<B>system</B>("ls"+" -l"+" > x.txt");<BR>
+	x=<B>file.read</B>("x.txt");<BR>
+	<B>print</B>(x);<BR>
+	<B>file.unlink</B>("x.txt");<BR>
+</CODE></TD></TR></TABLE>
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
 </DIV>
 <DIV ID=c2p_time STYLE='display: block'>
-<hr><h3><a name="nesla_time"><code>(string) time([number unixtime]);</code></a></h3>
-<p>
-Accepts an optional number (time in seconds since Jan 1 1970) and returns a
-formatted time string.
-</p>
+<!-- CONTENTS_START -->
+<A NAME="nesla_time"></A>
+<H2>time<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Returns a string representation of <VAR>timestamp</VAR> in the format 'HH:MM:SS'.
+If <VAR>timestamp</VAR> is not defined, the function will use the current local
+system time.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>string</I> <B>=</B> <B>time(</B><I>[number timestamp]</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>timestamp</I> </TD><TD>The <B>number</B> of seconds since January 1, 1970 UTC (commonly called a UNIX timestamp).</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns a formatted time <VAR>string</VAR> in the format 'HH:MM:SS'.
+</BLOCKQUOTE><P>
+
+<H4>Remarks</H4>
+<BLOCKQUOTE><P>
+<P>No remarks.
+</BLOCKQUOTE><P>
+
+<H4>Examples</H4>
+<BLOCKQUOTE><P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	<B>print</B>(<B>time</B>());
+</CODE></TD></TR></TABLE>
+<P>The above example will output something similar to: "<B>16:30:45</B>"</P>
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	<B>print</B>(<B>date</B>(0)+" "+<B>time</B>(0));
+</CODE></TD></TR></TABLE>
+<P>The above example will output something similar to (note the adjustment for local time): "<B>1969-12-31 19:00:00</B>"</P>
+</BLOCKQUOTE><P>
+
+<H4>See Also</H4>
+<BLOCKQUOTE><P>
+<B><A HREF="#c2p_date"          onClick="showpage('2', '_date');         return false;">date()</A></B>
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
 </DIV>
 <DIV ID=c2p_tonumber STYLE='display: block'>
-<hr><h3><a name="nesla_tonumber"><code>(number) tonumber(string|number);</code></a></h3>
-<p>
-Returns a number value equivalent of the source.
-</p>
+<!-- CONTENTS_START -->
+<a name="nesla_tonumber"></a>
+<H2>tonumber<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Returns a number value equivalent of the source.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>number</I> <B>=</B> <B>tonumber(</B><I>object</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>object</I> </TD><TD>Object to be converted to a numeric value.</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns a numeric approximation of the object parameter.  Objects such as tables
+and null will return zero since no other numeric value can be meaningfully representative.
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
 </DIV>
 <DIV ID=c2p_tostring STYLE='display: block'>
-<hr><h3><a name="nesla_tostring"><code>(number) tostring(string|number[, number]);</code></a></h3>
-<p>
-Returns a string value equivalent of the source.
-If both arguments are numbers, the second allows the setting of a decimal precision.
-</p>
+<!-- CONTENTS_START -->
+<a name="nesla_tostring"></a>
+<H2>tostring<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Returns a string value equivalent of the source.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>string</I> <B>=</B> <B>tostring(</B><I>object[, number]</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>object</I> </TD><TD>Object to be converted to a numeric value.</TD></TR>
+<TR><TD><I>number</I> </TD><TD>Precision to use for a numeric <I>object</I>.</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns a string value equivalent of the source.  If both arguments are
+numbers, the second allows the setting of a decimal precision.
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
 </DIV>
 <DIV ID=c2p_type STYLE='display: block'>
-<hr><h3><a name="nesla_type"><code>type(object);</code></a></h3>
-<p>
-Returns the name of the type of object.
-</p>
+<!-- CONTENTS_START -->
+<a name="nesla_type"></a>
+<H2>type<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Returns the name of the type of object.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>string</I> <B>=</B> <B>type(</B><I>object</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>object</I> </TD><TD>Object to be identified by type.</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns the name of the object type.  Possible types include boolean, number, string, table, function and null.
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
 </DIV>
 <DIV ID=c2p_write STYLE='display: block'>
-<hr><h3><a name="nesla_write"><code>write(...);</code></a></h3>
-<p>
-Print the complete list of args to the standard output.
-Pretty much a synonym for print();
-</p>
+<!-- CONTENTS_START -->
+<a name="nesla_write"></a>
+<H2>write<BR><HR></H2>
 
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Writes the entire object as a string and returns the result code.
+This function is binary safe.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>number</I> <B>=</B> <B>write(</B><I>object</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>object</I> </TD><TD>Object to be written to standard output.</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns the number of bytes written.
+</BLOCKQUOTE><P>
+
+<H4>See Also</H4>
+<BLOCKQUOTE><P>
+<B><A HREF="#c3p_io_write"          onClick="showpage('3', '_io_write');         return false;">io.write()</A></B>
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
 </DIV>
 <DIV ID=c3p0 STYLE='display: block'>
 <h1>3 - io.*()</h1>
 
 </DIV>
 <DIV ID=c3p_io_flush STYLE='display: block'>
-<B>/* basic io */</B>
-<hr><h3><a name="nesla_io_flush"><code>() io.flush(...);</code></a></h3>
-<p>
-Flushes the output buffer.
-</p>
+<!-- CONTENTS_START -->
+<a name="nesla_io_flush"></a>
+<H2>io.flush<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Flushes the output buffer.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>number</I> <B>=</B> <B>io.flush(</B><B>)<BR></B></BLOCKQUOTE><P>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns zero.
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
 </DIV>
 <DIV ID=c3p_io_print STYLE='display: block'>
-<hr><h3><a name="nesla_io_print"><code>() io.print(...);</code></a></h3>
-<p>
-Print the complete list of args to the standard output.
-</p>
+<!-- CONTENTS_START -->
+<a name="nesla_io_print"></a>
+<H2>io.print<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Print the complete list of arguments to the standard output.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>number</I> <B>=</B> <B>io.print(</B><I>...</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>...</I> </TD><TD>List of objects to be printed.</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns the number of characters printed.
+</BLOCKQUOTE><P>
+
+<H4>Remarks</H4>
+<BLOCKQUOTE><P>
+<P>Any argument that is not a string will be formatted automatically.  Boolean
+values will be 'true' or 'false' and numbers will have up to 6 digits past the
+decimal.  Most string functions may be binary safe, but this function _will_
+terminate its output at the first \0 character.
+</BLOCKQUOTE><P>
+
+<H4>Examples</H4>
+<BLOCKQUOTE><P>
+The following example demonstrates how to print multiple objects.
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	<B>io.print</B>("Hello", "world.\n");<BR>
+</CODE></TD></TR></TABLE>
+</BLOCKQUOTE><P>
+<BLOCKQUOTE><P>
+The following example gives the same output as above, but note that using + to
+concatenate the strings means that print only receives one argument.
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	<B>io.print</B>("Hello"+"world.\n");<BR>
+</CODE></TD></TR></TABLE>
+</BLOCKQUOTE><P>
+
+<H4>See Also</H4>
+<BLOCKQUOTE><P>
+<B><A HREF="#c2p_print"          onClick="showpage('2', '_print');         return false;">print()</A></B>
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
 </DIV>
 <DIV ID=c3p_io_write STYLE='display: block'>
-<hr><h3><a name="nesla_io_write"><code>() io.write(...);</code></a></h3>
-<p>
-Print the complete list of args to the standard output.
-Pretty much a synonym for print();
-</p>
+<!-- CONTENTS_START -->
+<a name="nesla_io_write"></a>
+<H2>io.write<BR><HR></H2>
 
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Writes the entire object as a string and returns the result code.
+This function is binary safe.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>number</I> <B>=</B> <B>io.write(</B><I>object</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>object</I> </TD><TD>Object to be written to standard output.</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns the number of bytes written.
+</BLOCKQUOTE><P>
+
+<H4>See Also</H4>
+<BLOCKQUOTE><P>
+<B><A HREF="#c2p_write"          onClick="showpage('2', '_write');         return false;">write()</A></B>
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
 </DIV>
 <DIV ID=c4p0 STYLE='display: block'>
 <h1>4 - file.*()</h1>
 
 </DIV>
 <DIV ID=c4p_file_read STYLE='display: block'>
-<B>/* file functions */</B>
 <hr><h3><a name="nesla_file_read"><code>(string) file.read(string filename);</code></a></h3>
 <p>
 Reads the entire file into a string and returns that string.
-This function is binary safe, but use of string functions to manipulate this string may mangle the data.
+This function is binary safe, but use of some string functions to manipulate this string may mangle the data.
+</p>
+</DIV>
+<DIV ID=c4p_file_stat STYLE='display: block'>
+<hr><h3><a name="nesla_file_stat"><code>(table) file.stat(string filename);</code></a></h3>
+<p>
+Stats filename and returns a table with stats.
+</p>
+</DIV>
+<DIV ID=c4p_file_unlink STYLE='display: block'>
+<hr><h3><a name="nesla_file_unlink"><code>(number) file.unlink(string filename);</code></a></h3>
+<p>
+Unlink filename and return zero if successful.
 </p>
 </DIV>
 <DIV ID=c4p_file_write STYLE='display: block'>
 <hr><h3><a name="nesla_file_write"><code>(number) file.write(string filename[, object]);</code></a></h3>
 <p>
-Writes the entire file and returns the result code.
+Writes the entire object as a string and returns the result code.
 This function is binary safe.
 </p>
-
-
-
 </DIV>
 <DIV ID=c5p0 STYLE='display: block'>
 <h1>5 - string.*()</h1>
@@ -736,10 +1118,14 @@ Returns a rot13 *cough* encoded string from str.
 Double-rot13 encryption is so stealthy, you won't even know it's been encrypted.
 </p>
 </DIV>
-<DIV ID=c8p_system STYLE='display: block'>
-<hr><h3><a name="nesla_system"><code>(number) system(string str);</code></a></h3>
+<DIV ID=c8p_sort_bykey STYLE='display: block'>
+<hr><h3><a name="nesla_sort_bykey"><code>(number) sort.bykey(table t, string subkey);</code></a></h3>
 <p>
-Performs an operating system call and returns the resulting errorcode.
+</p>
+</DIV>
+<DIV ID=c8p_sort_byname STYLE='display: block'>
+<hr><h3><a name="nesla_sort_byname"><code>(number) sort.byname(table t[, number recursive]);</code></a></h3>
+<p>
 </p>
 </DIV>
 <DIV ID=c8p_xml_read STYLE='display: block'>
@@ -801,21 +1187,21 @@ struct timeval { long tv_sec; long tv_usec; };
 #endif
 #include &lt;setjmp.h>
 
-#define NESLA_NAME     "nesla"
-#define NESLA_VERSION  "0.5.0"
+#define NESLA_NAME      "nesla"
+#define NESLA_VERSION   "0.7.0"
 
-#define MAX_OBJNAMELEN 64
-#define MAX_OUTBUFLEN  8192
+#define MAX_OBJNAMELEN  64
+#define MAX_OUTBUFLEN   8192
 
 /* object storage types */
-#define NT_NULL		0
-#define NT_BOOLEAN 	1
-#define NT_NUMBER	2
-#define NT_STRING	3
-#define NT_NFUNC	4
-#define NT_CFUNC	5
-#define NT_TABLE	6
-#define NT_CDATA	7
+#define NT_NULL         0
+#define NT_BOOLEAN      1
+#define NT_NUMBER       2
+#define NT_STRING       3
+#define NT_NFUNC        4
+#define NT_CFUNC        5
+#define NT_TABLE        6
+#define NT_CDATA        7
 
 /* object storage modes */
 #define NST_HIDDEN	0x01
@@ -833,6 +1219,20 @@ struct timeval { long tv_sec; long tv_usec; };
 /* should be typedef int(*NES_CFUNC)(nes_state *); */
 typedef int(*NES_CFUNC)(void *);
 
+/*
+ * define a callback function type so CDATA objects
+ * can choose the terms of their own death.
+ */
+/* should be typedef void(*NES_CFREE)(nes_state *, obj_t *); */
+typedef void(*NES_CFREE)(void *, void *);
+
+typedef struct NES_CDATA {
+	/* standard header info for CDATA object */
+	char      obj_type[16]; /* tell us all about yourself in 15 characters or less */
+	NES_CFREE obj_term;     /* now tell us how to kill you */
+	/* now begin the stuff that's socket-specific */
+} NES_CDATA;
+
 typedef struct nes_valrec {
 	unsigned short type; /* val type */
 	unsigned short attr; /* status: attributes (hidden, readonly, system, autosort, etc...) */
@@ -842,11 +1242,11 @@ typedef struct nes_valrec {
 		num_t  num;
 		char  *str;
 		NES_CFUNC cfunc;
+		NES_CDATA *cdata;
 		obj_t *table;
 	} d;
 } nes_valrec;
 typedef struct nes_objrec {
-	obj_t *parent; /* it's unsafe to use parent (but useful for debugging) */
 	obj_t *prev;
 	obj_t *next;
 	val_t *val;
@@ -890,30 +1290,31 @@ typedef struct nes_state {
 #define    nes_settable(N,t,n)     nes_setobj(N, t, n, NT_TABLE,  (NES_CFUNC)NULL, 0, NULL, 0)
 #define    nes_setcfunc(N,t,n,p)   nes_setobj(N, t, n, NT_CFUNC,  (NES_CFUNC)p,    0, NULL, 0)
 #define    nes_setnfunc(N,t,n,s,l) nes_setobj(N, t, n, NT_NFUNC,  (NES_CFUNC)NULL, 0, s,    l)
+#define    nes_setcdata(N,t,n,s,l) nes_setobj(N, t, n, NT_CDATA,  (NES_CFUNC)NULL, 0, (void *)s,    l)
 
 #ifndef NESLA_NOFUNCTIONS
 /* api */
 obj_t     *nes_readtablef(nes_state *N, obj_t *tobj, const char *fmt, ...);
 /* exec */
-nes_state *nes_newstate  (void);
-nes_state *nes_endstate  (nes_state *N);
-obj_t     *nes_exec      (nes_state *N, char *string);
-int        nes_execfile  (nes_state *N, char *file);
+nes_state *nes_newstate   (void);
+nes_state *nes_endstate   (nes_state *N);
+obj_t     *nes_exec       (nes_state *N, char *string);
+int        nes_execfile   (nes_state *N, char *file);
 /* libc */
-num_t      nes_aton      (nes_state *N, const char *str);
-char      *nes_ntoa      (nes_state *N, char *str, num_t num, short base, unsigned short dec);
+num_t      nes_aton       (nes_state *N, const char *str);
+char      *nes_ntoa       (nes_state *N, char *str, num_t num, short base, unsigned short dec);
 /* object */
-void       nes_linkval   (nes_state *N, obj_t *cobj1, obj_t *cobj2);
-void       nes_unlinkval (nes_state *N, obj_t *cobj);
-void       nes_freetable (nes_state *N, obj_t *tobj);
-obj_t     *nes_getobj    (nes_state *N, obj_t *tobj, char *oname);
-obj_t     *nes_getiobj   (nes_state *N, obj_t *tobj, int oindex);
-obj_t     *nes_setobj    (nes_state *N, obj_t *tobj, char *oname, unsigned short otype, NES_CFUNC _fptr, num_t _num, char *_str, int _slen);
-num_t      nes_tonum     (nes_state *N, obj_t *cobj);
-char      *nes_tostr     (nes_state *N, obj_t *cobj);
+void       nes_linkval    (nes_state *N, obj_t *cobj1, obj_t *cobj2);
+void       nes_unlinkval  (nes_state *N, obj_t *cobj);
+void       nes_freetable  (nes_state *N, obj_t *tobj);
+obj_t     *nes_getobj     (nes_state *N, obj_t *tobj, char *oname);
+obj_t     *nes_getiobj    (nes_state *N, obj_t *tobj, int oindex);
+obj_t     *nes_setobj     (nes_state *N, obj_t *tobj, char *oname, unsigned short otype, NES_CFUNC _fptr, num_t _num, char *_str, int _slen);
+num_t      nes_tonum      (nes_state *N, obj_t *cobj);
+char      *nes_tostr      (nes_state *N, obj_t *cobj);
 /* object */
-obj_t     *nes_eval      (nes_state *N, char *string);
-obj_t     *nes_readtable (nes_state *N, obj_t *tobj);
+obj_t     *nes_eval       (nes_state *N, char *string);
+obj_t     *nes_readtable  (nes_state *N, obj_t *tobj);
 #endif
 
 #endif /* nesla.h */

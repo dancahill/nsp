@@ -1,149 +1,106 @@
-.AUTODEPEND
+# Makefile for NullLogic Embedded Scripting Language
+# To use, do "make -fmakefile.tc"
 
-#		*Translator Definitions*
-CC = tcc +NESLA.CFG
-TASM = TASM
+# large really is the bare minimum to run the test scripts
+# you may even need *cough* huge...
+MODEL=l
+CC = tcc
 TLIB = tlib
-TLINK = tlink
-LIBPATH = C:\TC\LIB
-INCLUDEPATH = C:\TC\INCLUDE;..\INCLUDE
+TLINK = tcc
+LIBPATH = ..\LIB
+INCLUDEPATH = ..\INCLUDE
 
+CFLAGS = -w-par -m$(MODEL) -v- -I$(INCLUDEPATH) -DHAVE_MATH
+LDFLAGS = -m$(MODEL) -L$(LIBPATH)
 
-#		*Implicit Rules*
+NESLA_LIB = libnesla.lib
+NESLA_EXT_LIB = libext.lib
+NESLA_MATH_LIB = libmath.lib
+
+OBJ1 = api.obj exec.obj lib.obj libc.obj loop.obj obj.obj parse.obj
+OBJP1 = +api.obj+exec.obj+lib.obj+libc.obj+loop.obj+obj.obj+parse.obj
+
+OBJ2 = math.obj
+OBJP2 = +math.obj
+
+OBJ3 = base64.obj dir.obj md5.obj misc.obj rot13.obj sort.obj xml.obj
+OBJP3 = +base64.obj+dir.obj+md5.obj+misc.obj+rot13.obj+sort.obj+xml.obj
+
+all: nesla.exe
+
 .c.obj:
-  $(CC) -c {$< }
+	$(CC) $(CFLAGS) -c {$< }
 
-.cpp.obj:
-  $(CC) -c {$< }
+nesla.exe: $(NESLA_LIB) $(NESLA_EXT_LIB) $(NESLA_MATH_LIB) main.obj
+	$(TLINK) $(LDFLAGS) -enesla.exe main.obj $(NESLA_LIB) $(NESLA_EXT_LIB) $(NESLA_MATH_LIB)
 
-#		*List Macros*
+# *Individual File Dependencies*
+main.obj: hosts\cli\main.c
+	$(CC) $(CFLAGS) -c hosts\cli\main.c
 
+api.obj: libnesla\api.c
+	$(CC) $(CFLAGS) -c libnesla\api.c
 
-EXE_dependencies =  \
- main.obj \
- api.obj \
- exec.obj \
- lib.obj \
- libc.obj \
- loop.obj \
- obj.obj \
- parse.obj \
- math.obj \
- base64.obj \
- dir.obj \
- misc.obj \
- rot13.obj \
- sys.obj \
- xml.obj
+exec.obj: libnesla\exec.c
+	$(CC) $(CFLAGS) -c libnesla\exec.c
 
-#		*Explicit Rules*
-nesla.exe: nesla.cfg $(EXE_dependencies)
-  $(TLINK) /v/x/c/L$(LIBPATH) @&&|
-c0l.obj+
-main.obj+
-api.obj+
-exec.obj+
-lib.obj+
-libc.obj+
-loop.obj+
-obj.obj+
-parse.obj+
-math.obj+
-base64.obj+
-dir.obj+
-misc.obj+
-rot13.obj+
-sys.obj+
-xml.obj
-nesla
-		# no map file
-fp87.lib+
-mathl.lib+
-cl.lib
-|
+lib.obj: libnesla\lib.c
+	$(CC) $(CFLAGS) -c libnesla\lib.c
 
+libc.obj: libnesla\libc.c
+	$(CC) $(CFLAGS) -c libnesla\libc.c
 
-#		*Individual File Dependencies*
-main.obj: nesla.cfg hosts\cli\main.c
-	$(CC) -c hosts\cli\main.c
+loop.obj: libnesla\loop.c
+	$(CC) $(CFLAGS) -c libnesla\loop.c
 
-api.obj: nesla.cfg libnesla\api.c
-	$(CC) -c libnesla\api.c
+obj.obj: libnesla\obj.c
+	$(CC) $(CFLAGS) -c libnesla\obj.c
 
-exec.obj: nesla.cfg libnesla\exec.c
-	$(CC) -c libnesla\exec.c
+parse.obj: libnesla\parse.c
+	$(CC) $(CFLAGS) -c libnesla\parse.c
 
-lib.obj: nesla.cfg libnesla\lib.c
-	$(CC) -c libnesla\lib.c
+math.obj: libs\math\math.c
+	$(CC) $(CFLAGS) -c libs\math\math.c
 
-libc.obj: nesla.cfg libnesla\libc.c
-	$(CC) -c libnesla\libc.c
+base64.obj: libs\ext\base64.c
+	$(CC) $(CFLAGS) -c libs\ext\base64.c
 
-loop.obj: nesla.cfg libnesla\loop.c
-	$(CC) -c libnesla\loop.c
+dir.obj: libs\ext\dir.c
+	$(CC) $(CFLAGS) -c libs\ext\dir.c
 
-obj.obj: nesla.cfg libnesla\obj.c
-	$(CC) -c libnesla\obj.c
+md5.obj: libs\ext\md5.c
+	$(CC) $(CFLAGS) -c libs\ext\md5.c
 
-parse.obj: nesla.cfg libnesla\parse.c
-	$(CC) -c libnesla\parse.c
+misc.obj: libs\ext\misc.c
+	$(CC) $(CFLAGS) -c libs\ext\misc.c
 
-math.obj: nesla.cfg libs\math\math.c
-	$(CC) -c libs\math\math.c
+rot13.obj: libs\ext\rot13.c
+	$(CC) $(CFLAGS) -c libs\ext\rot13.c
 
-base64.obj: nesla.cfg libs\ext\base64.c
-	$(CC) -c libs\ext\base64.c
+sort.obj: libs\ext\sort.c
+	$(CC) $(CFLAGS) -c libs\ext\sort.c
 
-dir.obj: nesla.cfg libs\ext\dir.c
-	$(CC) -c libs\ext\dir.c
+xml.obj: libs\ext\xml.c
+	$(CC) $(CFLAGS) -c libs\ext\xml.c
 
-misc.obj: nesla.cfg libs\ext\misc.c
-	$(CC) -c libs\ext\misc.c
+# the command line is cut to fit in the MS-DOS 128 byte limit:
+$(NESLA_LIB): $(OBJ1)
+	@mkdir ..\LIB
+	@-del ..\LIB\$(NESLA_LIB)
+	$(TLIB) ..\LIB\$(NESLA_LIB) $(OBJP1)
 
-rot13.obj: nesla.cfg libs\ext\rot13.c
-	$(CC) -c libs\ext\rot13.c
+$(NESLA_EXT_LIB): $(OBJ3)
+	@mkdir ..\LIB
+	@-del ..\LIB\$(NESLA_EXT_LIB)
+	$(TLIB) ..\LIB\$(NESLA_EXT_LIB) $(OBJP3)
 
-sys.obj: nesla.cfg libs\ext\sys.c
-	$(CC) -c libs\ext\sys.c
+$(NESLA_MATH_LIB): $(OBJ2)
+	@mkdir ..\LIB
+	@-del ..\LIB\$(NESLA_MATH_LIB)
+	$(TLIB) ..\LIB\$(NESLA_MATH_LIB) $(OBJP2)
 
-xml.obj: nesla.cfg libs\ext\xml.c
-	$(CC) -c libs\ext\xml.c
-
-#		*Compiler Configuration File*
-nesla.cfg: makefile.tc
-  copy &&|
--ml
--2
--f287
--v
--vi-
--w-ret
--w-nci
--w-inl
--wpin
--wamb
--wamp
--w-par
--wasm
--wcln
--w-cpt
--wdef
--w-dup
--w-pia
--wsig
--wnod
--w-ill
--w-sus
--wstv
--wucp
--wuse
--w-ext
--w-ias
--w-ibc
--w-pre
--w-nst
--I$(INCLUDEPATH)
--L$(LIBPATH)
-| nesla.cfg
-
-
+clean:
+	-del *.obj
+	-del *.lib
+	-del *.exe
+	-del $(LIBPATH)\*.lib

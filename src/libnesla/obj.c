@@ -241,6 +241,7 @@ obj_t *nes_setobj(nes_state *N, obj_t *tobj, char *oname, unsigned short otype, 
 	int cmp=-1;
 	char *ostr=NULL;
 	unsigned short sortattr;
+	char *p;
 
 	if (tobj==&N->r) {
 		cobj=tobj;
@@ -267,12 +268,14 @@ obj_t *nes_setobj(nes_state *N, obj_t *tobj, char *oname, unsigned short otype, 
 			oobj=tobj->val->d.table;
 			for (cobj=oobj; cobj; oobj=cobj,cobj=cobj->next) {
 				/* both strings must be entirely numeric (not even decimals) */
-//				if (nc_isdigit(cobj->name[0])&&nc_isdigit(oname[0])) {
-//					cmp=(int)(nes_aton(N, cobj->name)-nes_aton(N, oname));
-//				} else {
+				p=cobj->name; while (nc_isdigit(*p)) p++;
+				if (!*p) { p=oname; while (nc_isdigit(*p)) p++; }
+				if (!*p) {
+					cmp=(int)(nes_aton(N, cobj->name)-nes_aton(N, oname));
+				} else {
 					if (cobj->name[0]!=oname[0]) cmp=cobj->name[0]-oname[0];else
 					cmp=nc_strcmp(cobj->name, oname);
-//				}
+				}
 				if (cmp==0) break;
 				if ((cmp>0)&&(sortattr)) break;
 			}
@@ -281,10 +284,6 @@ obj_t *nes_setobj(nes_state *N, obj_t *tobj, char *oname, unsigned short otype, 
 				cobj=n_alloc(N, sizeof(obj_t));
 				cobj->val=n_newval(N, otype);
 				nc_strncpy(cobj->name, oname, MAX_OBJNAMELEN);
-/*
-				cobj->prev=NULL;
-				cobj->next=NULL;
-*/
 				if (oobj==tobj->val->d.table) tobj->val->d.table=cobj;
 				cobj->prev=oobj->prev;
 				if (cobj->prev) cobj->prev->next=cobj;
@@ -350,6 +349,7 @@ void nes_freetable(nes_state *N, obj_t *tobj)
 	obj_t *cobj, *oobj;
 
 	if ((tobj==NULL)||(tobj->val==NULL)||(tobj->val->type!=NT_TABLE)) n_error(N, NE_MEM, "nes_freetable", "tobj is not a table");
+//	if (--tobj->val->refs<1) ...
 	cobj=tobj->val->d.table;
 	while (cobj!=NULL) {
 		oobj=cobj;
@@ -371,7 +371,6 @@ num_t nes_tonum(nes_state *N, obj_t *cobj)
 	case NT_TABLE   : return 0;
 	case NT_NFUNC   :
 	case NT_CFUNC   : return 0;
-	default         : return 0;
 	}
 	return 0;
 }
@@ -386,7 +385,6 @@ char *nes_tostr(nes_state *N, obj_t *cobj)
 	case NT_TABLE   : return "";
 	case NT_NFUNC   :
 	case NT_CFUNC   : return "";
-	default         : return "";
 	}
 	return "";
 }

@@ -1,9 +1,8 @@
 #!/usr/bin/nesla
 
-// comment
-
+// single line comment
 /*
-multiline comment
+multi line comment
 */
 
 function vars() {
@@ -25,6 +24,7 @@ function vars() {
 	}
 	print("global _GLOBALS = ");
 	printvar(_GLOBALS);
+	print(";\n");
 	if (type(_SERVER)=='table') print("</FONT></PRE></DIV>\n");
 	return;
 }
@@ -63,7 +63,9 @@ function main() {
 	print("-------------------------------------------------------------------\n");
 	include("_tcp.nes");
 	print("-------------------------------------------------------------------\n");
-	include("_ldap.nes");
+//	include("_ldap.nes");
+	print("-------------------------------------------------------------------\n");
+//	include("_odbc.nes");
 	print("-------------------------------------------------------------------\n");
 	include("_indexes.nes");
 	print("-------------------------------------------------------------------\n");
@@ -79,26 +81,31 @@ function main() {
 	print("-------------------------------------------------------------------\n");
 	expect("total errors", 0, tonumber(errors));
 
-	if (type(odbc.query)=='function') {
-		io.flush();
-		DSN="DRIVER=MySQL;DATABASE=nullgroupware;USER=root;PASSWORD=shit";
-		Q=odbc.query(DSN, "SELECT * FROM gw_users ORDER BY userid");
-#		Q=odbc.query(DSN, "INSERT INTO gw_users () VALUES ();");
-#		Q=odbc.query(DSN, "DELETE FROM gw_users WHERE userid > 2;");
+	if (_ENV['HOME']!=null) {
+		f=_ENV['HOME']+"/test.nes";
+		if (type(file.stat(f))=='table') {
+			print("-------------------------------------------------------------------\n");
+			print("running ", f, "\n");
+			include(f);
+			print("-------------------------------------------------------------------\n");
+		}
 	}
+
 	global _ARGS={};
 	global _ENV={};
+	
 	vars();
 	if (type(_SERVER)=='table') print("</BODY></HTML>");
 	return;
 }
 main();
-#exit 0;
 
 # below is code to read your /etc/passwd file into a table
-#x=file.read('/etc/passwd');
-#global y=string.split(x, '\n');
-#for (i=0;type(y[i])!='null';i++) {
-#	y[i]=string.split(y[i], ':');
-#}
-#printvar();
+/*
+x=file.read('/etc/passwd');
+global y=string.split(x, '\n');
+for (i=0;type(y[i])!='null';i++) {
+	y[i]=string.split(y[i], ':');
+}
+printvar(_GLOBALS);
+*/

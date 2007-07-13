@@ -36,3 +36,4 @@ function teststring() {
 	return;
 }
 teststring();
+io.flush();

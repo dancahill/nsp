@@ -92,7 +92,8 @@ LINK32_OBJS= \
 	"..\..\..\lib\libneslaext.lib" \
 	"..\..\..\lib\libneslamath.lib" \
 	"..\..\..\lib\libneslaodbc.lib" \
-	"..\..\..\lib\libneslatcp.lib"
+	"..\..\..\lib\libneslatcp.lib" \
+	"..\..\..\lib\libneslazip.lib"
 
 "$(OUTDIR)\nestray.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<

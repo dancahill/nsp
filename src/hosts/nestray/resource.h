@@ -10,22 +10,25 @@
 #define IDI_ICON1                       104
 #define IDI_ICON2                       105
 #define IDD_NULLDIALOG                  115
+#define IDD_TEXTINPUT1                  118
+#define IDD_TRAYNOTICE1                 119
 #define IDC_COMPANY                     400
 #define IDC_FILEDESC                    401
 #define IDC_COPYRIGHT                   402
 #define IDC_TRADEMARK                   403
 #define IDC_LABEL                       404
-#define IDC_STATIC                      -1
-#define IDI_STATE                       500 /* icon state change */
-#define IDM_STATE                       501 /* menu state change */
+#define IDC_STATIC1                     405
+#define IDI_STATE                       500
+#define IDM_STATE                       501
+#define IDC_EDIT1                       1002
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        118
+#define _APS_NEXT_RESOURCE_VALUE        120
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1002
+#define _APS_NEXT_CONTROL_VALUE         1003
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

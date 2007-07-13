@@ -1,0 +1,155 @@
+#!./bin/nesla_m
+
+function expect(msg, a, b) {
+	a=tostring(a);
+	b=tostring(b);
+	var sp="                              ";
+	var lm=string.len(msg);
+	var lb=string.len(b);
+
+	print("\t", msg, string.sub(sp, lm, 20-lm), " = ", b, " ", string.sub(sp, lb, 27-lb));
+	if (type(_ENV['TERM'])=='null') {
+		if (a==b) {
+			print("[  OK  ]\n");
+		} else {
+			print("[FAILED]\n");
+			global errors++;
+		}
+	} else {
+		if (a==b) {
+			print("[\e[00;32;40m  OK  \e[00m]\n");
+		} else {
+			print("[\e[00;31;40mFAILED\e[00m]\n");
+			global errors++;
+		}
+	}
+	return;
+}
+
+function testsub(title, l, c) {
+	file.unlink("conftest.c");
+	file.unlink("conftest.exe");
+	file.unlink("conftest.out");
+	if (ostype=='posix') {
+		file.write("conftest.c", c);
+		r1=system(cc+" conftest.c "+l+" -o conftest.out 2>/dev/null");
+		if (r1==0) r2=file.stat("conftest.out");
+	} else if (ostype=='windows') {
+		file.write("conftest.c", c);
+		r1=system(cc+" /nologo conftest.c "+l+" -o conftest.exe");
+		if (r1==0) r2=file.stat("conftest.exe");
+	} else {
+		print("unknown ostype '", ostype, "'[", _ENV['OS'], "][", _ENV['OSTYPE'], "]\n");
+		printvar(_GLOBALS);
+		expect("testing "+title, true, false);
+		return 0;
+	}
+	file.unlink("conftest.c");
+	file.unlink("conftest.exe");
+	file.unlink("conftest.out");
+	if ((r1==0)&&(type(r2)=='table')) {
+		expect("testing "+title, true, true);
+		return 1;
+	} else {
+		expect("testing "+title, true, false);
+		return 0;
+	}
+}
+
+function dotests() {
+	if (_ENV['OS']=='Windows_NT') {
+		if (_ENV['MAKE_MODE']=='unix') {
+			global ostype='posix';
+			global cygwin=true; // probably
+		} else {
+			global ostype='windows';
+		}
+	} else {
+		global ostype='posix';
+	}
+	config_mak="";
+	config_nes="";
+	config_nes2="";
+	if (ostype=='posix') {
+		// print("probably gcc\n");
+		if (type(_ENV['CC'])=='string') {
+			global cc=_ENV['CC'];
+		} else {
+			global cc="gcc";
+		}
+		config_mak=config_mak+"CC = "+cc+"\n";
+		config_mak=config_mak+"CFLAGS = -Wall -g -O2\n\n";
+
+		config_nes=config_nes+"CC = \""+cc+"\";\n";
+		config_nes=config_nes+"CFLAGS = \"-Wall -g -O2\";\n\n";
+	} else if (ostype=='windows') {
+		// print("probably vc\n");
+		global cc="cl.exe";
+	}
+	if (ostype=='posix') {
+
+		if (testsub("-pedantic", "-pedantic", "int main() { return 0; }\n")) {
+			config_mak=config_mak+"CFLAGS += -pedantic\n\n";
+			config_nes=config_nes+"CFLAGS = CFLAGS + \" -pedantic\";\n\n";
+		}
+		if (testsub("-pipe", "-pipe", "int main() { return 0; }\n")) {
+			config_mak=config_mak+"CFLAGS += -pipe\n\n";
+			config_nes=config_nes+"CFLAGS = CFLAGS + \" -pipe\";\n\n";
+		}
+//		if (testsub("socklen_t", "", "#include <netdb.h>\n#include <sys/socket.h>\nsocklen_t t;\nint main() { return 0; }\n")==0) {
+		if (testsub("socklen_t", "", "#include <netdb.h>\nsocklen_t t;\nint main() { return 0; }\n")==0) {
+			config_mak=config_mak+"CFLAGS += -DMISSING_SOCKLEN\n\n";
+			config_nes=config_nes+"CFLAGS = CFLAGS + \" -DMISSING_SOCKLEN\";\n\n";
+			config_nes2=config_nes2+"config_missing_socklen=true;\n";
+		}
+		if (testsub("LDAP", "-lldap", "#include <ldap.h>\nint main() { return 0; }\n")) {
+			config_mak=config_mak+"CFLAGS += -DHAVE_LDAP\nLDFLAGS += -lneslaldap -lldap\n\n";
+			config_nes=config_nes+"CFLAGS = CFLAGS + \" -DHAVE_LDAP\";\nLDFLAGS = LDFLAGS + \" -lneslaldap -lldap\";\n\n";
+			config_nes2=config_nes2+"config_have_ldap=true;\n";
+		}
+		if (testsub("MATH", "-lm", "#include <math.h>\nint main() { return 0; }\n")) {
+			config_mak=config_mak+"CFLAGS += -DHAVE_MATH\nLDFLAGS += -lneslamath -lm\n\n";
+			config_nes=config_nes+"CFLAGS = CFLAGS + \" -DHAVE_MATH\";\nLDFLAGS = LDFLAGS + \" -lneslamath -lm\";\n\n";
+			config_nes2=config_nes2+"config_have_math=true;\n";
+		}
+		if (testsub("MYSQL", "-lmysqlclient", "#include <mysql/mysql.h>\nint main() { return 0; }\n")) {
+			config_mak=config_mak+"CFLAGS += -DHAVE_MYSQL\nLDFLAGS += -lneslamysql -lmysqlclient\n\n";
+			config_nes=config_nes+"CFLAGS = CFLAGS + \" -DHAVE_MYSQL\";\nLDFLAGS = LDFLAGS + \" -lneslamysql -lmysqlclient\";\n\n";
+			config_nes2=config_nes2+"config_have_mysql=true;\n";
+		// try another location if the first test fails
+		} else if (testsub("MYSQL", "-L/usr/lib/mysql -lmysqlclient", "#include <mysql/mysql.h>\nint main() { return 0; }\n")) {
+			config_mak=config_mak+"CFLAGS += -DHAVE_MYSQL\nLDFLAGS += -lneslamysql -L/usr/lib/mysql -lmysqlclient\n\n";
+			config_nes=config_nes+"CFLAGS = CFLAGS + \" -DHAVE_MYSQL\";\nLDFLAGS = LDFLAGS + \" -lneslamysql -L/usr/lib/mysql -lmysqlclient\";\n\n";
+			config_nes2=config_nes2+"config_have_mysql=true;\n";
+		}
+		if (testsub("ODBC", "-lodbc", "#ifdef __CYGWIN__\n#include <windows.h>\n#endif\n#include <sql.h>\n#include <sqlext.h>\nint main() { return 0; }\n")) {
+			config_mak=config_mak+"CFLAGS += -DHAVE_ODBC\nLDFLAGS += -lneslaodbc -lodbc\n\n";
+			config_nes=config_nes+"CFLAGS = CFLAGS + \" -DHAVE_ODBC\";\nLDFLAGS = LDFLAGS + \" -lneslaodbc -lodbc\";\n\n";
+			config_nes2=config_nes2+"config_have_odbc=true;\n";
+		}
+		if (testsub("SQLITE3", "-lsqlite3", "#include <sqlite3.h>\nint main() { return 0; }\n")) {
+			config_mak=config_mak+"CFLAGS += -DHAVE_SQLITE3\nLDFLAGS += -lneslasqlite3 -lsqlite3\n\n";
+			config_nes=config_nes+"CFLAGS = CFLAGS + \" -DHAVE_SQLITE3\";\nLDFLAGS = LDFLAGS + \" -lneslasqlite3 -lsqlite3\";\n\n";
+			config_nes2=config_nes2+"config_have_sqlite3=true;\n";
+		}
+		if (testsub("SSL", "-lssl -lcrypto", "#include <openssl/ssl.h>\nint main() { return 0; }\n")) {
+			config_mak=config_mak+"CFLAGS += -DHAVE_SSL\nLDFLAGS += -lcrypto -lssl\n\n";
+			config_nes=config_nes+"CFLAGS = CFLAGS + \" -DHAVE_SSL\";\nLDFLAGS = LDFLAGS + \" -lcrypto -lssl\";\n\n";
+			config_nes2=config_nes2+"config_have_ssl=true;\n";
+		}
+		if (testsub("ZLIB", "-lz", "#include <zlib.h>\nint main() { return 0; }\n")) {
+			config_mak=config_mak+"CFLAGS += -DHAVE_ZLIB\nLDFLAGS += -lneslazip -lz\n\n";
+			config_nes=config_nes+"CFLAGS = CFLAGS + \" -DHAVE_ZLIB\";\nLDFLAGS = LDFLAGS + \" -lneslazip -lz\";\n\n";
+			config_nes2=config_nes2+"config_have_zlib=true;\n";
+		}
+	} else if (ostype=='windows') {
+	}
+	file.write("src/config.mak", config_mak);
+	config_nes=config_nes+config_nes2;
+	file.write("src/config.nes", config_nes);
+	print("\n");
+	return;
+}
+//printvar(_GLOBALS);
+r=file.stat("src/config.mak");
+if (type(r)!='table') dotests();

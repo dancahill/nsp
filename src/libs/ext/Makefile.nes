@@ -1,0 +1,20 @@
+# Makefile for NullLogic Embedded Scripting Language
+include("../../config.nes");
+CFLAGS  = CFLAGS+" -I../../../include -c -o";
+OBJECTS = "base64.o dir.o md5.o misc.o rot13.o sort.o xml.o";
+TARGET  = "../../../lib/libneslaext.a";
+if (target==null) target='build';
+if (target=='build') {
+	OLIST=string.split(OBJECTS, " ");
+	for (i=0;i<size(OLIST);i++) {
+		ONAME=string.split(OLIST[i], ".");
+		if (ONAME[1]=='o') {
+			print(CC+" "+CFLAGS+" "+ONAME[0]+".o "+ONAME[0]+".c\n");
+			system(CC+" "+CFLAGS+" "+ONAME[0]+".o "+ONAME[0]+".c");
+		}
+	}
+	system("ar cru "+TARGET+" "+OBJECTS);
+	system("ranlib "+TARGET);
+} else if (target=='clean') {
+	system("rm -f "+TARGET+" "+OBJECTS+" *~");
+}

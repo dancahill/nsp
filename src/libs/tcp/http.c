@@ -46,6 +46,8 @@ int neslatcp_http_get(nes_state *N)
 	int cl=-1, len=0, rc;
 	char tmpbuf[8192];
 	obj_t tobj;
+	obj_t *tobj2;
+	char *p, *p1, *p2;
 
 	if (cobj1->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a number for arg1");
 	if (cobj2->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg2");
@@ -64,23 +66,64 @@ int neslatcp_http_get(nes_state *N)
 	if (rc>0) {
 		cobj=nes_setstr(N, &tobj, "status", tmpbuf, strlen(tmpbuf));
 		while ((cobj->val->size>0)&&((cobj->val->d.str[cobj->val->size-1]=='\r')||(cobj->val->d.str[cobj->val->size-1]=='\n'))) cobj->val->d.str[--cobj->val->size]='\0';
+		tobj2=nes_settable(N, &tobj, "stat");
+		striprn(tmpbuf);
+		p1=tmpbuf;
+		p2=strchr(tmpbuf, ' ');
+		if ((*p1)&&(*p2)) {
+			*p2++='\0';
+			while (nc_isspace(*p2)) p2++;
+			nes_setstr(N, tobj2, "a", p1, strlen(p1));
+		}
+		p1=p2;
+		p2=strchr(p2, ' ');
+		if ((*p1)&&(*p2)) {
+			*p2++='\0';
+			while (nc_isspace(*p2)) p2++;
+			p=p1; while (nc_isdigit(*p)) p++;
+			if (*p) {
+				nes_setstr(N, tobj2, "b", p1, strlen(p1));
+			} else {
+				nes_setnum(N, tobj2, "b", atoi(p1));
+			}
+			nes_setstr(N, tobj2, "c", p2, strlen(p2));
+		}
 	}
 	cobj=nes_setstr(N, &tobj, "head", NULL, 0);
+	tobj2=nes_settable(N, &tobj, "headers");
 	for (;;) {
 		rc=tcp_fgets(N, tmpbuf, sizeof(tmpbuf)-1, &sock);
-		if (rc<1) { break; }
+		if (rc<1) break;
 		/* slow, but at least it's safe */
 		n_joinstr(N, cobj, tmpbuf, rc);
 		striprn(tmpbuf);
 		if (strlen(tmpbuf)<1) break;
 		/* printf("[%s]\r\n", tmpbuf); */
-		if (strncmp(tmpbuf, "Content-Length: ", 16)==0) { cl=atoi(tmpbuf+16); }
+		p1=tmpbuf;
+		p2=strchr(tmpbuf, ':');
+		if ((*p1)&&(*p2)) {
+			*p2++='\0';
+			for (p=p1;*p;p++) *p=nc_tolower(*p);
+			while (nc_isspace(*p2)) p2++;
+			/* printf("[%s][%s]\n", p1, p2); */
+			if (strcmp(p1, "content-length")==0) {
+				p=p2; while (nc_isdigit(*p)) p++;
+				if (*p) {
+					nes_setstr(N, tobj2, p1, p2, strlen(p2));
+				} else {
+					cl=atoi(p2);
+					nes_setnum(N, tobj2, p1, cl);
+				}
+			} else {
+				nes_setstr(N, tobj2, p1, p2, strlen(p2));
+			}
+		}
 	}
 	while ((cobj->val->size>0)&&((cobj->val->d.str[cobj->val->size-1]=='\r')||(cobj->val->d.str[cobj->val->size-1]=='\n'))) cobj->val->d.str[--cobj->val->size]='\0';
 	cobj=nes_setstr(N, &tobj, "body", NULL, 0);
 	for (;;) {
 		rc=tcp_fgets(N, tmpbuf, sizeof(tmpbuf)-1, &sock);
-		if (rc<1) { break; }
+		if (rc<1) break;
 		len+=rc;
 		/* slow, but at least it's safe */
 		n_joinstr(N, cobj, tmpbuf, rc);

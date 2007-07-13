@@ -24,3 +24,4 @@ function testindexing() {
 	return;
 }
 testindexing();
+io.flush();

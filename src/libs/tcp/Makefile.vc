@@ -12,7 +12,7 @@ LIB_LDFLAGS   = -lib
 LIB_TARGETDIR = ../../../lib
 
 CFLAGS  = $(LIB_CFLAGS)
-OBJECTS = $(INTDIR)/http.obj $(INTDIR)/misc.obj $(INTDIR)/ssl.obj $(INTDIR)/tcp.obj
+OBJECTS = $(INTDIR)/http.obj $(INTDIR)/ssl.obj $(INTDIR)/tcp.obj
 TARGET  = $(LIB_TARGETDIR)/libneslatcp.lib
 
 all: _dirs _libneslatcp

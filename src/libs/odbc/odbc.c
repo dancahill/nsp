@@ -191,7 +191,7 @@ int neslaodbc_query(nes_state *N)
 	strcpy(conn->obj_type, "odbc-conn");
 	rc=odbcConnect(N, conn, cobj1->val->d.str);
 	if (rc<0) {
-		nes_setstr(N, &N->r, "", "odbc error", strlen("odbc error"));
+		nes_setstr(N, &N->r, "", "odbc connection error", strlen("odbc connection error"));
 		n_free(N, (void *)&conn);
 		return -1;
 	}

@@ -102,3 +102,4 @@ function testxml() {
 	return;
 }
 testxml();
+io.flush();

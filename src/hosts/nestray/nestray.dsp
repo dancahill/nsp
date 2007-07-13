@@ -8,12 +8,12 @@ CFG=NesTray - Win32 Release
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "NesTray.mak".
+!MESSAGE NMAKE /f "nestray.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "NesTray.mak" CFG="NesTray - Win32 Release"
+!MESSAGE NMAKE /f "nestray.mak" CFG="NesTray - Win32 Release"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
@@ -85,6 +85,14 @@ SOURCE=.\nestray.ico
 # Begin Source File
 
 SOURCE=.\nestray.rc
+# End Source File
+# Begin Source File
+
+SOURCE=.\nestray1.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\nestray2.ico
 # End Source File
 # End Group
 # Begin Source File

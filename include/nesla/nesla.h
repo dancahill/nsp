@@ -18,6 +18,10 @@
 #ifndef _NESLA_H
 #define _NESLA_H 1
 
+#ifdef TINYCC
+/* missing in the supplied win32 headers */
+struct timeval { long tv_sec; long tv_usec; };
+#endif
 #ifdef WIN32
 /* always include winsock2 before windows, or bad stuff will happen */
 #include <winsock2.h>
@@ -33,7 +37,7 @@ struct timeval { long tv_sec; long tv_usec; };
 #include <setjmp.h>
 
 #define NESLA_NAME      "nesla"
-#define NESLA_VERSION   "0.6.0"
+#define NESLA_VERSION   "0.7.0"
 
 #define MAX_OBJNAMELEN  64
 #define MAX_OUTBUFLEN   8192
@@ -141,25 +145,25 @@ typedef struct nes_state {
 /* api */
 obj_t     *nes_readtablef(nes_state *N, obj_t *tobj, const char *fmt, ...);
 /* exec */
-nes_state *nes_newstate  (void);
-nes_state *nes_endstate  (nes_state *N);
-obj_t     *nes_exec      (nes_state *N, char *string);
-int        nes_execfile  (nes_state *N, char *file);
+nes_state *nes_newstate   (void);
+nes_state *nes_endstate   (nes_state *N);
+obj_t     *nes_exec       (nes_state *N, char *string);
+int        nes_execfile   (nes_state *N, char *file);
 /* libc */
-num_t      nes_aton      (nes_state *N, const char *str);
-char      *nes_ntoa      (nes_state *N, char *str, num_t num, short base, unsigned short dec);
+num_t      nes_aton       (nes_state *N, const char *str);
+char      *nes_ntoa       (nes_state *N, char *str, num_t num, short base, unsigned short dec);
 /* object */
-void       nes_linkval   (nes_state *N, obj_t *cobj1, obj_t *cobj2);
-void       nes_unlinkval (nes_state *N, obj_t *cobj);
-void       nes_freetable (nes_state *N, obj_t *tobj);
-obj_t     *nes_getobj    (nes_state *N, obj_t *tobj, char *oname);
-obj_t     *nes_getiobj   (nes_state *N, obj_t *tobj, int oindex);
-obj_t     *nes_setobj    (nes_state *N, obj_t *tobj, char *oname, unsigned short otype, NES_CFUNC _fptr, num_t _num, char *_str, int _slen);
-num_t      nes_tonum     (nes_state *N, obj_t *cobj);
-char      *nes_tostr     (nes_state *N, obj_t *cobj);
+void       nes_linkval    (nes_state *N, obj_t *cobj1, obj_t *cobj2);
+void       nes_unlinkval  (nes_state *N, obj_t *cobj);
+void       nes_freetable  (nes_state *N, obj_t *tobj);
+obj_t     *nes_getobj     (nes_state *N, obj_t *tobj, char *oname);
+obj_t     *nes_getiobj    (nes_state *N, obj_t *tobj, int oindex);
+obj_t     *nes_setobj     (nes_state *N, obj_t *tobj, char *oname, unsigned short otype, NES_CFUNC _fptr, num_t _num, char *_str, int _slen);
+num_t      nes_tonum      (nes_state *N, obj_t *cobj);
+char      *nes_tostr      (nes_state *N, obj_t *cobj);
 /* object */
-obj_t     *nes_eval      (nes_state *N, char *string);
-obj_t     *nes_readtable (nes_state *N, obj_t *tobj);
+obj_t     *nes_eval       (nes_state *N, char *string);
+obj_t     *nes_readtable  (nes_state *N, obj_t *tobj);
 #endif
 
 #endif /* nesla.h */
