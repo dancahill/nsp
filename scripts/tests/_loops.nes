@@ -1,5 +1,5 @@
 #!/usr/bin/nesla
-if (type(expect)!='function') include("_expect.nes");
+if (typeof(expect)!='function') include("_expect.nes");
 function testloop() {
 	local n=10;
 

@@ -16,6 +16,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nesla/libnesla.h"
+#include "opcodes.h"
 #include <math.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -53,12 +54,12 @@ int nc_vsnprintf(nes_state *N, char *dest, int max, const char *format, va_list 
 		}
 		switch (*s) {
 		case 'c': tmp[0]=(char)va_arg(ap, int); tmp[1]=0; goto end;
-		case 'd': p=nes_ntoa(N, tmp, va_arg(ap, int),          -10, 0); goto out;
-		case 'i': p=nes_ntoa(N, tmp, va_arg(ap, int),          -10, 0); goto out;
-		case 'o': p=nes_ntoa(N, tmp, va_arg(ap, int),            8, 0); goto out;
-		case 'u': p=nes_ntoa(N, tmp, va_arg(ap, unsigned int),  10, 0); goto out;
-		case 'x': p=nes_ntoa(N, tmp, va_arg(ap, unsigned int),  16, 0); goto out;
-		case 'f': p=nes_ntoa(N, tmp, va_arg(ap, double),       -10, 6); goto out;
+		case 'd': p=n_ntoa(N, tmp, va_arg(ap, int),          -10, 0); goto out;
+		case 'i': p=n_ntoa(N, tmp, va_arg(ap, int),          -10, 0); goto out;
+		case 'o': p=n_ntoa(N, tmp, va_arg(ap, int),            8, 0); goto out;
+		case 'u': p=n_ntoa(N, tmp, va_arg(ap, unsigned int),  10, 0); goto out;
+		case 'x': p=n_ntoa(N, tmp, va_arg(ap, unsigned int),  16, 0); goto out;
+		case 'f': p=n_ntoa(N, tmp, va_arg(ap, double),       -10, 6); goto out;
 		case 's': p=va_arg(ap, char *); if (p==NULL) p="(null)"; goto out;
 		default : p="orphan %"; goto out;
 		}
@@ -194,30 +195,23 @@ void *nc_memset(void *s, int c, int n)
 
 	while (n) a[--n]=c;
 	return s;
-	/* return memset(s, c, n); */
 }
 
 void n_error(nes_state *N, short int err, const char *fname, const char *format, ...)
 {
-	char ptrtxt[MAX_OBJNAMELEN+1];
-	char *p=ptrtxt;
 	va_list ap;
 	int len;
 
-	nc_strncpy(ptrtxt, (char *)N->readptr, MAX_OBJNAMELEN);
 	N->err=err;
+	nl_flush(N);
 	if (N->err) {
-		while (*p) {
-			if ((*p=='\r')||(*p=='\n')||(*p=='\t')) *p=' ';
-			p++;
-		}
 		len=nc_snprintf(N, N->errbuf, sizeof(N->errbuf)-1, "%-15s : ", fname);
 		va_start(ap, format);
 		len+=nc_vsnprintf(N, N->errbuf+len, sizeof(N->errbuf)-len-1, format, ap);
 		va_end(ap);
-		nc_snprintf(N, N->errbuf+len, sizeof(N->errbuf)-len-1, "\r\n\tN->readptr=\"%s\"", ptrtxt);
+		nc_snprintf(N, N->errbuf+len, sizeof(N->errbuf)-len-1, "\r\n");
+		nl_flush(N);
 	}
-	nl_flush(N);
 	if (N->jmpset) {
 		longjmp(N->savjmp, 1);
 	} else {
@@ -226,33 +220,34 @@ void n_error(nes_state *N, short int err, const char *fname, const char *format,
 	return;
 }
 
+void n_expect(nes_state *N, const char *fname, uchar op)
+{
+	if (*N->readptr!=op) n_error(N, NE_SYNTAX, fname, "expected a '%s'", n_getsym(N, op));
+/*
+	if (*N->readptr==op) return;
+	switch (op) {
+	case OP_STRDATA : n_error(N, NE_SYNTAX, fname, "expected a string");
+	case OP_NUMDATA : n_error(N, NE_SYNTAX, fname, "expected a number");
+	case OP_LABEL   : n_error(N, NE_SYNTAX, fname, "expected a label");
+	default         : n_error(N, NE_SYNTAX, fname, "expected a '%s'", n_getsym(N, op));
+	}
+*/
+}
+
 void n_warn(nes_state *N, const char *fname, const char *format, ...)
 {
 	va_list ap;
-/*
-	short i;
-	char *p;
-*/
+
 	if (++N->warnings>10000) n_error(N, NE_SYNTAX, "n_warn", "too many warnings (%d)\n", N->warnings);
 	if (N->outbuflen>OUTBUFLOWAT) nl_flush(N);
 	nc_printf(N, "[01;33;40m%s\r\t\t : ", fname);
 	va_start(ap, format);
 	N->outbuflen+=nc_vsnprintf(N, N->outbuf+N->outbuflen, MAX_OUTBUFLEN-N->outbuflen, format, ap);
 	va_end(ap);
-/*
-	nc_printf(N, "\r\t\t\t\t\t\tN->readptr = ");
-	for (i=0;i<40;i++) {
-		p=(char *)N->readptr+i;
-		N->outbuf[N->outbuflen++]=nc_isspace(*p)?' ':*p;
-		if (!*p) break;
-	}
-*/
 	nc_printf(N, "\r\n[00m");
 	nl_flush(N);
-	if (N->strict) {
-		if (N->jmpset) {
-			longjmp(N->savjmp, 1);
-		}
+	if ((N->strict)&&(N->jmpset)) {
+		longjmp(N->savjmp, 1);
 	}
 	return;
 }
@@ -261,29 +256,27 @@ void n_warn(nes_state *N, const char *fname, const char *format, ...)
 /*
  * the following functions are public API functions
  */
-num_t nes_aton(nes_state *N, const char *str)
+num_t n_aton(nes_state *N, const char *str)
 {
 	char *s=(char *)str;
-	num_t dot=0;
 	num_t rval=0;
 
 	while (nc_isdigit(*s)) {
-		rval=10*rval+(*s-'0');
-		s++;
+		rval=10*rval+(*s++-'0');
 	}
 	if (*s=='.') {
-		dot=1;
+		num_t dot=1;
+
 		s++;
 		while (nc_isdigit(*s)) {
 			dot*=0.1;
-			rval+=(*s-'0')*dot;
-			s++;
+			rval+=(*s++-'0')*dot;
 		}
 	}
 	return rval;
 }
 
-char *nes_ntoa(nes_state *N, char *str, num_t num, short base, unsigned short dec)
+char *n_ntoa(nes_state *N, char *str, num_t num, short base, unsigned short dec)
 {
 	int n=(int)num;
 	num_t f=(num_t)num-(int)num;

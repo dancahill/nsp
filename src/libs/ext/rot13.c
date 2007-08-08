@@ -18,7 +18,7 @@
 #include "nesla/libnesla.h"
 #include "nesla/libext.h"
 
-int neslaext_rot13(nes_state *N)
+NES_FUNCTION(neslaext_rot13)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	obj_t *robj;

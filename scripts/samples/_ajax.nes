@@ -28,7 +28,7 @@ function printxml() {
 		"			if (c.status==200) {\n",
 		"				redraw(c);\n",
 		"			} else {\n",
-		"				alert('HTTP status: '+c.status+'\\\nHTTP return: '+c.responseText);\n",
+		"				alert('HTTP status: '+c.status+'\\nHTTP return: '+c.responseText);\n",
 		"			}\n",
 		"		}\n",
 		"	}\n",

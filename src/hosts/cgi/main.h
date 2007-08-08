@@ -16,10 +16,11 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#ifdef WIN32
-#include <winsock2.h>
-#include <windows.h>
-#endif
+#include "nesla/nesla.h"
+#include "nesla/libdl.h"
+#include "nesla/libext.h"
+#include "nesla/libmath.h"
+#include "nesla/libtcp.h"
 #include <ctype.h>
 #include <signal.h>
 #include <stdio.h>
@@ -30,7 +31,6 @@
 #include <sys/stat.h>
 #ifdef WIN32
 	#include <io.h>
-	#include <sys/timeb.h>
 #ifdef BCC
 	#define _setmode setmode
 #endif
@@ -45,10 +45,6 @@
 	#include <unistd.h>
 #endif
 #include "config.h"
-#include "nesla/nesla.h"
-#include "nesla/libext.h"
-#include "nesla/libmath.h"
-#include "nesla/libtcp.h"
 
 extern nes_state *N;
 

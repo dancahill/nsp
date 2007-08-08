@@ -21,6 +21,7 @@
 
 #include "nesla/libodbc.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 static void odbcDisconnect(nes_state *N, ODBC_CONN *conn)
@@ -84,33 +85,7 @@ void odbc_murder(nes_state *N, obj_t *cobj)
 	n_free(N, (void *)&cobj->val->d.str);
 	return;
 }
-/*
-static int odbcUpdate(nes_state *N, ODBC_CONN *conn, char *sqlquery)
-{
-	char sqlstate[15];
-	char buf[250];
-	RETCODE rc;
 
-	rc=SQLAllocHandle(SQL_HANDLE_STMT, conn->hDBC, &conn->hSTMT);
-	if ((rc!=SQL_SUCCESS)&&(rc!=SQL_SUCCESS_WITH_INFO)) {
-		SQLError(conn->hENV, conn->hDBC, conn->hSTMT, (SQLPOINTER)sqlstate, NULL, (SQLPOINTER)buf, sizeof(buf), NULL);
-		n_warn(N, "odbcUpdate", "ODBC Update - SQLAllocHandle %s", buf);
-		return -1;
-	}
-	rc=SQLExecDirect(conn->hSTMT, (SQLPOINTER)sqlquery, SQL_NTS); 
-	if ((rc!=SQL_SUCCESS)&&(rc!=SQL_SUCCESS_WITH_INFO)) {
-		SQLError(conn->hENV, conn->hDBC, conn->hSTMT, (SQLPOINTER)sqlstate, NULL, (SQLPOINTER)buf, sizeof(buf), NULL);
-		n_warn(N, "odbcUpdate", "ODBC Update - SQLExecDirect %s", buf);
-		n_warn(N, "odbcUpdate", "ODBC QUERY: [%s]", sqlquery);
-		SQLFreeHandle(SQL_HANDLE_STMT, conn->hSTMT);
-		conn->hSTMT=NULL;
-		return -1;
-	}
-	SQLFreeHandle(SQL_HANDLE_STMT, conn->hSTMT);
-	conn->hSTMT=NULL;
-	return 0;
-}
-*/
 static int odbcQuery(nes_state *N, ODBC_CONN *conn, char *sqlquery, obj_t *qobj)
 {
 	SQLSMALLINT pccol;
@@ -156,7 +131,7 @@ static int odbcQuery(nes_state *N, ODBC_CONN *conn, char *sqlquery, obj_t *qobj)
 		memset(name, 0, sizeof(name));
 		sprintf(name, "%d", numtuples);
 		tobj=nes_settable(NULL, robj, name);
-		tobj->val->attr^=NST_AUTOSORT;
+		tobj->val->attr&=~NST_AUTOSORT;
 		for (field=0;field<numfields;field++) {
 			rc=SQLDescribeCol(conn->hSTMT, (SQLSMALLINT)(field+1), (SQLPOINTER)colname, MAX_OBJNAMELEN, NULL, NULL, NULL, NULL, NULL);
 			cobj=nes_setstr(NULL, tobj, colname, NULL, 0);
@@ -164,7 +139,7 @@ static int odbcQuery(nes_state *N, ODBC_CONN *conn, char *sqlquery, obj_t *qobj)
 			rc=SQLGetData(conn->hSTMT, (SQLUSMALLINT)(field+1), SQL_C_CHAR, NULL, 0, &slen);
 			if (slen>0) {
 				cobj->val->size=slen;
-				cobj->val->d.str=n_alloc(N, (cobj->val->size+1)*sizeof(char));
+				cobj->val->d.str=n_alloc(N, cobj->val->size+1, 0);
 				if (cobj->val->d.str==NULL) n_error(N, NE_SYNTAX, "odbcQuery", "malloc() error while creating SQL cursor.");
 				rc=SQLGetData(conn->hSTMT, (SQLUSMALLINT)(field+1), SQL_C_CHAR, cobj->val->d.str, cobj->val->size+1, &slen);
 				cobj->val->d.str[cobj->val->size]=0;
@@ -177,7 +152,7 @@ static int odbcQuery(nes_state *N, ODBC_CONN *conn, char *sqlquery, obj_t *qobj)
 	return 0;
 }
 
-int neslaodbc_query(nes_state *N)
+NES_FUNCTION(neslaodbc_query)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
@@ -198,7 +173,7 @@ int neslaodbc_query(nes_state *N)
 	nc_memset((void *)&tobj, 0, sizeof(obj_t));
 	nes_linkval(N, &tobj, NULL);
 	tobj.val->type=NT_TABLE;
-	tobj.val->attr^=NST_AUTOSORT;
+	tobj.val->attr&=~NST_AUTOSORT;
 	odbcQuery(N, conn, cobj2->val->d.str, &tobj);
 	nes_linkval(N, &N->r, &tobj);
 	nes_unlinkval(N, &tobj);
@@ -216,5 +191,13 @@ int neslaodbc_register_all(nes_state *N)
 	nes_setcfunc(N, tobj, "query", (NES_CFUNC)neslaodbc_query);
 	return 0;
 }
+
+#ifdef PIC
+DllExport int neslalib_init(nes_state *N)
+{
+	neslaodbc_register_all(N);
+	return 0;
+}
+#endif
 
 #endif /* HAVE_ODBC */

@@ -1,4 +1,0 @@
-LIBRARY		libneslatcp
-VERSION		0.7.0
-EXPORTS
-	neslatcp_register_all

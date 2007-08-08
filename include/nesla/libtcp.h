@@ -68,7 +68,7 @@ typedef struct {
 } TCP_SOCKET;
 
 /* http.c */
-int neslatcp_http_get(nes_state *N);
+NES_FUNCTION(neslatcp_http_get);
 
 int neslatcp_register_all(nes_state *N);
 
@@ -92,10 +92,10 @@ int     tcp_recv   (nes_state *N, TCP_SOCKET *socket, char *buffer, int len, int
 int     tcp_send   (nes_state *N, TCP_SOCKET *socket, const char *buffer, int len, int flags);
 int     tcp_close  (nes_state *N, TCP_SOCKET *socket, short int owner_killed);
 
-int     neslatcp_tcp_bind  (nes_state *N);
-int     neslatcp_tcp_accept(nes_state *N);
-int     neslatcp_tcp_open  (nes_state *N);
-int     neslatcp_tcp_close (nes_state *N);
-int     neslatcp_tcp_read  (nes_state *N);
-int     neslatcp_tcp_gets  (nes_state *N);
-int     neslatcp_tcp_write (nes_state *N);
+NES_FUNCTION(neslatcp_tcp_bind);
+NES_FUNCTION(neslatcp_tcp_accept);
+NES_FUNCTION(neslatcp_tcp_open);
+NES_FUNCTION(neslatcp_tcp_close);
+NES_FUNCTION(neslatcp_tcp_read);
+NES_FUNCTION(neslatcp_tcp_gets);
+NES_FUNCTION(neslatcp_tcp_write);

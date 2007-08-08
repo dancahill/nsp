@@ -32,7 +32,7 @@ nes_state *N;
 
 extern char **environ;
 
-static int nescgi_flush(nes_state *N)
+static NES_FUNCTION(nescgi_flush)
 {
 	static short headersent=0;
 
@@ -47,7 +47,7 @@ static int nescgi_flush(nes_state *N)
 	return 0;
 }
 
-static int nescgi_sendfile(nes_state *N)
+static NES_FUNCTION(nescgi_sendfile)
 {
 	char tmppath[512];
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
@@ -212,6 +212,7 @@ int main(int argc, char *argv[])
 #ifdef HAVE_MATH
 	neslamath_register_all(N);
 #endif
+	nesladl_register_all(N);
 	neslaext_register_all(N);
 	neslatcp_register_all(N);
 	/* add env */

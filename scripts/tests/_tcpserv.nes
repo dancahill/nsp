@@ -1,17 +1,17 @@
 #!/usr/bin/nesla
-if (type(expect)!='function') include("_expect.nes");
+if (typeof(expect)!='function') include("_expect.nes");
 function testtcpd() {
-	if (type(tcp)!='table') {
+	if (typeof(tcp)!='table') {
 		print("SKIPPING TCPSERV TESTS\n");
 		return;
 	}
-	if (type(tcp.open)=='function') {
+	if (typeof(tcp.open)=='function') {
 		bsock=tcp.bind("localhost", 1234);
-		print("bsock=", type(bsock), "\n");
+		print("bsock=", typeof(bsock), "\n");
 		io.flush();
 		while (1) {
 			asock=tcp.accept(bsock);
-			if (type(asock)=='sock4') {
+			if (typeof(asock)=='sock4') {
 				x=tcp.gets(asock);
 				print("client said: ", x, "\n");
 				if (x=="ping") {

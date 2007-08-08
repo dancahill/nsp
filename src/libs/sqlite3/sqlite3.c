@@ -85,7 +85,7 @@ static int sqlite3Callback(void *vptr, int argc, char **argv, char **azColName)
 	sprintf(name, "%d", numtuples);
 	/* get pointer to this record table */
 	tobj=nes_settable(NULL, tobj, name);
-	tobj->val->attr^=NST_AUTOSORT;
+	tobj->val->attr&=~NST_AUTOSORT;
 	if (numtuples==0) nes_setnum(NULL, qobj, "_fields", numfields);
 	for (field=0;field<numfields;field++) {
 		if (argv==NULL) continue;
@@ -121,7 +121,7 @@ static int sqlite3Query(nes_state *N, SQLITE3_CONN *conn, char *sqlquery, obj_t 
 	return -1;
 }
 
-int neslasqlite3_query(nes_state *N)
+NES_FUNCTION(neslasqlite3_query)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
@@ -142,7 +142,7 @@ int neslasqlite3_query(nes_state *N)
 	nc_memset((void *)&tobj, 0, sizeof(obj_t));
 	nes_linkval(N, &tobj, NULL);
 	tobj.val->type=NT_TABLE;
-	tobj.val->attr^=NST_AUTOSORT;
+	tobj.val->attr&=~NST_AUTOSORT;
 	sqlite3Query(N, conn, cobj2->val->d.str, &tobj);
 	nes_linkval(N, &N->r, &tobj);
 	nes_unlinkval(N, &tobj);
@@ -160,5 +160,13 @@ int neslasqlite3_register_all(nes_state *N)
 	nes_setcfunc(N, tobj, "query", (NES_CFUNC)neslasqlite3_query);
 	return 0;
 }
+
+#ifdef PIC
+DllExport int neslalib_init(nes_state *N)
+{
+	neslasqlite3_register_all(N);
+	return 0;
+}
+#endif
 
 #endif /* HAVE_SQLITE3 */

@@ -1,0 +1,229 @@
+# NullLogic Embedded Scripting Language
+# MS Visual C++ Makefile
+# run 'nmake.exe -f Makefile.vc'
+
+CC      = cl.exe
+LINK    = link.exe
+MAKE    = nmake.exe /C /S /Y /F
+NESLITE = .\bin\neslite.exe
+
+all: _libnesla lite deps static_libs cli nestray cgi
+	@echo Run 'make targets' to list more options.
+
+deps:
+	@cd src\libs
+	@..\..\$(NESLITE) autoconf.nes msvc windows
+	@cd ..\..
+
+dirs:
+	@if not exist bin mkdir bin
+	@if not exist lib mkdir lib
+	@if not exist lib\shared mkdir lib\shared
+	@if not exist int mkdir int
+
+# rules for libs
+
+static_libs: _libnesladl _libneslaext _libneslaldap _libneslamath _libneslamysql _libneslaodbc _libneslapgsql _libneslasqlite3 _libneslatcp _libneslawinapi _libneslazip
+
+_libnesla: dirs
+	@cd src\libnesla
+	@$(MAKE) Makefile.vc
+	@cd ..\..
+
+_libnesladl:
+	@cd src\libs\dl
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@cd ..\..\..
+
+_libneslaext:
+	@cd src\libs\ext
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@cd ..\..\..
+
+_libneslaldap:
+	@cd src\libs\ldap
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@cd ..\..\..
+
+_libneslamath:
+	@cd src\libs\math
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@cd ..\..\..
+
+_libneslamysql:
+	@cd src\libs\mysql
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@cd ..\..\..
+
+_libneslaodbc:
+	@cd src\libs\odbc
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@cd ..\..\..
+
+_libneslapgsql:
+	@cd src\libs\pgsql
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@cd ..\..\..
+
+_libneslasqlite3:
+	@cd src\libs\sqlite3
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@cd ..\..\..
+
+_libneslatcp:
+	@cd src\libs\tcp
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@cd ..\..\..
+
+_libneslawinapi:
+	@cd src\libs\winapi
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@cd ..\..\..
+
+_libneslazip:
+	@cd src\libs\zip
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@cd ..\..\..
+
+shared_libs:
+	@cd src\libs\ext
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@cd ..\..\..
+	@cd src\libs\ldap
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@cd ..\..\..
+	@cd src\libs\math
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@cd ..\..\..
+	@cd src\libs\mysql
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@cd ..\..\..
+	@cd src\libs\odbc
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@cd ..\..\..
+	@cd src\libs\pgsql
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@cd ..\..\..
+	@cd src\libs\sqlite3
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@cd ..\..\..
+	@cd src\libs\tcp
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@cd ..\..\..
+	@cd src\libs\test
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@cd ..\..\..
+	@cd src\libs\winapi
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@cd ..\..\..
+	@cd src\libs\zip
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@cd ..\..\..
+
+# rules for hosts
+
+cgi: _libnesla
+	@cd src\hosts\cgi
+	@$(MAKE) Makefile.vc
+	@cd ..\..\..
+
+cli: _libnesla
+	@cd src\hosts\cli
+	@$(MAKE) Makefile.vc
+	@cd ..\..\..
+	@$(NESLITE) -e "print('\nStandard Interpreter built');var x='gnikrow dna ';for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));print('\n\n');"
+
+ctest: _libnesla
+	@cd src\hosts\ctest
+	@$(MAKE) Makefile.vc
+	@cd ..\..\..
+
+lite: _libnesla
+	@cd src\hosts\lite
+	@$(MAKE) Makefile.vc
+	@cd ..\..\..
+	@$(NESLITE) -e "print('\nMinimal Interpreter built');var x='gnikrow dna ';for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));print('\n\n');"
+
+nestray: _libnesla
+	@cd src\hosts\nestray
+	@$(MAKE) Makefile.vc
+	@cd ..\..\..
+
+nullgw: _libnesla
+	@cd src\hosts\nullgw
+	@$(MAKE) Makefile.vc
+	@cd ..\..\..
+
+# rules for everything else
+
+clean: lite
+#	@touch src\config.mak
+	@cd src\libs\dl
+	@..\..\..\$(NESLITE) Makefile.nes clean
+	@cd ..\..\..
+	@cd src\libs\ext
+	@..\..\..\$(NESLITE) Makefile.nes clean
+	@cd ..\..\..
+	@cd src\libs\ldap
+	@..\..\..\$(NESLITE) Makefile.nes clean
+	@cd ..\..\..
+	@cd src\libs\math
+	@..\..\..\$(NESLITE) Makefile.nes clean
+	@cd ..\..\..
+	@cd src\libs\mysql
+	@..\..\..\$(NESLITE) Makefile.nes clean
+	@cd ..\..\..
+	@cd src\libs\odbc
+	@..\..\..\$(NESLITE) Makefile.nes clean
+	@cd ..\..\..
+	@cd src\libs\pgsql
+	@..\..\..\$(NESLITE) Makefile.nes clean
+	@cd ..\..\..
+	@cd src\libs\sqlite3
+	@..\..\..\$(NESLITE) Makefile.nes clean
+	@cd ..\..\..
+	@cd src\libs\tcp
+	@..\..\..\$(NESLITE) Makefile.nes clean
+	@cd ..\..\..
+	@cd src\libs\test
+	@..\..\..\$(NESLITE) Makefile.nes clean
+	@cd ..\..\..
+	@cd src\libs\winapi
+	@..\..\..\$(NESLITE) Makefile.nes clean
+	@cd ..\..\..
+	@cd src\libs\zip
+	@..\..\..\$(NESLITE) Makefile.nes clean
+	@cd ..\..\..
+	@cd src\hosts\cgi
+	@$(MAKE) MAKEFILE.VC clean
+	@cd ..\..\..
+	@cd src\hosts\cli
+	@$(MAKE) MAKEFILE.VC clean
+	@cd ..\..\..
+	@cd src\hosts\ctest
+	@$(MAKE) MAKEFILE.VC clean
+	@cd ..\..\..
+	@cd src\hosts\lite
+	@$(MAKE) MAKEFILE.VC clean
+	@cd ..\..\..
+	@cd src\hosts\nestray
+	@$(MAKE) MAKEFILE.VC clean
+	@cd ..\..\..
+	@cd src\hosts\nullgw
+	@$(MAKE) MAKEFILE.VC clean
+	@cd ..\..\..
+	@cd src\libnesla
+	@$(MAKE) MAKEFILE.VC clean
+	@cd ..\..
+#	@rm -f bin\* lib\*
+	@if exist "int" rmdir "int"
+
+distclean: clean
+	@del src\config.???
+
+hack:
+	cl.exe /DWIN32 /I./include src/libnesla/*.c src/hosts/lite/main.c -Febin/nesla_h.exe
+	del *.obj
+
+test:
+	bin\nesla.exe scripts\tests\test1.nes

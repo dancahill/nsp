@@ -101,7 +101,7 @@ static int n_dirlist(nes_state *N, obj_t *dobj, const char *dirname)
 	return 0;
 }
 
-int neslaext_dirlist(nes_state *N)
+NES_FUNCTION(neslaext_dirlist)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	obj_t tobj;

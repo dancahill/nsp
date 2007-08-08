@@ -1,5 +1,5 @@
 #!/usr/bin/nesla
-if (type(expect)!='function') include("_expect.nes");
+if (typeof(expect)!='function') include("_expect.nes");
 function testscope() {
 	function subf1(p1, p2) {
 		local p3="b";
@@ -34,14 +34,14 @@ function testscope() {
 	subf3(5, "x", ack.b);
 	expect("testing scope",    "[null][null][a]",  "["+tostring(p1)+"]["+tostring(p2)+"]["+tostring(p3)+"]");
 	scopetab=subf4(0);
-	expect("testing scopetab", "[table][1][2]",    "["+type(scopetab)+"]["+tostring(scopetab.aa)+"]["+tostring(scopetab.bb)+"]");
+	expect("testing scopetab", "[table][1][2]",    "["+typeof(scopetab)+"]["+tostring(scopetab.aa)+"]["+tostring(scopetab.bb)+"]");
 
 	print("\t");
 	i=subf5(0);
 	print("\n");
 
-	expect("subtab=subf4(0)",  "(table)2",         "("+type(scopetab)+")"+tostring(scopetab.bb));
-	expect("i=subf5(0)",       "(number)42",       "("+type(i)+")"+tostring(i));
+	expect("subtab=subf4(0)",  "(table)2",         "("+typeof(scopetab)+")"+tostring(scopetab.bb));
+	expect("i=subf5(0)",       "(number)42",       "("+typeof(i)+")"+tostring(i));
 	return;
 }
 testscope();

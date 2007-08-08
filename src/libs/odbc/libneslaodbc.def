@@ -1,4 +1,0 @@
-LIBRARY		libneslaodbc
-VERSION		0.7.0
-EXPORTS
-	neslaodbc_register_all

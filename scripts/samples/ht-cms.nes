@@ -21,7 +21,7 @@
 // This thing has serious limits that make its usefuless rather limited.
 
 global MASTERPASSWORD="nesla";
-if (type(_SERVER)!='table') exit 0;
+if (typeof(_SERVER)!='table') exit;
 
 function dologin() {
 	var user="nobody";
@@ -48,9 +48,9 @@ A:HOVER  { background-color: #E0E0FF; }
 </BODY>
 </HTML>
 ");
-	exit 0;
+	exit;
 }
-if (type(_POST['PASSWORD'])!='null') {
+if (typeof(_POST['PASSWORD'])!='null') {
 	_GET['DOWNLOAD']='';
 	if (_POST['PASSWORD']==MASTERPASSWORD) {
 		#printf("Set-Cookie: wminfo=%.2s:%.4s:%s:%s:%s; path=%s/; expires=%s\r\n");
@@ -61,19 +61,19 @@ if (type(_POST['PASSWORD'])!='null') {
 	} else {
 		print("bad pass");
 	}
-	exit 0;
+	exit;
 }
-if (type(_COOKIE['NESLACMS'])=='null') {
+if (typeof(_COOKIE['NESLACMS'])=='null') {
 	_GET['DOWNLOAD']='';
 	dologin();
 }
 global MASTERPASSWORD="********";
 
 #if user is logged in, and download request exists, process that instead
-if (type(_GET['DOWNLOAD'])!='null') {
+if (typeof(_GET['DOWNLOAD'])!='null') {
 	if (_GET['DOWNLOAD']!='') {
 		sendfile(_GET['DOWNLOAD']);
-		exit 0;
+		exit;
 	}
 }
 
@@ -81,7 +81,7 @@ if (_SERVER['REQUEST_METHOD']=='POST') {
 	var opt=_POST['OPT'];
 	if (opt=='browse') {
 		# limit browsing to docroot
-		if (type(_SERVER['DOCUMENT_ROOT'])=='null') {
+		if (typeof(_SERVER['DOCUMENT_ROOT'])=='null') {
 			print("you have no docroot");
 		} else {
 			if (string.ncmp(_SERVER['DOCUMENT_ROOT'], _POST['PATH'], string.len(_SERVER['DOCUMENT_ROOT']))!=0) {
@@ -93,7 +93,7 @@ if (_SERVER['REQUEST_METHOD']=='POST') {
 		dir=dirlist(_POST['PATH']);
 		x=string.split(_POST['PATH'], "/");
 		for (i=0;;i++) {
-			if (type(x[i])=='null') break;
+			if (typeof(x[i])=='null') break;
 		}
 		parent="";
 		for (j=0;j<i-1;j++) {
@@ -102,7 +102,7 @@ if (_SERVER['REQUEST_METHOD']=='POST') {
 		}
 		if (parent=='') parent='/';
 		# limit browsing to docroot
-		if (type(_SERVER['DOCUMENT_ROOT'])=='null') {
+		if (typeof(_SERVER['DOCUMENT_ROOT'])=='null') {
 			print("you have no docroot");
 		} else {
 			if (string.ncmp(_SERVER['DOCUMENT_ROOT'], parent, string.len(_SERVER['DOCUMENT_ROOT']))!=0) {
@@ -112,8 +112,8 @@ if (_SERVER['REQUEST_METHOD']=='POST') {
 		}
 		print("<TABLE BORDER=1 CELLPADDING=0 CELLSPACING=0 WIDTH=100%>\n");
 		for (i=0;;i++) {
-			var x=dir[@i];
-			if (type(dir[x])!='table') break;
+			var x=iname(dir, i);
+			if (typeof(dir[x])!='table') break;
 			if (string.cmp(x, '.')==0) {
 			} else if (string.cmp(x, '..')==0) {
 				print("<TR><TD COLSPAN=4 STYLE='border-style:solid'><IMG SRC=/icons/folder.open.png>&nbsp;<A HREF='javascript:newparent(\"", parent, "\");'>Parent Directory - ", parent, "</A></TD></TR>\n");
@@ -127,8 +127,8 @@ if (_SERVER['REQUEST_METHOD']=='POST') {
 			}
 		}
 		for (i=0;;i++) {
-			var x=dir[@i];
-			if (type(dir[x])!='table') break;
+			var x=iname(dir, i);
+			if (typeof(dir[x])!='table') break;
 			if (string.cmp(x, '.')==0) {
 			} else if (string.cmp(x, '..')==0) {
 			} else if (dir[x].type=='dir') {
@@ -152,19 +152,19 @@ if (_SERVER['REQUEST_METHOD']=='POST') {
 	} else if (opt=='edit') {
 		system("chmod u+r "+_POST['FILE']);
 		x=file.read(_POST['FILE']);
-		if ((type(x)=='number')&&(x<0)) {
+		if ((typeof(x)=='number')&&(x<0)) {
 			print("can't read file");
 		} else {
 			print(x);
 		}
 	} else if (opt=='save') {
-		if (type(_POST['ATTACHMENT1_SIZE'])!='null') {
+		if (typeof(_POST['ATTACHMENT1_SIZE'])!='null') {
 			x=file.write(_POST['EDITNAME']+"-new", _POST['ATTACHMENT1']);
 		} else {
 			x=file.write(_POST['EDITNAME']+"-new", _POST['EDITWINDOW']);
 		}
 		_POST['EDITWINDOW']="";
-		if ((type(x)=='number')&&(x<0)) {
+		if ((typeof(x)=='number')&&(x<0)) {
 			print("can't write file '", _POST['EDITNAME'], "'\n");
 		} else {
 			system("chmod 644 "+_POST['EDITNAME']+"-new");
@@ -178,7 +178,7 @@ if (_SERVER['REQUEST_METHOD']=='POST') {
 		printvar(_GLOBALS);
 		print("</pre>");
 	}
-	exit 0;
+	exit;
 }
 
 function printjs() {

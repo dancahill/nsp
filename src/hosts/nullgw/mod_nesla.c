@@ -35,7 +35,7 @@ static CONN *get_sid()
 	return &http_proc->conn[sid];
 }
 
-static int mod_nes_write(nes_state *N)
+static NES_FUNCTION(mod_nes_write)
 {
 	CONN *sid=get_sid();
 	int len;
@@ -46,7 +46,7 @@ static int mod_nes_write(nes_state *N)
 	return len;
 }
 
-static int mod_nes_system(nes_state *N)
+static NES_FUNCTION(mod_nes_system)
 {
 	CONN *sid=get_sid();
 	char tempname[255];

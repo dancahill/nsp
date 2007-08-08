@@ -3,6 +3,7 @@ These are simple samples of Nesla programs.
    _ajax.nes       included file used to add AJAX functions
    _cards.nes      included file used to define playing cards
    ansi.nes        simple ANSI codes
+   current.nes     download latest test release of Nesla (via http)
    hello.nes       the first program in every language
    ht-bj.nes       blackjack game for web servers using ajax (kinda)
    ht-cms.nes      A _very_ crude Content Management System

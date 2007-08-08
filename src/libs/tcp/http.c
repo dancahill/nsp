@@ -35,7 +35,7 @@ static void striprn(char *string)
 	}
 }
 
-int neslatcp_http_get(nes_state *N)
+NES_FUNCTION(neslatcp_http_get)
 {
 	TCP_SOCKET sock;
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1); /* SSL */
@@ -53,7 +53,7 @@ int neslatcp_http_get(nes_state *N)
 	if (cobj2->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg2");
 	if (cobj3->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a number for arg3");
 	if (cobj4->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg4");
-	memset((char *)&sock, 0, sizeof(sock));
+	nc_memset((char *)&sock, 0, sizeof(sock));
 	if ((rc=tcp_connect(N, &sock, cobj2->val->d.str, (unsigned short)cobj3->val->d.num, 0))<0) {
 		nes_setstr(N, &N->r, "", "tcp error", strlen("tcp error"));
 		return -1;
@@ -69,14 +69,14 @@ int neslatcp_http_get(nes_state *N)
 		tobj2=nes_settable(N, &tobj, "stat");
 		striprn(tmpbuf);
 		p1=tmpbuf;
-		p2=strchr(tmpbuf, ' ');
+		p2=nc_strchr(tmpbuf, ' ');
 		if ((*p1)&&(*p2)) {
 			*p2++='\0';
 			while (nc_isspace(*p2)) p2++;
 			nes_setstr(N, tobj2, "a", p1, strlen(p1));
 		}
 		p1=p2;
-		p2=strchr(p2, ' ');
+		p2=nc_strchr(p2, ' ');
 		if ((*p1)&&(*p2)) {
 			*p2++='\0';
 			while (nc_isspace(*p2)) p2++;
@@ -95,18 +95,18 @@ int neslatcp_http_get(nes_state *N)
 		rc=tcp_fgets(N, tmpbuf, sizeof(tmpbuf)-1, &sock);
 		if (rc<1) break;
 		/* slow, but at least it's safe */
-		n_joinstr(N, cobj, tmpbuf, rc);
+		nes_strcat(N, cobj, tmpbuf, rc);
 		striprn(tmpbuf);
 		if (strlen(tmpbuf)<1) break;
 		/* printf("[%s]\r\n", tmpbuf); */
 		p1=tmpbuf;
-		p2=strchr(tmpbuf, ':');
+		p2=nc_strchr(tmpbuf, ':');
 		if ((*p1)&&(*p2)) {
 			*p2++='\0';
 			for (p=p1;*p;p++) *p=nc_tolower(*p);
 			while (nc_isspace(*p2)) p2++;
 			/* printf("[%s][%s]\n", p1, p2); */
-			if (strcmp(p1, "content-length")==0) {
+			if (nc_strcmp(p1, "content-length")==0) {
 				p=p2; while (nc_isdigit(*p)) p++;
 				if (*p) {
 					nes_setstr(N, tobj2, p1, p2, strlen(p2));
@@ -126,7 +126,7 @@ int neslatcp_http_get(nes_state *N)
 		if (rc<1) break;
 		len+=rc;
 		/* slow, but at least it's safe */
-		n_joinstr(N, cobj, tmpbuf, rc);
+		nes_strcat(N, cobj, tmpbuf, rc);
 		striprn(tmpbuf);
 		/* printf("{%s}\r\n", tmpbuf); */
 		if ((cl>-1)&&(len>=cl)) break;

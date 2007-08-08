@@ -1,20 +1,18 @@
-# Makefile for NullLogic Embedded Scripting Language
+#!../../../bin/neslite
 include("../../config.nes");
-CFLAGS  = CFLAGS+" -I../../../include -c -o";
+include("../makelib.nes");
+CFLAGS  = CFLAGS+" -I../../../include ";
+if (CC=='cl.exe') CFLAGS=CFLAGS+"/c /Fo";
+else if (CC=='tcc.exe') CFLAGS=CFLAGS+"-c -o";
+else CFLAGS=CFLAGS+"-c -o ";
 OBJECTS = "base64.o dir.o md5.o misc.o rot13.o sort.o xml.o";
-TARGET  = "../../../lib/libneslaext.a";
-if (target==null) target='build';
-if (target=='build') {
-	OLIST=string.split(OBJECTS, " ");
-	for (i=0;i<size(OLIST);i++) {
-		ONAME=string.split(OLIST[i], ".");
-		if (ONAME[1]=='o') {
-			print(CC+" "+CFLAGS+" "+ONAME[0]+".o "+ONAME[0]+".c\n");
-			system(CC+" "+CFLAGS+" "+ONAME[0]+".o "+ONAME[0]+".c");
-		}
-	}
-	system("ar cru "+TARGET+" "+OBJECTS);
-	system("ranlib "+TARGET);
-} else if (target=='clean') {
-	system("rm -f "+TARGET+" "+OBJECTS+" *~");
+TNAME   = "libneslaext";
+if (cmd==null) if (_ARGS[2]=='clean') cmd='clean'; else cmd='build';
+if (cmd=='build') {
+	print("building ext lib\n");
+	if (CC=='cl.exe') file.write("dlldefs.def", "LIBRARY\t\tlibneslaext\r\nVERSION\t\t"+_version_+"\r\nEXPORTS\r\n\tneslaext_register_all\r\n");
+	build_objs(CC, CFLAGS, OBJECTS, _LINKAGE_, TNAME);
+	build_lib(CC, TNAME, OBJECTS, _LINKAGE_, TNAME);
+} else if (cmd=='clean') {
+	build_clean(TNAME, OBJECTS);
 }

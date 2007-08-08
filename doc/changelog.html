@@ -16,6 +16,27 @@ NESLA NullLogic Embedded Scripting Language ChangeLog
 </small>
 <hr>
 
+<h2>0.8.0 (2007-08-08)</h2>
+<ul>
+  <li>added 'this' object for that object-oriented stuff some people like</li>
+  <li>functions can now be declared inside a statement</li>
+  <li>x=x+1 no longer clobbers x before evaluating the expression</li>
+  <li>all extension libraries can now be built as shared objects (except for the one that adds shared object support)</li>
+  <li>added native postgresql support</li>
+  <li>values are now completely destroyed when setting them to null</li>
+  <li>mixed string and number math now works as expected</li>
+  <li>evaluating expressions is now more than twice as fast as before</li>
+  <li>major overhaul of the internal binary format of scripts</li>
+  <li>variable assignment inside an expression now works</li>
+  <li>fixed several cases of bogus return values from mixed object type comparisons</li>
+  <li>fixed the use of direct table declarations inside function parameters</li>
+  <li>added dl extension lib for dynamic module loading</li>
+  <li>added gmtime(), localtime(), string.tolower(), string.toupper() and string.join() to core lib</li>
+  <li>added winapi extension lib</li>
+  <li>changed type() and size() to typeof() and sizeof()</li>
+  <li>+= now works for strings</li>
+  <li>rewrote the extension makefiles in pure nesla</li>
+</ul>
 <h2>0.7.0 (2007-07-13)</h2>
 <ul>
   <li>added md5 support</li>

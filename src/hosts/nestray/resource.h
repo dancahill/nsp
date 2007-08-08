@@ -11,7 +11,6 @@
 #define IDI_ICON2                       105
 #define IDD_NULLDIALOG                  115
 #define IDD_TEXTINPUT1                  118
-#define IDD_TRAYNOTICE1                 119
 #define IDC_COMPANY                     400
 #define IDC_FILEDESC                    401
 #define IDC_COPYRIGHT                   402

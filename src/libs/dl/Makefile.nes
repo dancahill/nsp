@@ -1,0 +1,22 @@
+#!../../../bin/neslite
+include("../../config.nes");
+include("../makelib.nes");
+CFLAGS  = CFLAGS+" -I../../../include ";
+if (CC=='cl.exe') CFLAGS=CFLAGS+"/c /Fo";
+else if (CC=='tcc.exe') CFLAGS=CFLAGS+"-c -o";
+else CFLAGS=CFLAGS+"-c -o ";
+OBJECTS = "dl.o";
+TNAME   = "libnesladl";
+if (cmd==null) if (_ARGS[2]=='clean') cmd='clean'; else cmd='build';
+if (cmd=='build') {
+	if (config.have_dl==true) {
+		print("building dl lib\n");
+		if (CC=='cl.exe') file.write("dlldefs.def", "LIBRARY\t\tlibnesladl\r\nVERSION\t\t"+_version_+"\r\nEXPORTS\r\n\tnesladl_register_all\r\n");
+		build_objs(CC, CFLAGS, OBJECTS, _LINKAGE_, TNAME);
+		build_lib(CC, TNAME, OBJECTS, _LINKAGE_, TNAME);
+	} else {
+		print("skipping dl lib\n");
+	}
+} else if (cmd=='clean') {
+	build_clean(TNAME, OBJECTS);
+}

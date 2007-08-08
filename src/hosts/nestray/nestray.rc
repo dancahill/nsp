@@ -53,8 +53,8 @@ END
 //
 
 IDR_VERSION VERSIONINFO
- FILEVERSION 0,7,0,0
- PRODUCTVERSION 0,7,0,0
+ FILEVERSION 0,8,0,0
+ PRODUCTVERSION 0,8,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -71,12 +71,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "NullLogic\0"
             VALUE "FileDescription", "Nesla Tray Host\0"
-            VALUE "FileVersion", "0.7.0\0"
+            VALUE "FileVersion", "0.8.0\0"
             VALUE "InternalName", "NESTRAY.EXE\0"
             VALUE "LegalCopyright", "Copyright © 2007\0"
             VALUE "OriginalFilename", "NESTRAY.EXE\0"
             VALUE "ProductName", "Nesla Tray Host\0"
-            VALUE "ProductVersion", "0.7.0\0"
+            VALUE "ProductVersion", "0.8.0\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -115,13 +115,6 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,95,24,50,14
 END
 
-IDD_TRAYNOTICE1 DIALOG DISCARDABLE  0, 0, 160, 80
-STYLE DS_MODALFRAME | DS_SETFOREGROUND | WS_POPUP | WS_VISIBLE
-FONT 8, "MS Sans Serif"
-BEGIN
-    LTEXT           "Static",IDC_STATIC1,2,2,156,76,SS_NOPREFIX | WS_BORDER
-END
-
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -148,25 +141,6 @@ BEGIN
     "\0"
 END
 
-#endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
-BEGIN
-    IDD_TRAYNOTICE1, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 179
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 87
-    END
-END
 #endif    // APSTUDIO_INVOKED
 
 #endif    // English (U.S.) resources

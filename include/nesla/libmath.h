@@ -16,5 +16,4 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-int neslamath_math2(nes_state *N);
 int neslamath_register_all(nes_state *N);

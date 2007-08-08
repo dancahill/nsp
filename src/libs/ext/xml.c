@@ -65,9 +65,9 @@ static char *neslaext_xml_readsub(nes_state *N, obj_t *tobj, char *ptr)
 			if (N->debug) n_warn(N, "neslaext_xml_readsub", "new label '%s'", namebuf);
 			j=-1;
 			for (cobj=nobj->val->d.table; cobj; cobj=cobj->next) {
-				if (nc_isdigit(cobj->name[0])) j=(int)nes_aton(N, cobj->name);
+				if (nc_isdigit(cobj->name[0])) j=(int)n_aton(N, cobj->name);
 			}
-			nobj=nes_settable(N, nobj, nes_ntoa(N, namebuf, ++j, 10, 0));
+			nobj=nes_settable(N, nobj, n_ntoa(N, namebuf, ++j, 10, 0));
 			if (N->debug) n_warn(N, "neslaext_xml_readsub", "new node '%s'", namebuf);
 			aobj=NULL;
 			for (;;) {
@@ -133,7 +133,7 @@ static char *neslaext_xml_readsub(nes_state *N, obj_t *tobj, char *ptr)
 	return b;
 }
 
-int neslaext_xml_read(nes_state *N)
+NES_FUNCTION(neslaext_xml_read)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	obj_t tobj;

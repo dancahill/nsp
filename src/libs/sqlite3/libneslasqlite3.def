@@ -1,4 +1,0 @@
-LIBRARY		libneslasqlite3
-VERSION		0.7.0
-EXPORTS
-	neslasqlite3_register_all

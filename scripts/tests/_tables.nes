@@ -1,18 +1,18 @@
 #!/usr/bin/nesla
-if (type(expect)!='function') include("_expect.nes");
+if (typeof(expect)!='function') include("_expect.nes");
 function testtables() {
 	function subf() { return 69; }
 	local x=1;
 	local ack = { a="x" };
 
-	expect("type(CARDS)",        "table",           type(CARDS));
-	if (string.cmp(type(CARDS), 'table')!=0) return;
+	expect("typeof(CARDS)",      "table",           typeof(CARDS));
+	if (typeof(CARDS)!='table') return;
 	expect("CARDS['1']['name']", "Ace of Diamonds", CARDS['1']['name']);
 	CARDS[1].name="aa";
 	expect("CARDS[1].name", "aa", CARDS[1].name);
-	expect("CARDS[x]['dealt']", "(null)null", "("+type(CARDS[x]['dealt'])+")"+tostring(CARDS[x]['dealt']));
+	expect("CARDS[x]['dealt']", "(null)null", "("+typeof(CARDS[x]['dealt'])+")"+tostring(CARDS[x]['dealt']));
 	CARDS[x]['dealt']=true;
-	expect("CARDS[x]['dealt']", "(boolean)true", "("+type(CARDS[x]['dealt'])+")"+tostring(CARDS[x]['dealt']));
+	expect("CARDS[x]['dealt']", "(boolean)true", "("+typeof(CARDS[x]['dealt'])+")"+tostring(CARDS[x]['dealt']));
 
 	tab = {
 		{ a1="x", b = pi, [12]=41, [1]=42, 43, 'blah', subf() },

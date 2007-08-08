@@ -16,6 +16,9 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nesla/nesla.h"
+#ifdef HAVE_DL
+#include "nesla/libdl.h"
+#endif
 #include "nesla/libext.h"
 #ifdef HAVE_LDAP
 #include "nesla/libldap.h"
@@ -28,6 +31,9 @@
 #endif
 #ifdef HAVE_ODBC
 #include "nesla/libodbc.h"
+#endif
+#ifdef HAVE_PGSQL
+#include "nesla/libpgsql.h"
 #endif
 #ifdef HAVE_SQLITE3
 #include "nesla/libsqlite3.h"
@@ -159,6 +165,9 @@ int main(int argc, char *argv[])
 	if ((N=nes_newstate())==NULL) return -1;
 	setsigs();
 	N->debug=0;
+#ifdef HAVE_DL
+	nesladl_register_all(N);
+#endif
 	neslaext_register_all(N);
 #ifdef HAVE_LDAP
 	neslaldap_register_all(N);
@@ -171,6 +180,9 @@ int main(int argc, char *argv[])
 #endif
 #ifdef HAVE_ODBC
 	neslaodbc_register_all(N);
+#endif
+#ifdef HAVE_PGSQL
+	neslapgsql_register_all(N);
 #endif
 #ifdef HAVE_SQLITE3
 	neslasqlite3_register_all(N);

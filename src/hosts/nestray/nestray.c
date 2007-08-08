@@ -16,19 +16,23 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #ifdef WIN32
-#include <winsock2.h>
-#include <windows.h>
-#include <windowsx.h>
-#include <direct.h>
-#include <stdio.h>
-#include <sys/stat.h>
-#include "resource.h"
 #include "nesla/nesla.h"
+#include "nesla/libdl.h"
 #include "nesla/libext.h"
 #include "nesla/libmath.h"
 #include "nesla/libodbc.h"
 #include "nesla/libtcp.h"
+#include "nesla/libwinapi.h"
 #include "nesla/libzip.h"
+#include <direct.h>
+#include <shellapi.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <windowsx.h>
+#include <sys/stat.h>
+#include "resource.h"
+
+#pragma comment(lib, "winmm.lib")
 
 #define snprintf _snprintf
 #define vsnprintf _vsnprintf
@@ -37,6 +41,7 @@
 
 static nes_state *N;
 static HWND hDLG;
+
 static int iconstatus=0;
 static HINSTANCE hInst;
 static UINT tc;
@@ -52,7 +57,6 @@ int winsystem(WORD show_hide, const char *format, ...);
 obj_t *getindex(obj_t *tobj, int i);
 BOOL submenu(HMENU hMenu, obj_t *tobj);
 
-/* WIN32 DIALOG STUFF */
 static BOOL TrayMessage(DWORD dwMessage)
 {
 	obj_t *mobj=nes_getobj(N, &N->g, "PROGNAME");
@@ -234,36 +238,6 @@ void CALLBACK UpdateNotifyProc(HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 		lastpoll=t;
 	}
 }
-/* END WIN32 DIALOG STUFF */
-
-/* START WIN32 MINI API */
-static int nes_createprocess(nes_state *N)
-{
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
-
-	winsystem(SW_SHOW, cobj1->val->d.str);
-	nes_setnum(N, &N->r, "", 0);
-	return 0;
-}
-
-static int nes_messagebox(nes_state *N)
-{
-	obj_t *cobj3=nes_getiobj(N, &N->l, 3);
-	UINT uType=0;
-	int rc;
-
-	if (cobj3->val->type==NT_NUMBER) uType=(int)cobj3->val->d.num;
-	rc=MessageBox(NULL, nes_getstr(N, &N->l, "1"), nes_getstr(N, &N->l, "2"), uType);
-	nes_setnum(N, &N->r, "", rc);
-	return 0;
-}
-
-static int nes_shellexecute(nes_state *N)
-{
-	ShellExecute(NULL, "open", nes_getstr(N, &N->l, "1"), NULL, NULL, SW_SHOWMAXIMIZED);
-	nes_setnum(N, &N->r, "", 0);
-	return 0;
-}
 
 static BOOL CALLBACK TextInputDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -300,7 +274,7 @@ static BOOL CALLBACK TextInputDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARA
 	return(TRUE);
 }
 
-static int nes_textinput(nes_state *N)
+NES_FUNCTION(nes_textinput)
 {
 	TrayIcon(1);
 	DialogBox(hInst, MAKEINTRESOURCE(IDD_TEXTINPUT1), NULL, TextInputDlgProc);
@@ -313,61 +287,98 @@ void CALLBACK TrayNotifyProc(HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 	PostMessage(hwnd, WM_CLOSE, 0, 0);
 }
 
-static BOOL CALLBACK TrayNoticeDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+static BOOL CALLBACK TrayNoticeDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
 	obj_t *cobj3=nes_getiobj(N, &N->l, 3);
 	int t;
-	RECT rc;
-	int x, y;
-	int w, h;
-	int tbh;
+	HDC hDC;
+	PAINTSTRUCT Ps;
+	RECT rect;
+	HFONT hFont;
+	static char buf[240];
 
 	switch (uMsg) {
-	case WM_INITDIALOG:
-		x=GetSystemMetrics(SM_CXSCREEN);
-		y=GetSystemMetrics(SM_CYSCREEN);
-		GetWindowRect(hDlg, &rc);
-		w=rc.right-rc.left;
-		h=rc.bottom-rc.top;
-		/* how do we get the height of the taskbar? */
-		tbh=30;
-		MoveWindow(hDlg, x-w, y-h-tbh, w, h, TRUE);
-		SetWindowText(hDlg, nes_tostr(N, cobj2));
-		SetDlgItemText(hDlg, IDC_STATIC1, nes_tostr(N, cobj1));
+	case WM_CREATE:
+		SetWindowText(hwnd, nes_tostr(N, cobj2));
 		t=nes_isnum(cobj3)?(int)nes_tonum(N, cobj3):5;
-		SetFocus(hDlg);
-		if (t) SetTimer(hDlg, 12345, t*1000, TrayNotifyProc);
+		if (t) SetTimer(hwnd, 12345, t*1000, TrayNotifyProc);
+		snprintf(buf, sizeof(buf)-1, "%s", nes_tostr(N, cobj1));
 		break;
-	case WM_COMMAND:
-		switch (LOWORD(wParam)) {
-		case IDCANCEL:
-			EndDialog(hDlg, 0);
-			nes_setnum(N, &N->r, "", 0);
-			return (TRUE);
-		}
+	case WM_PAINT:
+		hDC=BeginPaint(hwnd, &Ps);
+		hFont=CreateFont(14,0,0,0,FW_SEMIBOLD,FALSE,FALSE,FALSE,ANSI_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,DEFAULT_PITCH|FF_DONTCARE,"arial");
+		SelectObject(hDC, hFont);
+		SetBkMode(hDC, TRANSPARENT);
+		SetTextColor(hDC,0xFF0000);
+		GetClientRect(hwnd, &rect);
+		rect.top+=5; rect.left+=5;
+		rect.bottom-=5; rect.right-=5;
+//		DPtoLP(hDC, (LPPOINT)&rect, 2);
+		DrawText(hDC, buf, -1, &rect, DT_TOP|DT_LEFT|DT_WORDBREAK|DT_EXPANDTABS);
+		DeleteObject(hFont);
+		EndPaint(hwnd, &Ps);
 		break;
 	case WM_CLOSE:
-	case WM_QUIT:
-	case WM_DESTROY:
-		EndDialog(hDlg, 0);
+//	case WM_QUIT:
+//	case WM_DESTROY:
+//		CloseWindow(hwnd);
+		DestroyWindow(hwnd);
 		break;
 	default:
-		return(FALSE);
+		return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
 	return(TRUE);
 }
 
-static int nes_traynotice(nes_state *N)
+NES_FUNCTION(nes_traynotice)
 {
+	HWND hwnd;
+	WNDCLASSEX WndClsEx;
+	static int init=0;
+	int x, y;
+	int w, h;
+	int tbh;
+
 	TrayIcon(1);
-	DialogBox(hInst, MAKEINTRESOURCE(IDD_TRAYNOTICE1), NULL, TrayNoticeDlgProc);
-	// ABS_ALWAYSONTOP ?
+	x=GetSystemMetrics(SM_CXSCREEN);
+	y=GetSystemMetrics(SM_CYSCREEN);
+	w=240; h=120;
+	/* how do we get the height of the taskbar? */
+	tbh=30;
+	memset(&WndClsEx, 0, sizeof(WndClsEx));
+	WndClsEx.cbSize        = sizeof(WNDCLASSEX);
+	WndClsEx.style         = CS_OWNDC | CS_VREDRAW | CS_HREDRAW;
+	WndClsEx.lpfnWndProc   = TrayNoticeDlgProc;
+	WndClsEx.hInstance     = hInst;
+	WndClsEx.hCursor       = LoadCursor(NULL, IDC_ARROW);
+//	WndClsEx.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
+	WndClsEx.hbrBackground = (HBRUSH)GetStockObject(LTGRAY_BRUSH);
+	WndClsEx.lpszClassName = "TrayNotice";
+	if (!init) {
+		if (!RegisterClassEx(&WndClsEx)) return 0;
+		init=1;
+	}
+	hwnd=CreateWindowEx(
+		WS_EX_PALETTEWINDOW,
+		"TrayNotice",
+		"Tray Notification",
+		WS_POPUPWINDOW,
+		x-w,
+		y-h-tbh,
+		w,
+		h,
+		NULL,
+		NULL,
+		hInst,
+		NULL
+	);
+//	SetWindowPos(hwnd, HWND_TOPMOST, x-w, y-h-tbh, w, h, SWP_SHOWWINDOW);
+	ShowWindow(hwnd, SW_SHOW);
 	TrayIcon(0);
 	return 0;
 }
-/* END WIN32 MINI API */
 
 static void preppath(nes_state *N, char *name)
 {
@@ -426,10 +437,12 @@ void init_stuff(nes_state *N)
 	struct stat sb;
 
 	N->debug=0;
+	nesladl_register_all(N);
 	neslaext_register_all(N);
 	neslamath_register_all(N);
 	neslaodbc_register_all(N);
 	neslatcp_register_all(N);
+	neslawinapi_register_all(N);
 	neslazip_register_all(N);
 	/* add env */
 	tobj=nes_settable(N, &N->g, "_ENV");
@@ -446,11 +459,8 @@ void init_stuff(nes_state *N)
 		nes_setstr(N, tobj, tmpbuf, p, strlen(p));
 	}
 	preppath(N, conffile);
-	nes_setcfunc(N, &N->g, "CreateProcess", (void *)nes_createprocess);
-	nes_setcfunc(N, &N->g, "MessageBox",    (void *)nes_messagebox);
-	nes_setcfunc(N, &N->g, "ShellExecute",  (void *)nes_shellexecute);
-	nes_setcfunc(N, &N->g, "TextInput",     (void *)nes_textinput);
-	nes_setcfunc(N, &N->g, "TrayNotice",    (void *)nes_traynotice);
+	nes_setcfunc(N, &N->g, "TextInput",  (void *)nes_textinput);
+	nes_setcfunc(N, &N->g, "TrayNotice", (void *)nes_traynotice);
 	if (stat(conffile, &sb)==0) {
 		lastfile=sb.st_mtime;
 		nes_execfile(N, conffile);

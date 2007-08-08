@@ -1,17 +1,17 @@
 
 #<?php
 # speed.c    = 0m0.017s
-# speed.lua  = 0m0.095s
-# speed.pl   = 0m0.274s
-# speed.php5 = 0m0.269s
-# speed.php4 = 0m0.671s
-# speed.nes  = 0m0.968s
+# speed.lua  = 0m0.091s
+# speed.pl   = 0m0.220s
+# speed.php5 = 0m0.223s
+# speed.nes  = 0m0.806s
 # i have crappy comps, but these should be relatively representative.
 # basically we do loops like old people screw
 #local $i=0;
-print("\n");
+#print("\n",runtime(),"\n");
 for ($i=1;$i<100001;$i++) {
-	if (($i%20000)==0) { print($i/20000); }
+#	if (($i%20000)==0) { print($i/20000); }
+	if ($i%20000==0) { print($i/20000); }
 }
-print("\n");
+#print("\n",runtime(),"\n");
 #?>

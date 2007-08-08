@@ -289,7 +289,7 @@ static int untar(nes_state *N, char *TARfile, int artype, int action, obj_t *tob
 						if (1) {
 							cobj=nes_setstr(N, tobj2, "data", NULL, 0);
 							cobj->val->size=remaining;
-							cobj->val->d.str=n_alloc(N, (cobj->val->size+1)*sizeof(char));
+							cobj->val->d.str=n_alloc(N, cobj->val->size+1, 0);
 							if (cobj->val->d.str==NULL) {
 								nes_unlinkval(N, tobj);
 								n_error(N, NE_SYNTAX, "untar", "malloc() error while creating tar cache");
@@ -384,7 +384,7 @@ static int untar(nes_state *N, char *TARfile, int artype, int action, obj_t *tob
 	return 0;
 }
 
-int neslazip_untar_list(nes_state *N)
+NES_FUNCTION(neslazip_untar_list)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	obj_t tobj;
@@ -401,7 +401,7 @@ int neslazip_untar_list(nes_state *N)
 	nc_memset((void *)&tobj, 0, sizeof(obj_t));
 	nes_linkval(N, &tobj, NULL);
 	tobj.val->type=NT_TABLE;
-	tobj.val->attr^=NST_AUTOSORT;
+	tobj.val->attr&=~NST_AUTOSORT;
 	p=strrchr(cobj1->val->d.str, '.');
 	if (p) {
 		if ((strcasecmp(p, ".gz")==0)||(strcasecmp(p, ".tgz")==0)) {
@@ -417,7 +417,7 @@ int neslazip_untar_list(nes_state *N)
 	return 0;
 }
 
-int neslazip_untar_cache(nes_state *N)
+NES_FUNCTION(neslazip_untar_cache)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	obj_t tobj;
@@ -434,7 +434,7 @@ int neslazip_untar_cache(nes_state *N)
 	nc_memset((void *)&tobj, 0, sizeof(obj_t));
 	nes_linkval(N, &tobj, NULL);
 	tobj.val->type=NT_TABLE;
-	tobj.val->attr^=NST_AUTOSORT;
+	tobj.val->attr&=~NST_AUTOSORT;
 	p=strrchr(cobj1->val->d.str, '.');
 	if (p) {
 		if ((strcasecmp(p, ".gz")==0)||(strcasecmp(p, ".tgz")==0)) {
@@ -460,3 +460,11 @@ int neslazip_register_all(nes_state *N)
 	nes_setcfunc(N, tobj, "cache", (NES_CFUNC)neslazip_untar_cache);
 	return 0;
 }
+
+#ifdef PIC
+DllExport int neslalib_init(nes_state *N)
+{
+	neslazip_register_all(N);
+	return 0;
+}
+#endif

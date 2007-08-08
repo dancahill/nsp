@@ -16,6 +16,9 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nesla/nesla.h"
+#ifdef HAVE_DL
+#include "nesla/libdl.h"
+#endif
 #include "nesla/libext.h"
 #ifdef HAVE_LDAP
 #include "nesla/libldap.h"
@@ -23,9 +26,20 @@
 #ifdef HAVE_MATH
 #include "nesla/libmath.h"
 #endif
+#ifdef HAVE_MYSQL
+#include "nesla/libmysql.h"
+#endif
+#ifdef HAVE_ODBC
 #include "nesla/libodbc.h"
+#endif
+#ifdef HAVE_SQLITE3
+#include "nesla/libsqlite3.h"
+#endif
 #ifndef __TURBOC__
 #include "nesla/libtcp.h"
+#endif
+#ifdef HAVE_ZLIB
+#include "nesla/libzip.h"
 #endif
 #include <stdio.h>
 #include <string.h>
@@ -62,7 +76,7 @@ static void sig_trap(int sig)
 	flush(N); /* if we die here, we should flush the buffer first */
 	switch (sig) {
 	case 11:
-		printf("SIGSEGV [%d] Segmentation Violation\r\n", sig);
+		printf("Segmentation Violation\r\n");
 		if ((N)&&(N->readptr)) printf("[%.40s]\r\n", N->readptr);
 		exit(-1);
 	default:
@@ -137,9 +151,33 @@ int main(int argc, char *argv[])
 	if ((N=nes_newstate())==NULL) return -1;
 	setsigs();
 	N->debug=0;
+#ifdef HAVE_DL
+	nesladl_register_all(N);
+#endif
 	neslaext_register_all(N);
+#ifdef HAVE_LDAP
+	neslaldap_register_all(N);
+#endif
+#ifdef HAVE_MATH
 	neslamath_register_all(N);
+#endif
+#ifdef HAVE_MYSQL
+	neslamysql_register_all(N);
+#endif
+#ifdef HAVE_ODBC
+	neslaodbc_register_all(N);
+#endif
+#ifdef HAVE_SQLITE3
+	neslasqlite3_register_all(N);
+#endif
+#ifndef __TURBOC__
+#ifndef TINYCC
 	neslatcp_register_all(N);
+#endif
+#endif
+#ifdef HAVE_ZLIB
+	neslazip_register_all(N);
+#endif
 	/* add env */
 	tobj=nes_settable(N, &N->g, "_ENV");
 	for (i=0;environ[i]!=NULL;i++) {
@@ -159,11 +197,13 @@ int main(int argc, char *argv[])
 
 	/* BEGIN CRASH TESTS */
 	tobj=nes_settable(N, &N->g, "_TEST1");
-	nes_readtablef(N, tobj, "{ name='[SHOW TABLES] (SQLITE)', query='SELECT tbl_name FROM sqlite_master WHERE type = \\'table\\'' }");
+	cobj=nes_evalf(N, "{ name='[SHOW TABLES] (SQLITE)', query='SELECT tbl_name FROM sqlite_master WHERE type = \\'table\\'' }");
+	nes_linkval(N, tobj, cobj);
 	if (N->err) { printf("errno=%d :: \r\n%s\r\n", N->err, N->errbuf); N->err=0; }
 	cobj=nes_getobj(N, tobj, "query");
 	tobj=nes_settable(N, &N->g, "_TEST2");
-	nes_readtablef(N, tobj, "{ a=' }");
+	cobj=nes_evalf(N, "{ a=' }");
+	nes_linkval(N, tobj, cobj);
 	if (N->err) { printf("errno=%d :: \r\n%s\r\n", N->err, N->errbuf); N->err=0; }
 	nes_exec(N, "print(_TEST1['query'],\"\\n\");");
 	nes_exec(N, " asdf laiur oiqwur9yh ishdzfu z98xfnszd9 m9sdf7 nasdfyq90E RUIZJZXCH GFKJSAEHF WEYR 8768&SZTdg f98as 8fbsa");

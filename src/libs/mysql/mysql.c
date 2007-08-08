@@ -72,10 +72,11 @@ static int mysqlQuery(nes_state *N, MYSQL_CONN *conn, char *sqlquery, obj_t *qob
 	unsigned int field, numfields, numtuples;
 
 	if (mysql_ping(conn->mysock)!=0) {
+		n_warn(N, "mysqlQuery", "MySQL connection lost");
 		return -1;
 	}
 	if (mysql_query(conn->mysock, sqlquery)) {
-		n_warn(N, "mysqlQuery", "MySQL connection error");
+		n_warn(N, "mysqlQuery", "MySQL query error");
 		return -1;
 	}
 	if (!(myres=mysql_use_result(conn->mysock))) {
@@ -93,7 +94,7 @@ static int mysqlQuery(nes_state *N, MYSQL_CONN *conn, char *sqlquery, obj_t *qob
 		memset(name, 0, sizeof(name));
 		sprintf(name, "%d", numtuples);
 		tobj=nes_settable(NULL, robj, name);
-		tobj->val->attr^=NST_AUTOSORT;
+		tobj->val->attr&=~NST_AUTOSORT;
 		for (field=0;field<numfields;field++) {
 			p=MYrow[field]?MYrow[field]:"NULL";
 			MYfield=mysql_fetch_field_direct(myres, field);
@@ -106,7 +107,7 @@ static int mysqlQuery(nes_state *N, MYSQL_CONN *conn, char *sqlquery, obj_t *qob
 	return 0;
 }
 
-int neslamysql_query(nes_state *N)
+NES_FUNCTION(neslamysql_query)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
@@ -127,7 +128,7 @@ int neslamysql_query(nes_state *N)
 	nc_memset((void *)&tobj, 0, sizeof(obj_t));
 	nes_linkval(N, &tobj, NULL);
 	tobj.val->type=NT_TABLE;
-	tobj.val->attr^=NST_AUTOSORT;
+	tobj.val->attr&=~NST_AUTOSORT;
 	mysqlQuery(N, conn, cobj2->val->d.str, &tobj);
 	nes_linkval(N, &N->r, &tobj);
 	nes_unlinkval(N, &tobj);
@@ -145,5 +146,13 @@ int neslamysql_register_all(nes_state *N)
 	nes_setcfunc(N, tobj, "query", (NES_CFUNC)neslamysql_query);
 	return 0;
 }
+
+#ifdef PIC
+DllExport int neslalib_init(nes_state *N)
+{
+	neslamysql_register_all(N);
+	return 0;
+}
+#endif
 
 #endif /* HAVE_MYSQL */

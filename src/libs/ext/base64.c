@@ -20,7 +20,7 @@
 
 static const char b64chars[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-int neslaext_base64_decode(nes_state *N)
+NES_FUNCTION(neslaext_base64_decode)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	obj_t *robj;
@@ -36,7 +36,7 @@ int neslaext_base64_decode(nes_state *N)
 	robj=nes_setstr(N, &N->r, "", NULL, 0);
 	if (cobj1->val->size<1) return 0;
 	/* should actually be about 3/4 the size of cobj1->val->size */
-	if ((robj->val->d.str=n_alloc(N, (cobj1->val->size)*sizeof(char)))==NULL) return 0;
+	if ((robj->val->d.str=n_alloc(N, cobj1->val->size+1, 0))==NULL) return 0;
 	robj->val->size=0;
 	dest=robj->val->d.str;
 	while ((ch=*src++)!='\0') {
@@ -92,7 +92,7 @@ int neslaext_base64_decode(nes_state *N)
 	return 0;
 }
 
-int neslaext_base64_encode(nes_state *N)
+NES_FUNCTION(neslaext_base64_encode)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
@@ -113,7 +113,7 @@ int neslaext_base64_encode(nes_state *N)
 	/* should actually be about 4/3 the size of cobj1->val->size */
 	i=maxline?(((cobj1->val->size+3)/3*4)/maxline):5;
 	i=i*2+5;
-	if ((dest=n_alloc(N, (enclen*4+i)*sizeof(char)))==NULL) return 0;
+	if ((dest=n_alloc(N, enclen*4+i, 0))==NULL) return 0;
 	robj->val->d.str=dest;
 	for (i=0;i<enclen;i++) {
 		a=(cp[0]>>2);

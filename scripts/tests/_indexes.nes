@@ -1,27 +1,22 @@
 #!/usr/bin/nesla
-if (type(expect)!='function') include("_expect.nes");
+if (typeof(expect)!='function') include("_expect.nes");
 function testindexing() {
-	local i=0;
-
-	print("\tthis is a sample of indexes.\n\n");
-	for (i=0;;i++) {
-		local x=_GLOBALS[@i];
-		local t=type(_GLOBALS[x]);
-
-		if (t=='null') break;
-		if (t!='function') {
-			print("\t", t, "\t", x);
-			print("\r\t\t\t\t", _GLOBALS[x], "\n");
-		}
+	print("\tthis is a sample of table indexes.\n\n");
+	for (i=0;i<sizeof(_GLOBALS);i++) {
+		local n=iname(_GLOBALS, i);
+		local t=typeof(_GLOBALS[n]);
+		if (t=='function') continue;
+		if (t=='table') continue;
+		print("\t", t, "\t", n);
+		print("\r\t\t\t\t", _GLOBALS[n], "\n");
 	}
 	# this will list all available string functions stored in table 'string'
 #	for (i=0;;i++) {
-#		local x=string[@i];
-#		local t=type(string[x]);
+#		local n=iname(string, i);
+#		local t=typeof(string[n]);
 #		if (t=='null') break;
-#		print("\t", i, "\t", t, "\tstring.", x, "\n");
+#		print("\t", i, "\t", t, "\tstring.", n, "\n");
 #	}
 	return;
 }
 testindexing();
-io.flush();

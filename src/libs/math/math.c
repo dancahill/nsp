@@ -18,7 +18,7 @@
 #include "nesla/libnesla.h"
 #include "nesla/libmath.h"
 #include <math.h>
-int neslamath_math2(nes_state *N)
+NES_FUNCTION(neslamath_math2)
 {
 	obj_t *cobj0=nes_getiobj(N, &N->l, 0);
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
@@ -50,11 +50,14 @@ int neslamath_math2(nes_state *N)
 	} else if (nc_strcmp(cobj0->val->d.str, "exp")==0) {
 		n=exp(cobj1->val->d.num);
 	} else if (nc_strcmp(cobj0->val->d.str, "log")==0) {
-		if (cobj1->val->type<=0) n_error(N, NE_SYNTAX, nes_tostr(N, cobj0), "arg must not be zero");
+		if (cobj1->val->d.num<=0) n_error(N, NE_SYNTAX, nes_tostr(N, cobj0), "arg must not be zero");
 		n=log(cobj1->val->d.num);
 	} else if (nc_strcmp(cobj0->val->d.str, "log10")==0) {
-		if (cobj1->val->type<=0) n_error(N, NE_SYNTAX, nes_tostr(N, cobj0), "arg must not be zero");
+		if (cobj1->val->d.num<=0) n_error(N, NE_SYNTAX, nes_tostr(N, cobj0), "arg must not be zero");
 		n=log10(cobj1->val->d.num);
+	} else if (nc_strcmp(cobj0->val->d.str, "pow")==0) {
+		if (cobj2->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, nes_tostr(N, cobj0), "expected a number for arg2");
+		n=pow(cobj1->val->d.num, cobj2->val->d.num);
 	/* add hyperbolic functions */
 	} else if (nc_strcmp(cobj0->val->d.str, "cosh")==0) {
 		n=cosh(cobj1->val->d.num);
@@ -93,3 +96,11 @@ int neslamath_register_all(nes_state *N)
 	nes_setcfunc(N, tobj, "sqrt",  (NES_CFUNC)neslamath_math2);
 	return 0;
 }
+
+#ifdef PIC
+DllExport int neslalib_init(nes_state *N)
+{
+	neslamath_register_all(N);
+	return 0;
+}
+#endif

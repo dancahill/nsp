@@ -1,5 +1,5 @@
 #!/usr/bin/nesla
-if (string.cmp(type(_SERVER), 'table')!=0) {
+if (string.cmp(typeof(_SERVER), 'table')!=0) {
 	global I=0;
 	for (I=1;I<50001;I++) {
 		include("_load.nes");

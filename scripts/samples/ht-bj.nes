@@ -4,66 +4,70 @@ include("_cards.nes");
 include("_ajax.nes");
 
 function cardval(p) {
+	if (typeof(p)!='number') return 0;
 	x=tonumber(p)+1;
-	if (type(p)=='null') return 0;
 	if (x<1) return 0;
-	x=math.ceil((x/4));
+	x=math.ceil(x/4);
 	if (x>10) x=10;
 	if (x==1) x=11;
 	return x;
 }
 
 function getcard() {
-	while (1) {
-		local x=math.rand(52);
-		if (type(CARDS[x]['dealt'])=='null') {
-			CARDS[x]['dealt']=true;
-			return x;
-		}
-	}
-	return 0;
+	do {
+		x=math.rand(52);
+	} while (CARDS[x]['dealt']!=null);
+	CARDS[x]['dealt']=true;
+	return x;
 }
 
 function regcard(p) {
+	if (p==null) return null;
 	x=tonumber(p);
-	if (x>=0) CARDS[x]['dealt']=true;
-	return tonumber(p);
+	CARDS[x]['dealt']=true;
+	return x;
 }
 
 function prepcards() {
-	if (_SERVER['REQUEST_METHOD']=="POST") {
-		global d = { regcard(_POST['D0']), regcard(_POST['D1']), regcard(_POST['D2']), regcard(_POST['D3']), regcard(_POST['D4']) };
-		global c = { regcard(_POST['C0']), regcard(_POST['C1']), regcard(_POST['C2']), regcard(_POST['C3']), regcard(_POST['C4']) };
-		global dv = { cardval(d[0]), cardval(d[1]), cardval(d[2]), cardval(d[3]), cardval(d[4]) };
-		global cv = { cardval(c[0]), cardval(c[1]), cardval(c[2]), cardval(c[3]), cardval(c[4]) };
-		if (type(_POST['OPT'])!='null') {
+	if (_SERVER['REQUEST_METHOD']=='POST') {
+		global d = { regcard(_POST['D0']), regcard(_POST['D1']) };
+		global c = { regcard(_POST['C0']), regcard(_POST['C1']) };
+		global dv = { cardval(d[0]), cardval(d[1]) };
+		global cv = { cardval(c[0]), cardval(c[1]) };
+		if (_POST['D2']) { d[2]=regcard(_POST['D2']); dv[2]=cardval(d[2]); }
+		if (_POST['D3']) { d[3]=regcard(_POST['D3']); dv[3]=cardval(d[3]); }
+		if (_POST['D4']) { d[4]=regcard(_POST['D4']); dv[4]=cardval(d[4]); }
+		if (_POST['C2']) { c[2]=regcard(_POST['C2']); cv[2]=cardval(c[2]); }
+		if (_POST['C3']) { c[3]=regcard(_POST['C3']); cv[3]=cardval(c[3]); }
+		if (_POST['C4']) { c[4]=regcard(_POST['C4']); cv[4]=cardval(c[4]); }
+		if (_POST['OPT']!=null) {
 			global opt = _POST['OPT'];
 		} else {
 			global opt = "";
 		}
 		if (opt=="Hit") {
-			if (c[0]<0) {
+			if (c[0]==null) {
 				print("weird error 1");
-			} else if (c[1]<0) {
+			} else if (c[1]==null) {
 				print("weird error 2");
-			} else if (c[2]<0) {
+			} else if (c[2]==null) {
 				c[2]=getcard();
 				cv[2]=cardval(c[2]);
-			} else if (c[3]<0) {
+			} else if (c[3]==null) {
 				c[3]=getcard();
 				cv[3]=cardval(c[3]);
-			} else if (c[4]<0) {
+			} else if (c[4]==null) {
 				c[4]=getcard();
 				cv[4]=cardval(c[4]);
 			}
 		} else if (opt=="Stand") {
 			for (n=2;n<5;n++) {
 				global dt=dv[0]+dv[1]+dv[2]+dv[3]+dv[4];
-				if ((dt>21)&&(dv[4]==11)) { dv[4]=1; }
-				if ((dt>21)&&(dv[3]==11)) { dv[3]=1; }
-				if ((dt>21)&&(dv[2]==11)) { dv[2]=1; }
-				if ((dt>21)&&(dv[1]==11)) { dv[1]=1; }
-				if ((dt>21)&&(dv[0]==11)) { dv[0]=1; }
+				if ((dt>21)&&(dv[4]==11)) dv[4]=1;
+				if ((dt>21)&&(dv[3]==11)) dv[3]=1;
+				if ((dt>21)&&(dv[2]==11)) dv[2]=1;
+				if ((dt>21)&&(dv[1]==11)) dv[1]=1;
+				if ((dt>21)&&(dv[0]==11)) dv[0]=1;
 				global dt=dv[0]+dv[1]+dv[2]+dv[3]+dv[4];
 				if (dt>15) break;
 				d[n]=getcard();
@@ -71,19 +75,19 @@ function prepcards() {
 			}
 		}
 	} else {
-		global d = { getcard(), getcard(), -1, -1, -1 };
-		global c = { getcard(), getcard(), -1, -1, -1 };
-		global dv = { cardval(d[0]), cardval(d[1]), 0, 0, 0 };
-		global cv = { cardval(c[0]), cardval(c[1]), 0, 0, 0 };
+		global d = { getcard(), getcard(), null, null, null };
+		global c = { getcard(), getcard(), null, null, null };
+		global dv = { cardval(d[0]), cardval(d[1]), null, null, null };
+		global cv = { cardval(c[0]), cardval(c[1]), null, null, null };
 		global opt = "";
 	}
 	global dt=dv[0]+dv[1]+dv[2]+dv[3]+dv[4];
 	global ct=cv[0]+cv[1]+cv[2]+cv[3]+cv[4];
-	if ((ct>21)&&(cv[4]==11)) { cv[4]=1; }
-	if ((ct>21)&&(cv[3]==11)) { cv[3]=1; }
-	if ((ct>21)&&(cv[2]==11)) { cv[2]=1; }
-	if ((ct>21)&&(cv[1]==11)) { cv[1]=1; }
-	if ((ct>21)&&(cv[0]==11)) { cv[0]=1; }
+	if ((ct>21)&&(cv[4]==11)) cv[4]=1;
+	if ((ct>21)&&(cv[3]==11)) cv[3]=1;
+	if ((ct>21)&&(cv[2]==11)) cv[2]=1;
+	if ((ct>21)&&(cv[1]==11)) cv[1]=1;
+	if ((ct>21)&&(cv[0]==11)) cv[0]=1;
 	global ct=cv[0]+cv[1]+cv[2]+cv[3]+cv[4];
 	return;
 }
@@ -99,11 +103,11 @@ function printredraw() {
 }
 
 function main() {
-	if (type(_SERVER['REQUEST_METHOD'])=='null') {
+	if (typeof(_SERVER['REQUEST_METHOD'])=='null') {
 		global _SERVER = { REQUEST_METHOD="GET", SCRIPT_NAME="/nesla/blah" }
 	} # this is a debug block
-	if (type(_SESSION)!='table') global _SESSION = { };
-	if (type(_SESSION['BJ'])!='table') _SESSION['BJ'] = { };
+	if (typeof(_SESSION)!='table') global _SESSION = { };
+	if (typeof(_SESSION['BJ'])!='table') _SESSION['BJ'] = { };
 	_SESSION['BJ'].won  = tonumber(_SESSION['BJ'].won);
 	_SESSION['BJ'].lost = tonumber(_SESSION['BJ'].lost);
 	prepcards();
@@ -119,31 +123,21 @@ function main() {
 		print("<SPAN ID='remstatus'>");
 	}
 	print("<FORM ACTION='", _SERVER['SCRIPT_NAME'], "' METHOD='POST' NAME='game'>\n");
-	for (n=0;n<5;n++) {
-		if (type(d[n])!='null') print("<INPUT TYPE=hidden NAME=d", n, " VALUE='", d[n], "'>\n");
-	}
-	for (n=0;n<5;n++) {
-		if (type(c[n])!='null') print("<INPUT TYPE=hidden NAME=c", n, " VALUE='", c[n], "'>\n");
-	}
+	for (n=0;n<5;n++) if (d[n]!=null) print("<INPUT TYPE=hidden NAME=d", n, " VALUE='", d[n], "'>\n");
+	for (n=0;n<5;n++) if (c[n]!=null) print("<INPUT TYPE=hidden NAME=c", n, " VALUE='", c[n], "'>\n");
 	print("<TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>\n");
 	print("<TR><TD ALIGN=LEFT COLSPAN=2 WIDTH=355px>");
 	if (opt=="Stand") {
-		for (n=0;n<5;n++) {
-			if (d[n]>=0) print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[d[n]]['file'] ,"' ALT='", CARDS[d[n]]['name'], " TITLE='", CARDS[d[n]]['name'], "'>");
-		}
+		for (n=0;n<5;n++) if (d[n]!=null) print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[d[n]]['file'] ,"' ALT='", CARDS[d[n]]['name'], "' TITLE='", CARDS[d[n]]['name'], "'>");
 	} else if (ct>20) {
-		for (n=0;n<5;n++) {
-			if (d[n]>=0) print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[d[n]]['file'] ,"' ALT='", CARDS[d[n]]['name'], " TITLE='", CARDS[d[n]]['name'], "'>");
-		}
+		for (n=0;n<5;n++) if (d[n]!=null) print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[d[n]]['file'] ,"' ALT='", CARDS[d[n]]['name'], "' TITLE='", CARDS[d[n]]['name'], "'>");
 	} else {
 		print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/face.png' TITLE='unknown'>");
-		if (d[1]>=0) print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[d[1]]['file'], "' ALT='", CARDS[d[n]]['name'], " TITLE='", CARDS[d[1]]['name'], "'>");
+		if (d[1]!=null) print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[d[1]]['file'], "' ALT='", CARDS[d[1]]['name'], "' TITLE='", CARDS[d[1]]['name'], "'>");
 	}
 	print("</TD></TR>\n");
 	print("<TR><TD ALIGN=LEFT COLSPAN=2 WIDTH=355px>");
-	for (n=0;n<5;n++) {
-		if (c[n]>=0) print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[c[n]]['file'], "' ALT='", CARDS[d[n]]['name'], " TITLE='", CARDS[c[n]]['name'], "'>");
-	}
+	for (n=0;n<5;n++) if (c[n]!=null) print("<IMG WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[c[n]]['file'], "' ALT='", CARDS[c[n]]['name'], "' TITLE='", CARDS[c[n]]['name'], "'>");
 	print("</TD></TR>\n");
 	print("</TABLE>\n");
 	if (ct>21) {
@@ -175,10 +169,11 @@ function main() {
 	print("</FORM>\n");
 	print("wins:", _SESSION['BJ'].won, " - losses:", _SESSION['BJ'].lost, "<BR>\n");
 	print("runtime = ", runtime(), " seconds\n");
+//	CARDS=null;print("<PRE>");printvar(_GLOBALS);print("</PRE>");
 	if (_SERVER['REQUEST_METHOD']!="POST") {
 		print("</SPAN>\n");
 		print("</CENTER>\n</BODY>\n</HTML>\n");
 	}
 	return;
 }
-if (type(_SERVER)=='table') main();
+if (typeof(_SERVER)=='table') main();

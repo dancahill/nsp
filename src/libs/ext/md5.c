@@ -404,7 +404,7 @@ int main(int argc, char *argv[])
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
-int neslaext_md5_file(nes_state *N)
+NES_FUNCTION(neslaext_md5_file)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	char *hex="0123456789abcdef";
@@ -434,7 +434,7 @@ int neslaext_md5_file(nes_state *N)
 	return 0;
 }
 
-int neslaext_md5_string(nes_state *N)
+NES_FUNCTION(neslaext_md5_string)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	char *hex="0123456789abcdef";
@@ -453,7 +453,7 @@ int neslaext_md5_string(nes_state *N)
 	return 0;
 }
 
-int neslaext_md5_passwd(nes_state *N)
+NES_FUNCTION(neslaext_md5_passwd)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	obj_t *cobj2=nes_getiobj(N, &N->l, 2);

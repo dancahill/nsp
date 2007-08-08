@@ -2,117 +2,111 @@
 # poker sample prog by Dan Cahill
 include("_cards.nes");
 include("_ajax.nes");
-global hand_vals = {
-	{ name="NONE",            val=0   },
-	{ name="JACKS OR HIGHER", val=1   },
-	{ name="2 PAIRS",         val=2   },
-	{ name="3 OF A KIND",     val=3   },
-	{ name="STRAIGHT",        val=5   },
-	{ name="FLUSH",           val=7   },
-	{ name="FULL HOUSE",      val=10  },
-	{ name="4 OF A KIND",     val=40  },
-	{ name="STR FLUSH",       val=100 },
-	{ name="ROYAL FLUSH",     val=500 }
-};
 
 function getcard() {
 	do {
 		x=math.rand(52);
-	} while (type(CARDS[x]['dealt'])!='null');
-	CARDS[x]['dealt']=true;
+	} while (CARDS[x].dealt!=null);
+	CARDS[x].dealt=true;
 	return x;
 }
 
 function regcard(p) {
-	local x=tonumber(p);
-
-	if (type(p)!='null') CARDS[x]['dealt']=true;
+	if (p==null) return null;
+	x=tonumber(p);
+	CARDS[x].dealt=true;
 	return x;
 }
 
 function showscore(r) {
+	hand_vals = {
+		{ name="NONE",            val=0   },
+		{ name="JACKS OR HIGHER", val=1   },
+		{ name="2 PAIRS",         val=2   },
+		{ name="3 OF A KIND",     val=3   },
+		{ name="STRAIGHT",        val=5   },
+		{ name="FLUSH",           val=7   },
+		{ name="FULL HOUSE",      val=10  },
+		{ name="4 OF A KIND",     val=40  },
+		{ name="STR FLUSH",       val=100 },
+		{ name="ROYAL FLUSH",     val=500 }
+	};
 	print("<TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0 WIDTH=400>\n");
-	print("<TR ID=row9"); if (r==9) { print(" BGCOLOR=#00FF7F"); } print(">");
-	print("<TD>ROYAL FLUSH     </TD><TD ALIGN=right>", (hand_vals[9].val*1), "</TD></TR>\n");
-	print("<TR ID=row8"); if (r==8) { print(" BGCOLOR=#00FF7F"); } print(">");
-	print("<TD>STRAIGHT FLUSH  </TD><TD ALIGN=right>", (hand_vals[8].val*1), "</TD></TR>\n");
-	print("<TR ID=row7"); if (r==7) { print(" BGCOLOR=#00FF7F"); } print(">");
-	print("<TD>FOUR OF A KIND  </TD><TD ALIGN=right>", (hand_vals[7].val*1), "</TD></TR>\n");
-	print("<TR ID=row6"); if (r==6) { print(" BGCOLOR=#00FF7F"); } print(">");
-	print("<TD>FULL HOUSE      </TD><TD ALIGN=right>", (hand_vals[6].val*1), "</TD></TR>\n");
-	print("<TR ID=row5"); if (r==5) { print(" BGCOLOR=#00FF7F"); } print(">");
-	print("<TD>FLUSH           </TD><TD ALIGN=right>", (hand_vals[5].val*1), "</TD></TR>\n");
-	print("<TR ID=row4"); if (r==4) { print(" BGCOLOR=#00FF7F"); } print(">");
-	print("<TD>STRAIGHT        </TD><TD ALIGN=right>", (hand_vals[4].val*1), "</TD></TR>\n");
-	print("<TR ID=row3"); if (r==3) { print(" BGCOLOR=#00FF7F"); } print(">");
-	print("<TD>THREE OF A KIND </TD><TD ALIGN=right>", (hand_vals[3].val*1), "</TD></TR>\n");
-	print("<TR ID=row2"); if (r==2) { print(" BGCOLOR=#00FF7F"); } print(">");
-	print("<TD>TWO PAIRS       </TD><TD ALIGN=right>", (hand_vals[2].val*1), "</TD></TR>\n");
-	print("<TR ID=row1"); if (r==1) { print(" BGCOLOR=#00FF7F"); } print(">");
-	print("<TD>JACKS OR HIGHER </TD><TD ALIGN=right>", (hand_vals[1].val*1), "</TD></TR>\n");
+	print("<TR ID=row9"); if (r==9) print(" BGCOLOR=#00FF7F"); print(">");
+	print("<TD>ROYAL FLUSH     </TD><TD ALIGN=right>", hand_vals[9].val, "</TD></TR>\n");
+	print("<TR ID=row8"); if (r==8) print(" BGCOLOR=#00FF7F"); print(">");
+	print("<TD>STRAIGHT FLUSH  </TD><TD ALIGN=right>", hand_vals[8].val, "</TD></TR>\n");
+	print("<TR ID=row7"); if (r==7) print(" BGCOLOR=#00FF7F"); print(">");
+	print("<TD>FOUR OF A KIND  </TD><TD ALIGN=right>", hand_vals[7].val, "</TD></TR>\n");
+	print("<TR ID=row6"); if (r==6) print(" BGCOLOR=#00FF7F"); print(">");
+	print("<TD>FULL HOUSE      </TD><TD ALIGN=right>", hand_vals[6].val, "</TD></TR>\n");
+	print("<TR ID=row5"); if (r==5) print(" BGCOLOR=#00FF7F"); print(">");
+	print("<TD>FLUSH           </TD><TD ALIGN=right>", hand_vals[5].val, "</TD></TR>\n");
+	print("<TR ID=row4"); if (r==4) print(" BGCOLOR=#00FF7F"); print(">");
+	print("<TD>STRAIGHT        </TD><TD ALIGN=right>", hand_vals[4].val, "</TD></TR>\n");
+	print("<TR ID=row3"); if (r==3) print(" BGCOLOR=#00FF7F"); print(">");
+	print("<TD>THREE OF A KIND </TD><TD ALIGN=right>", hand_vals[3].val, "</TD></TR>\n");
+	print("<TR ID=row2"); if (r==2) print(" BGCOLOR=#00FF7F"); print(">");
+	print("<TD>TWO PAIRS       </TD><TD ALIGN=right>", hand_vals[2].val, "</TD></TR>\n");
+	print("<TR ID=row1"); if (r==1) print(" BGCOLOR=#00FF7F"); print(">");
+	print("<TD>JACKS OR HIGHER </TD><TD ALIGN=right>", hand_vals[1].val, "</TD></TR>\n");
 	print("</TABLE><BR>\n");
 	return;
 }
 
 function ratehand() {
-	global cards    = { };
-	global flush    = { 0, 0, 0, 0, 0 };
-	global kind     = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	global straight = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	flush    = { };
+	kind     = { };
+	straight = { };
 
-	for (n=0;n<5;n++)  { flush[n]=0;    }
-	for (n=0;n<14;n++) { kind[n]=0;     }
-	for (n=0;n<15;n++) { straight[n]=0; }
-	for (n=0;n<52;n++) { cards[n]=0;    }
-	for (n=0;n<5;n++)  { local i=c[n]; cards[i]=1; }
+	for (i=0;i<5;i++) CARDS[c[i]].dealt=true;
 #	CHECK FOR ROYAL FLUSH
-	if ((cards[36]==1)&&(cards[40]==1)&&(cards[44]==1)&&(cards[48]==1)&&(cards[0]==1)) { return 9; }
-	if ((cards[37]==1)&&(cards[41]==1)&&(cards[45]==1)&&(cards[49]==1)&&(cards[1]==1)) { return 9; }
-	if ((cards[38]==1)&&(cards[42]==1)&&(cards[46]==1)&&(cards[50]==1)&&(cards[2]==1)) { return 9; }
-	if ((cards[39]==1)&&(cards[43]==1)&&(cards[47]==1)&&(cards[51]==1)&&(cards[3]==1)) { return 9; }
+//	for (n=0;n<4;n++) print("[", CARDS[n+36].dealt==true, CARDS[n+40].dealt==true, CARDS[n+44].dealt==true, CARDS[n+48].dealt==true, CARDS[n+0].dealt==true, "]");
+//	for (n=0;n<4;n++) print("[", ((CARDS[n+36].dealt==true)&&(CARDS[n+40].dealt==true)&&(CARDS[n+44].dealt==true)&&(CARDS[n+48].dealt==true)&&(CARDS[n+0].dealt==true)), "]");
+	for (n=0;n<4;n++) if ((CARDS[n+36].dealt==true)&&(CARDS[n+40].dealt==true)&&(CARDS[n+44].dealt==true)&&(CARDS[n+48].dealt==true)&&(CARDS[n+0].dealt==true)) return 9;
 #	CHECK FOR STRAIGHT FLUSH
-	for (n=0;n<36;n++) { if ((cards[n]==1)&&(cards[n+4]==1)&&(cards[n+8]==1)&&(cards[n+12]==1)&&(cards[n+16]==1)) { return 8; } }
+	for (n=0;n<36;n++) if ((CARDS[n+0].dealt==true)&&(CARDS[n+4].dealt==true)&&(CARDS[n+8].dealt==true)&&(CARDS[n+12].dealt==true)&&(CARDS[n+16].dealt==true)) return 8;
 #	CHECK FOR 4 OF A KIND
-	for (n=0;n<14;n++) { kind[n]=0; }
-	for (n=0;n<5;n++)  { kind[math.floor(tonumber(c[n])/4)]++; }
-	for (n=0;n<13;n++) { if (kind[n]==4) { return 7; } }
+	kind     = { };
+	for (n=0;n<5;n++)  kind[math.floor(tonumber(c[n])/4)]++;
+	for (n=0;n<13;n++) if (kind[n]==4) return 7;
 #	CHECK FOR A FULL HOUSE
-	for (n=0;n<14;n++) { kind[n]=0; }
-	for (n=0;n<5;n++)  { kind[math.floor(tonumber(c[n])/4)]++; }
-	global pair=0;
+	kind     = { };
+	pair=0;
+	for (n=0;n<5;n++)  kind[math.floor(tonumber(c[n])/4)]++;
 	for (n=0;n<13;n++) {
-		if (kind[n]==3) { global pair=pair+1.5; }
-		if (kind[n]==2) { global pair=pair+1; }
+		if (kind[n]==3) global pair=pair+1.5;
+		if (kind[n]==2) global pair=pair+1;
 	}
-	if (pair==2.5) { return 6; }
+	if (pair==2.5) return 6;
 #	CHECK FOR A FLUSH
-	for (n=0;n<4;n++)  { flush[n]=0; }
+	flush    = { };
 	for (n=0;n<13;n++) {
-		if (cards[n*4+0]==1) { flush[0]++; }
-		if (cards[n*4+1]==1) { flush[1]++; }
-		if (cards[n*4+2]==1) { flush[2]++; }
-		if (cards[n*4+3]==1) { flush[3]++; }
+		if (CARDS[n*4+0].dealt==true) flush[0]++;
+		if (CARDS[n*4+1].dealt==true) flush[1]++;
+		if (CARDS[n*4+2].dealt==true) flush[2]++;
+		if (CARDS[n*4+3].dealt==true) flush[3]++;
 	}
-	for (n=0;n<3;n++) { if (flush[n]==5) { return 5; } }
+	for (n=0;n<3;n++) if (flush[n]==5) return 5;
 #	CHECK FOR A STRAIGHT
-	for (n=0;n<14;n++) { straight[n]=0; }
-	for (n=0;n<5;n++)  { straight[math.floor(tonumber(c[n])/4)]=1; }
+	straight = { };
+	for (n=0;n<5;n++)  straight[math.floor(tonumber(c[n])/4)]=1;
 	straight[13]=straight[0];
-	for (n=0;n<10;n++) { if (straight[n]+straight[n+1]+straight[n+2]+straight[n+3]+straight[n+4]==5) { return 4; } }
+	for (n=0;n<10;n++) if (straight[n]+straight[n+1]+straight[n+2]+straight[n+3]+straight[n+4]==5) return 4;
 #	CHECK FOR 3 OF A KIND
-	for (n=0;n<13;n++) { kind[n]=0; }
-	for (n=0;n<5;n++)  { kind[math.floor(tonumber(c[n])/4)]++; }
-	for (n=0;n<13;n++) { if (kind[n]==3) { return 3; } }
+	kind     = { };
+	for (n=0;n<5;n++)  kind[math.floor(tonumber(c[n])/4)]++;
+	for (n=0;n<13;n++) if (kind[n]==3) return 3;
 #	CHECK FOR 2 PAIRS
 	global pair=0;
-	for (n=0;n<13;n++) { kind[n]=0; }
-	for (n=0;n<5;n++)  { kind[math.floor(tonumber(c[n])/4)]++; }
-	for (n=0;n<13;n++) { if (kind[n]==2) { global pair=pair+1; } }
-	if (pair==2) { return 2; }
+	kind     = { };
+	for (n=0;n<5;n++)  kind[math.floor(tonumber(c[n])/4)]++;
+	for (n=0;n<13;n++) if (kind[n]==2) global pair=pair+1;
+	if (pair==2) return 2;
 #	CHECK FOR HIGH PAIR
-	for (n=0;n<13;n++) { kind[n]=0; }
-	for (n=0;n<5;n++)  { kind[math.floor(tonumber(c[n])/4)]++; }
-	if ((kind[10]==2)||(kind[11]==2)||(kind[12]==2)||(kind[0]==2)) { return 1; }
+	kind     = { };
+	for (n=0;n<5;n++)  kind[math.floor(tonumber(c[n])/4)]++;
+	if ((kind[10]==2)||(kind[11]==2)||(kind[12]==2)||(kind[0]==2)) return 1;
 	return 0;
 }
 
@@ -122,14 +116,14 @@ function printredraw() {
 
 	print(
 		"	r=c.responseXML.documentElement;\n"
-#		"	r=c.responseText;\n",
-#		"	document.getElementById('remstatus').innerHTML=r;\n",
+//		"	r=c.responseText;\n",
+//		"	document.getElementById('remstatus').innerHTML=r;\n",
 	);
 	for (n=0;n<5;n++) {
-		print("	document.game.c",n,".value=r.getElementsByTagName('c",n,"')[0].firstChild.data;\n");
-		print("	document.card",n,".src=r.getElementsByTagName('c",n,"f')[0].firstChild.data;\n");
-		print("	document.card",n,".alt=r.getElementsByTagName('c",n,"n')[0].firstChild.data;\n");
-		print("	document.card",n,".title=r.getElementsByTagName('c",n,"n')[0].firstChild.data;\n");
+		print("	document.game.C",n,".value=r.getElementsByTagName('C",n,"')[0].firstChild.data;\n");
+		print("	document.card",n,".src=r.getElementsByTagName('C",n,"F')[0].firstChild.data;\n");
+		print("	document.card",n,".alt=r.getElementsByTagName('C",n,"N')[0].firstChild.data;\n");
+		print("	document.card",n,".title=r.getElementsByTagName('C",n,"N')[0].firstChild.data;\n");
 	}
 	print(
 		"	rating=r.getElementsByTagName('rating')[0].firstChild.data;\n",
@@ -144,11 +138,11 @@ function printredraw() {
 	);
 	print(
 		"function toggle(hc) {\n",
-		"	if (document.getElementById('h'+hc).value==0) {\n",
-		"		document.getElementById('h'+hc).value=1;\n",
+		"	if (document.getElementById('H'+hc).value==0) {\n",
+		"		document.getElementById('H'+hc).value=1;\n",
 		"		document.getElementById('hbut'+hc).bgColor='#00FF7F';\n",
 		"	} else {\n",
-		"		document.getElementById('h'+hc).value=0;\n",
+		"		document.getElementById('H'+hc).value=0;\n",
 		"		document.getElementById('hbut'+hc).bgColor='#FFFFFF';\n",
 		"	}\n",
 		"}\n"
@@ -158,37 +152,38 @@ function printredraw() {
 }
 
 function xmlmain() {
-	global c = { 0, 0, 0, 0, 0 };
+	global c = { regcard(_POST['C0']), regcard(_POST['C1']), regcard(_POST['C2']), regcard(_POST['C3']), regcard(_POST['C4']) };
 	global held = { 0, 0, 0, 0, 0 };
 
-	if (tonumber(_POST['H0'])==0) { c[0]=getcard(); } else { c[0]=regcard(_POST['C0']); held[0]=1; }
-	if (tonumber(_POST['H1'])==0) { c[1]=getcard(); } else { c[1]=regcard(_POST['C1']); held[1]=1; }
-	if (tonumber(_POST['H2'])==0) { c[2]=getcard(); } else { c[2]=regcard(_POST['C2']); held[2]=1; }
-	if (tonumber(_POST['H3'])==0) { c[3]=getcard(); } else { c[3]=regcard(_POST['C3']); held[3]=1; }
-	if (tonumber(_POST['H4'])==0) { c[4]=getcard(); } else { c[4]=regcard(_POST['C4']); held[4]=1; }
+	if (tonumber(_POST['H0'])) held[0]=1; else c[0]=getcard();
+	if (tonumber(_POST['H1'])) held[1]=1; else c[1]=getcard();
+	if (tonumber(_POST['H2'])) held[2]=1; else c[2]=getcard();
+	if (tonumber(_POST['H3'])) held[3]=1; else c[3]=getcard();
+	if (tonumber(_POST['H4'])) held[4]=1; else c[4]=getcard();
+//	print("<PRE>");printvar(_GLOBALS);print("</PRE>");
 	global opt = _POST['OPT'];
 	global r=ratehand();
 #	if response header isn't text/xml, IE will choke on this
 	_HEADER['CONTENT_TYPE']="text/xml";
 	print("<?xml version='1.0' encoding='UTF-8' standalone='yes'?>\n");
 	print("<response>\n");
-	for (n=0;n<5;n++) {
-		print("<c",n,">",c[n],"</c",n,">\n<c",n,"f>/cards/",CARDS[c[n]].file,"</c",n,"f>\n<c",n,"n>",CARDS[c[n]].name,"</c",n,"n>\n");
-	}
+	for (n=0;n<5;n++) print("<C",n,">",c[n],"</C",n,">\n<C",n,"F>/cards/",CARDS[c[n]].file,"</C",n,"F>\n<C",n,"N>",CARDS[c[n]].name,"</C",n,"N>\n");
 	print("	<rating>",r,"</rating>\n");
 	print("</response>\n");
 	return;
 }
 
 function main() {
-	global c = { [0]=getcard(), [1]=getcard(), [2]=getcard(), [3]=getcard(), [4]=getcard() }
+	global c = { getcard(), getcard(), getcard(), getcard(), getcard() };
 	global held = { 0,0,0,0,0 };
 	global opt = "";
 
-#	if (type(_SERVER)=='null') { # this is a debug block
-#		global _SERVER = { REQUEST_METHOD="POST", SCRIPT_NAME="/nesla/blah" }
-#		global _POST = { c0=12, c1=16, c2=20, c3=24, c4=28, h0=1, h1=1, h2=1, h3=1, h4=1 }
-#	}
+/*
+	if (_SERVER==null) { # this is a debug block
+		global _SERVER = { REQUEST_METHOD="POST", SCRIPT_NAME="/nesla/blah" }
+		global _POST = { c0=12, c1=16, c2=20, c3=24, c4=28, h0=1, h1=1, h2=1, h3=1, h4=1 }
+	}
+*/
 	print("<HTML>\n<HEAD>\n<TITLE>Nesla-AJAX Poker</TITLE>\n");
 	print("<STYLE TYPE=text/css>\n");
 	print("A       { color: #0000FF; text-decoration: none; }\n");
@@ -202,38 +197,40 @@ function main() {
 	global r=ratehand();
 	showscore(r);
 	for (n=0;n<5;n++) {
-		print("<INPUT TYPE=hidden NAME=c", n, " VALUE='", c[n], "'>");
-		print("<INPUT TYPE=hidden NAME=h", n, " VALUE=", held[n], ">\n");
+		print("<INPUT TYPE=hidden NAME=C", n, " VALUE='", c[n], "'>");
+		print("<INPUT TYPE=hidden NAME=H", n, " VALUE='", held[n], "'>\n");
 	}
-	print("<TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>\n");
-	print("<TR>");
+	print("<TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0><TR>\n");
 	for (n=0;n<5;n++) {
 		local i=tonumber(c[n]);
 		print("<TD ALIGN=LEFT WIDTH=71><IMG NAME=card", n, " WIDTH=71 HEIGHT=96 SRC='/cards/", CARDS[i].file ,"' ALT='", CARDS[i].name, "' TITLE='", CARDS[i].name, "'></TD>\n");
 	}
 	print("</TR>\n");
-#	if (string.cmp(opt, "Deal")!=0) {
+//	if (string.cmp(opt, "Deal")!=0) {
 		print("<TR>\n");
 		for (n=0;n<5;n++) {
 			print("<TD ID=hbut",n," ALIGN=CENTER WIDTH=71");
-			if (held[n]==1) { print(" FONT COLOR=green"); }
+			if (held[n]==1) print(" FONT COLOR=green");
 			print(" onClick=\"toggle(",n,")\">HOLD</TD>\n");
 		}
 		print("</TR>\n");
 		print("<TR><TD ALIGN=CENTER COLSPAN=5>[<A HREF=javascript:nexthand('Deal');> DEAL </A>]</TD></TR>\n");
-#	}
+//	}
 	print("</TABLE>\n");
-#	if (string.cmp(opt, "Deal")==0) {
-#		print("<A HREF='", _SERVER['SCRIPT_NAME'], "' 'onClick=location.replace('", _SERVER['SCRIPT_NAME'], "');return false;'>Play again</A>\n");
-#	}
+/*
+	if (string.cmp(opt, "Deal")==0) {
+		print("<A HREF='", _SERVER['SCRIPT_NAME'], "' 'onClick=location.replace('", _SERVER['SCRIPT_NAME'], "');return false;'>Play again</A>\n");
+	}
+*/
 	print("</FORM>\n");
+//	CARDS=null;print("<PRE>");printvar(_GLOBALS);print("</PRE>");
 	if (_SERVER['REQUEST_METHOD']=='GET') {
 		print("</SPAN>\n");
 		print("</CENTER>\n</BODY>\n</HTML>\n");
 	}
 	return;
 }
-if (type(_SERVER)=='table') {
+if (typeof(_SERVER)=='table') {
 	if (_SERVER['REQUEST_METHOD']=='POST') {
 		xmlmain();
 	} else {

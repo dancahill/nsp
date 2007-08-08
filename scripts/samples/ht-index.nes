@@ -1,17 +1,17 @@
 #!/usr/bin/nesla
-if (type(_SERVER)=='table') {
+if ((typeof(_SERVER)=='table')&&(typeof(dirlist)!='null')) {
 	print("<H1>INDEX OF ", _SERVER['REQUEST_URI'], "</H1>");
 	print("<PRE><FONT SIZE=2>");
-	if (type(_SERVER['PWD'])!='null') {
+	if (_SERVER['PWD']!=null) {
 		_d=dirlist(_SERVER['PWD']);
 	} else {
 		_d=dirlist(_filepath);
 	}
 	print("<TABLE BORDER=1 WIDTH=100%>\n");
 	for (i=0;;i++) {
-		var x=_d[@i];
-		if (string.cmp(type(_d[x]), 'null')==0) { break; }
-		if (string.cmp(type(_d[x]), 'table')==0) {
+		var x=iname(_d, i);
+		if (typeof(_d[x])=='null') break;
+		if (typeof(_d[x])=='table') {
 			if (string.cmp(x, '.')==0) {
 			} else if (string.cmp(x, '..')==0) {
 				print("<TR>\n");

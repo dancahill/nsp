@@ -16,6 +16,8 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nesla/libnesla.h"
+#include "opcodes.h"
+
 #include <fcntl.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -28,227 +30,313 @@
 #endif
 #endif
 
-static obj_t *n_setargs(nes_state *N, char *fname)
+static obj_t *n_setargs(nes_state *N, char *fname, obj_t *pobj)
 {
-	static char *fn="n_evalargs";
+#define __FUNCTION__ "n_setargs"
 	obj_t listobj;
 	obj_t *cobj, *nobj;
 	unsigned short i;
 
-	if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "missing '('");
+	n_expect(N, __FUNCTION__, OP_POPAREN);
 	listobj.val=n_newval(N, NT_TABLE);
 	listobj.val->attr=0;
 	cobj=nes_setstr(N, &listobj, "0", fname, nc_strlen(fname));
 	for (i=1;;i++) {
-		N->lastop=OP_UNDEFINED;
+		N->readptr++;
+		if (*N->readptr==OP_PCPAREN) break;
 		if ((nobj=nes_eval(N, (char *)N->readptr))!=NULL) {
 			cobj->next=n_newiobj(N, i);
 			cobj->next->prev=cobj;
 			cobj=cobj->next;
 			nes_linkval(N, cobj, nobj);
 		}
-		if (N->lastop==OP_UNDEFINED) nextop();
-		if (N->lastop==OP_PCPAREN) break;
-		if (N->lastop!=OP_PCOMMA) n_error(N, NE_SYNTAX, fn, "missing ')' or ','");
+		if (*N->readptr==OP_PCOMMA) continue;
+		n_expect(N, __FUNCTION__, OP_PCPAREN);
+		break;
 	}
+	if (pobj) {
+		cobj->next=n_alloc(N, sizeof(obj_t), 1);
+		cobj->next->prev=cobj;
+		cobj=cobj->next;
+		cobj->next=NULL;
+		nc_strncpy(cobj->name, "this", MAX_OBJNAMELEN);
+		nes_linkval(N, cobj, pobj);
+	}
+	N->readptr++;
 	nes_linkval(N, &N->r, &listobj);
 	nes_unlinkval(N, &listobj);
 	return &N->r;
+#undef __FUNCTION__
 }
 
-obj_t *n_execfunction(nes_state *N, obj_t *cobj)
+obj_t *n_execfunction(nes_state *N, obj_t *cobj, obj_t *pobj)
 {
-	static char *fn="n_execfunction";
+#define __FUNCTION__ "n_execfunction"
 	NES_CFUNC cfunc;
 	obj_t *cobj2;
+	obj_t *lobj;
 	val_t *olobj;
-	obj_t *pobj;
-	uchar *p;
+	uchar *oldbptr;
+	uchar *oldbend;
+	uchar *oldrptr;
 	unsigned int i;
 
 	DEBUG_IN();
-	if ((cobj->val->type!=NT_NFUNC)&&(cobj->val->type!=NT_CFUNC)) n_error(N, NE_SYNTAX, fn, "'%s' is not a function", cobj->name);
-	nextop();
-	if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "missing '('");
-	pobj=n_setargs(N, cobj->name);
-	N->lastop=OP_UNDEFINED;
-	olobj=N->l.val; N->l.val=pobj->val; pobj->val=NULL;
-	p=N->readptr;
-	if (N->debug) n_warn(N, fn, "%s()", cobj->name);
+	if ((cobj->val->type!=NT_NFUNC)&&(cobj->val->type!=NT_CFUNC)) n_error(N, NE_SYNTAX, __FUNCTION__, "'%s' is not a function", cobj->name);
+	lobj=n_setargs(N, cobj->name, pobj);
+	olobj=N->l.val; N->l.val=lobj->val; lobj->val=NULL;
+	/* if (N->debug) n_warn(N, __FUNCTION__, "%s()", cobj->name); */
+	/* if (N->debug) if (pobj) n_warn(N, __FUNCTION__, "parent object name = %s", pobj->name); */
 	if (cobj->val->type==NT_CFUNC) {
 		cfunc=cobj->val->d.cfunc;
 		cfunc(N);
 	} else if (cobj->val->type==NT_NFUNC) {
+		oldbptr=N->blockptr;
+		oldbend=N->blockend;
+		oldrptr=N->readptr;
+		N->blockptr=(uchar *)cobj->val->d.str;
+		N->blockend=(uchar *)cobj->val->d.str+cobj->val->size;
 		N->readptr=(uchar *)cobj->val->d.str;
-		nextop();
-		if (N->lastop!=OP_POPAREN) n_error(N, NE_SYNTAX, fn, "missing '('");
+		n_expect(N, __FUNCTION__, OP_POPAREN);
 		for (i=1;;i++) {
+			N->readptr++;
 			cobj2=nes_getiobj(N, &N->l, i);
-			nextop();
-			if (N->lastop==OP_LABEL) {
-				nc_strncpy(cobj2->name, N->lastname, MAX_OBJNAMELEN);
-				nextop();
-			}
-			if (N->lastop==OP_PCOMMA) continue;
-			if (N->lastop==OP_PCPAREN) break;
-			n_error(N, NE_SYNTAX, fn, "missing ')' or ','");
+			if (*N->readptr==OP_LABEL) nc_strncpy(cobj2->name, n_getlabel(N, NULL), MAX_OBJNAMELEN);
+			if (*N->readptr==OP_PCOMMA) continue;
+			n_expect(N, __FUNCTION__, OP_PCPAREN);
+			N->readptr++;
+			break;
 		}
-		nextop();
-		if (N->lastop==OP_POBRACE) nes_exec(N, (char *)N->readptr);
+		n_expect(N, __FUNCTION__, OP_POBRACE);
+		nes_exec(N, (char *)N->readptr);
+		n_skipto(N, __FUNCTION__, OP_PCBRACE);
 		if (N->ret) { N->ret=0; }
+		N->blockptr=oldbptr;
+		N->blockend=oldbend;
+		N->readptr=oldrptr;
 	}
 	nes_unlinkval(N, &N->l);
 	N->l.val=olobj;
-	N->readptr=p;
 	DEBUG_OUT();
 	return &N->r;
+#undef __FUNCTION__
 }
 
 /*
  * the following functions are public API functions
  */
 
-obj_t *nes_exec(nes_state *N, char *string)
+obj_t *nes_exec(nes_state *N, const char *string)
 {
-	static char *fn="nes_exec";
+#define __FUNCTION__ "nes_exec"
 	char namebuf[MAX_OBJNAMELEN+1];
 	obj_t *cobj, *tobj;
-	char block;
-	short int jmp=N->jmpset;
-	short int single=N->single;
+	uchar block, ctype, op;
+	uchar jmp=(uchar)N->jmpset, single=(uchar)N->single;
+	uchar *p;
 
 	DEBUG_IN();
 	N->single=0;
 	if (jmp==0) {
-		if (setjmp(N->savjmp)==0) {
-			N->jmpset=1;
+		N->jmpset=1;
+		nes_unlinkval(N, &N->r);
+		if (string==NULL||string[0]==0) goto end;
+		p=n_decompose(N, (uchar *)string);
+		if (p!=N->blockptr) {
+			N->blockptr=p;
 		} else {
-			goto end;
+			p=NULL;
 		}
+		N->blockend=N->blockptr+readi4((N->blockptr+8));
+		N->readptr=N->blockptr+readi4((N->blockptr+12));
+		if (setjmp(N->savjmp)!=0) goto end;
+	} else {
+		N->readptr=(uchar *)string;
 	}
-	N->readptr=(uchar *)string;
 	if (N->readptr==NULL) goto end;
-	if (N->lastop==OP_POBRACE) block=1; else block=0;
+	if (*N->readptr==OP_POBRACE) {
+		N->readptr++;
+		block=1;
+	} else block=0;
 	while (*N->readptr) {
-		if ((N->brk>0)&&(block)) goto end;
-		nextop();
-		if ((N->lastop==OP_PCBRACE)&&(block)) break;
-		if (OP_ISMATH(N->lastop)) {
-			n_warn(N, fn, "unexpected math op '%s'", N->lastname);
-		} else if (OP_ISPUNC(N->lastop)) {
-			n_warn(N, fn, "unexpected punctuation '%s'", N->lastname);
-		} else if (OP_ISKEY(N->lastop)) {
-			switch (N->lastop) {
+		if (block&&(N->brk>0||N->cnt>0||*N->readptr==OP_PCBRACE)) goto end;
+		if (*N->readptr==OP_PCBRACE) {
+			N->readptr++;
+			goto endstmt;
+		} else if (OP_ISMATH(*N->readptr)) {
+			n_warn(N, __FUNCTION__, "unexpected math op '%s'", n_getsym(N, *N->readptr));
+			N->readptr++;
+		} else if (OP_ISPUNC(*N->readptr)) {
+			n_warn(N, __FUNCTION__, "unexpected punctuation '%s'", n_getsym(N, *N->readptr));
+			N->readptr++;
+		} else if (OP_ISKEY(*N->readptr)) {
+			op=*N->readptr++;
+			switch (op) {
 			case OP_KLOCAL:
-			case OP_KVAR:   n_readvar(N, &N->l, NULL); break;
-			case OP_KGLOB:  n_readvar(N, &N->g, NULL); break;
-			case OP_KIF:    n_if(N);    if (N->ret) goto end; else break;
-			case OP_KFOR:   n_for(N);   if (N->ret) goto end; else break;
-			case OP_KDO:    n_do(N);    if (N->ret) goto end; else break;
-			case OP_KWHILE: n_while(N); if (N->ret) goto end; else break;
-			case OP_KFUNC:  n_readfunction(N); break;
+			case OP_KVAR:   n_readvar(N, &N->l, NULL); goto endstmt;
+			case OP_KGLOB:  n_readvar(N, &N->g, NULL); goto endstmt;
+			case OP_KIF:    n_if(N);    if (N->ret) goto end; else goto endstmt;
+			case OP_KFOR:   n_for(N);   if (N->ret) goto end; else goto endstmt;
+			case OP_KDO:    n_do(N);    if (N->ret) goto end; else goto endstmt;
+			case OP_KWHILE: n_while(N); if (N->ret) goto end; else goto endstmt;
+			case OP_KFUNC:  
+				n_expect(N, __FUNCTION__, OP_LABEL);
+				cobj=nes_setnfunc(N, &N->g, n_getlabel(N, NULL), NULL, 0);
+				nes_linkval(N, cobj, n_getfunction(N));
+				goto endstmt;
 			case OP_KBREAK:
-				if ((!block)&&(!single)) n_error(N, NE_SYNTAX, fn, "return without block");
-				N->brk=nc_isdigit(*N->readptr)?(short int)n_getnumber(N):1;
-				if (*N->readptr==OP_PSEMICOL||*N->readptr==';') nextop();
+				if ((!block)&&(!single)) n_error(N, NE_SYNTAX, __FUNCTION__, "break without block");
+				N->brk=(*N->readptr==OP_NUMDATA)?(int)n_ntoa(N, namebuf, n_getnumber(N), 10, 0):1;
+				if (*N->readptr==OP_PSEMICOL) N->readptr++;
 				goto end;
 			case OP_KCONT:
-				if (!block) n_error(N, NE_SYNTAX, fn, "continue without block");
-				if (*N->readptr==OP_PSEMICOL||*N->readptr==';') nextop();
+				if ((!block)&&(!single)) n_error(N, NE_SYNTAX, __FUNCTION__, "continue without block");
+				N->cnt=1;
+				if (*N->readptr==OP_PSEMICOL) N->readptr++;
 				goto end;
 			case OP_KRET:
 				n_storeval(N, &N->r);
+				if (*N->readptr==OP_PSEMICOL) N->readptr++;
 				N->ret=1;
 				goto end;
 			case OP_KEXIT:
-				N->err=nc_isdigit(*N->readptr)?(short int)n_getnumber(N):0;
-				n_error(N, N->err, fn, "exiting normally");
-			case OP_KELSE:  n_error(N, NE_SYNTAX, fn, "stray else");
+				N->err=(*N->readptr==OP_NUMDATA)?(int)n_ntoa(N, namebuf, n_getnumber(N), 10, 0):0;
+				n_error(N, N->err, __FUNCTION__, "exiting normally");
+			case OP_KELSE:  n_error(N, NE_SYNTAX, __FUNCTION__, "stray else");
 			}
 		} else {
-			if (N->lastname[0]=='\0') n_error(N, NE_SYNTAX, fn, "zero length token");
+			obj_t *pobj=NULL;
+
+			if (*N->readptr!=OP_LABEL) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a label [%d][%s]", *N->readptr, n_getsym(N, *N->readptr));
 			tobj=&N->l;
-			cobj=nes_getobj(N, tobj, N->lastname);
+			n_getlabel(N, namebuf);
+			cobj=nes_getobj(N, tobj, namebuf);
 			while (cobj->val->type==NT_TABLE) {
 				tobj=cobj;
-				if (*N->readptr!=OP_POBRACKET&&*N->readptr!=OP_PDOT&&*N->readptr!='['&&*N->readptr!='.') break;
-				cobj=n_getindex(N, tobj, namebuf);
+				if (*N->readptr!=OP_POBRACKET&&*N->readptr!=OP_PDOT) break;
+				pobj=tobj;
+				cobj=n_readindex(N, tobj, namebuf);
 				if (nes_isnull(cobj)&&(namebuf[0]!=0)) {
 					cobj=nes_setnum(N, tobj, namebuf, 0);
 				}
 			}
-			if (nes_isnull(cobj)) {
-				if (N->lastop!=OP_LABEL) n_error(N, NE_SYNTAX, fn, "expected a label");
-				cobj=nes_setnum(N, tobj, N->lastname, 0);
-			} else if ((cobj->val->type==NT_NFUNC)||(cobj->val->type==NT_CFUNC)) {
-				n_execfunction(N, cobj);
-				if (*N->readptr==OP_PSEMICOL||*N->readptr==';') nextop();
+			ctype=nes_typeof(cobj);
+			if ((ctype==NT_NFUNC)||(ctype==NT_CFUNC)) {
+				n_execfunction(N, cobj, pobj);
+				if (*N->readptr==OP_PSEMICOL) N->readptr++;
 				if (single) break;
 				continue;
 			}
+			if (ctype==NT_NULL) {
+				if (namebuf[0]==0) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a label");
+				cobj=nes_setnum(N, tobj, namebuf, 0);
+			}
 			n_readvar(N, tobj, cobj);
 		}
+endstmt:
+		if (*N->readptr==OP_PSEMICOL) N->readptr++;
 		if (single) break;
 	}
 end:
-	if (jmp==0) N->jmpset=0;
+	if (jmp==0) {
+		N->jmpset=0;
+		if (p) n_free(N, (void *)&p);
+		N->blockend=NULL;
+		N->readptr=NULL;
+	}
 	DEBUG_OUT();
 	return NULL;
+#undef __FUNCTION__
 }
 
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
+
+#include <string.h>
+int nes_writefile(nes_state *N, char *file, uchar *dat)
+{
+#define __FUNCTION__ "nes_writefile"
+	char outfile[512];
+	int fd;
+
+	nc_snprintf(N, outfile, sizeof(outfile), "/tmp/%s", file);
+	n_warn(N, __FUNCTION__, "writing '%s' from [%s]", outfile, file);
+	if ((fd=open(outfile, O_WRONLY|O_BINARY|O_CREAT|O_TRUNC, S_IREAD|S_IWRITE))!=-1) {
+		write(fd, dat, readi4((dat+8)));
+		close(fd);
+		return 1;
+	}
+	return 0;
+#undef __FUNCTION__
+}
+
 int nes_execfile(nes_state *N, char *file)
 {
+#define __FUNCTION__ "nes_execfile"
 	obj_t *cobj=nes_getobj(N, &N->g, "_filepath");
 	char buf[512];
+	char *pfile;
 	struct stat sb;
-	uchar *rawtext;
-	char *p, *pfile;
-	int bl;
-	int fp;
-	int r;
+	uchar *p;
+	uchar *oldbptr=N->blockptr;
+	uchar *oldbend=N->blockend;
+	uchar *oldrptr=N->readptr;
 	short int jmp=N->jmpset;
+	int bl;
+	int fd;
+	int r;
 	int rc;
+	char *o;
 
 	if (jmp==0) {
 		if (setjmp(N->savjmp)==0) {
 			N->jmpset=1;
 		} else {
-			n_free(N, (void *)&rawtext);
-			if (jmp==0) N->jmpset=0;
-			return 0;
+			rc=0;
+			goto end1;
 		}
 	}
 	pfile=file;
+	if ((o=strrchr(pfile, '/'))==NULL) o=pfile; else o++;
 	if ((stat(pfile, &sb)!=0)&&(cobj->val->type==NT_STRING)) {
 		nc_snprintf(N, buf, sizeof(buf), "%s/%s", cobj->val->d.str, pfile);
-		if (stat(buf, &sb)!=0) { rc=-1; goto end; }
+		if (stat(buf, &sb)!=0) { rc=-1; goto end2; }
 		pfile=buf;
 	}
-	if ((fp=open(pfile, O_RDONLY|O_BINARY))==-1) { rc=-1; goto end; }
-	rawtext=n_alloc(N, (sb.st_size+2)*sizeof(char));
-	p=(char *)rawtext;
+	if ((fd=open(pfile, O_RDONLY|O_BINARY))==-1) { rc=-1; goto end2; }
+	N->blockptr=n_alloc(N, sb.st_size+2, 0);
+	p=N->blockptr;
 	bl=sb.st_size;
 	for (;;) {
-		r=read(fp, p, bl);
+		r=read(fd, p, bl);
 		p+=r;
 		bl-=r;
 		if (bl<1) break;
 	}
-	close(fp);
+	close(fd);
 	rc=sb.st_size;
-	rawtext[sb.st_size]='\0';
-	while ((rc>0)&&((rawtext[rc-1]=='\r')||(rawtext[rc-1]=='\n'))) rawtext[--rc]='\0';
-	n_prechew(N, rawtext);
-	nes_exec(N, (char *)rawtext);
-	n_free(N, (void *)&rawtext);
+	N->blockptr[sb.st_size]='\0';
+	p=n_decompose(N, N->blockptr);
+	if (p!=N->blockptr) {
+//		nes_writefile(N, o, p);
+		n_free(N, (void *)&N->blockptr);
+		N->blockptr=p;
+	}
+	N->blockend=N->blockptr+readi4((N->blockptr+8));
+	N->readptr=N->blockptr+readi4((N->blockptr+12));
+	nes_exec(N, (char *)N->readptr);
 	if (N->outbuflen) nl_flush(N);
 	rc=0;
-end:
+end1:
+	n_free(N, (void *)&N->blockptr);
+	N->blockptr=oldbptr;
+	N->blockend=oldbend;
+	N->readptr=oldrptr;
+end2:
 	if (jmp==0) N->jmpset=0;
 	return rc;
+#undef __FUNCTION__
 }
 
 typedef struct {
@@ -260,17 +348,20 @@ nes_state *nes_newstate()
 {
 	FUNCTION list[]={
 		{ "date",	(NES_CFUNC)nl_datetime	},
+		{ "gmtime",	(NES_CFUNC)nl_gmtime	},
+		{ "iname",	(NES_CFUNC)nl_iname	},
 		{ "include",	(NES_CFUNC)nl_include	},
+		{ "localtime",	(NES_CFUNC)nl_gmtime	},
 		{ "print",	(NES_CFUNC)nl_print	},
 		{ "printvar",	(NES_CFUNC)nl_printvar	},
 		{ "runtime",	(NES_CFUNC)nl_runtime	},
-		{ "size",	(NES_CFUNC)nl_size	},
+		{ "sizeof",	(NES_CFUNC)nl_sizeof	},
 		{ "sleep",	(NES_CFUNC)nl_sleep	},
 		{ "system",	(NES_CFUNC)nl_system	},
 		{ "time",	(NES_CFUNC)nl_datetime	},
 		{ "tonumber",	(NES_CFUNC)nl_tonumber	},
 		{ "tostring",	(NES_CFUNC)nl_tostring	},
-		{ "type",	(NES_CFUNC)nl_type	},
+		{ "typeof",	(NES_CFUNC)nl_typeof	},
 		{ "write",	(NES_CFUNC)nl_write	},
 		{ NULL, NULL }
 	};
@@ -300,31 +391,31 @@ nes_state *nes_newstate()
 		{ "icmp",	(NES_CFUNC)nl_strcmp	},
 		{ "ncmp",	(NES_CFUNC)nl_strcmp	},
 		{ "nicmp",	(NES_CFUNC)nl_strcmp	},
+		{ "join",	(NES_CFUNC)nl_strjoin	},
 		{ "len",	(NES_CFUNC)nl_strlen	},
 		{ "split",	(NES_CFUNC)nl_strsplit	},
 		{ "str",	(NES_CFUNC)nl_strstr	},
 		{ "istr",	(NES_CFUNC)nl_strstr	},
 		{ "sub",	(NES_CFUNC)nl_strsub	},
+		{ "tolower",	(NES_CFUNC)nl_strtolower},
+		{ "toupper",	(NES_CFUNC)nl_strtolower},
 		{ NULL, NULL }
 	};
 	nes_state *new_N;
 	obj_t *cobj;
 	short i;
 
-	new_N=n_alloc(NULL, sizeof(nes_state));
-	nc_memset(new_N, 0, sizeof(nes_state));
+	new_N=n_alloc(NULL, sizeof(nes_state), 1);
 	nc_gettimeofday(&new_N->ttime, NULL);
 	srand(new_N->ttime.tv_usec);
 
-	new_N->g.val=n_alloc(new_N, sizeof(val_t));
-	nc_memset(new_N->g.val, 0, sizeof(val_t));
+	new_N->g.val=n_alloc(new_N, sizeof(val_t), 1);
 	new_N->g.val->type=NT_TABLE;
 	new_N->g.val->d.table=NULL;
 	new_N->g.val->refs=1;
 	new_N->g.val->attr|=NST_AUTOSORT;
 
-	new_N->l.val=n_alloc(new_N, sizeof(val_t));
-	nc_memset(new_N->l.val, 0, sizeof(val_t));
+	new_N->l.val=n_alloc(new_N, sizeof(val_t), 1);
 	new_N->l.val->type=NT_TABLE;
 	new_N->l.val->d.table=NULL;
 	new_N->l.val->refs=1;

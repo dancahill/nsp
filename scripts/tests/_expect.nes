@@ -6,21 +6,25 @@ function expect(msg, a, b) {
 	var lm=string.len(msg);
 	var lb=string.len(b);
 
-	print("\t", msg, string.sub(sp, lm, 20-lm));
-	print(" = ", b, " ", string.sub(sp, lb, 27-lb));
-	if (a==b) {
-		if (type(_ENV['TERM'])=='null') {
+	if (_ENV['TERM']==null) {
+		print("\t", msg, string.sub(sp, lm, 20-lm));
+		print(" = ", b, " ", string.sub(sp, lb, 27-lb));
+		if (a==b) {
 			print("[  OK  ]\n");
 		} else {
-			print("[\e[00;32;40m  OK  \e[00m]\n");
+			print("[FAILED] expected [ ", a, " ]\n");
+			global numerrors++;
 		}
 	} else {
-		if (type(_ENV['TERM'])=='null') {
-			print("[FAILED] expected [ ", a, " ]\n");
+		print("\t", msg, string.sub(sp, lm, 20-lm));
+		print(" = \e[01;37;40m", b, "\e[00m ", string.sub(sp, lb, 27-lb));
+		if (a==b) {
+			print("[\e[00;32;40m  OK  \e[00m]\n");
 		} else {
 			print("[\e[00;31;40mFAILED\e[00m] expected [ ", a, " ]\n");
+			global numerrors++;
 		}
-		global errors++;
 	}
+	global numtests++;
 	return;
 }

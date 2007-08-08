@@ -1,7 +1,7 @@
 #!/usr/bin/nesla
-if (type(expect)!='function') include("_expect.nes");
+if (typeof(expect)!='function') include("_expect.nes");
 function testxml() {
-	if (type(xml)!='table') {
+	if (typeof(xml)!='table') {
 		print("SKIPPING XML TESTS\n");
 		return;
 	}
@@ -102,4 +102,3 @@ function testxml() {
 	return;
 }
 testxml();
-io.flush();

@@ -47,3 +47,11 @@ int neslaext_register_all(nes_state *N)
 	nes_setcfunc(N, tobj,  "read",    (NES_CFUNC)neslaext_xml_read);
 	return 0;
 }
+
+#ifdef PIC
+DllExport int neslalib_init(nes_state *N)
+{
+	neslaext_register_all(N);
+	return 0;
+}
+#endif

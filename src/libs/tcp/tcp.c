@@ -79,7 +79,7 @@ int tcp_bind(nes_state *N, char *ifname, unsigned short port)
 	int option;
 	int sock;
 
-	memset((char *)&sin, 0, sizeof(sin));
+	nc_memset((char *)&sin, 0, sizeof(sin));
 	sock=socket(AF_INET, SOCK_STREAM, 0);
 	sin.sin_family=AF_INET;
 	if (strcasecmp("INADDR_ANY", ifname)==0) {
@@ -89,7 +89,7 @@ int tcp_bind(nes_state *N, char *ifname, unsigned short port)
 			n_warn(N, "tcp_bind", "Host lookup error for %s", ifname);
 			return -1;
 		}
-		memmove((char *)&sin.sin_addr, hp->h_addr, hp->h_length);
+		nc_memcpy((char *)&sin.sin_addr, hp->h_addr, hp->h_length);
 	}
 	sin.sin_port=htons(port);
 	option=1;
@@ -129,11 +129,11 @@ int tcp_accept(nes_state *N, int listensock, TCP_SOCKET *sock)
 	sock->socket=clientsock;
 	fromlen=sizeof(host);
 	getsockname(sock->socket, (struct sockaddr *)&host, &fromlen);
-	strncpy(sock->LocalAddr, inet_ntoa(host.sin_addr), sizeof(sock->LocalAddr)-1);
+	nc_strncpy(sock->LocalAddr, inet_ntoa(host.sin_addr), sizeof(sock->LocalAddr)-1);
 	sock->LocalPort=ntohs(host.sin_port);
 	fromlen=sizeof(peer);
 	getpeername(sock->socket, (struct sockaddr *)&peer, &fromlen);
-	strncpy(sock->RemoteAddr, inet_ntoa(peer.sin_addr), sizeof(sock->RemoteAddr)-1);
+	nc_strncpy(sock->RemoteAddr, inet_ntoa(peer.sin_addr), sizeof(sock->RemoteAddr)-1);
 	sock->RemotePort=ntohs(peer.sin_port);
 /*
 	n_warn(N, "tcp_accept", "[%s:%d] tcp_accept: new connection", sock->RemoteAddr, sock->RemotePort);
@@ -165,11 +165,11 @@ static int tcp_conn(nes_state *N, TCP_SOCKET *sock, const struct sockaddr_in *se
 	}
 	fromlen=sizeof(host);
 	getsockname(sock->socket, (struct sockaddr *)&host, &fromlen);
-	strncpy(sock->LocalAddr, inet_ntoa(host.sin_addr), sizeof(sock->LocalAddr)-1);
+	nc_strncpy(sock->LocalAddr, inet_ntoa(host.sin_addr), sizeof(sock->LocalAddr)-1);
 	sock->LocalPort=ntohs(host.sin_port);
 	fromlen=sizeof(peer);
 	getpeername(sock->socket, (struct sockaddr *)&peer, &fromlen);
-	strncpy(sock->RemoteAddr, inet_ntoa(peer.sin_addr), sizeof(sock->RemoteAddr)-1);
+	nc_strncpy(sock->RemoteAddr, inet_ntoa(peer.sin_addr), sizeof(sock->RemoteAddr)-1);
 	sock->RemotePort=ntohs(peer.sin_port);
 	return rc;
 }
@@ -183,8 +183,8 @@ int tcp_connect(nes_state *N, TCP_SOCKET *sock, char *host, unsigned short port,
 		n_warn(N, "tcp_connect", "Host lookup error for %s", host);
 		return -1;
 	}
-	memset((char *)&serv, 0, sizeof(serv));
-	memmove((char *)&serv.sin_addr, hp->h_addr, hp->h_length);
+	nc_memset((char *)&serv, 0, sizeof(serv));
+	nc_memcpy((char *)&serv.sin_addr, hp->h_addr, hp->h_length);
 	serv.sin_family=hp->h_addrtype;
 	serv.sin_port=htons(port);
 	if ((sock->socket=socket(AF_INET, SOCK_STREAM, 0))<0) return -2;
@@ -325,7 +325,7 @@ retry:
 	if (!socket->recvbufsize) {
 		x=sizeof(socket->recvbuf)-socket->recvbufoffset-socket->recvbufsize-2;
 		if (x<1) {
-			memset(socket->recvbuf, 0, sizeof(socket->recvbuf));
+			nc_memset(socket->recvbuf, 0, sizeof(socket->recvbuf));
 			socket->recvbufoffset=0;
 			socket->recvbufsize=0;
 			x=sizeof(socket->recvbuf)-socket->recvbufoffset-socket->recvbufsize-2;
@@ -359,11 +359,11 @@ retry:
 	}
 	if (!lf) {
 		if (socket->recvbufsize>0) {
-			memmove(socket->recvbuf, socket->recvbuf+socket->recvbufoffset, socket->recvbufsize);
-			memset(socket->recvbuf+socket->recvbufsize, 0, sizeof(socket->recvbuf)-socket->recvbufsize);
+			nc_memcpy(socket->recvbuf, socket->recvbuf+socket->recvbufoffset, socket->recvbufsize);
+			nc_memset(socket->recvbuf+socket->recvbufsize, 0, sizeof(socket->recvbuf)-socket->recvbufsize);
 			socket->recvbufoffset=0;
 		} else {
-			memset(socket->recvbuf, 0, sizeof(socket->recvbuf));
+			nc_memset(socket->recvbuf, 0, sizeof(socket->recvbuf));
 			socket->recvbufoffset=0;
 			socket->recvbufsize=0;
 		}
@@ -395,7 +395,7 @@ int tcp_close(nes_state *N, TCP_SOCKET *socket, short int owner_killed)
 /*
  * start nesla tcp script functions here
  */
-int neslatcp_tcp_bind(nes_state *N)
+NES_FUNCTION(neslatcp_tcp_bind)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1); /* host */
 	obj_t *cobj2=nes_getiobj(N, &N->l, 2); /* port */
@@ -409,7 +409,7 @@ int neslatcp_tcp_bind(nes_state *N)
 		n_warn(N, "neslatcp_tcp_bind", "couldn't alloc %d crappy bytes", sizeof(TCP_SOCKET)+1);
 		return -1;
 	}
-	strcpy(bsock->obj_type, "sock4");
+	nc_strncpy(bsock->obj_type, "sock4", 6);
 	bsock->obj_term=(NES_CFREE)tcp_murder;
 	if ((rc=tcp_bind(N, cobj1->val->d.str, (unsigned short)cobj2->val->d.num))<0) {
 		nes_setstr(N, &N->r, "", "tcp error", strlen("tcp error"));
@@ -417,11 +417,14 @@ int neslatcp_tcp_bind(nes_state *N)
 		return -1;
 	}
 	bsock->socket=rc;
-	nes_setcdata(N, &N->r, "", bsock, sizeof(TCP_SOCKET)+1);
+//	nes_setcdata(N, &N->r, "", bsock, sizeof(TCP_SOCKET)+1);
+	nes_setcdata(N, &N->r, "", NULL, 0);
+	N->r.val->d.str=(void *)bsock;
+	N->r.val->size=sizeof(TCP_SOCKET)+1;
 	return 0;
 }
 
-int neslatcp_tcp_accept(nes_state *N)
+NES_FUNCTION(neslatcp_tcp_accept)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	TCP_SOCKET *asock;
@@ -443,11 +446,14 @@ int neslatcp_tcp_accept(nes_state *N)
 		n_free(N, (void *)&asock);
 		return -1;
 	}
-	nes_setcdata(N, &N->r, "", asock, sizeof(TCP_SOCKET)+1);
+//	nes_setcdata(N, &N->r, "", asock, sizeof(TCP_SOCKET)+1);
+	nes_setcdata(N, &N->r, "", NULL, 0);
+	N->r.val->d.str=(void *)asock;
+	N->r.val->size=sizeof(TCP_SOCKET)+1;
 	return 0;
 }
 
-int neslatcp_tcp_open(nes_state *N)
+NES_FUNCTION(neslatcp_tcp_open)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1); /* host */
 	obj_t *cobj2=nes_getiobj(N, &N->l, 2); /* port*/
@@ -467,11 +473,14 @@ int neslatcp_tcp_open(nes_state *N)
 		n_free(N, (void *)&sock);
 		return -1;
 	}
-	nes_setcdata(N, &N->r, "", sock, sizeof(TCP_SOCKET)+1);
+//	nes_setcdata(N, &N->r, "", sock, sizeof(TCP_SOCKET)+1);
+	nes_setcdata(N, &N->r, "", NULL, 0);
+	N->r.val->d.str=(void *)sock;
+	N->r.val->size=sizeof(TCP_SOCKET)+1;
 	return 0;
 }
 
-int neslatcp_tcp_close(nes_state *N)
+NES_FUNCTION(neslatcp_tcp_close)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	TCP_SOCKET *sock;
@@ -485,7 +494,7 @@ int neslatcp_tcp_close(nes_state *N)
 	return 0;
 }
 
-int neslatcp_tcp_read(nes_state *N)
+NES_FUNCTION(neslatcp_tcp_read)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	TCP_SOCKET *sock;
@@ -513,7 +522,7 @@ int neslatcp_tcp_read(nes_state *N)
 	return 0;
 }
 
-int neslatcp_tcp_gets(nes_state *N)
+NES_FUNCTION(neslatcp_tcp_gets)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	TCP_SOCKET *sock;
@@ -533,7 +542,7 @@ int neslatcp_tcp_gets(nes_state *N)
 	return 0;
 }
 
-int neslatcp_tcp_write(nes_state *N)
+NES_FUNCTION(neslatcp_tcp_write)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
@@ -580,3 +589,11 @@ int neslatcp_register_all(nes_state *N)
 	nes_setcfunc(N, tobj,  "write",  (NES_CFUNC)neslatcp_tcp_write);
 	return 0;
 }
+
+#ifdef PIC
+DllExport int neslalib_init(nes_state *N)
+{
+	neslatcp_register_all(N);
+	return 0;
+}
+#endif

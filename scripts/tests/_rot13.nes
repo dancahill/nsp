@@ -1,7 +1,7 @@
 #!/usr/bin/nesla
-if (type(expect)!='function') include("_expect.nes");
+if (typeof(expect)!='function') include("_expect.nes");
 function testrot13() {
-	if (type(rot13)!='function') {
+	if (typeof(rot13)!='function') {
 		print("SKIPPING ROT13 TESTS\n");
 		return;
 	}

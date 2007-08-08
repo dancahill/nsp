@@ -23,144 +23,63 @@
 #define NULL ((void *)0)
 #endif
 
-#define OUTBUFLOWAT	4096
+#ifdef WIN32
+#define DllExport __declspec(dllexport)
+#else
+#define DllExport
+#endif
 
 /* error numbers */
 #define NE_MEM		1
 #define NE_SYNTAX	2
 #define NE_INTERNAL	3
 
-/* ops and cmps */
-#define OP_UNDEFINED    255
-/* punctuation */
-#define	OP_POBRACE	254
-#define	OP_POPAREN	253
-#define	OP_POBRACKET	252
-
-#define	OP_PCBRACE	251
-#define	OP_PCPAREN	250
-#define	OP_PCBRACKET	249
-#define	OP_PCOMMA	248
-#define	OP_PSEMICOL	247
-
-#define	OP_PDOT		246
-#define	OP_PSQUOTE	245
-#define	OP_PDQUOTE	244
-#define	OP_PHASH	243
-/* math ops */
-#define	OP_MEQ		242
-#define	OP_MADD		241
-#define	OP_MSUB		240
-#define	OP_MMUL		239
-#define	OP_MDIV		238
-#define	OP_MADDEQ	237
-#define	OP_MSUBEQ	236
-#define	OP_MMULEQ	235
-#define	OP_MDIVEQ	234
-#define	OP_MADDADD	233
-#define	OP_MSUBSUB	232
-#define	OP_MMOD		231
-#define	OP_MAND		230
-#define	OP_MOR		229
-#define	OP_MXOR		228
-#define	OP_MLAND	227
-#define	OP_MLOR		226
-#define	OP_MLNOT	225
-#define	OP_MCEQ		224
-#define	OP_MCNE		223
-#define	OP_MCLE		222
-#define	OP_MCGE		221
-#define	OP_MCLT		220
-#define	OP_MCGT		219
-/* keywords */
-#define	OP_KBREAK	218
-#define	OP_KCONT	217
-#define	OP_KRET		216
-#define	OP_KFUNC	215
-#define	OP_KGLOB	214
-#define	OP_KLOCAL	213
-#define	OP_KVAR		212
-#define	OP_KIF		211
-#define	OP_KELSE	210
-#define	OP_KFOR		209
-#define	OP_KDO		208
-#define	OP_KWHILE	207
-#define	OP_KEXIT	206
-
-#define OP_LABEL	205
-#define OP_DATA		204
-
-#define OP_ISPUNC(o)	(o>=OP_PHASH&&o<=OP_POBRACE)
-#define OP_ISMATH(o)	(o>=OP_MCGT&&o<=OP_MEQ)
-#define OP_ISKEY(o)	(o>=OP_KEXIT&&o<=OP_KBREAK)
-#define OP_ISEND(o)	(o>=OP_PSEMICOL&&o<=OP_PCBRACE)
-
-#define n_debug(fn)	n_warn(N, fn, "%10s:%d - %d[ %s ]", __FILE__, __LINE__, N->lastop, N->lastname)
-#define sanetest()	/*{ if (N->readptr==NULL) n_error(N, NE_SYNTAX, fn, "NULL readptr"); }*/
-
-#if 0
-#define ADJTIME 22
-#define DEBUG_IN() { \
-	char *tabs="................................"; \
-	struct timeval ttime; \
-	if (N) { \
-		N->ttime.tv_usec+=ADJTIME; \
-		if (N->ttime.tv_usec>1000000) { N->ttime.tv_sec++; N->ttime.tv_usec-=1000000; }; \
-		N->test_depth++; \
-		nc_gettimeofday(&ttime, NULL); \
-		ttime.tv_sec-=N->ttime.tv_sec; ttime.tv_usec-=N->ttime.tv_usec; \
-		if (ttime.tv_usec<0) { ttime.tv_sec--; ttime.tv_usec+=1000000; }; \
-		printf("\n%d.%06d%s[01;34;40m+%s[00m", (int)ttime.tv_sec, (int)ttime.tv_usec, tabs+32-N->test_depth, fn); \
-	} \
-}
-#define DEBUG_OUT() { \
-	char *tabs="................................"; \
-	struct timeval ttime; \
-	if (N) { \
-		N->ttime.tv_usec+=ADJTIME; \
-		if (N->ttime.tv_usec>1000000) { N->ttime.tv_sec++; N->ttime.tv_usec-=1000000; }; \
-		nc_gettimeofday(&ttime, NULL); \
-		ttime.tv_sec-=N->ttime.tv_sec; ttime.tv_usec-=N->ttime.tv_usec; \
-		if (ttime.tv_usec<0) { ttime.tv_sec--; ttime.tv_usec+=1000000; }; \
-		printf("\n%d.%06d%s[01;34;40m-%s (%d)[00m", (int)ttime.tv_sec, (int)ttime.tv_usec, tabs+32-N->test_depth, fn, __LINE__); \
-		N->test_depth--; \
-	} \
-}
-#else
+#define sanetest()	/*{ if (N->readptr==NULL) n_error(N, NE_SYNTAX, __FUNCTION__, "NULL readptr"); }*/
 #define DEBUG_IN()
 #define DEBUG_OUT()
-#endif
 
+/* block.c */
+void     n_skipto       (nes_state *N, const char *fn, unsigned short c);
+void     n_if           (nes_state *N);
+void     n_for          (nes_state *N);
+void     n_do           (nes_state *N);
+void     n_while        (nes_state *N);
+/* compile.c */
+uchar   *n_decompose    (nes_state *N, uchar *rawtext);
+void     n_decompile    (nes_state *N);
 /* exec.c */
-obj_t   *n_execfunction (nes_state *N, obj_t *cobj);
+obj_t   *n_execfunction (nes_state *N, obj_t *cobj, obj_t *pobj);
 /* lib.c */
-int      n_unescape     (nes_state *N, char *src, char *dst, int len);
-int      nl_flush       (nes_state *N);
-int      nl_print       (nes_state *N);
-int      nl_write       (nes_state *N);
-int      nl_fileread    (nes_state *N);
-int      nl_filestat    (nes_state *N);
-int      nl_fileunlink  (nes_state *N);
-int      nl_filewrite   (nes_state *N);
-int      nl_math1       (nes_state *N);
-int      nl_tonumber    (nes_state *N);
-int      nl_tostring    (nes_state *N);
-int      nl_strcat      (nes_state *N);
-int      nl_strcmp      (nes_state *N);
-int      nl_strlen      (nes_state *N);
-int      nl_strsplit    (nes_state *N);
-int      nl_strstr      (nes_state *N);
-int      nl_strsub      (nes_state *N);
-int      nl_datetime    (nes_state *N);
-int      nl_sleep       (nes_state *N);
-int      nl_runtime     (nes_state *N);
-int      nl_include     (nes_state *N);
-int      nl_printvar    (nes_state *N);
-int      nl_size        (nes_state *N);
-int      nl_sort_name   (nes_state *N);
-int      nl_sort_key    (nes_state *N);
-int      nl_type        (nes_state *N);
-int      nl_system      (nes_state *N);
+NES_FUNCTION(nl_flush);
+NES_FUNCTION(nl_print);
+NES_FUNCTION(nl_write);
+NES_FUNCTION(nl_fileread);
+NES_FUNCTION(nl_filestat);
+NES_FUNCTION(nl_fileunlink);
+NES_FUNCTION(nl_filewrite);
+NES_FUNCTION(nl_math1);
+NES_FUNCTION(nl_tonumber);
+NES_FUNCTION(nl_tostring);
+NES_FUNCTION(nl_strcat);
+NES_FUNCTION(nl_strcmp);
+NES_FUNCTION(nl_strjoin);
+NES_FUNCTION(nl_strlen);
+NES_FUNCTION(nl_strsplit);
+NES_FUNCTION(nl_strstr);
+NES_FUNCTION(nl_strsub);
+NES_FUNCTION(nl_strtolower);
+NES_FUNCTION(nl_datetime);
+NES_FUNCTION(nl_gmtime);
+NES_FUNCTION(nl_sleep);
+NES_FUNCTION(nl_runtime);
+NES_FUNCTION(nl_iname);
+NES_FUNCTION(nl_include);
+NES_FUNCTION(nl_printvar);
+NES_FUNCTION(nl_sizeof);
+NES_FUNCTION(nl_sort_name);
+NES_FUNCTION(nl_sort_key);
+NES_FUNCTION(nl_typeof);
+NES_FUNCTION(nl_system);
 /* libc.c */
 #define  nc_isdigit(c)  ((c>='0'&&c<='9')?1:0)
 #define  nc_isalpha(c)  ((c>='A'&&c<='Z')||(c>='a'&&c<='z')?1:0)
@@ -182,34 +101,37 @@ int      nc_strncmp     (const char *s1, const char *s2, int n);
 void    *nc_memset      (void *s, int c, int n);
 
 void     n_error        (nes_state *N, short int err, const char *fname, const char *format, ...);
+void     n_expect       (nes_state *N, const char *fname, uchar op);
 void     n_warn         (nes_state *N, const char *fname, const char *format, ...);
-/* loop.c */
-void     n_if           (nes_state *N);
-void     n_for          (nes_state *N);
-void     n_do           (nes_state *N);
-void     n_while        (nes_state *N);
+/* libc */
+num_t    n_aton         (nes_state *N, const char *str);
+char    *n_ntoa         (nes_state *N, char *str, num_t num, short base, unsigned short dec);
 /* obj.c */
-void    *n_alloc        (nes_state *N, int size);
-void     n_free         (nes_state *N, void **ptr);
+void    *n_alloc        (nes_state *N, int size, short zero);
+void    *n_realloc      (nes_state *N, void **p, int size, short zero);
+void     n_free         (nes_state *N, void **p);
 void     n_copyval      (nes_state *N, obj_t *cobj1, obj_t *cobj2);
 val_t   *n_newval       (nes_state *N, unsigned short type);
 void     n_freeval      (nes_state *N, obj_t *cobj);
-void     n_joinstr      (nes_state *N, obj_t *cobj, char *str, int len);
 obj_t   *n_newiobj      (nes_state *N, int index);
+/* opcode.c */
+short    n_getop        (nes_state *N, char *name);
+char    *n_getsym       (nes_state *N, short op);
+uchar   *n_seekop       (nes_state *N, uchar *readptr, int ops, int sb);
 /* parse.c */
-void     n_skipto       (nes_state *N, unsigned short c);
-short    n_getop        (nes_state *N);
+obj_t   *n_getfunction  (nes_state *N);
+char    *n_getlabel     (nes_state *N, char *buf);
 num_t    n_getnumber    (nes_state *N);
-obj_t   *n_getquote     (nes_state *N);
-obj_t   *n_getindex     (nes_state *N, obj_t *cobj, char *lastname);
-
-void     n_prechew      (nes_state *N, uchar *rawtext);
-
-obj_t   *n_storeval     (nes_state *N, obj_t *cobj);
-obj_t   *n_readfunction (nes_state *N);
+obj_t   *n_getstring    (nes_state *N);
+obj_t   *n_readindex    (nes_state *N, obj_t *cobj, char *lastname);
+obj_t   *n_readtable    (nes_state *N, obj_t *tobj);
 obj_t   *n_readvar      (nes_state *N, obj_t *tobj, obj_t *cobj);
+obj_t   *n_storeval     (nes_state *N, obj_t *cobj);
 
-#define  nextop()       { if (*N->readptr<128) n_getop(N); else { N->lastop=*N->readptr; N->lastptr=N->readptr++; N->lastname[0]=0; } }
-#define  ungetop()      N->readptr=N->lastptr; N->lastop=OP_UNDEFINED; N->lastname[0]=0;
+#define  readi4(ptr)    (int)(ptr[0]+ptr[1]*256+ptr[2]*65536+ptr[3]*16777216)
+#define  readi2(ptr)    (int)(ptr[0]+ptr[1]*256)
+
+#define  writei4(n,ptr) ptr[0]=n&255; ptr[1]=(n>>8)&255; ptr[2]=(n>>16)&255; ptr[3]=(n>>24)&255;
+#define  writei2(n,ptr) ptr[0]=n&255; ptr[1]=(n>>8)&255;
 
 #endif /* libnesla.h */

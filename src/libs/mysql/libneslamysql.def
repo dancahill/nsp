@@ -1,4 +1,0 @@
-LIBRARY		libneslamysql
-VERSION		0.7.0
-EXPORTS
-	neslamysql_register_all

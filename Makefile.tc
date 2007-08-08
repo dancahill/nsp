@@ -1,0 +1,93 @@
+# NullLogic Embedded Scripting Language
+# Borland Turbo C++ Makefile
+# run 'make.exe -f Makefile.tc'
+
+MODEL   = l
+CC      = tcc
+TLIB    = tlib
+TLINK   = tcc
+MAKE    = make -s -f
+NESLITE = .\bin\neslite.exe
+
+all: _libnesla lite deps static_libs cli
+	@echo Run 'make targets' to list more options.
+
+deps:
+	@cd src\libs
+	@..\..\$(NESLITE) autoconf.nes turboc dos
+	@cd ..\..
+
+dirs:
+	@mkdir bin
+	@mkdir lib
+	@mkdir int
+
+# rules for libs
+
+static_libs: _libneslaext _libneslamath
+
+_libnesla: dirs
+	@cd src\libnesla
+	@$(MAKE) Makefile.tc
+	@cd ..\..
+
+_libneslaext:
+	@cd src\libs\ext
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@cd ..\..\..
+
+_libneslamath:
+	@cd src\libs\math
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@cd ..\..\..
+
+# rules for hosts
+
+cli: _libnesla
+	@cd src\hosts\cli
+	@$(MAKE) Makefile.tc
+	@cd ..\..\..
+#	@$(NESLITE) -e "print('\nStandard Interpreter built');var x='gnikrow dna ';for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));print('\n\n');"
+
+lite: _libnesla
+	@cd src\hosts\lite
+	@$(MAKE) Makefile.tc
+	@cd ..\..\..
+#	@$(NESLITE) -e "print('\nMinimal Interpreter built');var x='gnikrow dna ';for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));print('\n\n');"
+
+# rules for everything else
+
+clean: lite
+#	@touch src\config.mak
+	@cd src\libs\ext
+	@..\..\..\$(NESLITE) Makefile.nes clean
+	@cd ..\..\..
+	@cd src\libs\math
+	@..\..\..\$(NESLITE) Makefile.nes clean
+	@cd ..\..\..
+	@cd src\hosts\cli
+	@$(MAKE) MAKEFILE.TC clean
+	@cd ..\..\..
+	@cd src\hosts\lite
+	@$(MAKE) MAKEFILE.TC clean
+	@cd ..\..\..
+	@cd src\libnesla
+	@$(MAKE) MAKEFILE.TC clean
+	@cd ..\..
+	@del bin\*.exe
+	@del lib\*.lib
+#	@if exist "int" rmdir "int"
+
+distclean: clean
+	@del src\config.???
+
+hack:
+	del *.obj
+	tcc -w-par -ml -v- -I..\include -eneslite.exe libnesla\*.c hosts\lite\main.c
+	rem if all else fails, you can build it complete with just the next line by itself
+	tcc -w-par -ml -v- -I..\include -enesla.exe -DHAVE_MATH libnesla\*.c libs\ext\*.c libs\math\*.c hosts\cli\main.c
+	del *.obj
+	nesla.exe -e "var x='\n\ngnikrow dna ';print('Standard Interpreter built');for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));"
+
+test:
+	bin\nesla.exe scripts\tests\test1.nes

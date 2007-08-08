@@ -1,12 +1,10 @@
 #!/usr/bin/nesla
 
 // single line comment
-/*
-multi line comment
-*/
+/* multi line comment */
 
 function vars() {
-	if (type(_SERVER)=='table') {
+	if (typeof(_SERVER)=='table') {
 		print("</FONT></PRE>");
 		print(
 			"<SCRIPT LANGUAGE=JavaScript>\n<!--\n",
@@ -25,15 +23,18 @@ function vars() {
 	print("global _GLOBALS = ");
 	printvar(_GLOBALS);
 	print(";\n");
-	if (type(_SERVER)=='table') print("</FONT></PRE></DIV>\n");
+	if (typeof(_SERVER)=='table') print("</FONT></PRE></DIV>\n");
 	return;
 }
 
 function main() {
+	global numtests=0;
+	global numerrors=0;
+
 	function subf() { return 42; }
 	include("../samples/_cards.nes");
 	include("_expect.nes");
-	if (type(_SERVER)=='table') {
+	if (typeof(_SERVER)=='table') {
 		print("<HTML><HEAD><TITLE>NESLA WEB TEST</TITLE></HEAD><BODY>");
 		print("<H1>NESLA WEB TEST</H1><PRE><FONT SIZE=2>");
 	}
@@ -59,53 +60,47 @@ function main() {
 	print("-------------------------------------------------------------------\n");
 	include("_rot13.nes");
 	print("-------------------------------------------------------------------\n");
+	include("_size.nes");
+	print("-------------------------------------------------------------------\n");
 	include("_xml.nes");
+	print("-------------------------------------------------------------------\n");
+	include("_indexes.nes");
 	print("-------------------------------------------------------------------\n");
 	include("_tcp.nes");
 	print("-------------------------------------------------------------------\n");
 //	include("_ldap.nes");
-	print("-------------------------------------------------------------------\n");
+//	print("-------------------------------------------------------------------\n");
 //	include("_odbc.nes");
-	print("-------------------------------------------------------------------\n");
-	include("_indexes.nes");
-	print("-------------------------------------------------------------------\n");
-	expect("size(CARDS)", 52, size(CARDS));
-	global CARDS={};
-	expect("size(CARDS)", 0, size(CARDS));
-	if (type(sqlquery)=='function') Q=sqlquery("SELECT * FROM nullgs_sessions");
-	if (type(dirlist)=='function') D=dirlist(_filepath);
-	print("\t[", date(), " ", time(), "]\n");
-	print("\truntime = ", runtime(), " seconds\n");
-	print("-------------------------------------------------------------------\n");
-	print("FINISHED TESTS\n");
-	print("-------------------------------------------------------------------\n");
-	expect("total errors", 0, tonumber(errors));
-
+//	print("-------------------------------------------------------------------\n");
 	if (_ENV['HOME']!=null) {
-		f=_ENV['HOME']+"/test.nes";
-		if (type(file.stat(f))=='table') {
-			print("-------------------------------------------------------------------\n");
-			print("running ", f, "\n");
+		var f=_ENV['HOME']+"/test.nes";
+		if (typeof(file.stat(f))=='table') {
+			print("\trunning ", f, "\n");
 			include(f);
 			print("-------------------------------------------------------------------\n");
 		}
 	}
+	if (typeof(sqlquery)=='function') Q=sqlquery("SELECT * FROM nullgs_sessions");
+	if (typeof(dirlist)=='function') D=dirlist(_filepath);
+	print("\tFINISHED TESTS       = "+runtime()+" seconds\n");
+	print("\ttotal tests          = "+tostring(numtests)+"\n");
+	expect("total errors", 0, tonumber(numerrors));
+	print("-------------------------------------------------------------------\n");
 
 	global _ARGS={};
 	global _ENV={};
+	global decomped_script=null;
 	
 	vars();
-	if (type(_SERVER)=='table') print("</BODY></HTML>");
+	if (typeof(_SERVER)=='table') print("</BODY></HTML>");
 	return;
 }
 main();
 
-# below is code to read your /etc/passwd file into a table
+// below is code to read your /etc/passwd file into a table
 /*
 x=file.read('/etc/passwd');
-global y=string.split(x, '\n');
-for (i=0;type(y[i])!='null';i++) {
-	y[i]=string.split(y[i], ':');
-}
-printvar(_GLOBALS);
+p=string.split(x, '\n');
+for (i=0;p[i]!=null;i++) p[i]=string.split(p[i], ':');
+printvar(p);
 */

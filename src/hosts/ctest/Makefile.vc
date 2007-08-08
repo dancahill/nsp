@@ -1,7 +1,7 @@
 # Makefile for NullLogic Embedded Scripting Language
 
-OBJDIR  = ../../../obj
-INTDIR  = $(OBJDIR)/cli
+OBJDIR  = ..\..\..\obj
+INTDIR  = $(OBJDIR)\cli
 
 CC            = cl.exe /nologo
 LINK          = link.exe
@@ -9,11 +9,11 @@ MAKE          = nmake.exe /C /S /Y /F
 
 BIN_CFLAGS    = /W3 /O2 /ML /I "../../../include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /FD /c
 BIN_LDFLAGS   = /subsystem:console /pdb:none /machine:I386 libc.lib ../../../lib/libnesla.lib ../../../lib/libneslamath.lib ../../../lib/libneslaext.lib ../../../lib/libneslatcp.lib
-BIN_TARGETDIR = ../../../bin
+BIN_TARGETDIR = ..\..\..\bin
 
 CFLAGS  = $(BIN_CFLAGS)
-OBJECTS = $(INTDIR)/main.obj
-TARGET  = $(BIN_TARGETDIR)/ctest.exe
+OBJECTS = $(INTDIR)\main.obj
+TARGET  = $(BIN_TARGETDIR)\ctest.exe
 
 all: _dirs _nesla
 
@@ -26,8 +26,10 @@ _nesla: $(OBJECTS)
 	$(LINK) $(BIN_LDFLAGS) /out:$(TARGET) $(OBJECTS)
 
 clean:
-	@-erase "$(TARGET)"
-	@-erase "$(INTDIR)/*"
+	@-erase "$(TARGET)" 2>nul
+	@-erase "$(INTDIR)\*.obj" 2>nul
+	@-erase "$(INTDIR)\*.idb" 2>nul
+	@if exist "$(INTDIR)" rmdir "$(INTDIR)"
 
 .c{$(INTDIR)}.obj:
 	$(CC) $(CFLAGS) $<

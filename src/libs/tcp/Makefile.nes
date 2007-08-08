@@ -1,0 +1,18 @@
+#!../../../bin/neslite
+include("../../config.nes");
+include("../makelib.nes");
+CFLAGS  = CFLAGS+" -I../../../include ";
+if (CC=='cl.exe') CFLAGS=CFLAGS+"/c /Fo";
+else if (CC=='tcc.exe') CFLAGS=CFLAGS+"-c -o";
+else CFLAGS=CFLAGS+"-c -o ";
+OBJECTS = "http.o ssl.o tcp.o";
+TNAME   = "libneslatcp";
+if (cmd==null) if (_ARGS[2]=='clean') cmd='clean'; else cmd='build';
+if (cmd=='build') {
+	print("building tcp lib\n");
+	if (CC=='cl.exe') file.write("dlldefs.def", "LIBRARY\t\tlibneslatcp\r\nVERSION\t\t"+_version_+"\r\nEXPORTS\r\n\tneslatcp_register_all\r\n");
+	build_objs(CC, CFLAGS, OBJECTS, _LINKAGE_, TNAME);
+	build_lib(CC, TNAME, OBJECTS, _LINKAGE_, TNAME);
+} else if (cmd=='clean') {
+	build_clean(TNAME, OBJECTS);
+}

@@ -123,7 +123,7 @@ end:
 	return;
 }
 
-int neslaext_sort_byname(nes_state *N)
+NES_FUNCTION(neslaext_sort_byname)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
@@ -139,7 +139,7 @@ int neslaext_sort_byname(nes_state *N)
 	return 0;
 }
 
-int neslaext_sort_bykey(nes_state *N)
+NES_FUNCTION(neslaext_sort_bykey)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	obj_t *cobj2=nes_getiobj(N, &N->l, 2);

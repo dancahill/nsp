@@ -29,7 +29,7 @@
  * someone who actually knows ldap may want to replace
  * this with code that doesn't suck quite so much...
  */
-int neslaldap_search(nes_state *N)
+NES_FUNCTION(neslaldap_search)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1); /* host   */
 	obj_t *cobj2=nes_getiobj(N, &N->l, 2); /* port   */
@@ -78,17 +78,17 @@ int neslaldap_search(nes_state *N)
 	nc_memset((void *)&qobj, 0, sizeof(obj_t));
 	nes_linkval(N, &qobj, NULL);
 	qobj.val->type=NT_TABLE;
-	qobj.val->attr^=NST_AUTOSORT;
+	qobj.val->attr&=~NST_AUTOSORT;
 	numtuples=ldap_count_entries(ld, res);
 	nes_setnum(NULL, &qobj, "_tuples", numtuples);
 	robj=nes_settable(NULL, &qobj, "_rows");
-	robj->val->attr^=NST_AUTOSORT;
+	robj->val->attr&=~NST_AUTOSORT;
 	numtuples=0;
 	for (e=ldap_first_entry(ld, res); e!=NULL; e=ldap_next_entry(ld, e)) {
 		memset(name, 0, sizeof(name));
 		sprintf(name, "%d", numtuples++);
 		tobj=nes_settable(NULL, robj, name);
-		tobj->val->attr^=NST_AUTOSORT;
+		tobj->val->attr&=~NST_AUTOSORT;
 		dn=ldap_get_dn(ld, e);
 		nes_setstr(NULL, tobj, "dn", dn, strlen(dn));
 		ldap_memfree(dn);
@@ -131,5 +131,13 @@ int neslaldap_register_all(nes_state *N)
 	nes_setcfunc(N, tobj, "search",  (NES_CFUNC)neslaldap_search);
 	return 0;
 }
+
+#ifdef PIC
+DllExport int neslalib_init(nes_state *N)
+{
+	neslaldap_register_all(N);
+	return 0;
+}
+#endif
 
 #endif /* HAVE_LDAP */
