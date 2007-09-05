@@ -71,11 +71,13 @@
 #define	OP_KFOR		209 /* 0xD1 */
 #define	OP_KDO		208 /* 0xD0 */
 #define	OP_KWHILE	207 /* 0xCF */
-#define	OP_KEXIT	206 /* 0xCE */
+#define	OP_KTRY		206 /* 0xCE */
+#define	OP_KCATCH	205 /* 0xCD */
+#define	OP_KEXIT	204 /* 0xCC */
 
-#define OP_LABEL	205 /* 0xCD */
-#define OP_STRDATA	204 /* 0xCC */
-#define OP_NUMDATA	203 /* 0xCB */
+#define OP_LABEL	203 /* 0xCB */
+#define OP_STRDATA	202 /* 0xCA */
+#define OP_NUMDATA	201 /* 0xC9 */
 
 #define OP_ISPUNC(o)	(o>=OP_PHASH&&o<=OP_POBRACE)
 #define OP_ISMATH(o)	(o>=OP_MCGT&&o<=OP_MEQ)

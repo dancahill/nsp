@@ -17,10 +17,12 @@
 */
 #ifdef WIN32
 #include "nesla/nesla.h"
+#include "nesla/libcrypt.h"
 #include "nesla/libdl.h"
 #include "nesla/libext.h"
 #include "nesla/libmath.h"
 #include "nesla/libodbc.h"
+#include "nesla/libregex.h"
 #include "nesla/libtcp.h"
 #include "nesla/libwinapi.h"
 #include "nesla/libzip.h"
@@ -344,7 +346,8 @@ NES_FUNCTION(nes_traynotice)
 	TrayIcon(1);
 	x=GetSystemMetrics(SM_CXSCREEN);
 	y=GetSystemMetrics(SM_CYSCREEN);
-	w=240; h=120;
+	/* w=240; h=120; */
+	w=220; h=110;
 	/* how do we get the height of the taskbar? */
 	tbh=30;
 	memset(&WndClsEx, 0, sizeof(WndClsEx));
@@ -437,10 +440,12 @@ void init_stuff(nes_state *N)
 	struct stat sb;
 
 	N->debug=0;
+	neslacrypto_register_all(N);
 	nesladl_register_all(N);
 	neslaext_register_all(N);
 	neslamath_register_all(N);
 	neslaodbc_register_all(N);
+	neslaregex_register_all(N);
 	neslatcp_register_all(N);
 	neslawinapi_register_all(N);
 	neslazip_register_all(N);

@@ -50,7 +50,7 @@ A:HOVER  { background-color: #E0E0FF; }
 ");
 	exit;
 }
-if (typeof(_POST['PASSWORD'])!='null') {
+if (_POST['PASSWORD']!=null) {
 	_GET['DOWNLOAD']='';
 	if (_POST['PASSWORD']==MASTERPASSWORD) {
 		#printf("Set-Cookie: wminfo=%.2s:%.4s:%s:%s:%s; path=%s/; expires=%s\r\n");
@@ -63,14 +63,14 @@ if (typeof(_POST['PASSWORD'])!='null') {
 	}
 	exit;
 }
-if (typeof(_COOKIE['NESLACMS'])=='null') {
+if (_COOKIE['NESLACMS']==null) {
 	_GET['DOWNLOAD']='';
 	dologin();
 }
 global MASTERPASSWORD="********";
 
 #if user is logged in, and download request exists, process that instead
-if (typeof(_GET['DOWNLOAD'])!='null') {
+if (_GET['DOWNLOAD']!=null) {
 	if (_GET['DOWNLOAD']!='') {
 		sendfile(_GET['DOWNLOAD']);
 		exit;
@@ -81,7 +81,7 @@ if (_SERVER['REQUEST_METHOD']=='POST') {
 	var opt=_POST['OPT'];
 	if (opt=='browse') {
 		# limit browsing to docroot
-		if (typeof(_SERVER['DOCUMENT_ROOT'])=='null') {
+		if (_SERVER['DOCUMENT_ROOT']==null) {
 			print("you have no docroot");
 		} else {
 			if (string.ncmp(_SERVER['DOCUMENT_ROOT'], _POST['PATH'], string.len(_SERVER['DOCUMENT_ROOT']))!=0) {
@@ -93,7 +93,7 @@ if (_SERVER['REQUEST_METHOD']=='POST') {
 		dir=dirlist(_POST['PATH']);
 		x=string.split(_POST['PATH'], "/");
 		for (i=0;;i++) {
-			if (typeof(x[i])=='null') break;
+			if (x[i]==null) break;
 		}
 		parent="";
 		for (j=0;j<i-1;j++) {
@@ -102,7 +102,7 @@ if (_SERVER['REQUEST_METHOD']=='POST') {
 		}
 		if (parent=='') parent='/';
 		# limit browsing to docroot
-		if (typeof(_SERVER['DOCUMENT_ROOT'])=='null') {
+		if (_SERVER['DOCUMENT_ROOT']==null) {
 			print("you have no docroot");
 		} else {
 			if (string.ncmp(_SERVER['DOCUMENT_ROOT'], parent, string.len(_SERVER['DOCUMENT_ROOT']))!=0) {
@@ -122,7 +122,7 @@ if (_SERVER['REQUEST_METHOD']=='POST') {
 				print("<TD ALIGN=left  NOWRAP STYLE='border-style:solid'>&nbsp;</TD>");
 				print("<TD ALIGN=left  NOWRAP STYLE='border-style:solid' WIDTH=66%>dir - <A HREF='javascript:newparent(\"", _POST['PATH']+'/'+x, "\");'>", x, "/</A></TD>");
 				print("<TD ALIGN=right NOWRAP STYLE='border-style:solid'>&nbsp;</TD>");
-				print("<TD ALIGN=right NOWRAP STYLE='border-style:solid'>", date(dir[x].mtime), " ", time(dir[x].mtime), "</TD>");
+				print("<TD ALIGN=right NOWRAP STYLE='border-style:solid'>", time.sqldate(dir[x].mtime), " ", time.sqltime(dir[x].mtime), "</TD>");
 				print("</TR>\n");
 			}
 		}
@@ -141,7 +141,7 @@ if (_SERVER['REQUEST_METHOD']=='POST') {
 #				print("<TD ALIGN=left  NOWRAP STYLE='border-style:solid' WIDTH=66%>file - <A HREF='javascript:download(\"", _POST['PATH']+'/'+x, "\");'>", x, "</A></TD>");
 				print("<TD ALIGN=left  NOWRAP STYLE='border-style:solid' WIDTH=66%>file - <A HREF=\"", _SERVER['SCRIPT_NAME'], "?download=", _POST['PATH']+'/'+x, "\" TARGET=\"_blank\">", x, "</A></TD>");
 				print("<TD ALIGN=right NOWRAP STYLE='border-style:solid'>", math.ceil(dir[x].size/1024), " KiB</TD>");
-				print("<TD ALIGN=right NOWRAP STYLE='border-style:solid'>", date(dir[x].mtime), " ", time(dir[x].mtime), "</TD>");
+				print("<TD ALIGN=right NOWRAP STYLE='border-style:solid'>", time.sqldate(dir[x].mtime), " ", time.sqltime(dir[x].mtime), "</TD>");
 				print("</TR>\n");
 			}
 		}
@@ -158,7 +158,7 @@ if (_SERVER['REQUEST_METHOD']=='POST') {
 			print(x);
 		}
 	} else if (opt=='save') {
-		if (typeof(_POST['ATTACHMENT1_SIZE'])!='null') {
+		if (_POST['ATTACHMENT1_SIZE']!=null) {
 			x=file.write(_POST['EDITNAME']+"-new", _POST['ATTACHMENT1']);
 		} else {
 			x=file.write(_POST['EDITNAME']+"-new", _POST['EDITWINDOW']);

@@ -16,7 +16,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nesla/libnesla.h"
-#include "nesla/libext.h"
+#include "nesla/libcrypt.h"
 #include <fcntl.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -62,7 +62,7 @@ typedef struct MD5Context MD5_CONTEXT;
 * will fill a supplied 16-byte array with the digest.
 */
 
-void md5_transform(uint32 buf[4], uint32 const in[16]);
+static void md5_transform(uint32 buf[4], uint32 const in[16]);
 
 #ifndef HIGHFIRST
 #define byteReverse(buf, len)	/* Nothing */
@@ -90,7 +90,7 @@ static void byteReverse(unsigned char *buf, unsigned longs)
 * Start MD5 accumulation.  Set bit count to 0 and buffer to mysterious
 * initialization constants.
 */
-void md5_init(struct MD5Context *ctx)
+static void md5_init(struct MD5Context *ctx)
 {
 	ctx->buf[0]=0x67452301;
 	ctx->buf[1]=0xefcdab89;
@@ -104,7 +104,7 @@ void md5_init(struct MD5Context *ctx)
 * Update context to reflect the concatenation of another buffer full
 * of bytes.
 */
-void md5_update(struct MD5Context *ctx, unsigned char const *buf, unsigned len)
+static void md5_update(struct MD5Context *ctx, unsigned char const *buf, unsigned len)
 {
 	uint32 t;
 
@@ -146,7 +146,7 @@ void md5_update(struct MD5Context *ctx, unsigned char const *buf, unsigned len)
 * Final wrapup - pad to 64-byte boundary with the bit pattern
 * 1 0* (64-bit count of bits processed, MSB-first)
 */
-void md5_final(unsigned char digest[16], struct MD5Context *ctx)
+static void md5_final(struct MD5Context *ctx, unsigned char digest[16])
 {
 	unsigned count;
 	unsigned char *p;
@@ -197,7 +197,7 @@ void md5_final(unsigned char digest[16], struct MD5Context *ctx)
 * reflect the addition of 16 longwords of new data.  MD5Update blocks
 * the data and converts bytes into longwords for this routine.
 */
-void md5_transform(uint32 buf[4], uint32 const in[16])
+static void md5_transform(uint32 buf[4], uint32 const in[16])
 {
 	register uint32 a, b, c, d;
 
@@ -294,7 +294,7 @@ static void _crypt_to64(char *s, unsigned long v, int n)
 	}
 }
 
-char *md5_crypt(char *cpass, char *pw, char *salt)
+static char *md5_crypt(char *cpass, char *pw, char *salt)
 {
 	char *magic="$1$";
 	char *sp,*ep, *p;
@@ -323,7 +323,7 @@ char *md5_crypt(char *cpass, char *pw, char *salt)
 	md5_update(&ctx1,(unsigned char *)pw,strlen(pw));
 	md5_update(&ctx1,(unsigned char *)sp,sl);
 	md5_update(&ctx1,(unsigned char *)pw,strlen(pw));
-	md5_final(final,&ctx1);
+	md5_final(&ctx1, final);
 	for (pl = strlen(pw); pl > 0; pl -= MD5_SIZE)
 		md5_update(&ctx,final,pl>MD5_SIZE ? MD5_SIZE : pl);
 	/* Don't leave anything around in vm they could use. */
@@ -339,7 +339,7 @@ char *md5_crypt(char *cpass, char *pw, char *salt)
 	strcpy(cpass, magic);
 	strncat(cpass,sp,sl);
 	strcat(cpass,"$");
-	md5_final(final,&ctx);
+	md5_final(&ctx, final);
 	/*
 	 * and now, just to make sure things don't run too fast
 	 * On a 60 Mhz Pentium this takes 34 msec, so you would
@@ -362,7 +362,7 @@ char *md5_crypt(char *cpass, char *pw, char *salt)
 			md5_update(&ctx1,final,MD5_SIZE);
 		else
 			md5_update(&ctx1,(unsigned char *)pw,strlen(pw));
-		md5_final(final,&ctx1);
+		md5_final(&ctx1, final);
 	}
 	p = cpass + strlen(cpass);
 	l = (final[ 0]<<16) | (final[ 6]<<8) | final[12];
@@ -404,11 +404,11 @@ int main(int argc, char *argv[])
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
-NES_FUNCTION(neslaext_md5_file)
+NES_FUNCTION(neslacrypto_md5_file)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	char *hex="0123456789abcdef";
-	unsigned char buffer[4096];
+	unsigned char buffer[2048];
 	unsigned char md[MD5_SIZE];
 	char token[64]; /* should only need 32+'\0' */
 	MD5_CONTEXT c;
@@ -426,15 +426,15 @@ NES_FUNCTION(neslaext_md5_file)
 		if (i<1) break;
 		md5_update(&c, buffer, i);
 	}
-	md5_final(&(md[0]),&c);
+	md5_final(&c, md);
+	close(fd);
 	memset(token, 0, sizeof(token));
 	for (i=0;i<MD5_SIZE;i++) { token[i*2]=hex[md[i]>>4]; token[i*2+1]=hex[md[i]&15]; }
-	close(fd);
 	nes_setstr(N, &N->r, "", token, strlen(token));
 	return 0;
 }
 
-NES_FUNCTION(neslaext_md5_string)
+NES_FUNCTION(neslacrypto_md5_string)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	char *hex="0123456789abcdef";
@@ -446,14 +446,14 @@ NES_FUNCTION(neslaext_md5_string)
 	if ((cobj1->val->type!=NT_STRING)||(cobj1->val->size<1)) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
 	md5_init(&c);
 	md5_update(&c, (uchar *)cobj1->val->d.str, cobj1->val->size);
-	md5_final(&(md[0]),&c);
+	md5_final(&c, &(md[0]));
 	memset(token, 0, sizeof(token));
 	for (i=0;i<MD5_SIZE;i++) { token[i*2]=hex[md[i]>>4]; token[i*2+1]=hex[md[i]&15]; }
 	nes_setstr(N, &N->r, "", token, strlen(token));
 	return 0;
 }
 
-NES_FUNCTION(neslaext_md5_passwd)
+NES_FUNCTION(neslacrypto_md5_passwd)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	obj_t *cobj2=nes_getiobj(N, &N->l, 2);

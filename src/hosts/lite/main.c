@@ -79,6 +79,19 @@ static void setsigs(void)
 	return;
 }
 
+#define striprn(s) { int n=strlen(s)-1; while (n>-1&&(s[n]=='\r'||s[n]=='\n')) s[n--]='\0'; }
+
+static NES_FUNCTION(neslib_io_gets)
+{
+	char buf[1024];
+
+	flush(N);
+	fgets(buf, sizeof(buf)-1, stdin);
+	striprn(buf);
+	nes_setstr(N, &N->r, "", buf, -1);
+	return 0;
+}
+
 static void preppath(nes_state *N, char *name)
 {
 	char buf[1024];
@@ -162,6 +175,8 @@ int main(int argc, char *argv[])
 		sprintf(tmpbuf, "%d", i);
 		nes_setstr(N, tobj, tmpbuf, argv[i], strlen(argv[i]));
 	}
+	tobj=nes_settable(N, &N->g, "io");
+	nes_setcfunc(N, tobj, "gets", (NES_CFUNC)neslib_io_gets);
 	for (i=1;i<argc;i++) {
 		if (argv[i]==NULL) break;
 		if (argv[i][0]=='-') {
@@ -193,8 +208,7 @@ int main(int argc, char *argv[])
 	}
 err:
 	if (N->err) {
-		printf("errno=%d (%d)(0x%04X) :: \r\n%s", N->err, N->warnings, N->readptr-N->blockptr, N->errbuf);
-//		n_decompile(N);
+		printf("errno=%d (%d) :: \r\n%s", N->err, N->warnings, N->errbuf);
 	}
 	nes_endstate(N);
 	return 0;

@@ -44,6 +44,7 @@ void     n_if           (nes_state *N);
 void     n_for          (nes_state *N);
 void     n_do           (nes_state *N);
 void     n_while        (nes_state *N);
+void     n_try          (nes_state *N);
 /* compile.c */
 uchar   *n_decompose    (nes_state *N, uchar *rawtext);
 void     n_decompile    (nes_state *N);
@@ -68,11 +69,13 @@ NES_FUNCTION(nl_strsplit);
 NES_FUNCTION(nl_strstr);
 NES_FUNCTION(nl_strsub);
 NES_FUNCTION(nl_strtolower);
-NES_FUNCTION(nl_datetime);
+NES_FUNCTION(nl_sqltime);
+NES_FUNCTION(nl_time);
 NES_FUNCTION(nl_gmtime);
 NES_FUNCTION(nl_sleep);
 NES_FUNCTION(nl_runtime);
 NES_FUNCTION(nl_iname);
+NES_FUNCTION(nl_ival);
 NES_FUNCTION(nl_include);
 NES_FUNCTION(nl_printvar);
 NES_FUNCTION(nl_sizeof);
@@ -133,5 +136,7 @@ obj_t   *n_storeval     (nes_state *N, obj_t *cobj);
 
 #define  writei4(n,ptr) ptr[0]=n&255; ptr[1]=(n>>8)&255; ptr[2]=(n>>16)&255; ptr[3]=(n>>24)&255;
 #define  writei2(n,ptr) ptr[0]=n&255; ptr[1]=(n>>8)&255;
+
+#define striprn(s) { int n=strlen(s)-1; while (n>-1&&(s[n]=='\r'||s[n]=='\n')) s[n--]='\0'; }
 
 #endif /* libnesla.h */

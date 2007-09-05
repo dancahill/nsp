@@ -11,8 +11,7 @@ function testrot13() {
 	expect("rot13(rx.p)", "123NOPXYZABCKLM", rot13(rx.p));
 	expect("rot13(ry.e)", "123abcklmnopxyz", rot13(ry.e));
 	expect("rot13(ry.p)", "123nopxyzabcklm", rot13(ry.p));
-#	local joke = "Nakvrgl, a.: Gur svefg gvzr lbh pna'g qb vg n frpbaq gvzr.\aCnavp, a.  : Gur frpbaq gvzr lbh pna'g qb vg gur svefg gvzr.";
-#	print("\n", rot13(joke), "\n");
+//	print(rot13("\nNakvrgl, a.: Gur svefg gvzr lbh pna'g qb vg n frpbaq gvzr.\nCnavp, a.  : Gur frpbaq gvzr lbh pna'g qb vg gur svefg gvzr.\n"));
 	return;
 }
 testrot13();

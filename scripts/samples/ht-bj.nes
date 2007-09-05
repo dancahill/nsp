@@ -81,14 +81,14 @@ function prepcards() {
 		global cv = { cardval(c[0]), cardval(c[1]), null, null, null };
 		global opt = "";
 	}
-	global dt=dv[0]+dv[1]+dv[2]+dv[3]+dv[4];
-	global ct=cv[0]+cv[1]+cv[2]+cv[3]+cv[4];
+	global dt=tonumber(dv[0])+tonumber(dv[1])+tonumber(dv[2])+tonumber(dv[3])+tonumber(dv[4]);
+	global ct=tonumber(cv[0])+tonumber(cv[1])+tonumber(cv[2])+tonumber(cv[3])+tonumber(cv[4]);
 	if ((ct>21)&&(cv[4]==11)) cv[4]=1;
 	if ((ct>21)&&(cv[3]==11)) cv[3]=1;
 	if ((ct>21)&&(cv[2]==11)) cv[2]=1;
 	if ((ct>21)&&(cv[1]==11)) cv[1]=1;
 	if ((ct>21)&&(cv[0]==11)) cv[0]=1;
-	global ct=cv[0]+cv[1]+cv[2]+cv[3]+cv[4];
+	global ct=tonumber(cv[0])+tonumber(cv[1])+tonumber(cv[2])+tonumber(cv[3])+tonumber(cv[4]);
 	return;
 }
 
@@ -103,7 +103,7 @@ function printredraw() {
 }
 
 function main() {
-	if (typeof(_SERVER['REQUEST_METHOD'])=='null') {
+	if (_SERVER['REQUEST_METHOD']==null) {
 		global _SERVER = { REQUEST_METHOD="GET", SCRIPT_NAME="/nesla/blah" }
 	} # this is a debug block
 	if (typeof(_SESSION)!='table') global _SESSION = { };
@@ -169,7 +169,6 @@ function main() {
 	print("</FORM>\n");
 	print("wins:", _SESSION['BJ'].won, " - losses:", _SESSION['BJ'].lost, "<BR>\n");
 	print("runtime = ", runtime(), " seconds\n");
-//	CARDS=null;print("<PRE>");printvar(_GLOBALS);print("</PRE>");
 	if (_SERVER['REQUEST_METHOD']!="POST") {
 		print("</SPAN>\n");
 		print("</CENTER>\n</BODY>\n</HTML>\n");

@@ -17,6 +17,7 @@ function testtcp() {
 		return;
 	}
 	function test_http() {
+		print("\ttrying http://localhost:80/\n");
 		sock=tcp.open("localhost", 80, 0);
 		if (typeof(sock)!='sock4') {
 			print("can't connect to http server\n");
@@ -44,6 +45,38 @@ function testtcp() {
 			i=tcp.read(sock);
 			if (i=="") break;
 //			print("read body :\n", i, "\n");
+		}
+		tcp.close(sock);
+		io.flush();
+		return;
+	}
+	function test_https() {
+		print("\ttrying https://localhost:443/\n");
+		sock=tcp.open("localhost", 443, true);
+		if (typeof(sock)!='sock4') {
+			print("can't connect to http server\n");
+			return;
+		}
+		o=tcp.write(sock, "GET / HTTP/1.0\r\n\r\n");
+//		print("\twrote ", o, " bytes\n");
+		i=tcp.gets(sock);
+		print("\t["+i+"]\n");
+//		print("\nread: "+i+"");
+		io.flush();
+		while (1) {
+			i=tcp.gets(sock);
+			if (typeof(i)!='string') break;
+			if (i=="") break;
+			i=string.join(string.split(i, "<"), "&lt;");
+//			print("\nread head : "+i+"");
+		}
+		io.flush();
+		while (1) {
+			i=tcp.read(sock);
+			if (typeof(i)!='string') break;
+			if (sizeof(i)==0) break;
+			i=string.join(string.split(i, "<"), "&lt;");
+//			print("\nread body :", i, "\n");
 		}
 		tcp.close(sock);
 		io.flush();
@@ -188,7 +221,8 @@ function testtcp() {
 		expect("status",     "200",   status[1]);
 		if (tonumber(status[1])==200) {
 			X=xml.read(ht.body);
-			expect("xml.read(...)", "NullLogic - NESLA", X['HTML'][0]['HEAD'][0]['TITLE'][0]['value']);
+//			expect("xml.read(...)", "NullLogic - NESLA", X['HTML'][0]['HEAD'][0]['TITLE'][0]['value']);
+			expect("xml.read(...)", "NullLogic - NESLA", X.HTML.HEAD.TITLE.value);
 		}
 		print("\tsucking http://nesla.sourceforge.net/nesla/version.php\n");
 		ht=http.get(0, "nesla.sourceforge.net", 80, "/nesla/version.php");
@@ -200,7 +234,8 @@ function testtcp() {
 			expect("status",     "200",   status[1]);
 			if (tonumber(status[1])==200) {
 				X=xml.read(ht.body);
-				expect("Latest Version", _version_, X['version'][0]['major'][0]['value']+'.'+X['version'][0]['minor'][0]['value']+'.'+X['version'][0]['point'][0]['value']);
+//				expect("Latest Version", _version_, X['version'][0]['major'][0]['value']+'.'+X['version'][0]['minor'][0]['value']+'.'+X['version'][0]['point'][0]['value']);
+				expect("Latest Version", _version_, X.version.major.value+'.'+X.version.minor.value+'.'+X.version.point.value);
 			}
 		}
 	}
@@ -212,6 +247,8 @@ function testtcp() {
 		test_tcpserv();
 		print("\truntime = ", runtime(), " seconds\n");
 		test_http();
+		print("\truntime = ", runtime(), " seconds\n");
+		test_https();
 		print("\truntime = ", runtime(), " seconds\n");
 #		test_ftp();
 #		print("\truntime = ", runtime(), " seconds\n");

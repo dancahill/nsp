@@ -573,9 +573,9 @@ NES_FUNCTION(nl_strstr)
 	obj_t *cobj0=nes_getiobj(N, &N->l, 0);
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
-	obj_t *robj;
 	unsigned int i=0, j=0;
 
+	nes_unlinkval(N, &N->r);
 	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_tostr(N, cobj0), "expected a string for arg1");
 	if (cobj2->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_tostr(N, cobj0), "expected a string for arg2");
 	if (cobj2->val->size<1) n_error(N, NE_SYNTAX, nes_tostr(N, cobj0), "zero length arg2");
@@ -594,14 +594,8 @@ NES_FUNCTION(nl_strstr)
 	} else {
 		n_error(N, NE_SYNTAX, nes_tostr(N, cobj0), "................");
 	}
-	robj=nes_setstr(N, &N->r, "", NULL, 0);
-	if (i<cobj1->val->size&&j==cobj2->val->size) {
-		i=i-j;
-		robj->val->size=cobj1->val->size-i;
-		robj->val->d.str=n_alloc(N, robj->val->size+1, 0);
-		nc_memcpy(robj->val->d.str, cobj1->val->d.str+i, robj->val->size+1);
-		robj->val->d.str[robj->val->size]=0;
-	} else {
+	if (i<=cobj1->val->size&&j==cobj2->val->size) {
+		nes_setstr(N, &N->r, "", cobj1->val->d.str+i-j, cobj1->val->size-i+j);
 	}
 	return 0;
 }
@@ -612,7 +606,6 @@ NES_FUNCTION(nl_strsub)
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
 	obj_t *cobj3=nes_getiobj(N, &N->l, 3);
-	obj_t *robj;
 	unsigned int offset, max=0;
 
 	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_tostr(N, cobj0), "expected a string for arg1");
@@ -622,16 +615,10 @@ NES_FUNCTION(nl_strsub)
 	} else {
 		offset=(int)cobj2->val->d.num;
 	}
-	if (cobj3->val->type==NT_NUMBER) max=(int)cobj3->val->d.num;
+	if (cobj3->val->type==NT_NUMBER) max=(int)cobj3->val->d.num; else max=cobj1->val->size;
 	if (offset>cobj1->val->size) offset=cobj1->val->size;
 	if (max>cobj1->val->size-offset) max=cobj1->val->size-offset;
-	robj=nes_setstr(N, &N->r, "", NULL, 0);
-	if (cobj1->val->d.str!=NULL) {
-		robj->val->size=max;
-		robj->val->d.str=n_alloc(N, robj->val->size+1, 0);
-		nc_memcpy(robj->val->d.str, cobj1->val->d.str+offset, robj->val->size+1);
-		robj->val->d.str[robj->val->size]=0;
-	}
+	nes_setstr(N, &N->r, "", cobj1->val->d.str+offset, max);
 	return 0;
 }
 
@@ -659,7 +646,7 @@ NES_FUNCTION(nl_strtolower)
 	return 0;
 }
 
-NES_FUNCTION(nl_datetime)
+NES_FUNCTION(nl_sqltime)
 {
 	obj_t *cobj0=nes_getiobj(N, &N->l, 0);
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
@@ -671,12 +658,18 @@ NES_FUNCTION(nl_datetime)
 	} else {
 		nc_gettimeofday(&ttime, NULL);
 	}
-	if (nc_strcmp(cobj0->val->d.str, "date")==0) {
+	if (nc_strcmp(cobj0->val->d.str, "sqldate")==0) {
 		strftime(timebuf, sizeof(timebuf)-1, "%Y-%m-%d", localtime((time_t *)&ttime.tv_sec));
-	} else if (nc_strcmp(cobj0->val->d.str, "time")==0) {
+	} else if (nc_strcmp(cobj0->val->d.str, "sqltime")==0) {
 		strftime(timebuf, sizeof(timebuf)-1, "%H:%M:%S", localtime((time_t *)&ttime.tv_sec));
 	}
-	nes_setstr(N, &N->r, "", timebuf, nc_strlen(timebuf));
+	nes_setstr(N, &N->r, "", timebuf, -1);
+	return 0;	
+}
+
+NES_FUNCTION(nl_time)
+{
+	nes_setnum(N, &N->r, "", time(NULL));
 	return 0;	
 }
 
@@ -757,7 +750,25 @@ NES_FUNCTION(nl_iname)
 	if (nes_isnull(cobj)) {
 		nes_setnum(N, &N->r, "", 0);
 	} else {
-		nes_setstr(N, &N->r, "", cobj->name, nc_strlen(cobj->name));
+		nes_setstr(N, &N->r, "", cobj->name, -1);
+	}
+	return 0;
+}
+
+NES_FUNCTION(nl_ival)
+{
+	obj_t *cobj0=nes_getiobj(N, &N->l, 0);
+	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
+	obj_t *cobj;
+
+	if (cobj1->val->type!=NT_TABLE) n_error(N, NE_SYNTAX, nes_tostr(N, cobj0), "expected a table for arg1");
+	if (cobj2->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, nes_tostr(N, cobj0), "expected a number for arg2");
+	cobj=nes_getiobj(N, cobj1, (int)cobj2->val->d.num);
+	if (nes_isnull(cobj)) {
+		nes_unlinkval(N, &N->r);
+	} else {
+		nes_linkval(N, &N->r, cobj);
 	}
 	return 0;
 }
@@ -834,7 +845,7 @@ NES_FUNCTION(nl_typeof)
 		}
 	default         : p="null";     break;
 	}
-	nes_setstr(N, &N->r, "", p, nc_strlen(p));
+	nes_setstr(N, &N->r, "", p, -1);
 	return 0;
 }
 

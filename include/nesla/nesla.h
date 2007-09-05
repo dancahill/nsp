@@ -24,7 +24,7 @@ struct timeval { long tv_sec; long tv_usec; };
 #endif
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
-/* always include winsock2 before windows, or bad stuff will happen */
+/* always include winsock2 before windows */
 #include <winsock2.h>
 #include <windows.h>
 #include <time.h>
@@ -38,13 +38,13 @@ struct timeval { long tv_sec; long tv_usec; };
 #include <setjmp.h>
 
 #define NESLA_NAME      "nesla"
-#define NESLA_VERSION   "0.8.0"
+#define NESLA_VERSION   "0.9.0"
 
 #define MAX_OBJNAMELEN  64
 #define MAX_OUTBUFLEN   8192
 #define OUTBUFLOWAT	4096
 
-/* object storage types */
+/* nesla object types */
 #define NT_NULL         0
 #define NT_BOOLEAN      1
 #define NT_NUMBER       2
@@ -54,7 +54,7 @@ struct timeval { long tv_sec; long tv_usec; };
 #define NT_TABLE        6
 #define NT_CDATA        7
 
-/* object storage modes */
+/* nesla object status flags */
 #define NST_HIDDEN	0x01
 #define NST_READONLY	0x02
 #define NST_SYSTEM	0x04
@@ -86,7 +86,7 @@ typedef struct NES_CDATA {
 } NES_CDATA;
 typedef struct nes_valrec {
 	unsigned short type; /* val type */
-	unsigned short attr; /* status: attributes (hidden, readonly, system, autosort, etc...) */
+	unsigned short attr; /* status flags (hidden, readonly, system, autosort, etc...) */
 	unsigned short refs; /* number of references to this node */
 	unsigned int   size; /* storage size of string, nfunc or cdata */
 	union {
@@ -118,8 +118,7 @@ typedef struct nes_state {
 	short int single;
 	short int strict;
 	short int warnings;
-	short int jmpset;
-	jmp_buf savjmp;
+	jmp_buf *savjmp;
 	struct timeval ttime;
 	unsigned short int outbuflen;
 	char numbuf[128];
@@ -141,6 +140,7 @@ obj_t     *nes_getobj     (nes_state *N, obj_t *tobj, char *oname);
 obj_t     *nes_getiobj    (nes_state *N, obj_t *tobj, int oindex);
 obj_t     *nes_setobj     (nes_state *N, obj_t *tobj, char *oname, unsigned short otype, NES_CFUNC _fptr, num_t _num, char *_str, int _slen);
 obj_t     *nes_strcat     (nes_state *N, obj_t *cobj, char *str, int len);
+num_t      nes_tobool     (nes_state *N, obj_t *cobj);
 num_t      nes_tonum      (nes_state *N, obj_t *cobj);
 char      *nes_tostr      (nes_state *N, obj_t *cobj);
 /* parser */
@@ -148,16 +148,18 @@ obj_t     *nes_eval       (nes_state *N, const char *string);
 obj_t     *nes_evalf      (nes_state *N, const char *fmt, ...);
 #endif
 
-#define    nes_isnull(o)           (o==NULL||o->val==NULL||o->val->type==NT_NULL)
-#define    nes_isbool(o)           (o!=NULL&&o->val!=NULL&&o->val->type==NT_BOOLEAN)
-#define    nes_isnum(o)            (o!=NULL&&o->val!=NULL&&o->val->type==NT_NUMBER)
-#define    nes_isstr(o)            (o!=NULL&&o->val!=NULL&&o->val->type==NT_STRING)
-#define    nes_istable(o)          (o!=NULL&&o->val!=NULL&&o->val->type==NT_TABLE)
+#define    nes_isnull(o)            (o==NULL||o->val==NULL||o->val->type==NT_NULL)
+#define    nes_isbool(o)            (o!=NULL&&o->val!=NULL&&o->val->type==NT_BOOLEAN)
+#define    nes_isnum(o)             (o!=NULL&&o->val!=NULL&&o->val->type==NT_NUMBER)
+#define    nes_isstr(o)             (o!=NULL&&o->val!=NULL&&o->val->type==NT_STRING)
+#define    nes_istable(o)           (o!=NULL&&o->val!=NULL&&o->val->type==NT_TABLE)
 
-#define    nes_typeof(o)           nes_isnull(o)?NT_NULL:o->val->type
+#define    nes_istrue(o)            nes_tobool(N, o)?1:0
 
-#define    nes_getnum(N,o,n)       nes_tonum(N, nes_getobj(N,o,n))
-#define    nes_getstr(N,o,n)       nes_tostr(N, nes_getobj(N,o,n))
+#define    nes_typeof(o)            nes_isnull(o)?NT_NULL:o->val->type
+
+#define    nes_getnum(N,o,n)        nes_tonum(N, nes_getobj(N,o,n))
+#define    nes_getstr(N,o,n)        nes_tostr(N, nes_getobj(N,o,n))
 
 #define    nes_setnum(N,t,n,v)      nes_setobj(N, t, n, NT_NUMBER, (NES_CFUNC)NULL, v, NULL, 0)
 #define    nes_setstr(N,t,n,s,l)    nes_setobj(N, t, n, NT_STRING, (NES_CFUNC)NULL, 0, s,    l)

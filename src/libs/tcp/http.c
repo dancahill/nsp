@@ -25,16 +25,6 @@
  * Since there's no actual useful code here, this makes a decent demo.
  */
 
-static void striprn(char *string)
-{
-	int i=strlen(string)-1;
-
-	while (i>-1) {
-		if ((string[i]!='\r')&&(string[i]!='\n')) break;
-		string[i--]='\0';
-	}
-}
-
 NES_FUNCTION(neslatcp_http_get)
 {
 	TCP_SOCKET sock;
@@ -44,7 +34,7 @@ NES_FUNCTION(neslatcp_http_get)
 	obj_t *cobj4=nes_getiobj(N, &N->l, 4); /* uri */
 	obj_t *cobj;
 	int cl=-1, len=0, rc;
-	char tmpbuf[8192];
+	char tmpbuf[2048];
 	obj_t tobj;
 	obj_t *tobj2;
 	char *p, *p1, *p2;
@@ -54,15 +44,14 @@ NES_FUNCTION(neslatcp_http_get)
 	if (cobj3->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a number for arg3");
 	if (cobj4->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg4");
 	nc_memset((char *)&sock, 0, sizeof(sock));
-	if ((rc=tcp_connect(N, &sock, cobj2->val->d.str, (unsigned short)cobj3->val->d.num, 0))<0) {
+	if ((rc=tcp_connect(N, &sock, cobj2->val->d.str, (unsigned short)cobj3->val->d.num, (unsigned short)cobj1->val->d.num))<0) {
 		nes_setstr(N, &N->r, "", "tcp error", strlen("tcp error"));
 		return -1;
 	}
 	/* why does php insert random data when i try to use HTTP/1.1? */
 	tcp_fprintf(N, &sock, "GET %s HTTP/1.0\r\nUser-Agent: Nesla_httpcli/" NESLA_VERSION "\r\nConnection: Close\r\nHost: %s\r\nAccept: */*\r\n\r\n", cobj4->val->d.str, cobj2->val->d.str);
-	nc_memset((void *)&tobj, 0, sizeof(obj_t));
 	tobj.val=n_newval(N, NT_TABLE);
-	rc=tcp_fgets(N, tmpbuf, sizeof(tmpbuf)-1, &sock);
+	rc=tcp_fgets(N, &sock, tmpbuf, sizeof(tmpbuf)-1);
 	if (rc>0) {
 		cobj=nes_setstr(N, &tobj, "status", tmpbuf, strlen(tmpbuf));
 		while ((cobj->val->size>0)&&((cobj->val->d.str[cobj->val->size-1]=='\r')||(cobj->val->d.str[cobj->val->size-1]=='\n'))) cobj->val->d.str[--cobj->val->size]='\0';
@@ -92,7 +81,7 @@ NES_FUNCTION(neslatcp_http_get)
 	cobj=nes_setstr(N, &tobj, "head", NULL, 0);
 	tobj2=nes_settable(N, &tobj, "headers");
 	for (;;) {
-		rc=tcp_fgets(N, tmpbuf, sizeof(tmpbuf)-1, &sock);
+		rc=tcp_fgets(N, &sock, tmpbuf, sizeof(tmpbuf)-1);
 		if (rc<1) break;
 		/* slow, but at least it's safe */
 		nes_strcat(N, cobj, tmpbuf, rc);
@@ -122,7 +111,7 @@ NES_FUNCTION(neslatcp_http_get)
 	while ((cobj->val->size>0)&&((cobj->val->d.str[cobj->val->size-1]=='\r')||(cobj->val->d.str[cobj->val->size-1]=='\n'))) cobj->val->d.str[--cobj->val->size]='\0';
 	cobj=nes_setstr(N, &tobj, "body", NULL, 0);
 	for (;;) {
-		rc=tcp_fgets(N, tmpbuf, sizeof(tmpbuf)-1, &sock);
+		rc=tcp_fgets(N, &sock, tmpbuf, sizeof(tmpbuf)-1);
 		if (rc<1) break;
 		len+=rc;
 		/* slow, but at least it's safe */

@@ -20,10 +20,6 @@ NES_FUNCTION(neslaext_base64_decode);
 NES_FUNCTION(neslaext_base64_encode);
 /* dir.c */
 NES_FUNCTION(neslaext_dirlist);
-/* md5.c */
-NES_FUNCTION(neslaext_md5_file);
-NES_FUNCTION(neslaext_md5_string);
-NES_FUNCTION(neslaext_md5_passwd);
 /* rot13.c */
 NES_FUNCTION(neslaext_rot13);
 /* sort.c */

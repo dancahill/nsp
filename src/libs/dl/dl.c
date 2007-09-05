@@ -48,7 +48,7 @@ static void *lib_sym(void *handle, const char *name)
 static char *lib_error(void)
 {
 #ifdef WIN32
-//	return GetProcAddress(handle, name);
+	/* return GetProcAddress(handle, name); */
 	return "";
 #else
 	return (char *)dlerror();

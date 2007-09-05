@@ -3,15 +3,18 @@
 OBJDIR  = ..\..\..\obj
 INTDIR  = $(OBJDIR)\cli
 
+include ..\..\config.mak
+
 CC            = cl.exe /nologo
 LINK          = link.exe /nologo
 MAKE          = nmake.exe /C /S /Y /F
 
-BIN_CFLAGS    = /W3 /O2 /ML /I "../../../include" /D "HAVE_DL" /D "HAVE_ODBC" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /FD /c
-BIN_LDFLAGS   = /subsystem:console /pdb:none /machine:I386 /libpath:../../../lib/ libc.lib libnesla.lib libnesladl.lib libneslaext.lib libneslamath.lib libneslaodbc.lib libneslatcp.lib libneslawinapi.lib libneslazip.lib
+BIN_CFLAGS    = /W3 /O2 /ML /I "../../../include" $(CFLAGS) /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /FD /c
+BIN_LDFLAGS   = /subsystem:console /pdb:none /machine:I386 /NODEFAULTLIB:libc /libpath:../../../lib/ libcmt.lib libnesla.lib $(LDFLAGS) \
+	libneslaext.lib libneslatcp.lib # libneslawinapi.lib libneslazip.lib
 BIN_TARGETDIR = ..\..\..\bin
 
-CFLAGS  = $(BIN_CFLAGS)
+#CFLAGS  = $(BIN_CFLAGS)
 OBJECTS = $(INTDIR)\main.obj
 TARGET  = $(BIN_TARGETDIR)\nesla.exe
 
@@ -32,4 +35,4 @@ clean:
 	@if exist "$(INTDIR)" rmdir "$(INTDIR)"
 
 .c{$(INTDIR)}.obj:
-	$(CC) $(CFLAGS) $<
+	$(CC) $(BIN_CFLAGS) $<

@@ -29,12 +29,6 @@ int neslaext_register_all(nes_state *N)
 
 	nes_setcfunc(N, &N->g, "dirlist", (NES_CFUNC)neslaext_dirlist);
 
-	tobj=nes_settable(N, &N->g, "md5");
-	tobj->val->attr|=NST_HIDDEN;
-	nes_setcfunc(N, tobj, "file",     (NES_CFUNC)neslaext_md5_file);
-	nes_setcfunc(N, tobj, "string",   (NES_CFUNC)neslaext_md5_string);
-	nes_setcfunc(N, tobj, "passwd",   (NES_CFUNC)neslaext_md5_passwd);
-
 	nes_setcfunc(N, &N->g, "rot13",   (NES_CFUNC)neslaext_rot13);
 
 	tobj=nes_settable(N, &N->g, "sort");

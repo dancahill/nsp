@@ -75,6 +75,8 @@ const optab oplist[] = {
 	{ "for",      OP_KFOR     , -1 },
 	{ "do",       OP_KDO      , -1 },
 	{ "while",    OP_KWHILE   , -1 },
+	{ "try",      OP_KTRY     , -1 },
+	{ "catch",    OP_KCATCH   , -1 },
 	{ "exit",     OP_KEXIT    , -1 },
 	{ NULL,       0           , -1 }
 };

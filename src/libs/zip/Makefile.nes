@@ -9,7 +9,7 @@ OBJECTS = "untar.o";
 TNAME   = "libneslazip";
 if (cmd==null) if (_ARGS[2]=='clean') cmd='clean'; else cmd='build';
 if (cmd=='build') {
-	print("building zip lib\n");
+	print("building ",_LINKAGE_," lib zip\n");
 	if (CC=='cl.exe') file.write("dlldefs.def", "LIBRARY\t\tlibneslazip\r\nVERSION\t\t"+_version_+"\r\nEXPORTS\r\n\tneslazip_register_all\r\n");
 	build_objs(CC, CFLAGS, OBJECTS, _LINKAGE_, TNAME);
 	build_lib(CC, TNAME, OBJECTS, _LINKAGE_, TNAME);

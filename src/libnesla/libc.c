@@ -203,17 +203,15 @@ void n_error(nes_state *N, short int err, const char *fname, const char *format,
 	int len;
 
 	N->err=err;
-	nl_flush(N);
 	if (N->err) {
 		len=nc_snprintf(N, N->errbuf, sizeof(N->errbuf)-1, "%-15s : ", fname);
 		va_start(ap, format);
 		len+=nc_vsnprintf(N, N->errbuf+len, sizeof(N->errbuf)-len-1, format, ap);
 		va_end(ap);
-		nc_snprintf(N, N->errbuf+len, sizeof(N->errbuf)-len-1, "\r\n");
-		nl_flush(N);
 	}
-	if (N->jmpset) {
-		longjmp(N->savjmp, 1);
+	nl_flush(N);
+	if (N->savjmp!=NULL) {
+		longjmp(*N->savjmp, 1);
 	} else {
 		n_warn(N, "n_error", "jmp ptr not set - errno=%d :: \r\n%s", N->err, N->errbuf);
 	}
@@ -246,8 +244,8 @@ void n_warn(nes_state *N, const char *fname, const char *format, ...)
 	va_end(ap);
 	nc_printf(N, "\r\n[00m");
 	nl_flush(N);
-	if ((N->strict)&&(N->jmpset)) {
-		longjmp(N->savjmp, 1);
+	if ((N->strict)&&(N->savjmp!=NULL)) {
+		longjmp(*N->savjmp, 1);
 	}
 	return;
 }

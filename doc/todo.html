@@ -17,14 +17,13 @@ NESLA NullLogic Embedded Scripting Language ToDo
 <hr>
 
 <ul>
-  <li>adding a regex lib might be good (POSIX P1003.2, not pcre)</li>
-  <li>obj dir breaks build with bsd make</li>
+  <li>several third party libs like sql leak memory - submitting patches to them might be useful</li>
+  <li>try {} can lead to mem leaks - especially where locally alloc'd mem isn't freed (see n_setargs)</li>
+  <li>regex lib fails in dos/tcc - probably just insufficient memory...</li>
   <li>shared libs crash on openbsd 3.5</li>
   <li>need better errors and failure return codes</li>
-  <li>need better input checking</li>
   <li>need better checks for fdiv/nan/inf, etc.</li>
   <li>need to add a printf function</li>
-  <li>should some vars have tables for handler functions? (like javascript events?)</li>
   <li>including a file creates a new local context - this seems wrong....</li>
 </ul>
 

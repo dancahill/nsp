@@ -1,7 +1,10 @@
 #!/usr/bin/nesla
 
 // single line comment
-/* multi line comment */
+/*
+ * multi line
+ * comment
+ */
 
 function vars() {
 	if (typeof(_SERVER)=='table') {
@@ -44,6 +47,8 @@ function main() {
 	print("-------------------------------------------------------------------\n");
 	include("_tables.nes");
 	print("-------------------------------------------------------------------\n");
+	include("_size.nes");
+	print("-------------------------------------------------------------------\n");
 	include("_scope.nes");
 	print("-------------------------------------------------------------------\n");
 	include("_string.nes");
@@ -56,15 +61,23 @@ function main() {
 	print("-------------------------------------------------------------------\n");
 	include("_math.nes");
 	print("-------------------------------------------------------------------\n");
+	include("_oo.nes");
+	print("-------------------------------------------------------------------\n");
+	include("_indexes.nes");
+	print("-------------------------------------------------------------------\n");
+	include("_dl.nes");
+	print("-------------------------------------------------------------------\n");
+	include("_try.nes");
+	print("-------------------------------------------------------------------\n");
 	include("_b64.nes");
 	print("-------------------------------------------------------------------\n");
 	include("_rot13.nes");
 	print("-------------------------------------------------------------------\n");
-	include("_size.nes");
-	print("-------------------------------------------------------------------\n");
 	include("_xml.nes");
 	print("-------------------------------------------------------------------\n");
-	include("_indexes.nes");
+	include("_regex.nes");
+	print("-------------------------------------------------------------------\n");
+	include("_crypto.nes");
 	print("-------------------------------------------------------------------\n");
 	include("_tcp.nes");
 	print("-------------------------------------------------------------------\n");
@@ -76,7 +89,7 @@ function main() {
 		var f=_ENV['HOME']+"/test.nes";
 		if (typeof(file.stat(f))=='table') {
 			print("\trunning ", f, "\n");
-			include(f);
+//			include(f);
 			print("-------------------------------------------------------------------\n");
 		}
 	}
@@ -85,6 +98,7 @@ function main() {
 	print("\tFINISHED TESTS       = "+runtime()+" seconds\n");
 	print("\ttotal tests          = "+tostring(numtests)+"\n");
 	expect("total errors", 0, tonumber(numerrors));
+	if (numerrors>1) numerrors--;
 	print("-------------------------------------------------------------------\n");
 
 	global _ARGS={};
@@ -96,11 +110,3 @@ function main() {
 	return;
 }
 main();
-
-// below is code to read your /etc/passwd file into a table
-/*
-x=file.read('/etc/passwd');
-p=string.split(x, '\n');
-for (i=0;p[i]!=null;i++) p[i]=string.split(p[i], ':');
-printvar(p);
-*/

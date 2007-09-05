@@ -51,9 +51,9 @@ function showpage(c,p) {
 </DIV>
 		<A CLASS="smenu" HREF="#c2p0"               onClick="showpage('2', '0');               return false;"><NOBR>Functions - core</NOBR></A><BR>
 <DIV ID=c2m STYLE='display: block'>
-		<A CLASS="smenu" HREF="#c2p_date"           onClick="showpage('2', '_date');           return false;">&nbsp;&nbsp;date();</A><BR>
 		<A CLASS="smenu" HREF="#c2p_gmtime"         onClick="showpage('2', '_gmtime');         return false;">&nbsp;&nbsp;gmtime();</A><BR>
 		<A CLASS="smenu" HREF="#c2p_iname"          onClick="showpage('2', '_iname');          return false;">&nbsp;&nbsp;iname();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_ival"           onClick="showpage('2', '_ival');           return false;">&nbsp;&nbsp;ival();</A><BR>
 		<A CLASS="smenu" HREF="#c2p_include"        onClick="showpage('2', '_include');        return false;">&nbsp;&nbsp;include();</A><BR>
 		<A CLASS="smenu" HREF="#c2p_localtime"      onClick="showpage('2', '_localtime');      return false;">&nbsp;&nbsp;localtime();</A><BR>
 		<A CLASS="smenu" HREF="#c2p_print"          onClick="showpage('2', '_print');          return false;">&nbsp;&nbsp;print();</A><BR>
@@ -61,6 +61,8 @@ function showpage(c,p) {
 		<A CLASS="smenu" HREF="#c2p_runtime"        onClick="showpage('2', '_runtime');        return false;">&nbsp;&nbsp;runtime();</A><BR>
 		<A CLASS="smenu" HREF="#c2p_sizeof"         onClick="showpage('2', '_sizeof');         return false;">&nbsp;&nbsp;sizeof();</A><BR>
 		<A CLASS="smenu" HREF="#c2p_sleep"          onClick="showpage('2', '_sleep');          return false;">&nbsp;&nbsp;sleep();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_sqldate"        onClick="showpage('2', '_sqldate');        return false;">&nbsp;&nbsp;sqldate();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_sqltime"        onClick="showpage('2', '_sqltime');        return false;">&nbsp;&nbsp;sqltime();</A><BR>
 		<A CLASS="smenu" HREF="#c2p_system"         onClick="showpage('2', '_system');         return false;">&nbsp;&nbsp;system();</A><BR>
 		<A CLASS="smenu" HREF="#c2p_time"           onClick="showpage('2', '_time');           return false;">&nbsp;&nbsp;time();</A><BR>
 		<A CLASS="smenu" HREF="#c2p_tonumber"       onClick="showpage('2', '_tonumber');       return false;">&nbsp;&nbsp;tonumber();</A><BR>
@@ -185,23 +187,23 @@ object-based, but that doesn't make the language object oriented.  I added a
 'this' variable so functions could infer the context in which they were called.
 Does this make Nesla an OO language?  Consider the following code:
 </P>
-<PRE>
-<B>function</B> new_str(val) {
-	this = {
-		size  = <B>function</B> () { <B>return sizeof</B>(this.value); };
-		lower = <B>function</B> () { <B>return</B> string.tolower(this.value); };
-		upper = <B>function</B> () { <B>return</B> string.toupper(this.value); };
-		value = val;
-	};
-	<B>return</B> this;
-}
-x=new_str(<FONT COLOR=blue>"AbC"</FONT>);
-<B>print</B>(<FONT COLOR=blue>"["</FONT>+x.size()+<FONT COLOR=blue>"]\n"</FONT>);  <FONT COLOR=green>// will print 3</FONT>
-x.value=<FONT COLOR=blue>"aBcDeF"</FONT>;
-<B>print</B>(<FONT COLOR=blue>"["</FONT>+x.size()+<FONT COLOR=blue>"]\n"</FONT>);  <FONT COLOR=green>// will print 6</FONT>
-<B>print</B>(<FONT COLOR=blue>"["</FONT>+x.lower()+<FONT COLOR=blue>"]\n"</FONT>); <FONT COLOR=green>// will print abcdef</FONT>
-<B>print</B>(<FONT COLOR=blue>"["</FONT>+x.upper()+<FONT COLOR=blue>"]\n"</FONT>); <FONT COLOR=green>// will print ABCDEF</FONT>
-</PRE>
+
+<PRE><B>function</B> new_str<FONT COLOR=MAROON><B>(</B></FONT>val<FONT COLOR=MAROON><B>)</B></FONT> <FONT COLOR=MAROON><B>{</B></FONT>
+        this <FONT COLOR=MAROON><B>=</B></FONT> <FONT COLOR=MAROON><B>{</B></FONT>
+                size  <FONT COLOR=MAROON><B>=</B></FONT> <B>function</B> <FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=MAROON><B>)</B></FONT> <FONT COLOR=MAROON><B>{</B></FONT> <B>return</B> sizeof<FONT COLOR=MAROON><B>(</B></FONT>this<FONT COLOR=MAROON><B>.</B></FONT>value<FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT> <FONT COLOR=MAROON><B>}</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>
+                lower <FONT COLOR=MAROON><B>=</B></FONT> <B>function</B> <FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=MAROON><B>)</B></FONT> <FONT COLOR=MAROON><B>{</B></FONT> <B>return</B> string<FONT COLOR=MAROON><B>.</B></FONT>tolower<FONT COLOR=MAROON><B>(</B></FONT>this<FONT COLOR=MAROON><B>.</B></FONT>value<FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT> <FONT COLOR=MAROON><B>}</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>
+                upper <FONT COLOR=MAROON><B>=</B></FONT> <B>function</B> <FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=MAROON><B>)</B></FONT> <FONT COLOR=MAROON><B>{</B></FONT> <B>return</B> string<FONT COLOR=MAROON><B>.</B></FONT>toupper<FONT COLOR=MAROON><B>(</B></FONT>this<FONT COLOR=MAROON><B>.</B></FONT>value<FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT> <FONT COLOR=MAROON><B>}</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>
+                value <FONT COLOR=MAROON><B>=</B></FONT> val<FONT COLOR=MAROON><B>;</B></FONT>
+        <FONT COLOR=MAROON><B>}</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>
+        <B>return</B> this<FONT COLOR=MAROON><B>;</B></FONT>
+<FONT COLOR=MAROON><B>}</B></FONT>
+x<FONT COLOR=MAROON><B>=</B></FONT>new_str<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=BLUE>"AbC"</FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>
+print<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=BLUE>"["</FONT><FONT COLOR=MAROON><B>+</B></FONT>x<FONT COLOR=MAROON><B>.</B></FONT>size<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>+</B></FONT><FONT COLOR=BLUE>"]\n"</FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>  <FONT COLOR=GREEN><I>// will print 3</I></FONT>
+x<FONT COLOR=MAROON><B>.</B></FONT>value<FONT COLOR=MAROON><B>=</B></FONT><FONT COLOR=BLUE>"aBcDeF"</FONT><FONT COLOR=MAROON><B>;</B></FONT>
+print<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=BLUE>"["</FONT><FONT COLOR=MAROON><B>+</B></FONT>x<FONT COLOR=MAROON><B>.</B></FONT>size<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>+</B></FONT><FONT COLOR=BLUE>"]\n"</FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>  <FONT COLOR=GREEN><I>// will print 6</I></FONT>
+print<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=BLUE>"["</FONT><FONT COLOR=MAROON><B>+</B></FONT>x<FONT COLOR=MAROON><B>.</B></FONT>lower<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>+</B></FONT><FONT COLOR=BLUE>"]\n"</FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT> <FONT COLOR=GREEN><I>// will print abcdef</I></FONT>
+print<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=BLUE>"["</FONT><FONT COLOR=MAROON><B>+</B></FONT>x<FONT COLOR=MAROON><B>.</B></FONT>upper<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>+</B></FONT><FONT COLOR=BLUE>"]\n"</FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT> <FONT COLOR=GREEN><I>// will print ABCDEF</I></FONT></PRE>
+
 <P>
 Is that technically an example of OO?  True, most OO code has nicer looking
 constructors and classes and stuff I don't get, but this is working Nesla code.
@@ -221,27 +223,26 @@ break continue return function global local var if else for do while exit
 <p>
 Working code looks a little like the following sample.
 </p>
-<pre>
-<B>function</B> demo(arg1) {
-	<B>global</B> x=1;
-	<I># you don't actually need <B>local</B> or <B>var</B>, but it makes the code clearer</I>
-	<B>local</B> y=2;
-	<B>var</B> z=3;
+<PRE><B>function</B> demo<FONT COLOR=MAROON><B>(</B></FONT>arg1<FONT COLOR=MAROON><B>)</B></FONT> <FONT COLOR=MAROON><B>{</B></FONT>
+        <B>global</B> x<FONT COLOR=MAROON><B>=</B></FONT><FONT COLOR=NAVY>1</FONT><FONT COLOR=MAROON><B>;</B></FONT>
+        <FONT COLOR=GREEN><I># you don't actually need local or var, but it makes the code clearer</I></FONT>
+        <B>local</B> y<FONT COLOR=MAROON><B>=</B></FONT><FONT COLOR=NAVY>2</FONT><FONT COLOR=MAROON><B>;</B></FONT>
+        <B>var</B> z<FONT COLOR=MAROON><B>=</B></FONT><FONT COLOR=NAVY>3</FONT><FONT COLOR=MAROON><B>;</B></FONT>
 
-	<B>for</B> (i=0;i<10;i++) {
-		<B>if</B> (i<5) {
-			<B>print</B>("less than half ", i, "\n");
-		} <B>else if</B> (i==5) {
-			<B>print</B>("half\n");
-		} <B>else</B> {
-			<B>print</B>("more than half ", i, "\n");
-		}
-		<B>if</B> (i==arg1) <B>break</B>;
-	}
-	<B>return</B>;
-}
-demo(8);
-</pre>
+        <B>for</B> <FONT COLOR=MAROON><B>(</B></FONT>i<FONT COLOR=MAROON><B>=</B></FONT><FONT COLOR=NAVY>0</FONT><FONT COLOR=MAROON><B>;</B></FONT>i<FONT COLOR=MAROON><B>&lt;</B></FONT><FONT COLOR=NAVY>10</FONT><FONT COLOR=MAROON><B>;</B></FONT>i<FONT COLOR=MAROON><B>++</B></FONT><FONT COLOR=MAROON><B>)</B></FONT> <FONT COLOR=MAROON><B>{</B></FONT>
+                <B>if</B> <FONT COLOR=MAROON><B>(</B></FONT>i<FONT COLOR=MAROON><B>&lt;</B></FONT><FONT COLOR=NAVY>5</FONT><FONT COLOR=MAROON><B>)</B></FONT> <FONT COLOR=MAROON><B>{</B></FONT>
+                        print<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=BLUE>"less than half "</FONT><FONT COLOR=MAROON><B>,</B></FONT> i<FONT COLOR=MAROON><B>,</B></FONT> <FONT COLOR=BLUE>"\n"</FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>
+                <FONT COLOR=MAROON><B>}</B></FONT> <B>else</B> <B>if</B> <FONT COLOR=MAROON><B>(</B></FONT>i<FONT COLOR=MAROON><B>==</B></FONT><FONT COLOR=NAVY>5</FONT><FONT COLOR=MAROON><B>)</B></FONT> <FONT COLOR=MAROON><B>{</B></FONT>
+                        print<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=BLUE>"half\n"</FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>
+                <FONT COLOR=MAROON><B>}</B></FONT> <B>else</B> <FONT COLOR=MAROON><B>{</B></FONT>
+                        print<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=BLUE>"more than half "</FONT><FONT COLOR=MAROON><B>,</B></FONT> i<FONT COLOR=MAROON><B>,</B></FONT> <FONT COLOR=BLUE>"\n"</FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>
+                <FONT COLOR=MAROON><B>}</B></FONT>
+                <B>if</B> <FONT COLOR=MAROON><B>(</B></FONT>i<FONT COLOR=MAROON><B>==</B></FONT>arg1<FONT COLOR=MAROON><B>)</B></FONT> <B>break</B><FONT COLOR=MAROON><B>;</B></FONT>
+        <FONT COLOR=MAROON><B>}</B></FONT>
+        <B>return</B><FONT COLOR=MAROON><B>;</B></FONT>
+<FONT COLOR=MAROON><B>}</B></FONT>
+demo<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=NAVY>8</FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>
+</PRE>
 <p>
 break (accepts an optional unbracketed number arg to define the number of levels to break)<br>
 still need to add switch and goto..
@@ -274,57 +275,6 @@ setting a var's value to null will completely free the value and effectively mak
 </p>
 </DIV>
 
-<DIV ID=c2p_date STYLE='display: block'>
-<!-- CONTENTS_START -->
-<A NAME="nesla_date"></A>
-<H2>date<BR><HR></H2>
-
-<H4>Description</H4>
-<BLOCKQUOTE><P>
-<P>Returns a string representation of <VAR>timestamp</VAR> in the format 'YYYY-MM-DD'.
-If <VAR>timestamp</VAR> is not defined, the function will use the current local
-system date.
-</BLOCKQUOTE>
-
-<H4>Syntax</H4>
-<BLOCKQUOTE><P><I>string</I> <B>=</B> <B>date(</B><I>[number timestamp]</I><B>)<BR></B></BLOCKQUOTE><P>
-<BLOCKQUOTE>
-<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
-<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
-<TR><TD><I>timestamp</I> </TD><TD>The <B>number</B> of seconds since January 1, 1970 UTC (commonly called a UNIX timestamp).</TD></TR>
-</TABLE></BLOCKQUOTE>
-
-<H4>Return Value</H4>
-<BLOCKQUOTE><P>
-<P>Returns a formatted date <VAR>string</VAR> in the format 'YYYY-MM-DD'.
-</BLOCKQUOTE><P>
-
-<H4>Remarks</H4>
-<BLOCKQUOTE><P>
-<P>No remarks.
-</BLOCKQUOTE><P>
-
-<H4>Examples</H4>
-<BLOCKQUOTE><P>
-<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
-<CODE>
-	<B>print</B>(<B>date</B>());
-</CODE></TD></TR></TABLE>
-<P>The above example will output something similar to: "<B>2007-07-01</B>"</P>
-<P>
-<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
-<CODE>
-	<B>print</B>(<B>date</B>(0)+" "+<B>time</B>(0));
-</CODE></TD></TR></TABLE>
-<P>The above example will output something similar to (note the adjustment for local time): "<B>1969-12-31 19:00:00</B>"</P>
-</BLOCKQUOTE><P>
-
-<H4>See Also</H4>
-<BLOCKQUOTE><P>
-<B><A HREF="#c2p_time"          onClick="showpage('2', '_time');         return false;">time()</A></B>
-</BLOCKQUOTE><P>
-<!-- CONTENTS_END -->
-</DIV>
 <DIV ID=c2p_gmtime STYLE='display: block'>
 <!-- CONTENTS_START -->
 <A NAME="nesla_gmtime"></A>
@@ -345,6 +295,17 @@ is not defined, the function will use the current local system date.
 <H4>Description</H4>
 <BLOCKQUOTE><P>
 <P>Returns the name of a table entry at a given index.
+</BLOCKQUOTE>
+<!-- CONTENTS_END -->
+</DIV>
+<DIV ID=c2p_ival STYLE='display: block'>
+<!-- CONTENTS_START -->
+<A NAME="nesla_ival"></A>
+<H2>ival<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Returns a pointer to the value of a table entry at a given index.
 </BLOCKQUOTE>
 <!-- CONTENTS_END -->
 </DIV>
@@ -604,6 +565,110 @@ are zero size.
 </BLOCKQUOTE><P>
 <!-- CONTENTS_END -->
 </DIV>
+
+<DIV ID=c2p_sqldate STYLE='display: block'>
+<!-- CONTENTS_START -->
+<A NAME="nesla_sqldate"></A>
+<H2>sqldate<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Returns a string representation of <VAR>timestamp</VAR> in the format 'YYYY-MM-DD'.
+If <VAR>timestamp</VAR> is not defined, the function will use the current local
+system date.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>string</I> <B>=</B> <B>sqldate(</B><I>[number timestamp]</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>timestamp</I> </TD><TD>The <B>number</B> of seconds since January 1, 1970 UTC (commonly called a UNIX timestamp).</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns a formatted date <VAR>string</VAR> in the format 'YYYY-MM-DD'.
+</BLOCKQUOTE><P>
+
+<H4>Remarks</H4>
+<BLOCKQUOTE><P>
+<P>No remarks.
+</BLOCKQUOTE><P>
+
+<H4>Examples</H4>
+<BLOCKQUOTE><P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	<B>print</B>(<B>sqldate</B>());
+</CODE></TD></TR></TABLE>
+<P>The above example will output something similar to: "<B>2007-07-01</B>"</P>
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	<B>print</B>(<B>sqldate</B>(0)+" "+<B>sqltime</B>(0));
+</CODE></TD></TR></TABLE>
+<P>The above example will output something similar to (note the adjustment for local time): "<B>1969-12-31 19:00:00</B>"</P>
+</BLOCKQUOTE><P>
+
+<H4>See Also</H4>
+<BLOCKQUOTE><P>
+<B><A HREF="#c2p_sqltime"          onClick="showpage('2', '_sqltime');         return false;">sqltime()</A></B>
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
+</DIV>
+<DIV ID=c2p_sqltime STYLE='display: block'>
+<!-- CONTENTS_START -->
+<A NAME="nesla_sqltime"></A>
+<H2>sqltime<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Returns a string representation of <VAR>timestamp</VAR> in the format 'HH:MM:SS'.
+If <VAR>timestamp</VAR> is not defined, the function will use the current local
+system time.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>string</I> <B>=</B> <B>sqltime(</B><I>[number timestamp]</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>timestamp</I> </TD><TD>The <B>number</B> of seconds since January 1, 1970 UTC (commonly called a UNIX timestamp).</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns a formatted time <VAR>string</VAR> in the format 'HH:MM:SS'.
+</BLOCKQUOTE><P>
+
+<H4>Remarks</H4>
+<BLOCKQUOTE><P>
+<P>No remarks.
+</BLOCKQUOTE><P>
+
+<H4>Examples</H4>
+<BLOCKQUOTE><P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	<B>print</B>(<B>sqltime</B>());
+</CODE></TD></TR></TABLE>
+<P>The above example will output something similar to: "<B>16:30:45</B>"</P>
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	<B>print</B>(<B>sqldate</B>(0)+" "+<B>sqltime</B>(0));
+</CODE></TD></TR></TABLE>
+<P>The above example will output something similar to (note the adjustment for local time): "<B>1969-12-31 19:00:00</B>"</P>
+</BLOCKQUOTE><P>
+
+<H4>See Also</H4>
+<BLOCKQUOTE><P>
+<B><A HREF="#c2p_sqldate"          onClick="showpage('2', '_sqldate');         return false;">sqldate()</A></B>
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
+</DIV>
+
 <DIV ID=c2p_system STYLE='display: block'>
 <!-- CONTENTS_START -->
 <a name="nesla_system"></a>
@@ -647,57 +712,27 @@ The following example demonstrates a way to list a directory and then read the r
 </BLOCKQUOTE><P>
 <!-- CONTENTS_END -->
 </DIV>
+
 <DIV ID=c2p_time STYLE='display: block'>
 <!-- CONTENTS_START -->
-<A NAME="nesla_time"></A>
+<a name="nesla_time"></a>
 <H2>time<BR><HR></H2>
 
 <H4>Description</H4>
 <BLOCKQUOTE><P>
-<P>Returns a string representation of <VAR>timestamp</VAR> in the format 'HH:MM:SS'.
-If <VAR>timestamp</VAR> is not defined, the function will use the current local
-system time.
+<P>Returns the elapsed time in seconds since January 1, 1970.
 </BLOCKQUOTE>
 
 <H4>Syntax</H4>
-<BLOCKQUOTE><P><I>string</I> <B>=</B> <B>time(</B><I>[number timestamp]</I><B>)<BR></B></BLOCKQUOTE><P>
-<BLOCKQUOTE>
-<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
-<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
-<TR><TD><I>timestamp</I> </TD><TD>The <B>number</B> of seconds since January 1, 1970 UTC (commonly called a UNIX timestamp).</TD></TR>
-</TABLE></BLOCKQUOTE>
+<BLOCKQUOTE><P><I>number</I> <B>=</B> <B>time(</B><B>)<BR></B></BLOCKQUOTE><P>
 
 <H4>Return Value</H4>
 <BLOCKQUOTE><P>
-<P>Returns a formatted time <VAR>string</VAR> in the format 'HH:MM:SS'.
-</BLOCKQUOTE><P>
-
-<H4>Remarks</H4>
-<BLOCKQUOTE><P>
-<P>No remarks.
-</BLOCKQUOTE><P>
-
-<H4>Examples</H4>
-<BLOCKQUOTE><P>
-<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
-<CODE>
-	<B>print</B>(<B>time</B>());
-</CODE></TD></TR></TABLE>
-<P>The above example will output something similar to: "<B>16:30:45</B>"</P>
-<P>
-<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
-<CODE>
-	<B>print</B>(<B>date</B>(0)+" "+<B>time</B>(0));
-</CODE></TD></TR></TABLE>
-<P>The above example will output something similar to (note the adjustment for local time): "<B>1969-12-31 19:00:00</B>"</P>
-</BLOCKQUOTE><P>
-
-<H4>See Also</H4>
-<BLOCKQUOTE><P>
-<B><A HREF="#c2p_date"          onClick="showpage('2', '_date');         return false;">date()</A></B>
+<P>Returns the time in seconds since the creation of the UNIXverse.
 </BLOCKQUOTE><P>
 <!-- CONTENTS_END -->
 </DIV>
+
 <DIV ID=c2p_tonumber STYLE='display: block'>
 <!-- CONTENTS_START -->
 <a name="nesla_tonumber"></a>
@@ -1256,7 +1291,6 @@ will ever need to know about Nesla.  Actually, it needs to know a lot less, but
 hey.
 </p>
 <PRE>
-
 /*
     NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
 
@@ -1283,7 +1317,7 @@ struct timeval { long tv_sec; long tv_usec; };
 #endif
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
-/* always include winsock2 before windows, or bad stuff will happen */
+/* always include winsock2 before windows */
 #include &lt;winsock2.h>
 #include &lt;windows.h>
 #include &lt;time.h>
@@ -1297,13 +1331,13 @@ struct timeval { long tv_sec; long tv_usec; };
 #include &lt;setjmp.h>
 
 #define NESLA_NAME      "nesla"
-#define NESLA_VERSION   "0.7.0"
+#define NESLA_VERSION   "0.8.0"
 
 #define MAX_OBJNAMELEN  64
 #define MAX_OUTBUFLEN   8192
 #define OUTBUFLOWAT	4096
 
-/* object storage types */
+/* nesla object types */
 #define NT_NULL         0
 #define NT_BOOLEAN      1
 #define NT_NUMBER       2
@@ -1313,7 +1347,7 @@ struct timeval { long tv_sec; long tv_usec; };
 #define NT_TABLE        6
 #define NT_CDATA        7
 
-/* object storage modes */
+/* nesla object status flags */
 #define NST_HIDDEN	0x01
 #define NST_READONLY	0x02
 #define NST_SYSTEM	0x04
@@ -1345,7 +1379,7 @@ typedef struct NES_CDATA {
 } NES_CDATA;
 typedef struct nes_valrec {
 	unsigned short type; /* val type */
-	unsigned short attr; /* status: attributes (hidden, readonly, system, autosort, etc...) */
+	unsigned short attr; /* status flags (hidden, readonly, system, autosort, etc...) */
 	unsigned short refs; /* number of references to this node */
 	unsigned int   size; /* storage size of string, nfunc or cdata */
 	union {
@@ -1377,8 +1411,7 @@ typedef struct nes_state {
 	short int single;
 	short int strict;
 	short int warnings;
-	short int jmpset;
-	jmp_buf savjmp;
+	jmp_buf *savjmp;
 	struct timeval ttime;
 	unsigned short int outbuflen;
 	char numbuf[128];
@@ -1400,6 +1433,7 @@ obj_t     *nes_getobj     (nes_state *N, obj_t *tobj, char *oname);
 obj_t     *nes_getiobj    (nes_state *N, obj_t *tobj, int oindex);
 obj_t     *nes_setobj     (nes_state *N, obj_t *tobj, char *oname, unsigned short otype, NES_CFUNC _fptr, num_t _num, char *_str, int _slen);
 obj_t     *nes_strcat     (nes_state *N, obj_t *cobj, char *str, int len);
+num_t      nes_tobool     (nes_state *N, obj_t *cobj);
 num_t      nes_tonum      (nes_state *N, obj_t *cobj);
 char      *nes_tostr      (nes_state *N, obj_t *cobj);
 /* parser */
@@ -1407,16 +1441,18 @@ obj_t     *nes_eval       (nes_state *N, const char *string);
 obj_t     *nes_evalf      (nes_state *N, const char *fmt, ...);
 #endif
 
-#define    nes_isnull(o)           (o==NULL||o->val==NULL||o->val->type==NT_NULL)
-#define    nes_isbool(o)           (o!=NULL&&o->val!=NULL&&o->val->type==NT_BOOLEAN)
-#define    nes_isnum(o)            (o!=NULL&&o->val!=NULL&&o->val->type==NT_NUMBER)
-#define    nes_isstr(o)            (o!=NULL&&o->val!=NULL&&o->val->type==NT_STRING)
-#define    nes_istable(o)          (o!=NULL&&o->val!=NULL&&o->val->type==NT_TABLE)
+#define    nes_isnull(o)            (o==NULL||o->val==NULL||o->val->type==NT_NULL)
+#define    nes_isbool(o)            (o!=NULL&&o->val!=NULL&&o->val->type==NT_BOOLEAN)
+#define    nes_isnum(o)             (o!=NULL&&o->val!=NULL&&o->val->type==NT_NUMBER)
+#define    nes_isstr(o)             (o!=NULL&&o->val!=NULL&&o->val->type==NT_STRING)
+#define    nes_istable(o)           (o!=NULL&&o->val!=NULL&&o->val->type==NT_TABLE)
 
-#define    nes_typeof(o)           nes_isnull(o)?NT_NULL:o->val->type
+#define    nes_istrue(o)            nes_tobool(N, o)?1:0
 
-#define    nes_getnum(N,o,n)       nes_tonum(N, nes_getobj(N,o,n))
-#define    nes_getstr(N,o,n)       nes_tostr(N, nes_getobj(N,o,n))
+#define    nes_typeof(o)            nes_isnull(o)?NT_NULL:o->val->type
+
+#define    nes_getnum(N,o,n)        nes_tonum(N, nes_getobj(N,o,n))
+#define    nes_getstr(N,o,n)        nes_tostr(N, nes_getobj(N,o,n))
 
 #define    nes_setnum(N,t,n,v)      nes_setobj(N, t, n, NT_NUMBER, (NES_CFUNC)NULL, v, NULL, 0)
 #define    nes_setstr(N,t,n,s,l)    nes_setobj(N, t, n, NT_STRING, (NES_CFUNC)NULL, 0, s,    l)
@@ -1433,13 +1469,8 @@ obj_t     *nes_evalf      (nes_state *N, const char *fmt, ...);
 #define    nes_seticdata(N,t,n,s,l) nes_setiobj(N, t, n, NT_CDATA,  (NES_CFUNC)NULL, 0, (void *)s, l)
 
 #endif /* nesla.h */
-
 </PRE>
 </DIV>
-
-
-
-
 
 	</TD>
 	<TD HEIGHT="100%" WIDTH="10" ALIGN=CENTER>&nbsp;</TD>

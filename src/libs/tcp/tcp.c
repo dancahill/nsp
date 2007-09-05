@@ -61,16 +61,6 @@ void tcp_murder(nes_state *N, obj_t *cobj)
 	return;
 }
 
-static void striprn(char *string)
-{
-	int i=strlen(string)-1;
-
-	while (i>-1) {
-		if ((string[i]!='\r')&&(string[i]!='\n')) break;
-		string[i--]='\0';
-	}
-}
-
 int tcp_bind(nes_state *N, char *ifname, unsigned short port)
 {
 	struct hostent *hp;
@@ -107,36 +97,50 @@ int tcp_bind(nes_state *N, char *ifname, unsigned short port)
 	return sock;
 }
 
-int tcp_accept(nes_state *N, int listensock, TCP_SOCKET *sock)
+int tcp_accept(nes_state *N, TCP_SOCKET *bsock, TCP_SOCKET *asock)
 {
 	struct sockaddr addr;
 	struct sockaddr_in host;
 	struct sockaddr_in peer;
 	int clientsock;
 	socklen_t fromlen;
+
 /*
 	int lowat=1;
 	struct timeval timeout;
 */
 	fromlen=sizeof(addr);
-	clientsock=accept(listensock, &addr, &fromlen);
+	clientsock=accept(bsock->socket, &addr, &fromlen);
 	if (clientsock<0) {
-		sock->LocalPort=0;
-		sock->RemotePort=0;
+		asock->LocalPort=0;
+		asock->RemotePort=0;
 		n_warn(N, "tcp_accept", "failed tcp_accept");
 		return -1;
 	}
-	sock->socket=clientsock;
+	asock->socket=clientsock;
+#ifdef HAVE_OPENSSL
+	if (bsock->use_ssl) {
+		ossl_accept(N, bsock, asock);
+		asock->use_ssl=1;
+	}
+#else
+#ifdef HAVE_XYSSL
+	if (bsock->use_ssl) {
+		xyssl_accept(N, bsock, asock);
+		asock->use_ssl=1;
+	}
+#endif
+#endif
 	fromlen=sizeof(host);
-	getsockname(sock->socket, (struct sockaddr *)&host, &fromlen);
-	nc_strncpy(sock->LocalAddr, inet_ntoa(host.sin_addr), sizeof(sock->LocalAddr)-1);
-	sock->LocalPort=ntohs(host.sin_port);
+	getsockname(asock->socket, (struct sockaddr *)&host, &fromlen);
+	nc_strncpy(asock->LocalAddr, inet_ntoa(host.sin_addr), sizeof(asock->LocalAddr)-1);
+	asock->LocalPort=ntohs(host.sin_port);
 	fromlen=sizeof(peer);
-	getpeername(sock->socket, (struct sockaddr *)&peer, &fromlen);
-	nc_strncpy(sock->RemoteAddr, inet_ntoa(peer.sin_addr), sizeof(sock->RemoteAddr)-1);
-	sock->RemotePort=ntohs(peer.sin_port);
+	getpeername(asock->socket, (struct sockaddr *)&peer, &fromlen);
+	nc_strncpy(asock->RemoteAddr, inet_ntoa(peer.sin_addr), sizeof(asock->RemoteAddr)-1);
+	asock->RemotePort=ntohs(peer.sin_port);
 /*
-	n_warn(N, "tcp_accept", "[%s:%d] tcp_accept: new connection", sock->RemoteAddr, sock->RemotePort);
+	n_warn(N, "tcp_accept", "[%s:%d] tcp_accept: new connection", asock->RemoteAddr, asock->RemotePort);
 	timeout.tv_sec=1;
 	timeout.tv_usec=0;
 	setsockopt(clientsock, SOL_SOCKET, SO_RCVTIMEO, (void *)&timeout, sizeof(timeout));
@@ -153,10 +157,18 @@ static int tcp_conn(nes_state *N, TCP_SOCKET *sock, const struct sockaddr_in *se
 	int rc;
 
 	rc=connect(sock->socket, (struct sockaddr *)serv_addr, addrlen);
-#ifdef HAVE_SSL
+#ifdef HAVE_OPENSSL
 	if ((rc==0)&&(use_ssl)) {
-		rc=ssl_connect(N, sock);
+		rc=ossl_connect(N, sock);
+		sock->use_ssl=1;
 	}
+#else
+#ifdef HAVE_XYSSL
+	if ((rc==0)&&(use_ssl)) {
+		rc=xyssl_connect(N, sock);
+		sock->use_ssl=1;
+	}
+#endif
 #endif
 	if (rc<0) {
 		sock->LocalPort=0;
@@ -196,7 +208,7 @@ int tcp_connect(nes_state *N, TCP_SOCKET *sock, char *host, unsigned short port,
 	return 0;
 }
 
-int tcp_recv(nes_state *N, TCP_SOCKET *socket, char *buffer, int len, int flags)
+int tcp_recv(nes_state *N, TCP_SOCKET *socket, char *buffer, int max, int flags)
 {
 	int rc;
 
@@ -208,21 +220,26 @@ retry:
 		tcp_close(N, socket, 1);
 		return -1;
 	}
-	if (len>16384) len=16384;
-#ifdef HAVE_SSL
-	if (socket->ssl) {
-		rc=ssl_read(N, socket, buffer, len);
+	if (max>16384) max=16384;
+	if (socket->use_ssl) {
+#ifdef HAVE_OPENSSL
+		rc=ossl_read(N, socket, buffer, max);
 		if (rc==0) rc=-1;
-	} else {
-		rc=recv(socket->socket, buffer, len, flags);
-	}
 #else
-	rc=recv(socket->socket, buffer, len, flags);
+#ifdef HAVE_XYSSL
+		rc=xyssl_read(N, socket, buffer, max);
+		if (rc==0) rc=-1;
+#else
+	rc=-1;
+#endif
+#endif
+	} else {
+		rc=recv(socket->socket, buffer, max, flags);
+	}
 /*
 	buffer[rc]=0;
 	printf("\r\n--============================--\r\nrc=%d [%s]", rc, buffer);
 */
-#endif
 	if (rc<0) {
 #ifdef WIN32
 		return -1;
@@ -260,15 +277,19 @@ int tcp_send(nes_state *N, TCP_SOCKET *socket, const char *buffer, int len, int 
 		tcp_close(N, socket, 1);
 		return -1;
 	}
-#ifdef HAVE_SSL
-	if (socket->ssl) {
-		rc=ssl_write(N, socket, buffer, len);
+	if (socket->use_ssl) {
+#ifdef HAVE_OPENSSL
+		rc=ossl_write(N, socket, buffer, len);
+#else
+#ifdef HAVE_XYSSL
+		rc=xyssl_write(N, socket, buffer, len);
+#else
+	rc=-1;
+#endif
+#endif
 	} else {
 		rc=send(socket->socket, buffer, len, flags);
 	}
-#else
-	rc=send(socket->socket, buffer, len, flags);
-#endif
 	if (rc<0) {
 #ifdef WIN32
 		return rc;
@@ -312,7 +333,7 @@ int tcp_fprintf(nes_state *N, TCP_SOCKET *socket, const char *format, ...)
 	return rc;
 }
 
-int tcp_fgets(nes_state *N, char *buffer, int max, TCP_SOCKET *socket)
+int tcp_fgets(nes_state *N, TCP_SOCKET *socket, char *buffer, int max)
 {
 	char *pbuffer=buffer;
 	char *obuffer;
@@ -335,9 +356,7 @@ retry:
 		if (rc<0) {
 			return -1;
 		} else if (rc<1) {
-/*
-			goto retry;
-*/
+			/* goto retry; */
 			*pbuffer='\0';
 			return n;
 		}
@@ -379,8 +398,12 @@ int tcp_close(nes_state *N, TCP_SOCKET *socket, short int owner_killed)
 		socket->want_close=1;
 	} else {
 		socket->want_close=0;
-#ifdef HAVE_SSL
-		if (socket->ssl!=NULL) ssl_close(N, socket);
+#ifdef HAVE_OPENSSL
+		if (socket->use_ssl) ossl_close(N, socket);
+#else
+#ifdef HAVE_XYSSL
+		if (socket->use_ssl) xyssl_close(N, socket);
+#endif
 #endif
 		if (socket->socket>-1) {
 			/* shutdown(x,0=recv, 1=send, 2=both) */
@@ -399,6 +422,7 @@ NES_FUNCTION(neslatcp_tcp_bind)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1); /* host */
 	obj_t *cobj2=nes_getiobj(N, &N->l, 2); /* port */
+	obj_t *cobj3=nes_getiobj(N, &N->l, 3); /* port */
 	TCP_SOCKET *bsock;
 	int rc;
 
@@ -417,7 +441,30 @@ NES_FUNCTION(neslatcp_tcp_bind)
 		return -1;
 	}
 	bsock->socket=rc;
-//	nes_setcdata(N, &N->r, "", bsock, sizeof(TCP_SOCKET)+1);
+
+	if (nes_tobool(N, cobj3)) {
+		obj_t *tobj=nes_getiobj(N, &N->l, 4); /* ssl opts */
+		char *pc=NULL, *pk=NULL;
+
+		if (nes_istable(tobj)) {
+			cobj1=nes_getobj(N, tobj, "certfile");
+			cobj2=nes_getobj(N, tobj, "keyfile");
+			if (cobj1->val->type==NT_STRING&&cobj2->val->type==NT_STRING&&cobj1->val->size>0&&cobj2->val->size>0) {
+				pc=cobj1->val->d.str;
+				pk=cobj2->val->d.str;
+			}
+		}
+#ifdef HAVE_OPENSSL
+		rc=ossl_init(N, bsock, 1, pc, pk);
+		bsock->use_ssl=1;
+#else
+#ifdef HAVE_XYSSL
+		rc=xyssl_init(N, bsock, 1, pc, pk);
+		bsock->use_ssl=1;
+#endif
+#endif
+	}
+	/* nes_setcdata(N, &N->r, "", bsock, sizeof(TCP_SOCKET)+1); */
 	nes_setcdata(N, &N->r, "", NULL, 0);
 	N->r.val->d.str=(void *)bsock;
 	N->r.val->size=sizeof(TCP_SOCKET)+1;
@@ -441,12 +488,12 @@ NES_FUNCTION(neslatcp_tcp_accept)
 	}
 	strcpy(asock->obj_type, "sock4");
 	asock->obj_term=(NES_CFREE)tcp_murder;
-	if ((rc=tcp_accept(N, bsock->socket, asock))<0) {
+	if ((rc=tcp_accept(N, bsock, asock))<0) {
 		nes_setstr(N, &N->r, "", "tcp error", strlen("tcp error"));
 		n_free(N, (void *)&asock);
 		return -1;
 	}
-//	nes_setcdata(N, &N->r, "", asock, sizeof(TCP_SOCKET)+1);
+	/* nes_setcdata(N, &N->r, "", asock, sizeof(TCP_SOCKET)+1); */
 	nes_setcdata(N, &N->r, "", NULL, 0);
 	N->r.val->d.str=(void *)asock;
 	N->r.val->size=sizeof(TCP_SOCKET)+1;
@@ -473,7 +520,7 @@ NES_FUNCTION(neslatcp_tcp_open)
 		n_free(N, (void *)&sock);
 		return -1;
 	}
-//	nes_setcdata(N, &N->r, "", sock, sizeof(TCP_SOCKET)+1);
+	/* nes_setcdata(N, &N->r, "", sock, sizeof(TCP_SOCKET)+1); */
 	nes_setcdata(N, &N->r, "", NULL, 0);
 	N->r.val->d.str=(void *)sock;
 	N->r.val->size=sizeof(TCP_SOCKET)+1;
@@ -499,7 +546,7 @@ NES_FUNCTION(neslatcp_tcp_read)
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	TCP_SOCKET *sock;
 	int rc;
-	char tmpbuf[8192];
+	char tmpbuf[2048];
 	char *p;
 
 	if ((cobj1->val->type!=NT_CDATA)||(cobj1->val->d.str==NULL)||(strcmp(cobj1->val->d.str, "sock4")!=0))
@@ -517,7 +564,7 @@ NES_FUNCTION(neslatcp_tcp_read)
 	if (rc>-1) {
 		nes_setstr(N, &N->r, "", p, rc);
 	} else {
-		nes_setnum(N, &N->r, "", rc);
+		nes_unlinkval(N, &N->r);
 	}
 	return 0;
 }
@@ -527,15 +574,15 @@ NES_FUNCTION(neslatcp_tcp_gets)
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	TCP_SOCKET *sock;
 	int rc;
-	char tmpbuf[8192];
+	char tmpbuf[2048];
 
 	if ((cobj1->val->type!=NT_CDATA)||(cobj1->val->d.str==NULL)||(strcmp(cobj1->val->d.str, "sock4")!=0))
 		n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a socket for arg1");
 	sock=(TCP_SOCKET *)cobj1->val->d.str;
-	rc=tcp_fgets(N, tmpbuf, sizeof(tmpbuf)-1, sock);
+	rc=tcp_fgets(N, sock, tmpbuf, sizeof(tmpbuf)-1);
 	if (rc>-1) {
 		striprn(tmpbuf);
-		nes_setstr(N, &N->r, "", tmpbuf, rc);
+		nes_setstr(N, &N->r, "", tmpbuf, strlen(tmpbuf));
 	} else {
 		nes_setnum(N, &N->r, "", rc);
 	}
@@ -566,7 +613,7 @@ int neslatcp_register_all(nes_state *N)
 #ifdef WIN32
 	static WSADATA wsaData;
 #endif
-	obj_t *tobj;
+	obj_t *cobj, *tobj;
 
 #ifdef WIN32
 	if (WSAStartup(0x101, &wsaData)) {
@@ -587,6 +634,15 @@ int neslatcp_register_all(nes_state *N)
 	nes_setcfunc(N, tobj,  "read",   (NES_CFUNC)neslatcp_tcp_read);
 	nes_setcfunc(N, tobj,  "gets",   (NES_CFUNC)neslatcp_tcp_gets);
 	nes_setcfunc(N, tobj,  "write",  (NES_CFUNC)neslatcp_tcp_write);
+#ifdef HAVE_OPENSSL
+	cobj=nes_setnum(N, tobj, "have_ssl", 1);cobj->val->type=NT_BOOLEAN;
+#else
+#ifdef HAVE_XYSSL
+	cobj=nes_setnum(N, tobj, "have_ssl", 1);cobj->val->type=NT_BOOLEAN;
+#else
+	cobj=nes_setnum(N, tobj, "have_ssl", 0);cobj->val->type=NT_BOOLEAN;
+#endif
+#endif
 	return 0;
 }
 

@@ -1,30 +1,17 @@
 # Microsoft Developer Studio Generated NMAKE File, Based on nestray.dsp
 CFG=NesTray - Win32 Release
 
-!IF "$(CFG)" != "NesTray - Win32 Release"
-!MESSAGE Invalid configuration "$(CFG)" specified.
-!MESSAGE You can specify a configuration when running NMAKE
-!MESSAGE by defining the macro CFG on the command line. For example:
-!MESSAGE 
-!MESSAGE NMAKE /f "nestray.mak" CFG="NesTray - Win32 Release"
-!MESSAGE 
-!MESSAGE Possible choices for configuration are:
-!MESSAGE 
-!MESSAGE "NesTray - Win32 Release" (based on "Win32 (x86) Application")
-!MESSAGE 
-!ERROR An invalid configuration is specified.
-!ENDIF 
-
 !IF "$(OS)" == "Windows_NT"
 NULL=
 !ELSE 
 NULL=nul
 !ENDIF 
 
-OUTDIR=.\..\..\..\bin
-INTDIR=.\..\..\..\obj\NesTray
+include ..\..\config.mak
+
+OUTDIR=..\..\..\bin
+INTDIR=..\..\..\obj\NesTray
 # Begin Custom Macros
-OutDir=.\..\..\..\bin
 # End Custom Macros
 
 ALL : "$(OUTDIR)\nestray.exe"
@@ -85,15 +72,26 @@ BSC32_FLAGS=/nologo /o"$(OUTDIR)\nestray.bsc"
 BSC32_SBRS= \
 	
 LINK32=link.exe
-LINK32_FLAGS=kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /pdb:none /machine:I386 /out:"$(OUTDIR)\nestray.exe" 
+LINK32_FLAGS=/NODEFAULTLIB:libc /libpath:../../../lib/ libcmt.lib gdi32.lib shell32.lib user32.lib \
+	libnesla.lib libneslaext.lib libneslatcp.lib $(LDFLAGS) \
+	/nologo /subsystem:windows /pdb:none /machine:I386 /out:"$(OUTDIR)\nestray.exe" 
+
+#kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib \
+#	/nologo /subsystem:windows /pdb:none /machine:I386 /out:"$(OUTDIR)\nestray.exe" 
+
+#/libpath:../../../lib/ libcmt.lib libnesla.lib $(LDFLAGS) \
+#	libneslaext.lib libneslatcp.lib # libneslawinapi.lib libneslazip.lib
+
 LINK32_OBJS= \
 	"$(INTDIR)\nestray.obj" \
 	"$(INTDIR)\nestray.res" \
 	"..\..\..\lib\libnesla.lib" \
+	"..\..\..\lib\libneslacrypto.lib" \
 	"..\..\..\lib\libnesladl.lib" \
 	"..\..\..\lib\libneslaext.lib" \
 	"..\..\..\lib\libneslamath.lib" \
 	"..\..\..\lib\libneslaodbc.lib" \
+	"..\..\..\lib\libneslaregex.lib" \
 	"..\..\..\lib\libneslatcp.lib" \
 	"..\..\..\lib\libneslawinapi.lib" \
 	"..\..\..\lib\libneslazip.lib"
@@ -103,19 +101,9 @@ LINK32_OBJS= \
   $(LINK32_FLAGS) $(LINK32_OBJS)
 <<
 
-
-!IF "$(CFG)" == "NesTray - Win32 Release"
 SOURCE=.\nestray.c
-
 "$(INTDIR)\nestray.obj" : $(SOURCE) "$(INTDIR)"
 
-
 SOURCE=.\nestray.rc
-
 "$(INTDIR)\nestray.res" : $(SOURCE) "$(INTDIR)"
 	$(RSC) $(RSC_PROJ) $(SOURCE)
-
-
-
-!ENDIF 
-

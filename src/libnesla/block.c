@@ -248,3 +248,42 @@ void n_while(nes_state *N)
 	return;
 #undef __FUNCTION__
 }
+
+void n_try(nes_state *N)
+{
+#define __FUNCTION__ "n_try"
+	jmp_buf *savjmp;
+	uchar *bs, *be;
+	obj_t *tobj;
+
+	DEBUG_IN();
+	bs=N->readptr;
+	if (*N->readptr==OP_POBRACE) {
+		N->readptr++;
+		n_skipto(N, __FUNCTION__, OP_PCBRACE);
+	} else {
+		n_skipto(N, __FUNCTION__, OP_PSEMICOL);
+	}
+	N->readptr++;
+	be=N->readptr;
+	N->readptr=bs;
+	savjmp=N->savjmp;
+	N->savjmp=n_alloc(N, sizeof(jmp_buf), 1);
+	if (setjmp(*N->savjmp)==0) {
+		nes_exec(N, (char *)N->readptr);
+		tobj=nes_getobj(N, &N->l, "_exception");
+		if (!nes_isnull(tobj)) nes_unlinkval(N, tobj);
+	} else {
+		/* if (N->debug) n_warn(N, __FUNCTION__, "some kind of error?"); */
+		tobj=nes_settable(N, &N->l, "_exception");
+		nes_setnum(N, tobj, "errno", N->err);
+		nes_setstr(N, tobj, "errtext", N->errbuf, -1);
+		N->err=0;
+	}
+	n_free(N, (void *)&N->savjmp);
+	N->savjmp=savjmp;
+	N->readptr=be;
+	DEBUG_OUT();
+	return;
+#undef __FUNCTION__
+}

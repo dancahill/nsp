@@ -82,15 +82,18 @@ obj_t *n_execfunction(nes_state *N, obj_t *cobj, obj_t *pobj)
 	unsigned int i;
 
 	DEBUG_IN();
-	if ((cobj->val->type!=NT_NFUNC)&&(cobj->val->type!=NT_CFUNC)) n_error(N, NE_SYNTAX, __FUNCTION__, "'%s' is not a function", cobj->name);
-	lobj=n_setargs(N, cobj->name, pobj);
-	olobj=N->l.val; N->l.val=lobj->val; lobj->val=NULL;
 	/* if (N->debug) n_warn(N, __FUNCTION__, "%s()", cobj->name); */
 	/* if (N->debug) if (pobj) n_warn(N, __FUNCTION__, "parent object name = %s", pobj->name); */
 	if (cobj->val->type==NT_CFUNC) {
+		lobj=n_setargs(N, cobj->name, pobj);
+		olobj=N->l.val; N->l.val=lobj->val; lobj->val=NULL;
 		cfunc=cobj->val->d.cfunc;
 		cfunc(N);
+		nes_unlinkval(N, &N->l);
+		N->l.val=olobj;
 	} else if (cobj->val->type==NT_NFUNC) {
+		lobj=n_setargs(N, cobj->name, pobj);
+		olobj=N->l.val; N->l.val=lobj->val; lobj->val=NULL;
 		oldbptr=N->blockptr;
 		oldbend=N->blockend;
 		oldrptr=N->readptr;
@@ -114,9 +117,11 @@ obj_t *n_execfunction(nes_state *N, obj_t *cobj, obj_t *pobj)
 		N->blockptr=oldbptr;
 		N->blockend=oldbend;
 		N->readptr=oldrptr;
+		nes_unlinkval(N, &N->l);
+		N->l.val=olobj;
+	} else {
+		n_error(N, NE_SYNTAX, __FUNCTION__, "'%s' is not a function", cobj->name);
 	}
-	nes_unlinkval(N, &N->l);
-	N->l.val=olobj;
 	DEBUG_OUT();
 	return &N->r;
 #undef __FUNCTION__
@@ -132,13 +137,12 @@ obj_t *nes_exec(nes_state *N, const char *string)
 	char namebuf[MAX_OBJNAMELEN+1];
 	obj_t *cobj, *tobj;
 	uchar block, ctype, op;
-	uchar jmp=(uchar)N->jmpset, single=(uchar)N->single;
+	uchar jmp=N->savjmp?1:0, single=(uchar)N->single;
 	uchar *p;
 
 	DEBUG_IN();
 	N->single=0;
 	if (jmp==0) {
-		N->jmpset=1;
 		nes_unlinkval(N, &N->r);
 		if (string==NULL||string[0]==0) goto end;
 		p=n_decompose(N, (uchar *)string);
@@ -149,7 +153,8 @@ obj_t *nes_exec(nes_state *N, const char *string)
 		}
 		N->blockend=N->blockptr+readi4((N->blockptr+8));
 		N->readptr=N->blockptr+readi4((N->blockptr+12));
-		if (setjmp(N->savjmp)!=0) goto end;
+		N->savjmp=n_alloc(N, sizeof(jmp_buf), 1);
+		if (setjmp(*N->savjmp)!=0) goto end;
 	} else {
 		N->readptr=(uchar *)string;
 	}
@@ -179,6 +184,7 @@ obj_t *nes_exec(nes_state *N, const char *string)
 			case OP_KFOR:   n_for(N);   if (N->ret) goto end; else goto endstmt;
 			case OP_KDO:    n_do(N);    if (N->ret) goto end; else goto endstmt;
 			case OP_KWHILE: n_while(N); if (N->ret) goto end; else goto endstmt;
+			case OP_KTRY:   n_try(N);   if (N->ret) goto end; else goto endstmt;
 			case OP_KFUNC:  
 				n_expect(N, __FUNCTION__, OP_LABEL);
 				cobj=nes_setnfunc(N, &N->g, n_getlabel(N, NULL), NULL, 0);
@@ -239,7 +245,7 @@ endstmt:
 	}
 end:
 	if (jmp==0) {
-		N->jmpset=0;
+		n_free(N, (void *)&N->savjmp);
 		if (p) n_free(N, (void *)&p);
 		N->blockend=NULL;
 		N->readptr=NULL;
@@ -282,7 +288,7 @@ int nes_execfile(nes_state *N, char *file)
 	uchar *oldbptr=N->blockptr;
 	uchar *oldbend=N->blockend;
 	uchar *oldrptr=N->readptr;
-	short int jmp=N->jmpset;
+	short int jmp=N->savjmp?1:0;
 	int bl;
 	int fd;
 	int r;
@@ -290,8 +296,8 @@ int nes_execfile(nes_state *N, char *file)
 	char *o;
 
 	if (jmp==0) {
-		if (setjmp(N->savjmp)==0) {
-			N->jmpset=1;
+		N->savjmp=n_alloc(N, sizeof(jmp_buf), 1);
+		if (setjmp(*N->savjmp)==0) {
 		} else {
 			rc=0;
 			goto end1;
@@ -334,7 +340,9 @@ end1:
 	N->blockend=oldbend;
 	N->readptr=oldrptr;
 end2:
-	if (jmp==0) N->jmpset=0;
+	if (jmp==0) {
+		n_free(N, (void *)&N->savjmp);
+	}
 	return rc;
 #undef __FUNCTION__
 }
@@ -347,18 +355,15 @@ typedef struct {
 nes_state *nes_newstate()
 {
 	FUNCTION list[]={
-		{ "date",	(NES_CFUNC)nl_datetime	},
-		{ "gmtime",	(NES_CFUNC)nl_gmtime	},
 		{ "iname",	(NES_CFUNC)nl_iname	},
+		{ "ival",	(NES_CFUNC)nl_ival	},
 		{ "include",	(NES_CFUNC)nl_include	},
-		{ "localtime",	(NES_CFUNC)nl_gmtime	},
 		{ "print",	(NES_CFUNC)nl_print	},
 		{ "printvar",	(NES_CFUNC)nl_printvar	},
 		{ "runtime",	(NES_CFUNC)nl_runtime	},
 		{ "sizeof",	(NES_CFUNC)nl_sizeof	},
 		{ "sleep",	(NES_CFUNC)nl_sleep	},
 		{ "system",	(NES_CFUNC)nl_system	},
-		{ "time",	(NES_CFUNC)nl_datetime	},
 		{ "tonumber",	(NES_CFUNC)nl_tonumber	},
 		{ "tostring",	(NES_CFUNC)nl_tostring	},
 		{ "typeof",	(NES_CFUNC)nl_typeof	},
@@ -374,7 +379,7 @@ nes_state *nes_newstate()
 	};
 	FUNCTION list_io[]={
 		{ "print",	(NES_CFUNC)nl_print	},
-		{ "write",	(NES_CFUNC)nl_print	},
+		{ "write",	(NES_CFUNC)nl_write	},
 		{ "flush",	(NES_CFUNC)nl_flush	},
 		{ NULL, NULL }
 	};
@@ -401,6 +406,14 @@ nes_state *nes_newstate()
 		{ "toupper",	(NES_CFUNC)nl_strtolower},
 		{ NULL, NULL }
 	};
+	FUNCTION list_time[]={
+		{ "gmtime",	(NES_CFUNC)nl_gmtime	},
+		{ "localtime",	(NES_CFUNC)nl_gmtime	},
+		{ "sqldate",	(NES_CFUNC)nl_sqltime	},
+		{ "sqltime",	(NES_CFUNC)nl_sqltime	},
+		{ "now",	(NES_CFUNC)nl_time	},
+		{ NULL, NULL }
+	};
 	nes_state *new_N;
 	obj_t *cobj;
 	short i;
@@ -409,6 +422,7 @@ nes_state *nes_newstate()
 	nc_gettimeofday(&new_N->ttime, NULL);
 	srand(new_N->ttime.tv_usec);
 
+//	new_N->g.val=n_newval(N, NT_TABLE);
 	new_N->g.val=n_alloc(new_N, sizeof(val_t), 1);
 	new_N->g.val->type=NT_TABLE;
 	new_N->g.val->d.table=NULL;
@@ -450,6 +464,11 @@ nes_state *nes_newstate()
 	cobj->val->attr|=NST_HIDDEN;
 	for (i=0;list_string[i].fn_name!=NULL;i++) {
 		nes_setcfunc(new_N, cobj, list_string[i].fn_name, list_string[i].fn_ptr);
+	}
+	cobj=nes_settable(new_N, &new_N->g, "time");
+	cobj->val->attr|=NST_HIDDEN;
+	for (i=0;list_time[i].fn_name!=NULL;i++) {
+		nes_setcfunc(new_N, cobj, list_time[i].fn_name, list_time[i].fn_ptr);
 	}
 	cobj=nes_setnum(new_N, &new_N->g, "null", 0);
 	cobj->val->type=NT_NULL; cobj->val->attr|=NST_SYSTEM;

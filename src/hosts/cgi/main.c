@@ -212,8 +212,12 @@ int main(int argc, char *argv[])
 #ifdef HAVE_MATH
 	neslamath_register_all(N);
 #endif
+	neslacrypto_register_all(N);
 	nesladl_register_all(N);
 	neslaext_register_all(N);
+#ifdef HAVE_REGEX
+	neslaregex_register_all(N);
+#endif
 	neslatcp_register_all(N);
 	/* add env */
 	for (i=0;environ[i]!=NULL;i++) {

@@ -24,7 +24,7 @@ dirs:
 
 # rules for libs
 
-static_libs: _libneslaext _libneslamath
+static_libs: _libneslacrypto _libneslaext _libneslamath _libneslaregex
 
 _libnesla: dirs
 	@cd src\libnesla
@@ -36,8 +36,18 @@ _libneslaext:
 	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
 	@cd ..\..\..
 
+_libneslacrypto:
+	@cd src\libs\crypto
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@cd ..\..\..
+
 _libneslamath:
 	@cd src\libs\math
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@cd ..\..\..
+
+_libneslaregex:
+	@cd src\libs\regex
 	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
 	@cd ..\..\..
 
@@ -59,10 +69,16 @@ lite: _libnesla
 
 clean: lite
 #	@touch src\config.mak
+	@cd src\libs\crypto
+	@..\..\..\$(NESLITE) Makefile.nes clean
+	@cd ..\..\..
 	@cd src\libs\ext
 	@..\..\..\$(NESLITE) Makefile.nes clean
 	@cd ..\..\..
 	@cd src\libs\math
+	@..\..\..\$(NESLITE) Makefile.nes clean
+	@cd ..\..\..
+	@cd src\libs\regex
 	@..\..\..\$(NESLITE) Makefile.nes clean
 	@cd ..\..\..
 	@cd src\hosts\cli
@@ -85,7 +101,7 @@ hack:
 	del *.obj
 	tcc -w-par -ml -v- -I..\include -eneslite.exe libnesla\*.c hosts\lite\main.c
 	rem if all else fails, you can build it complete with just the next line by itself
-	tcc -w-par -ml -v- -I..\include -enesla.exe -DHAVE_MATH libnesla\*.c libs\ext\*.c libs\math\*.c hosts\cli\main.c
+	tcc -w-par -ml -v- -I..\include -enesla.exe -DHAVE_MATH -DHAVE_REGEX libnesla\*.c libs\ext\*.c libs\math\*.c hosts\cli\main.c
 	del *.obj
 	nesla.exe -e "var x='\n\ngnikrow dna ';print('Standard Interpreter built');for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));"
 

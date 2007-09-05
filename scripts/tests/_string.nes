@@ -37,7 +37,9 @@ function teststring() {
 	local x="1|2|3|4|5|6|7";
 	while (x==true) {
 		print("\t", x, "\n");
-		x=string.sub(string.str(x, "|"), 1, 42);
+		if ((x=string.str(x, "|"))!=null) {
+			x=string.sub(x, 1, 42);
+		}
 	}
 	return;
 }

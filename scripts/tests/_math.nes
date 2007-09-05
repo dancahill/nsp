@@ -66,10 +66,10 @@ function testmath() {
 	print("\t\t3.141593, actually, but rounding doesn't work\n");
 
 	print("\tmath.rand()         = ", math.rand());
-	for (i=0;i<3;i++) print(", ", math.rand());
+	for (i=0;i<4;i++) print(", ", math.rand());
 	print("\n");
 	print("\tmath.rand(10)       = ", math.rand(10));
-	for (i=0;i<14;i++) print(", ", math.rand(10));
+	for (i=0;i<11;i++) print(", ", math.rand(10));
 	print("\n");
 
 //	print("\nexpect a divided by zero warning and a null return val\n");

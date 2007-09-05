@@ -358,13 +358,6 @@ char *strcasestr(const char *src, const char *query)
 	return NULL;
 }
 
-void striprn(char *string)
-{
-	while ((string[strlen(string)-1]=='\r')||(string[strlen(string)-1]=='\n')) {
-		string[strlen(string)-1]='\0';
-	}
-}
-
 void cgi_readenv()
 {
 	obj_t *confobj=nes_settable(N, &N->g, "_CONFIG");

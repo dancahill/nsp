@@ -16,6 +16,9 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nesla/nesla.h"
+#ifdef HAVE_CRYPTO
+#include "nesla/libcrypt.h"
+#endif
 #ifdef HAVE_DL
 #include "nesla/libdl.h"
 #endif
@@ -151,6 +154,9 @@ int main(int argc, char *argv[])
 	if ((N=nes_newstate())==NULL) return -1;
 	setsigs();
 	N->debug=0;
+#ifdef HAVE_CRYPTO
+	neslacrypto_register_all(N);
+#endif
 #ifdef HAVE_DL
 	nesladl_register_all(N);
 #endif

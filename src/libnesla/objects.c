@@ -339,6 +339,20 @@ obj_t *nes_strcat(nes_state *N, obj_t *cobj, char *str, int len)
 	return cobj;
 }
 
+num_t nes_tobool(nes_state *N, obj_t *cobj)
+{
+	switch (nes_typeof(cobj)) {
+	case NT_NULL    : return 0;
+	case NT_BOOLEAN : return cobj->val->d.num?1:0;
+	case NT_NUMBER  : return cobj->val->d.num?1:0;
+	case NT_STRING  : return cobj->val->size?1:0;
+	case NT_TABLE   : return cobj->val->d.table?1:0;
+	case NT_NFUNC   :
+	case NT_CFUNC   : return 1;
+	}
+	return 0;
+}
+
 num_t nes_tonum(nes_state *N, obj_t *cobj)
 {
 	switch (nes_typeof(cobj)) {

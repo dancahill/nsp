@@ -9,7 +9,7 @@ OBJECTS = "test.o";
 TNAME   = "libneslatest";
 if (cmd==null) if (_ARGS[2]=='clean') cmd='clean'; else cmd='build';
 if (cmd=='build') {
-	print("building test lib\n");
+	print("building ",_LINKAGE_," lib test\n");
 	if (CC=='cl.exe') file.write("dlldefs.def", "LIBRARY\t\tlibneslatest\r\nVERSION\t\t"+_version_+"\r\nEXPORTS\r\n\tneslatest_register_all\r\n");
 	build_objs(CC, CFLAGS, OBJECTS, _LINKAGE_, TNAME);
 	build_lib(CC, TNAME, OBJECTS, _LINKAGE_, TNAME);

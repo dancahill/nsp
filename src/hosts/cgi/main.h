@@ -17,9 +17,13 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nesla/nesla.h"
+#include "nesla/libcrypt.h"
 #include "nesla/libdl.h"
 #include "nesla/libext.h"
 #include "nesla/libmath.h"
+#ifdef HAVE_REGEX
+#include "nesla/libregex.h"
+#endif
 #include "nesla/libtcp.h"
 #include <ctype.h>
 #include <signal.h>
@@ -58,7 +62,6 @@ void  URLDecode(char *pEncoded);
 char *str2html(char *instring);
 char *get_mime_type(char *name);
 char *strcasestr(const char *src, const char *query);
-void  striprn(char *string);
 void  cgi_readenv(void);
 char *getgetenv(char *query);
 char *getpostenv(char *query);

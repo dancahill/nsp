@@ -89,7 +89,8 @@ function ratehand() {
 	}
 	for (n=0;n<3;n++) if (flush[n]==5) return 5;
 #	CHECK FOR A STRAIGHT
-	straight = { };
+	straight = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+//	straight = { };
 	for (n=0;n<5;n++)  straight[math.floor(tonumber(c[n])/4)]=1;
 	straight[13]=straight[0];
 	for (n=0;n<10;n++) if (straight[n]+straight[n+1]+straight[n+2]+straight[n+3]+straight[n+4]==5) return 4;

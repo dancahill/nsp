@@ -301,9 +301,7 @@ uchar *n_decompose(nes_state *N, uchar *rawtext)
 		} else if (op==OP_NUMDATA) {
 			testgrow((int)(3+cobj->val->size));
 			state.destbuf[state.offset++]=op&255;
-//			writei4(cobj->val->size, (state.destbuf+state.offset));
 			state.offset+=sprintf((char *)state.destbuf+state.offset, "%c", cobj->val->size&255);
-//			state.offset+=1;
 			nc_memcpy((char *)state.destbuf+state.offset, cobj->val->d.str, cobj->val->size);
 			state.offset+=cobj->val->size;
 			state.destbuf[state.offset++]=0;

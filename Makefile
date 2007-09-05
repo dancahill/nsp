@@ -6,13 +6,13 @@ CC      = gcc
 MAKE    = make
 NESLITE = ./bin/neslite
 
-all: _libnesla lite deps static_libs cli
-	@echo
+#.SILENT:
+
+all: _all
 	@echo "	Run 'make targets' to list more options."
 	@echo
 
-deps: lite
-	@cd src/libs && ../../$(NESLITE) autoconf.nes gcc posix && cd ../..
+_all: dirs libnesla lite deps static_libs cli
 
 dirs:
 	@mkdir -p bin
@@ -20,62 +20,54 @@ dirs:
 	@mkdir -p lib/shared
 	@mkdir -p int
 
+libnesla: dirs
+	@cd src/libnesla     && $(MAKE) && cd ../..
+
+deps: lite
+	@cd src/libs && ../../$(NESLITE) autoconf.nes gcc posix && cd ../..
+
+reconf: lite
+	@rm -f src/config.???
+	@cd src/libs && ../../$(NESLITE) autoconf.nes gcc posix && cd ../..
+
 # rules for libs
 
-static_libs: deps _libnesladl _libneslaext _libneslaldap _libneslamath _libneslamysql _libneslaodbc _libneslapgsql _libneslasqlite3 _libneslatcp _libneslazip
+static_libs: deps
+	@cd src/libs/crypto  && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/dl      && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/ext     && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/ldap    && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/math    && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/mysql   && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/odbc    && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/pgsql   && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/regex   && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/sqlite3 && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/tcp     && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/zip     && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
 
 static: static_libs
 
-_libnesla: dirs
-	@cd src/libnesla     && $(MAKE) && cd ../..
-
-_libnesladl:
-	@cd src/libs/dl      && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
-
-_libneslaext:
-	@cd src/libs/ext     && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
-
-_libneslaldap:
-	@cd src/libs/ldap    && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
-
-_libneslamath:
-	@cd src/libs/math    && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
-
-_libneslamysql:
-	@cd src/libs/mysql   && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
-
-_libneslaodbc:
-	@cd src/libs/odbc    && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
-
-_libneslapgsql:
-	@cd src/libs/pgsql   && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
-
-_libneslasqlite3:
-	@cd src/libs/sqlite3 && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
-
-_libneslatcp:
-	@cd src/libs/tcp     && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
-
-_libneslazip:
-	@cd src/libs/zip     && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
-
 shared_libs: deps
-	@cd src/libs/ext     && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
-	@cd src/libs/ldap    && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
-	@cd src/libs/math    && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
-	@cd src/libs/mysql   && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
-	@cd src/libs/odbc    && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
-	@cd src/libs/pgsql   && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
-	@cd src/libs/sqlite3 && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
-	@cd src/libs/test    && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
-	@cd src/libs/tcp     && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
-	@cd src/libs/zip     && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
-	@./bin/nesla -e "dl.loadlib('./lib/shared/libneslatest.so');print('\n'+dltest()+'\n');"
+	@cd src/libs/crypto   && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/ext      && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/ldap     && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/math     && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/mysql    && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/odbc     && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/pgsql    && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/regex    && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/sqlite3  && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/src2html && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/tcp      && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/test     && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
+	@cd src/libs/zip      && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
+#	@./bin/nesla -e "dl.loadlib('./lib/shared/libneslatest.so');print('\n'+dltest()+'\n');"
 
 shared: shared_libs
 
 # rules for hosts
-cgi: all
+cgi: _all
 	@cd src/hosts/cgi     && $(MAKE) && cd ../../..
 
 cli:
@@ -86,11 +78,11 @@ cli:
 	@echo
 	@echo
 
-ctest: all
+ctest: _all
 	@cd src/hosts/ctest   && $(MAKE) && cd ../../..
 	@gdb --args ./bin/ctest_d
 
-lite: _libnesla
+lite: libnesla
 	@cd src/hosts/lite    && $(MAKE) -s && cd ../../..
 	@echo
 	@echo -n "Minimal Interpreter built"
@@ -98,7 +90,7 @@ lite: _libnesla
 	@echo
 	@echo
 
-nullgw: all
+nullgw: _all
 	@cd src/hosts/nullgw  && $(MAKE) && cd ../../..
 
 # rules for everything else
@@ -110,6 +102,7 @@ clean: #lite
 	@cd src/hosts/ctest   && $(MAKE) -s clean && cd ../../..
 	@cd src/hosts/nullgw  && $(MAKE) -s clean && cd ../../..
 	@cd src/hosts/lite    && $(MAKE) -s clean && cd ../../..
+#	@cd src/libs/crypto   && ../../../$(NESLITE) Makefile.nes clean && cd ../../..
 #	@cd src/libs/dl       && ../../../$(NESLITE) Makefile.nes clean && cd ../../..
 #	@cd src/libs/ext      && ../../../$(NESLITE) Makefile.nes clean && cd ../../..
 #	@cd src/libs/ldap     && ../../../$(NESLITE) Makefile.nes clean && cd ../../..
@@ -117,7 +110,9 @@ clean: #lite
 #	@cd src/libs/mysql    && ../../../$(NESLITE) Makefile.nes clean && cd ../../..
 #	@cd src/libs/odbc     && ../../../$(NESLITE) Makefile.nes clean && cd ../../..
 #	@cd src/libs/pgsql    && ../../../$(NESLITE) Makefile.nes clean && cd ../../..
+#	@cd src/libs/regex    && ../../../$(NESLITE) Makefile.nes clean && cd ../../..
 #	@cd src/libs/sqlite3  && ../../../$(NESLITE) Makefile.nes clean && cd ../../..
+#	@cd src/libs/src2html && ../../../$(NESLITE) Makefile.nes clean && cd ../../..
 #	@cd src/libs/test     && ../../../$(NESLITE) Makefile.nes clean && cd ../../..
 #	@cd src/libs/tcp      && ../../../$(NESLITE) Makefile.nes clean && cd ../../..
 #	@cd src/libs/winapi   && ../../../$(NESLITE) Makefile.nes clean && cd ../../..
@@ -129,8 +124,13 @@ distclean: clean
 	@rm -rf bin lib int
 	@rm -f src/config.???
 
-install: all
+install: _all
 	@cp -pR bin/nesla /usr/bin/nesla
+
+install_libs: _all shared install
+	@mkdir -p /usr/local/lib/nesla
+	@cp -pR lib/*.a /usr/local/lib/nesla/
+	@cp -pR lib/shared/*.so /usr/local/lib/nesla/
 
 # minimal one-line command for making a minimal unoptimized binary
 hack:
@@ -173,7 +173,7 @@ test2:
 
 ver:
 	@make clean
-	@joe `grep -lR "0\.7\." *`
+	@joe `grep -lR "0\.8\." *`
 	@rm `find -name *~`
 
 showbug:
@@ -195,21 +195,13 @@ valgrindlite:
 	@valgrind -v --leak-check=full --leak-resolution=high --show-reachable=yes $(NESLITE)_d scripts/tests/test1.nes
 
 datestamp:
-	cd scripts && touch --date="2007-08-01 01:00:00" `find *` && cd ..
+#	cd scripts && touch --date="`date +%Y-%m-%d` 01:00:00" `find *` && cd ..
+#	touch --date="`date +'%Y-%m-%d %H:%M:%S'`" `find *`
+	touch --date="`date +'%Y-%m-%d %H:00:00'`" `find *`
 
 wc:
-	@wc `find src/libnesla     -name *.[ch]`
-	@wc `find src/libs/dl      -name *.[ch]`
-	@wc `find src/libs/ext     -name *.[ch]`
-	@wc `find src/libs/ldap    -name *.[ch]`
-	@wc `find src/libs/math    -name *.[ch]`
-	@wc `find src/libs/mysql   -name *.[ch]`
-	@wc `find src/libs/odbc    -name *.[ch]`
-	@wc `find src/libs/pgsql   -name *.[ch]`
-	@wc `find src/libs/sqlite3 -name *.[ch]`
-	@wc `find src/libs/test    -name *.[ch]`
-	@wc `find src/libs/tcp     -name *.[ch]`
-	@wc `find src/libs/zip     -name *.[ch]`
+	@wc `find . -name *.[ch]`
+	@wc src/libnesla/*.c
 
 time:
 	@echo -e "\n\e[01;37;40mNES - timing tests\e[00m"

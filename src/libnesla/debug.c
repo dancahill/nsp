@@ -57,10 +57,10 @@ void n_decompile(nes_state *N)
 	printf("\n----\nrecomposed source is:\n\n");
 	printf(" 0x%08X\n 0x%08X <-you are here\n 0x%08X\n\n", (unsigned int)N->blockptr, (unsigned int)N->readptr, (unsigned int)N->blockend);
 	if (N->readptr>N->blockend) {
-		printf(" N->readptr is %d bytes past the end of the block\n\n", N->readptr-N->blockend);
+		printf(" N->readptr is %d bytes past the end of the block\n\n", (int)(N->readptr-N->blockend));
 		N->blockptr=N->readptr;
 	} else if (N->readptr<N->blockptr) {
-		printf(" N->readptr is %d bytes before the block\n\n", N->blockptr-N->readptr);
+		printf(" N->readptr is %d bytes before the block\n\n", (int)(N->blockptr-N->readptr));
 		N->blockptr=N->readptr;
 	} else {
 		offset=N->readptr;

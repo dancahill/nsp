@@ -16,6 +16,9 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nesla/nesla.h"
+#ifdef HAVE_CRYPTO
+#include "nesla/libcrypt.h"
+#endif
 #ifdef HAVE_DL
 #include "nesla/libdl.h"
 #endif
@@ -34,6 +37,9 @@
 #endif
 #ifdef HAVE_PGSQL
 #include "nesla/libpgsql.h"
+#endif
+#ifdef HAVE_REGEX
+#include "nesla/libregex.h"
 #endif
 #ifdef HAVE_SQLITE3
 #include "nesla/libsqlite3.h"
@@ -63,6 +69,8 @@ nes_state *N;
 
 extern char **environ;
 
+#define striprn(s) { int n=strlen(s)-1; while (n>-1&&(s[n]=='\r'||s[n]=='\n')) s[n--]='\0'; }
+
 #ifndef STDOUT_FILENO
 #define STDOUT_FILENO 1
 #endif
@@ -82,6 +90,8 @@ static void sig_trap(int sig)
 		printf("Segmentation Violation\r\n");
 		if ((N)&&(N->readptr)) printf("[%.40s]\r\n", N->readptr);
 		exit(-1);
+	case 13: /* SIGPIPE */
+		return;
 	default:
 		printf("Unexpected signal [%d] received\r\n", sig);
 	}
@@ -102,6 +112,17 @@ static void setsigs(void)
 #endif
 #endif
 	return;
+}
+
+static NES_FUNCTION(neslib_io_gets)
+{
+	char buf[1024];
+
+	flush(N);
+	fgets(buf, sizeof(buf)-1, stdin);
+	striprn(buf);
+	nes_setstr(N, &N->r, "", buf, -1);
+	return 0;
 }
 
 static void preppath(nes_state *N, char *name)
@@ -165,6 +186,9 @@ int main(int argc, char *argv[])
 	if ((N=nes_newstate())==NULL) return -1;
 	setsigs();
 	N->debug=0;
+#ifdef HAVE_CRYPTO
+	neslacrypto_register_all(N);
+#endif
 #ifdef HAVE_DL
 	nesladl_register_all(N);
 #endif
@@ -183,6 +207,9 @@ int main(int argc, char *argv[])
 #endif
 #ifdef HAVE_PGSQL
 	neslapgsql_register_all(N);
+#endif
+#ifdef HAVE_REGEX
+	neslaregex_register_all(N);
 #endif
 #ifdef HAVE_SQLITE3
 	neslasqlite3_register_all(N);
@@ -211,6 +238,8 @@ int main(int argc, char *argv[])
 		sprintf(tmpbuf, "%d", i);
 		nes_setstr(N, tobj, tmpbuf, argv[i], strlen(argv[i]));
 	}
+	tobj=nes_settable(N, &N->g, "io");
+	nes_setcfunc(N, tobj, "gets", (NES_CFUNC)neslib_io_gets);
 	for (i=1;i<argc;i++) {
 		if (argv[i]==NULL) break;
 		if (argv[i][0]=='-') {
@@ -241,7 +270,9 @@ int main(int argc, char *argv[])
 		}
 	}
 err:
-	if (N->err) printf("errno=%d (%d) :: \r\n%s", N->err, N->warnings, N->errbuf);
+	if (N->err) {
+		printf("errno=%d (%d) :: \r\n%s\r\n", N->err, N->warnings, N->errbuf);
+	}
 	nes_endstate(N);
 	return 0;
 }

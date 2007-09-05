@@ -12,14 +12,14 @@ BINDIR = ..\..\..\bin
 INCDIR = ..\..\..\include
 LIBDIR = ..\..\..\lib
 
-CFLAGS  = -w-par -m$(MODEL) -v- -I$(INCDIR) -DHAVE_MATH
+CFLAGS  = -w-par -m$(MODEL) -v- -I$(INCDIR) -DHAVE_CRYPTO -DHAVE_MATH -DHAVE_REGEX
 LDFLAGS = -m$(MODEL) -L$(LIBDIR)
 TARGET  = $(BINDIR)\nesla.exe
 
 all: _nesla
 
 _nesla: main.obj
-	$(TLINK) $(LDFLAGS) -e$(TARGET) main.obj libnesla.lib libext.lib libmath.lib
+	$(TLINK) $(LDFLAGS) -e$(TARGET) main.obj libnesla.lib crypto.lib ext.lib math.lib regex.lib
 
 clean:
 	@del $(TARGET)
