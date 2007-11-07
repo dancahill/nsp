@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>NullLogic - Welcome</TITLE>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; CHARSET=us-ascii">
+<META HTTP-EQUIV="Keywords" CONTENT="nulllogic, nesla, groupware, webmail">
+<META HTTP-EQUIV="Description" CONTENT="Nesla is the script language for C programmers.">
+<LINK REL="SHORTCUT ICON" HREF="/favicon.ico">
+<STYLE TYPE="text/css">
+A             { COLOR: #0000FF; TEXT-DECORATION: underline }
+A.SMENU       { COLOR: #FFFFFF; TEXT-DECORATION: none; }
+A.SMENU:HOVER { COLOR: #399CDE; TEXT-DECORATION: none; }
+P { text-align:justify }
+</STYLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="/style.css">
+<SCRIPT LANGUAGE=JavaScript TYPE="text/javascript">
+<!--
+function showpage(c,p) {
+	var coll=document.all.tags("DIV");
+	if (coll==null) return;
+	for (i=0;i<coll.length;i++) {
+		if (coll[i].id=='c'+c+'m') {
+			coll[i].style.display='block';
+		} else if (coll[i].id=='c'+c+'p'+p) {
+			coll[i].style.display='block';
+		} else {
+			coll[i].style.display='none';
+		}
+	}
+}
+// -->
+</SCRIPT>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="#000066" VLINK="#606060" MARGINWIDTH="0" MARGINHEIGHT="0" TOPMARGIN="0" LEFTMARGIN="0" RIGHTMARGIN="0" BOTTOMMARGIN="0">
+
+<BASEFONT FACE="Verdana, Arial, Helvetica, sans-serif" SIZE="2">
+<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0" HEIGHT="100%" WIDTH="100%">
+<TR>
+	<TD BGCOLOR="#003399" COLSPAN=3 ALIGN="CENTER" VALIGN="TOP" HEIGHT=40 WIDTH="99%" CLASS="welcome" NOWRAP>
+	<h2><a href="http://nesla.sourceforge.net/nesla/" CLASS="smenu">NullLogic Embedded Scripting Language - Reference</a></h2>
+	</TD>
+	<TD WIDTH="10" BGCOLOR="#003399" ALIGN="RIGHT" VALIGN="BOTTOM"><IMG SRC="/images/blue-rounder1.gif" WIDTH="14" HEIGHT="20" BORDER="0" ALT=""></TD>
+</TR>
+<TR>
+	<TD HEIGHT="100%" WIDTH="200" BGCOLOR="#003399" VALIGN=TOP>
+		<HR NOSHADE SIZE="0.5" WIDTH="160">
+		<H2 CLASS="lefttitle"><FONT COLOR="#399CDE">&nbsp;Menu</FONT></H2>
+		<P CLASS="smenu">
+		<A CLASS="smenu" HREF="#c1p0"               onClick="showpage('1', '0');               return false;"><NOBR>Introduction</NOBR></A><BR>
+<DIV ID=c1m STYLE='display: block'>
+</DIV>
+		<A CLASS="smenu" HREF="#c2p0"               onClick="showpage('2', '0');               return false;"><NOBR>Functions - core</NOBR></A><BR>
+<DIV ID=c2m STYLE='display: block'>
+		<A CLASS="smenu" HREF="#c2p_core_eval"      onClick="showpage('2', '_core_eval');      return false;">&nbsp;&nbsp;eval();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_core_iname"     onClick="showpage('2', '_core_iname');     return false;">&nbsp;&nbsp;iname();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_core_include"   onClick="showpage('2', '_core_include');   return false;">&nbsp;&nbsp;include();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_core_ival"      onClick="showpage('2', '_core_ival');      return false;">&nbsp;&nbsp;ival();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_core_print"     onClick="showpage('2', '_core_print');     return false;">&nbsp;&nbsp;print();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_core_printvar"  onClick="showpage('2', '_core_printvar');  return false;">&nbsp;&nbsp;printvar();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_core_runtime"   onClick="showpage('2', '_core_runtime');   return false;">&nbsp;&nbsp;runtime();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_core_sizeof"    onClick="showpage('2', '_core_sizeof');    return false;">&nbsp;&nbsp;sizeof();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_core_sleep"     onClick="showpage('2', '_core_sleep');     return false;">&nbsp;&nbsp;sleep();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_core_system"    onClick="showpage('2', '_core_system');    return false;">&nbsp;&nbsp;system();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_core_tonumber"  onClick="showpage('2', '_core_tonumber');  return false;">&nbsp;&nbsp;tonumber();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_core_tostring"  onClick="showpage('2', '_core_tostring');  return false;">&nbsp;&nbsp;tostring();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_core_typeof"    onClick="showpage('2', '_core_typeof');    return false;">&nbsp;&nbsp;typeof();</A><BR>
+		<A CLASS="smenu" HREF="#c2p_core_write"     onClick="showpage('2', '_core_write');     return false;">&nbsp;&nbsp;write();</A><BR>
+</DIV>
+		<A CLASS="smenu" HREF="#c3p0"               onClick="showpage('3', '0');               return false;"><NOBR>Functions - file</NOBR></A><BR>
+<DIV ID=c3m STYLE='display: block'>
+		<A CLASS="smenu" HREF="#c3p_file_read"      onClick="showpage('3', '_file_read');      return false;">&nbsp;&nbsp;file.read();</A><BR>
+		<A CLASS="smenu" HREF="#c3p_file_stat"      onClick="showpage('3', '_file_stat');      return false;">&nbsp;&nbsp;file.stat();</A><BR>
+		<A CLASS="smenu" HREF="#c3p_file_unlink"    onClick="showpage('3', '_file_unlink');    return false;">&nbsp;&nbsp;file.unlink();</A><BR>
+		<A CLASS="smenu" HREF="#c3p_file_write"     onClick="showpage('3', '_file_write');     return false;">&nbsp;&nbsp;file.write();</A><BR>
+</DIV>
+		<A CLASS="smenu" HREF="#c4p0"               onClick="showpage('4', '0');               return false;"><NOBR>Functions - io</NOBR></A><BR>
+<DIV ID=c4m STYLE='display: block'>
+		<A CLASS="smenu" HREF="#c4p_io_flush"       onClick="showpage('4', '_io_flush');       return false;">&nbsp;&nbsp;io.flush();</A><BR>
+		<A CLASS="smenu" HREF="#c4p_io_print"       onClick="showpage('4', '_io_print');       return false;">&nbsp;&nbsp;io.print();</A><BR>
+		<A CLASS="smenu" HREF="#c4p_io_write"       onClick="showpage('4', '_io_write');       return false;">&nbsp;&nbsp;io.write();</A><BR>
+</DIV>
+		<A CLASS="smenu" HREF="#c5p0"               onClick="showpage('5', '0');               return false;"><NOBR>Functions - math</NOBR></A><BR>
+<DIV ID=c5m STYLE='display: block'>
+		<A CLASS="smenu" HREF="#c5p_math_abs"       onClick="showpage('5', '_math_abs');       return false;">&nbsp;&nbsp;math.abs();</A><BR>
+		<A CLASS="smenu" HREF="#c5p_math_acos"      onClick="showpage('5', '_math_acos');      return false;">&nbsp;&nbsp;math.acos();</A><BR>
+		<A CLASS="smenu" HREF="#c5p_math_asin"      onClick="showpage('5', '_math_asin');      return false;">&nbsp;&nbsp;math.asin();</A><BR>
+		<A CLASS="smenu" HREF="#c5p_math_atan"      onClick="showpage('5', '_math_atan');      return false;">&nbsp;&nbsp;math.atan();</A><BR>
+		<A CLASS="smenu" HREF="#c5p_math_ceil"      onClick="showpage('5', '_math_ceil');      return false;">&nbsp;&nbsp;math.ceil();</A><BR>
+		<A CLASS="smenu" HREF="#c5p_math_cos"       onClick="showpage('5', '_math_cos');       return false;">&nbsp;&nbsp;math.cos();</A><BR>
+		<A CLASS="smenu" HREF="#c5p_math_floor"     onClick="showpage('5', '_math_floor');     return false;">&nbsp;&nbsp;math.floor();</A><BR>
+		<A CLASS="smenu" HREF="#c5p_math_rand"      onClick="showpage('5', '_math_rand');      return false;">&nbsp;&nbsp;math.rand();</A><BR>
+		<A CLASS="smenu" HREF="#c5p_math_sin"       onClick="showpage('5', '_math_sin');       return false;">&nbsp;&nbsp;math.sin();</A><BR>
+		<A CLASS="smenu" HREF="#c5p_math_sqrt"      onClick="showpage('5', '_math_sqrt');      return false;">&nbsp;&nbsp;math.sqrt();</A><BR>
+		<A CLASS="smenu" HREF="#c5p_math_tan"       onClick="showpage('5', '_math_tan');       return false;">&nbsp;&nbsp;math.tan();</A><BR>
+</DIV>
+		<A CLASS="smenu" HREF="#c6p0"               onClick="showpage('6', '0');               return false;"><NOBR>Functions - string</NOBR></A><BR>
+<DIV ID=c6m STYLE='display: block'>
+		<A CLASS="smenu" HREF="#c6p_string_cat"     onClick="showpage('6', '_string_cat');     return false;">&nbsp;&nbsp;string.cat();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_string_cmp"     onClick="showpage('6', '_string_cmp');     return false;">&nbsp;&nbsp;string.cmp();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_string_icmp"    onClick="showpage('6', '_string_icmp');    return false;">&nbsp;&nbsp;string.icmp();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_string_join"    onClick="showpage('6', '_string_join');    return false;">&nbsp;&nbsp;string.join();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_string_ncmp"    onClick="showpage('6', '_string_ncmp');    return false;">&nbsp;&nbsp;string.ncmp();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_string_nicmp"   onClick="showpage('6', '_string_nicmp');   return false;">&nbsp;&nbsp;string.nicmp();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_string_len"     onClick="showpage('6', '_string_len');     return false;">&nbsp;&nbsp;string.len();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_string_split"   onClick="showpage('6', '_string_split');   return false;">&nbsp;&nbsp;string.split();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_string_str"     onClick="showpage('6', '_string_str');     return false;">&nbsp;&nbsp;string.str();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_string_istr"    onClick="showpage('6', '_string_istr');    return false;">&nbsp;&nbsp;string.istr();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_string_sub"     onClick="showpage('6', '_string_sub');     return false;">&nbsp;&nbsp;string.sub();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_string_tolower" onClick="showpage('6', '_string_tolower'); return false;">&nbsp;&nbsp;string.tolower();</A><BR>
+		<A CLASS="smenu" HREF="#c6p_string_toupper" onClick="showpage('6', '_string_toupper'); return false;">&nbsp;&nbsp;string.toupper();</A><BR>
+</DIV>
+		<A CLASS="smenu" HREF="#c7p0"               onClick="showpage('7', '0');               return false;"><NOBR>Functions - time</NOBR></A><BR>
+<DIV ID=c7m STYLE='display: block'>
+		<A CLASS="smenu" HREF="#c7p_time_gmtime"    onClick="showpage('7', '_time_gmtime');    return false;">&nbsp;&nbsp;time.gmtime();</A><BR>
+		<A CLASS="smenu" HREF="#c7p_time_localtime" onClick="showpage('7', '_time_localtime'); return false;">&nbsp;&nbsp;time.localtime();</A><BR>
+		<A CLASS="smenu" HREF="#c7p_time_now"       onClick="showpage('7', '_time_now');       return false;">&nbsp;&nbsp;time.now();</A><BR>
+		<A CLASS="smenu" HREF="#c7p_time_sqldate"   onClick="showpage('7', '_time_sqldate');   return false;">&nbsp;&nbsp;time.sqldate();</A><BR>
+		<A CLASS="smenu" HREF="#c7p_time_sqltime"   onClick="showpage('7', '_time_sqltime');   return false;">&nbsp;&nbsp;time.sqltime();</A><BR>
+</DIV>
+		<A CLASS="smenu" HREF="#c8p0"               onClick="showpage('8', '0');               return false;"><NOBR>libext</NOBR></A><BR>
+<DIV ID=c8m STYLE='display: block'>
+		<A CLASS="smenu" HREF="#c8p_libext_base64_decode" onClick="showpage('8', '_libext_base64_decode'); return false;">&nbsp;&nbsp;base64.decode();</A><BR>
+		<A CLASS="smenu" HREF="#c8p_libext_base64_encode" onClick="showpage('8', '_libext_base64_encode'); return false;">&nbsp;&nbsp;base64.encode();</A><BR>
+		<A CLASS="smenu" HREF="#c8p_libext_dirlist"       onClick="showpage('8', '_libext_dirlist');       return false;">&nbsp;&nbsp;dirlist();</A><BR>
+		<A CLASS="smenu" HREF="#c8p_libext_rot13"         onClick="showpage('8', '_libext_rot13');         return false;">&nbsp;&nbsp;rot13();</A><BR>
+		<A CLASS="smenu" HREF="#c8p_libext_sort_bykey"    onClick="showpage('8', '_libext_sort_bykey');    return false;">&nbsp;&nbsp;sort.bykey();</A><BR>
+		<A CLASS="smenu" HREF="#c8p_libext_sort_byname"   onClick="showpage('8', '_libext_sort_byname');   return false;">&nbsp;&nbsp;sort.byname();</A><BR>
+		<A CLASS="smenu" HREF="#c8p_libext_xml_read"      onClick="showpage('8', '_libext_xml_read');      return false;">&nbsp;&nbsp;xml.read();</A><BR>
+</DIV>
+		<A CLASS="smenu" HREF="#c9p0"               onClick="showpage('9', '0');               return false;"><NOBR>libtcp</NOBR></A><BR>
+<DIV ID=c9m STYLE='display: block'>
+		<A CLASS="smenu" HREF="#c9p_libtcp_http_get"   onClick="showpage('9', '_libtcp_http_get');   return false;">&nbsp;&nbsp;http.get();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_accept" onClick="showpage('9', '_libtcp_tcp_accept'); return false;">&nbsp;&nbsp;tcp.accept();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_bind"   onClick="showpage('9', '_libtcp_tcp_bind');   return false;">&nbsp;&nbsp;tcp.bind();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_close"  onClick="showpage('9', '_libtcp_tcp_close');  return false;">&nbsp;&nbsp;tcp.close();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_gets"   onClick="showpage('9', '_libtcp_tcp_gets');   return false;">&nbsp;&nbsp;tcp.gets();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_open"   onClick="showpage('9', '_libtcp_tcp_open');   return false;">&nbsp;&nbsp;tcp.open();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_read"   onClick="showpage('9', '_libtcp_tcp_read');   return false;">&nbsp;&nbsp;tcp.read();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_write"  onClick="showpage('9', '_libtcp_tcp_write');  return false;">&nbsp;&nbsp;tcp.write();</A><BR>
+</DIV>
+		<A CLASS="smenu" HREF="#c10p0"              onClick="showpage('10', '0');              return false;"><NOBR>C API</NOBR></A><BR>
+<DIV ID=c10m STYLE='display: block'>
+</DIV>
+		</p>
+		<HR NOSHADE SIZE="0.5" WIDTH="160">
+	</TD>
+	<TD HEIGHT="100%" VALIGN=TOP width="100%">

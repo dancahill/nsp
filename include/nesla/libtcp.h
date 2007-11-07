@@ -50,7 +50,9 @@ typedef struct {
 	char      obj_type[16]; /* tell us all about yourself in 15 characters or less */
 	NES_CFREE obj_term;     /* now tell us how to kill you */
 	/* now begin the stuff that's socket-specific */
-	short int socket;
+	/* xyssl dies a horrible and stupid death when using short ints.. */
+//	short int socket;
+	int socket;
 	short use_ssl;
 #ifdef HAVE_OPENSSL
 	SSL *ssl;
@@ -60,10 +62,11 @@ typedef struct {
 #ifdef HAVE_XYSSL
 	havege_state hs;
 	ssl_context ssl;
+	ssl_session ssn;
 	/* server stuff */
 	x509_cert srvcert;
 	rsa_context rsa;
-	unsigned char session_table[SSL_SESSION_TBL_LEN];
+	unsigned char session_table[sizeof(ssl_session)];
 #endif
 #endif
 	char LocalAddr[16];

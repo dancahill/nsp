@@ -16,6 +16,21 @@ NESLA NullLogic Embedded Scripting Language ChangeLog
 </small>
 <hr>
 
+<h2>0.9.1 (2007-11-07)</h2>
+<ul>
+  <li>updated xyssl lib to support v0.8</li>
+  <li>fixed redefinition of an existing function</li>
+  <li>fixed cases where function existence was evaled to 0 (should be true if exists, or false)</li>
+  <li>added AES encryption to the source tree</li>
+  <li>added password prompt form to win32 api</li>
+  <li>added eval()</li>
+  <li>added line number tracking during tokenizing phase</li>
+  <li>added support for string multiplication ('x'*5 is equal to 'xxxxx')</li>
+  <li>added dirhash, factorial, and sqrt examples</li>
+  <li>fixed memory leaks caused by error trapping</li>
+  <li>fixed segfaults caused by error calls in c functions and subsequent attempts to free the base pointer of script functions</li>
+  <li>fixed display limit of numbers larger than 2 billion (kinda)</li>
+</ul>
 <h2>0.9.0 (2007-09-05)</h2>
 <ul>
   <li>all time functions are now grouped in a single table</li>

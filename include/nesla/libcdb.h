@@ -15,19 +15,4 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-
-#include "nesla/libnesla.h"
-
-#ifdef HAVE_OPENSSL
-
-NES_FUNCTION(neslaopenssl_aes_encrypt)
-{
-	return 0;
-}
-
-NES_FUNCTION(neslaopenssl_aes_decrypt)
-{
-	return 0;
-}
-
-#endif /* HAVE_OPENSSL */
+int neslacdb_register_all(nes_state *N);

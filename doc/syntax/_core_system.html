@@ -1,0 +1,41 @@
+<!-- CONTENTS_START -->
+<a name="nesla_system"></a>
+<H2>system<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Performs an operating system call and returns the resulting errorcode.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>number</I> <B>=</B> <B>system(</B><I>string command</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>command</I> </TD><TD>Operating system command to be executed.</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns the errorcode after execution of <I>command</I>.
+</BLOCKQUOTE><P>
+
+<H4>Remarks</H4>
+<BLOCKQUOTE><P>
+<P>This function does not include or easily allow any sophisticated methods
+such as piping, signal handling, or interactivity.
+</BLOCKQUOTE><P>
+
+<H4>Examples</H4>
+<BLOCKQUOTE><P>
+The following example demonstrates a way to list a directory and then read the results.
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	<B>system</B>("ls"+" -l"+" > x.txt");<BR>
+	x=<B>file.read</B>("x.txt");<BR>
+	<B>print</B>(x);<BR>
+	<B>file.unlink</B>("x.txt");<BR>
+</CODE></TD></TR></TABLE>
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->

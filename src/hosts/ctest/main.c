@@ -243,11 +243,7 @@ int main(int argc, char *argv[])
 
 	if (argc>1) {
 		preppath(N, argv[1]);
-		if (setjmp(N->savjmp)==0) {
-			N->jmpset=1;
-			nes_execfile(N, argv[1]);
-		}
-		N->jmpset=0;
+		nes_execfile(N, argv[1]);
 	}
 	if (N->err) printf("errno=%d (%d) :: \r\n%s", N->err, N->warnings, N->errbuf);
 	nes_endstate(N);

@@ -53,8 +53,8 @@ END
 //
 
 IDR_VERSION VERSIONINFO
- FILEVERSION 0,9,0,0
- PRODUCTVERSION 0,9,0,0
+ FILEVERSION 0,9,1,0
+ PRODUCTVERSION 0,9,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -71,12 +71,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "NullLogic\0"
             VALUE "FileDescription", "Nesla Tray Host\0"
-            VALUE "FileVersion", "0.9.0\0"
+            VALUE "FileVersion", "0.9.1\0"
             VALUE "InternalName", "NESTRAY.EXE\0"
             VALUE "LegalCopyright", "Copyright © 2007\0"
             VALUE "OriginalFilename", "NESTRAY.EXE\0"
             VALUE "ProductName", "Nesla Tray Host\0"
-            VALUE "ProductVersion", "0.9.0\0"
+            VALUE "ProductVersion", "0.9.1\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -111,6 +111,16 @@ CAPTION "Text Input"
 FONT 8, "MS Sans Serif"
 BEGIN
     EDITTEXT        IDC_EDIT1,0,0,186,23,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,40,24,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,95,24,50,14
+END
+
+IDD_TEXTINPUT2 DIALOG DISCARDABLE  0, 0, 186, 39
+STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_CENTER | WS_POPUP | WS_CAPTION
+CAPTION "Text Input"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_EDIT1,0,0,186,23,ES_PASSWORD | ES_AUTOHSCROLL
     DEFPUSHBUTTON   "OK",IDOK,40,24,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,95,24,50,14
 END

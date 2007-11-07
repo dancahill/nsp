@@ -5,23 +5,17 @@ CFLAGS  = CFLAGS+" -I../../../include ";
 if (CC=='cl.exe') CFLAGS=CFLAGS+"/c /Fo";
 else if (CC=='tcc.exe') CFLAGS=CFLAGS+"-c -o";
 else CFLAGS=CFLAGS+"-c -o ";
-OBJECTS = "crypto.o md5.o openssl.o sha1.o xyssl.o";
+OBJECTS = "aes_api.o aes_core.o crypto.o md5.o sha1.o";
 TNAME   = "libneslacrypto";
 if (cmd==null) if (_ARGS[2]=='clean') cmd='clean'; else cmd='build';
 if (cmd=='build') {
-	print("building ",_LINKAGE_," lib crypto\n");
-	if (CC=='cl.exe') file.write("dlldefs.def", "LIBRARY\t\tlibneslacrypto\r\nVERSION\t\t"+_version_+"\r\nEXPORTS\r\n\tneslacrypto_register_all\r\n");
-	build_objs(CC, CFLAGS, OBJECTS, _LINKAGE_, TNAME);
-	ILIB="";
-	if (config.have_xyssl==true) {
-		/* try to make this shared lib self-sufficient */
-		if (typeof(file.stat("/usr/local/lib/libxyssl.a"))=='table') {
-			ILIB=" /usr/local/lib/libxyssl.a";
-		} else if (typeof(file.stat("/usr/lib/libxyssl.a"))=='table') {
-			ILIB=" /usr/lib/libxyssl.a";
-		}
+	t=newer2(OBJECTS, _LINKAGE_, TNAME);
+	if (t>0) {
+		print("building ",_LINKAGE_," lib crypto\n");
+		if (CC=='cl.exe') file.write("dlldefs.def", "LIBRARY\t\tlibneslacrypto\r\nVERSION\t\t"+_version_+"\r\nEXPORTS\r\n\tneslacrypto_register_all\r\n");
+		build_objs(CC, CFLAGS, OBJECTS, _LINKAGE_, TNAME);
+		build_lib(CC, TNAME, OBJECTS, _LINKAGE_, TNAME);
 	}
-	build_lib(CC, TNAME, OBJECTS+ILIB, _LINKAGE_, TNAME);
 } else if (cmd=='clean') {
 	build_clean(TNAME, OBJECTS);
 }

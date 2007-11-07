@@ -1,0 +1,39 @@
+<!-- CONTENTS_START -->
+<a name="nesla_include"></a>
+<H2>include<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Include (and interpret) the code in the specified file.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>number</I> <B>=</B> <B>include(</B><I>filename</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>filename</I> </TD><TD>String containing the name of the file to be included.</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns zero if the file has been successfully included.  Any non-zero return code indicates an error.
+</BLOCKQUOTE><P>
+
+<H4>Remarks</H4>
+<BLOCKQUOTE><P>
+<P>Return codes indicating failure are almost always caused by a nonexistent
+or unreadable script file, not errors in the script itself.
+</BLOCKQUOTE><P>
+
+<H4>Example</H4>
+<BLOCKQUOTE><P>
+The following example demonstrates how to load a script and verify its success.
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	rval=<B>include</B>("./somefile.nes");<BR>
+	<B>if</B> (rval!=0) <B>print</B>("error loading ./somefile.nes\n");
+</CODE></TD></TR></TABLE>
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->

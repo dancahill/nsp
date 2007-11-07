@@ -1,0 +1,49 @@
+<!-- CONTENTS_START -->
+<A NAME="nesla_sqltime"></A>
+<H2>time.sqltime<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Returns a string representation of <VAR>timestamp</VAR> in the format 'HH:MM:SS'.
+If <VAR>timestamp</VAR> is not defined, the function will use the current local
+system time.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>string</I> <B>=</B> <B>sqltime(</B><I>[number timestamp]</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>timestamp</I> </TD><TD>The <B>number</B> of seconds since January 1, 1970 UTC (commonly called a UNIX timestamp).</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns a formatted time <VAR>string</VAR> in the format 'HH:MM:SS'.
+</BLOCKQUOTE><P>
+
+<H4>Remarks</H4>
+<BLOCKQUOTE><P>
+<P>No remarks.
+</BLOCKQUOTE><P>
+
+<H4>Examples</H4>
+<BLOCKQUOTE><P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	<B>print</B>(<B>sqltime</B>());
+</CODE></TD></TR></TABLE>
+<P>The above example will output something similar to: "<B>16:30:45</B>"</P>
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	<B>print</B>(<B>sqldate</B>(0)+" "+<B>sqltime</B>(0));
+</CODE></TD></TR></TABLE>
+<P>The above example will output something similar to (note the adjustment for local time): "<B>1969-12-31 19:00:00</B>"</P>
+</BLOCKQUOTE><P>
+
+<H4>See Also</H4>
+<BLOCKQUOTE><P>
+<B><A HREF="#c7p_time_sqldate"          onClick="showpage('7', '_time_sqldate');         return false;">time.sqldate()</A></B>
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->

@@ -336,9 +336,9 @@ static char *md5_crypt(char *cpass, char *pw, char *salt)
 		    md5_update(&ctx, (unsigned char *)pw, 1);
 
 	/* Now make the output string */
-	strcpy(cpass, magic);
+	strncpy(cpass, magic, 4);
 	strncat(cpass,sp,sl);
-	strcat(cpass,"$");
+	strncat(cpass,"$",sl-1);
 	md5_final(&ctx, final);
 	/*
 	 * and now, just to make sure things don't run too fast
@@ -408,7 +408,7 @@ NES_FUNCTION(neslacrypto_md5_file)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	char *hex="0123456789abcdef";
-	unsigned char buffer[2048];
+	unsigned char buffer[1024];
 	unsigned char md[MD5_SIZE];
 	char token[64]; /* should only need 32+'\0' */
 	MD5_CONTEXT c;

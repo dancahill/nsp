@@ -309,7 +309,7 @@ NES_FUNCTION(neslacrypto_sha1_file)
 {
 	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
 	char *hex="0123456789abcdef";
-	unsigned char buffer[2048];
+	unsigned char buffer[1024];
 	unsigned char md[SHA1_DIGEST_LENGTH];
 	char token[64]; /* should only need 40+'\0' */
 	SHA1_CTX c;

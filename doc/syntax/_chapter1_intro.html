@@ -1,0 +1,64 @@
+<h1>1 - Introduction</h1>
+<p>
+I suck at writing documentation, so this will be short and bitter.  For working
+samples, check out scripts/tests/*.nes
+</p>
+<p>
+Nesla's earliest lines of code were derived from all the configuration file
+parsers I kept writing over and over, and was never happy with.  With the
+hassle of writing new functions to deal with different files, and adding
+callback functions to deal with subsections, and _then_ taking the parsed
+data and making that data accessible to other loaded functions and modules,
+not to mention the whole memory management part, and the need to keep track
+of not only the name and type of variable, but also the size...  Well, I guess
+I'm just lucky I have a sense of humour.
+</p>
+<p>
+So here was a goal: A flexible config parser, a simple and universal data
+storage model, a short and simple command set, a zero effort memory management
+system that didn't suck, and a C api that wouldn't be painful or difficult to
+use in other projects.  Whether or not it became a fully functional scripting
+language of its own was entirely incidental.  What I ended up with is the Nesla
+core library; the scripting language for C programmers.
+</p>
+<p>
+Syntactically, Nesla probably looks more like javascript than it does any other
+language.  Use of the word 'object' may be less than 100% accurate, there are
+no properties, methods, events, or classes in the javascript sense, but the C
+syntax rules are nearly identical.  Nesla is not an emulation of javascript,
+but both language designs do agree that C syntax is good and dollar signs are
+ugly.
+</p>
+
+
+<HR>
+<P>
+<B>OOPS</B>
+So here's the deal on 'Object Oriented Programming'.  I don't get it.  I'm not
+saying it's bad or that people who do it are deviants.  I'm just not sure what
+the working definition of OO is these days.  Nesla's storage system is entirely
+object-based, but that doesn't make the language object oriented.  I added a
+'this' variable so functions could infer the context in which they were called.
+Does this make Nesla an OO language?  Consider the following code:
+</P>
+
+<PRE><B>function</B> new_str<FONT COLOR=MAROON><B>(</B></FONT>val<FONT COLOR=MAROON><B>)</B></FONT> <FONT COLOR=MAROON><B>{</B></FONT>
+        this <FONT COLOR=MAROON><B>=</B></FONT> <FONT COLOR=MAROON><B>{</B></FONT>
+                size  <FONT COLOR=MAROON><B>=</B></FONT> <B>function</B> <FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=MAROON><B>)</B></FONT> <FONT COLOR=MAROON><B>{</B></FONT> <B>return</B> sizeof<FONT COLOR=MAROON><B>(</B></FONT>this<FONT COLOR=MAROON><B>.</B></FONT>value<FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT> <FONT COLOR=MAROON><B>}</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>
+                lower <FONT COLOR=MAROON><B>=</B></FONT> <B>function</B> <FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=MAROON><B>)</B></FONT> <FONT COLOR=MAROON><B>{</B></FONT> <B>return</B> string<FONT COLOR=MAROON><B>.</B></FONT>tolower<FONT COLOR=MAROON><B>(</B></FONT>this<FONT COLOR=MAROON><B>.</B></FONT>value<FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT> <FONT COLOR=MAROON><B>}</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>
+                upper <FONT COLOR=MAROON><B>=</B></FONT> <B>function</B> <FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=MAROON><B>)</B></FONT> <FONT COLOR=MAROON><B>{</B></FONT> <B>return</B> string<FONT COLOR=MAROON><B>.</B></FONT>toupper<FONT COLOR=MAROON><B>(</B></FONT>this<FONT COLOR=MAROON><B>.</B></FONT>value<FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT> <FONT COLOR=MAROON><B>}</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>
+                value <FONT COLOR=MAROON><B>=</B></FONT> val<FONT COLOR=MAROON><B>;</B></FONT>
+        <FONT COLOR=MAROON><B>}</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>
+        <B>return</B> this<FONT COLOR=MAROON><B>;</B></FONT>
+<FONT COLOR=MAROON><B>}</B></FONT>
+x<FONT COLOR=MAROON><B>=</B></FONT>new_str<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=BLUE>"AbC"</FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>
+print<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=BLUE>"["</FONT><FONT COLOR=MAROON><B>+</B></FONT>x<FONT COLOR=MAROON><B>.</B></FONT>size<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>+</B></FONT><FONT COLOR=BLUE>"]\n"</FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>  <FONT COLOR=GREEN><I>// will print 3</I></FONT>
+x<FONT COLOR=MAROON><B>.</B></FONT>value<FONT COLOR=MAROON><B>=</B></FONT><FONT COLOR=BLUE>"aBcDeF"</FONT><FONT COLOR=MAROON><B>;</B></FONT>
+print<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=BLUE>"["</FONT><FONT COLOR=MAROON><B>+</B></FONT>x<FONT COLOR=MAROON><B>.</B></FONT>size<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>+</B></FONT><FONT COLOR=BLUE>"]\n"</FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>  <FONT COLOR=GREEN><I>// will print 6</I></FONT>
+print<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=BLUE>"["</FONT><FONT COLOR=MAROON><B>+</B></FONT>x<FONT COLOR=MAROON><B>.</B></FONT>lower<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>+</B></FONT><FONT COLOR=BLUE>"]\n"</FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT> <FONT COLOR=GREEN><I>// will print abcdef</I></FONT>
+print<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=BLUE>"["</FONT><FONT COLOR=MAROON><B>+</B></FONT>x<FONT COLOR=MAROON><B>.</B></FONT>upper<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>+</B></FONT><FONT COLOR=BLUE>"]\n"</FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT> <FONT COLOR=GREEN><I>// will print ABCDEF</I></FONT></PRE>
+
+<P>
+Is that technically an example of OO?  True, most OO code has nicer looking
+constructors and classes and stuff I don't get, but this is working Nesla code.
+</P>

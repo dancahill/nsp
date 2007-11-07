@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Developer Studio generated include file.
-// Used by nestray.rc
+// Used by NesTray.rc
 //
 #define IDR_VERSION                     1
 #define IDM_CLIENT                      100
@@ -11,6 +11,7 @@
 #define IDI_ICON2                       105
 #define IDD_NULLDIALOG                  115
 #define IDD_TEXTINPUT1                  118
+#define IDD_TEXTINPUT2                  119
 #define IDC_COMPANY                     400
 #define IDC_FILEDESC                    401
 #define IDC_COPYRIGHT                   402

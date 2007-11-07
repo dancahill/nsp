@@ -1,8 +1,7 @@
 #!../bin/neslite
 
 function expect(msg, a, b) {
-	var sp="                      ";
-	print("  ", string.sub(msg+sp, 0, 20), " ");
+	print("  ", string.sub(msg+"                      ", 0, 20), " ");
 	if (b==true) print("pass\n"); else print("fail\n");
 	return;
 }
@@ -85,8 +84,6 @@ function dotests() {
 			print("  found VC on Win32 OS\n");
 			global cc="cl.exe";
 			config_mak+="CC     = "+cc+"\n";
-			// not right...
-//			config_nes+="CFLAGS = -nologo -W3 -O2 -ML -GX -DWIN32 -DNDEBUG -D_MBCS -D_LIB -FD\n\n";
 			config_mak+="CFLAGS = \n";
 			config_mak+="LDLAGS = \n\n";
 
@@ -118,6 +115,9 @@ function dotests() {
 		}
 	}
 	if (ostype=='posix') {
+		config_mak+="CFLAGS  += -DHAVE_CDB\nLDFLAGS += -lneslacdb\n\n";
+		config_nes+="CFLAGS  += \" -DHAVE_CDB\";\nLDFLAGS += \" -lneslacdb\";\n\n";
+
 		config_mak+="CFLAGS  += -DHAVE_CRYPTO\nLDFLAGS += -lneslacrypto\n\n";
 		config_nes+="CFLAGS  += \" -DHAVE_CRYPTO\";\nLDFLAGS += \" -lneslacrypto\";\n\n";
 /*
@@ -188,10 +188,12 @@ function dotests() {
 		}
 		/* OpenSSL doesn't conflict XySSL, but it does override it... */
 		if (testsub("OPENSSL", "-lssl -lcrypto", "#include <openssl/ssl.h>\nint main() { return 0; }\n")) {
-//			config_mak+="CFLAGS  += -DHAVE_OPENSSL\nLDFLAGS += -lcrypto -lssl\n\n";
-//			config_nes+="CFLAGS  += \" -DHAVE_OPENSSL\";\nLDFLAGS += \" -lcrypto -lssl\";\n\n";
-//			if (config_inc++) config_ne2+=", ";
-//			config_ne2+="have_openssl=true";
+/*
+			config_mak+="CFLAGS  += -DHAVE_OPENSSL\nLDFLAGS += -lcrypto -lssl\n\n";
+			config_nes+="CFLAGS  += \" -DHAVE_OPENSSL\";\nLDFLAGS += \" -lcrypto -lssl\";\n\n";
+			if (config_inc++) config_ne2+=", ";
+			config_ne2+="have_openssl=true";
+*/
 		}
 		if (testsub("PGSQL", "-lpq", "#include <libpq-fe.h>\nint main() { return 0; }\n")) {
 			config_mak+="CFLAGS  += -DHAVE_PGSQL\nLDFLAGS += -lneslapgsql -lpq\n\n";
@@ -220,8 +222,12 @@ function dotests() {
 			config_ne2+="have_zlib=true";
 		}
 	} else if (ostype=='windows') {
+		config_mak+="CFLAGS  = $(CFLAGS) -DHAVE_CDB\nLDFLAGS = $(LDFLAGS) libneslacdb.lib\n\n";
+		config_nes+="CFLAGS  += \" -DHAVE_CDB\";\nLDFLAGS += \" libneslacdb.lib\";\n\n";
+
 		config_mak+="CFLAGS  = $(CFLAGS) -DHAVE_CRYPTO\nLDFLAGS = $(LDFLAGS) libneslacrypto.lib\n\n";
 		config_nes+="CFLAGS  += \" -DHAVE_CRYPTO\";\nLDFLAGS += \" libneslacrypto.lib\";\n\n";
+
 		if (testsub("DL", "", "#include <windows.h>\nint main() { LoadLibrary(\"\"); return 0; }\n")) {
 			config_mak+="CFLAGS  = $(CFLAGS) -DHAVE_DL\nLDFLAGS = $(LDFLAGS) libnesladl.lib\n\n";
 			config_nes+="CFLAGS  += \" -DHAVE_DL\";\nLDFLAGS += \" libnesladl.lib\";\n\n";

@@ -433,7 +433,7 @@ NES_FUNCTION(neslatcp_tcp_bind)
 		n_warn(N, "neslatcp_tcp_bind", "couldn't alloc %d crappy bytes", sizeof(TCP_SOCKET)+1);
 		return -1;
 	}
-	nc_strncpy(bsock->obj_type, "sock4", 6);
+	nc_strncpy(bsock->obj_type, "sock4", sizeof(bsock->obj_type)-1);
 	bsock->obj_term=(NES_CFREE)tcp_murder;
 	if ((rc=tcp_bind(N, cobj1->val->d.str, (unsigned short)cobj2->val->d.num))<0) {
 		nes_setstr(N, &N->r, "", "tcp error", strlen("tcp error"));
@@ -486,7 +486,7 @@ NES_FUNCTION(neslatcp_tcp_accept)
 		n_warn(N, "neslatcp_tcp_accept", "couldn't alloc %d crappy bytes", sizeof(TCP_SOCKET)+1);
 		return -1;
 	}
-	strcpy(asock->obj_type, "sock4");
+	nc_strncpy(asock->obj_type, "sock4", sizeof(asock->obj_type)-1);
 	asock->obj_term=(NES_CFREE)tcp_murder;
 	if ((rc=tcp_accept(N, bsock, asock))<0) {
 		nes_setstr(N, &N->r, "", "tcp error", strlen("tcp error"));
@@ -513,7 +513,7 @@ NES_FUNCTION(neslatcp_tcp_open)
 		n_warn(N, "neslatcp_tcp_open", "couldn't alloc %d crappy bytes", sizeof(TCP_SOCKET)+1);
 		return -1;
 	}
-	strcpy(sock->obj_type, "sock4");
+	nc_strncpy(sock->obj_type, "sock4", sizeof(sock->obj_type)-1);
 	sock->obj_term=(NES_CFREE)tcp_murder;
 	if ((rc=tcp_connect(N, sock, cobj1->val->d.str, (unsigned short)cobj2->val->d.num, (unsigned short)cobj3->val->d.num))<0) {
 		nes_setstr(N, &N->r, "", "tcp error", strlen("tcp error"));

@@ -19,7 +19,8 @@
 #include "nesla/libregex.h"
 
 /*
- * Everything up to the page break is based on code written by Henry Spencer.
+ * Everything up to the page break (the next 1200 lines or so)
+ * is based on code written by Henry Spencer.
  */
 
 /*

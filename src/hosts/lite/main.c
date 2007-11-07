@@ -15,7 +15,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "nesla/nesla.h"
+#include "nesla/libnesla.h"
 #ifdef HAVE_DL
 #include "nesla/libdl.h"
 #endif
@@ -36,7 +36,12 @@
 #include <signal.h>
 nes_state *N;
 
+#if defined(__BORLANDC__)
+extern char **_environ;
+#define environ _environ
+#else
 extern char **environ;
+#endif
 
 #ifndef STDOUT_FILENO
 #define STDOUT_FILENO 1
@@ -105,12 +110,12 @@ static void preppath(nes_state *N, char *name)
 	} else if (name[0]=='.') {
 		/* looks relative... */
 		getcwd(buf, sizeof(buf)-strlen(name)-2);
-		strcat(buf, "/");
-		strcat(buf, name);
+		strncat(buf, "/", sizeof(buf)-strlen(buf));
+		strncat(buf, name, sizeof(buf)-strlen(buf));
 	} else {
 		getcwd(buf, sizeof(buf)-strlen(name)-2);
-		strcat(buf, "/");
-		strcat(buf, name);
+		strncat(buf, "/", sizeof(buf)-strlen(buf));
+		strncat(buf, name, sizeof(buf)-strlen(buf));
 	}
 	for (j=0;j<strlen(buf);j++) {
 		if (buf[j]=='\\') buf[j]='/';
@@ -172,7 +177,7 @@ int main(int argc, char *argv[])
 	/* add args */
 	tobj=nes_settable(N, &N->g, "_ARGS");
 	for (i=0;i<argc;i++) {
-		sprintf(tmpbuf, "%d", i);
+		n_ntoa(N, tmpbuf, i, 10, 0);
 		nes_setstr(N, tobj, tmpbuf, argv[i], strlen(argv[i]));
 	}
 	tobj=nes_settable(N, &N->g, "io");

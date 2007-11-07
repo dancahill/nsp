@@ -9,7 +9,8 @@ OBJECTS = "ldap.o";
 TNAME   = "libneslaldap";
 if (cmd==null) if (_ARGS[2]=='clean') cmd='clean'; else cmd='build';
 if (cmd=='build') {
-	if (config.have_ldap==true) {
+	t=newer2(OBJECTS, _LINKAGE_, TNAME);
+	if ((t>0)&&(config.have_ldap==true)) {
 		print("building ",_LINKAGE_," lib ldap\n");
 		if (CC=='cl.exe') file.write("dlldefs.def", "LIBRARY\t\tlibneslaldap\r\nVERSION\t\t"+_version_+"\r\nEXPORTS\r\n\tneslaldap_register_all\r\n");
 		build_objs(CC, CFLAGS, OBJECTS, _LINKAGE_, TNAME);

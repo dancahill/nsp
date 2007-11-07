@@ -15,7 +15,10 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "nesla/nesla.h"
+#include "nesla/libnesla.h"
+#ifdef HAVE_CDB
+#include "nesla/libcdb.h"
+#endif
 #ifdef HAVE_CRYPTO
 #include "nesla/libcrypt.h"
 #endif
@@ -138,12 +141,12 @@ static void preppath(nes_state *N, char *name)
 	} else if (name[0]=='.') {
 		/* looks relative... */
 		getcwd(buf, sizeof(buf)-strlen(name)-2);
-		strcat(buf, "/");
-		strcat(buf, name);
+		strncat(buf, "/", sizeof(buf)-strlen(buf));
+		strncat(buf, name, sizeof(buf)-strlen(buf));
 	} else {
 		getcwd(buf, sizeof(buf)-strlen(name)-2);
-		strcat(buf, "/");
-		strcat(buf, name);
+		strncat(buf, "/", sizeof(buf)-strlen(buf));
+		strncat(buf, name, sizeof(buf)-strlen(buf));
 	}
 	for (j=0;j<strlen(buf);j++) {
 		if (buf[j]=='\\') buf[j]='/';
@@ -186,6 +189,9 @@ int main(int argc, char *argv[])
 	if ((N=nes_newstate())==NULL) return -1;
 	setsigs();
 	N->debug=0;
+#ifdef HAVE_CDB
+	neslacdb_register_all(N);
+#endif
 #ifdef HAVE_CRYPTO
 	neslacrypto_register_all(N);
 #endif
@@ -235,7 +241,7 @@ int main(int argc, char *argv[])
 	/* add args */
 	tobj=nes_settable(N, &N->g, "_ARGS");
 	for (i=0;i<argc;i++) {
-		sprintf(tmpbuf, "%d", i);
+		n_ntoa(N, tmpbuf, i, 10, 0);
 		nes_setstr(N, tobj, tmpbuf, argv[i], strlen(argv[i]));
 	}
 	tobj=nes_settable(N, &N->g, "io");
@@ -274,5 +280,13 @@ err:
 		printf("errno=%d (%d) :: \r\n%s\r\n", N->err, N->warnings, N->errbuf);
 	}
 	nes_endstate(N);
+/*
+#include <limits.h>
+	printf("\nchar[%d]\nshort[%d]\nint[%d]\nlong[%d]\n"
+		"float[%d]\ndouble[%d]\nlong double[%d]\n"
+		"int_min[%d]\nint_max[%d]\n",
+		sizeof(char), sizeof(short), sizeof(int), sizeof(long), sizeof(float), sizeof(double), sizeof(long double),
+		INT_MIN, INT_MAX);
+*/
 	return 0;
 }

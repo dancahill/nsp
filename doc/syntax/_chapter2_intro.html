@@ -1,0 +1,60 @@
+<h1>2 - The Language</h1>
+
+<h2>Keywords</h2>
+
+<p>
+break continue return function global local var if else for do while exit
+</p>
+<p>
+Working code looks a little like the following sample.
+</p>
+<PRE><B>function</B> demo<FONT COLOR=MAROON><B>(</B></FONT>arg1<FONT COLOR=MAROON><B>)</B></FONT> <FONT COLOR=MAROON><B>{</B></FONT>
+        <B>global</B> x<FONT COLOR=MAROON><B>=</B></FONT><FONT COLOR=NAVY>1</FONT><FONT COLOR=MAROON><B>;</B></FONT>
+        <FONT COLOR=GREEN><I># you don't actually need local or var, but it makes the code clearer</I></FONT>
+        <B>local</B> y<FONT COLOR=MAROON><B>=</B></FONT><FONT COLOR=NAVY>2</FONT><FONT COLOR=MAROON><B>;</B></FONT>
+        <B>var</B> z<FONT COLOR=MAROON><B>=</B></FONT><FONT COLOR=NAVY>3</FONT><FONT COLOR=MAROON><B>;</B></FONT>
+
+        <B>for</B> <FONT COLOR=MAROON><B>(</B></FONT>i<FONT COLOR=MAROON><B>=</B></FONT><FONT COLOR=NAVY>0</FONT><FONT COLOR=MAROON><B>;</B></FONT>i<FONT COLOR=MAROON><B>&lt;</B></FONT><FONT COLOR=NAVY>10</FONT><FONT COLOR=MAROON><B>;</B></FONT>i<FONT COLOR=MAROON><B>++</B></FONT><FONT COLOR=MAROON><B>)</B></FONT> <FONT COLOR=MAROON><B>{</B></FONT>
+                <B>if</B> <FONT COLOR=MAROON><B>(</B></FONT>i<FONT COLOR=MAROON><B>&lt;</B></FONT><FONT COLOR=NAVY>5</FONT><FONT COLOR=MAROON><B>)</B></FONT> <FONT COLOR=MAROON><B>{</B></FONT>
+                        print<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=BLUE>"less than half "</FONT><FONT COLOR=MAROON><B>,</B></FONT> i<FONT COLOR=MAROON><B>,</B></FONT> <FONT COLOR=BLUE>"\n"</FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>
+                <FONT COLOR=MAROON><B>}</B></FONT> <B>else</B> <B>if</B> <FONT COLOR=MAROON><B>(</B></FONT>i<FONT COLOR=MAROON><B>==</B></FONT><FONT COLOR=NAVY>5</FONT><FONT COLOR=MAROON><B>)</B></FONT> <FONT COLOR=MAROON><B>{</B></FONT>
+                        print<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=BLUE>"half\n"</FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>
+                <FONT COLOR=MAROON><B>}</B></FONT> <B>else</B> <FONT COLOR=MAROON><B>{</B></FONT>
+                        print<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=BLUE>"more than half "</FONT><FONT COLOR=MAROON><B>,</B></FONT> i<FONT COLOR=MAROON><B>,</B></FONT> <FONT COLOR=BLUE>"\n"</FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>
+                <FONT COLOR=MAROON><B>}</B></FONT>
+                <B>if</B> <FONT COLOR=MAROON><B>(</B></FONT>i<FONT COLOR=MAROON><B>==</B></FONT>arg1<FONT COLOR=MAROON><B>)</B></FONT> <B>break</B><FONT COLOR=MAROON><B>;</B></FONT>
+        <FONT COLOR=MAROON><B>}</B></FONT>
+        <B>return</B><FONT COLOR=MAROON><B>;</B></FONT>
+<FONT COLOR=MAROON><B>}</B></FONT>
+demo<FONT COLOR=MAROON><B>(</B></FONT><FONT COLOR=NAVY>8</FONT><FONT COLOR=MAROON><B>)</B></FONT><FONT COLOR=MAROON><B>;</B></FONT>
+</PRE>
+<p>
+break (accepts an optional unbracketed number arg to define the number of levels to break)<br>
+still need to add switch and goto..
+</p>
+
+<h2>Operators</h2>
+
+<p>
+= + ++ += - -- -= * *= / /= == != <= >= < > % & | ^ && || !
+</p>
+<p>
+Strings can also be handled using the slightly shorter list of ops: = + += == != <= >= < >
+</p>
+<p>
+The statement <B>var x="a"+"b";</B> will set x to "ab".
+</p>
+<p>
+Tables have considerably less ops: = {}
+<pre>
+<B>function</B> subf() { <B>return</B> 69; }
+<B>var</B> pi = <B>math.asin</B>(1)*2;
+<B>var</B> table = {
+	{ a1="x", b = pi, [12]=41, [1]=42, 43, 'blah', subf() },
+	{ "x", 'y', x = 41, 42, 43, 'blah', [5]=12, heh=";-)" }
+};
+</pre>
+</p>
+<p>
+setting a var's value to null will completely free the value and effectively make the var non-existant
+</p>

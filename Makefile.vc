@@ -23,12 +23,17 @@ dirs:
 
 # rules for libs
 
-static_libs: _libneslacrypto _libnesladl _libneslaext _libneslaldap _libneslamath _libneslamysql _libneslaodbc _libneslapgsql _libneslaregex _libneslasqlite3 _libneslatcp _libneslawinapi _libneslazip
+static_libs: _libneslacdb _libneslacrypto _libnesladl _libneslaext _libneslaldap _libneslamath _libneslamysql _libneslaodbc _libneslapgsql _libneslaregex _libneslasqlite3 _libneslatcp _libneslawinapi _libneslazip
 
 _libnesla: dirs
 	@cd src\libnesla
 	@$(MAKE) Makefile.vc
 	@cd ..\..
+
+_libneslacdb:
+	@cd src\libs\cdb
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@cd ..\..\..
 
 _libneslacrypto:
 	@cd src\libs\crypto
@@ -96,6 +101,9 @@ _libneslazip:
 	@cd ..\..\..
 
 shared_libs:
+	@cd src\libs\cdb
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@cd ..\..\..
 	@cd src\libs\crypto
 	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
 	@cd ..\..\..
@@ -174,6 +182,9 @@ nullgw: _libnesla
 
 clean: lite
 #	@touch src\config.mak
+	@cd src\libs\cdb
+	@..\..\..\$(NESLITE) Makefile.nes clean
+	@cd ..\..\..
 	@cd src\libs\crypto
 	@..\..\..\$(NESLITE) Makefile.nes clean
 	@cd ..\..\..

@@ -33,6 +33,7 @@ reconf: lite
 # rules for libs
 
 static_libs: deps
+	@cd src/libs/cdb     && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
 	@cd src/libs/crypto  && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
 	@cd src/libs/dl      && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
 	@cd src/libs/ext     && ../../../$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');" && cd ../../..
@@ -49,6 +50,7 @@ static_libs: deps
 static: static_libs
 
 shared_libs: deps
+	@cd src/libs/cdb      && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
 	@cd src/libs/crypto   && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
 	@cd src/libs/ext      && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
 	@cd src/libs/ldap     && ../../../$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');" && cd ../../..
@@ -102,6 +104,7 @@ clean: #lite
 	@cd src/hosts/ctest   && $(MAKE) -s clean && cd ../../..
 	@cd src/hosts/nullgw  && $(MAKE) -s clean && cd ../../..
 	@cd src/hosts/lite    && $(MAKE) -s clean && cd ../../..
+#	@cd src/libs/cdb      && ../../../$(NESLITE) Makefile.nes clean && cd ../../..
 #	@cd src/libs/crypto   && ../../../$(NESLITE) Makefile.nes clean && cd ../../..
 #	@cd src/libs/dl       && ../../../$(NESLITE) Makefile.nes clean && cd ../../..
 #	@cd src/libs/ext      && ../../../$(NESLITE) Makefile.nes clean && cd ../../..
@@ -173,7 +176,7 @@ test2:
 
 ver:
 	@make clean
-	@joe `grep -lR "0\.8\." *`
+	@joe `grep -lR "0\.9\." *`
 	@rm `find -name *~`
 
 showbug:
@@ -203,6 +206,8 @@ wc:
 	@wc `find . -name *.[ch]`
 	@wc src/libnesla/*.c
 
+docs:
+	@cd doc/syntax && ../../$(NESLITE) syntax.nes && cd ../..
+
 time:
-	@echo -e "\n\e[01;37;40mNES - timing tests\e[00m"
-	@time ./bin/nesla scripts/bench/speed.nes 2>/dev/null
+	@$(NESLITE) -f scripts/tests/speed.nes

@@ -32,6 +32,42 @@ function newer(file1, file2) {
 	return 0;
 }
 
+function newer2(OBJECTS, _LINKAGE_, TNAME) {
+	OLIST=string.split(OBJECTS, " ");
+	if (CC=='tcc.exe') {
+		if (string.sub(TNAME, 0, 8)=='libnesla') TNAME=string.sub(TNAME, 8);
+		s3=file.stat(swapslash(LIBDIR+"/"+TNAME+".lib"));
+	} else if (CC=='cl.exe') {
+		if (_LINKAGE_=='shared') {
+			s3=file.stat(swapslash(LIBDIR+"/shared/"+TNAME+".dll"));
+		} else {
+			s3=file.stat(swapslash(LIBDIR+"/"+TNAME+".lib"));
+		}
+	} else {
+		if (_LINKAGE_=='shared') {
+			s3=file.stat(swapslash(LIBDIR+"/shared/"+TNAME+".so"));
+		} else {
+			s3=file.stat(swapslash(LIBDIR+"/"+TNAME+".a"));
+		}
+	}
+	if (typeof(s3)!='table') return 1;
+	for (i=0;i<sizeof(OLIST);i++) {
+		ONAME=string.split(OLIST[i], ".");
+		if (ONAME[1]!='o') continue;
+		s1=file.stat(ONAME[0]+".c");
+		s2=file.stat(swapslash(OBJDIR+"/"+TNAME+"/"+_LINKAGE_+"/"+ONAME[0]+".o"));
+		if (typeof(s1)!='table') {
+			print("missing source ",file1,"?\n");
+			return -1;
+		}
+		if (typeof(s2)!='table') return 1;
+		if (s1.mtime>s2.mtime) { /*print(ONAME[0]+".c newer than obj\n");*/ return 1; }
+		if (s1.mtime>s3.mtime) { /*print(ONAME[0]+".c newer than lib\n");*/ return 1; }
+		if (s2.mtime>s3.mtime) { /*print(ONAME[0]+".o newer than lib\n");*/ return 1; }
+	}
+	return 0;
+}
+
 function build_objs(CC, CFLAGS, OBJECTS, OTYPE, INTDIR) {
 	if (CC=='tcc.exe') {
 		if (string.sub(INTDIR, 0, 8)=='libnesla') INTDIR=string.sub(INTDIR, 8);

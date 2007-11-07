@@ -15,6 +15,9 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+/* aes.c */
+NES_FUNCTION(neslacrypto_aes_decrypt);
+NES_FUNCTION(neslacrypto_aes_encrypt);
 /* md5.c */
 NES_FUNCTION(neslacrypto_md5_file);
 NES_FUNCTION(neslacrypto_md5_string);
@@ -22,11 +25,5 @@ NES_FUNCTION(neslacrypto_md5_passwd);
 /* sha1.c */
 NES_FUNCTION(neslacrypto_sha1_file);
 NES_FUNCTION(neslacrypto_sha1_string);
-/* openssl.c */
-NES_FUNCTION(neslaopenssl_aes_decrypt);
-NES_FUNCTION(neslaopenssl_aes_encrypt);
-/* xyssl.c */
-NES_FUNCTION(neslaxyssl_aes_decrypt);
-NES_FUNCTION(neslaxyssl_aes_encrypt);
 
 int neslacrypto_register_all(nes_state *N);

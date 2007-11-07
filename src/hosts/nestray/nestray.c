@@ -17,6 +17,7 @@
 */
 #ifdef WIN32
 #include "nesla/nesla.h"
+#include "nesla/libcdb.h"
 #include "nesla/libcrypt.h"
 #include "nesla/libdl.h"
 #include "nesla/libext.h"
@@ -284,6 +285,14 @@ NES_FUNCTION(nes_textinput)
 	return 0;
 }
 
+NES_FUNCTION(nes_passinput)
+{
+	TrayIcon(1);
+	DialogBox(hInst, MAKEINTRESOURCE(IDD_TEXTINPUT2), NULL, TextInputDlgProc);
+	TrayIcon(0);
+	return 0;
+}
+
 void CALLBACK TrayNotifyProc(HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
 	PostMessage(hwnd, WM_CLOSE, 0, 0);
@@ -440,6 +449,7 @@ void init_stuff(nes_state *N)
 	struct stat sb;
 
 	N->debug=0;
+	neslacdb_register_all(N);
 	neslacrypto_register_all(N);
 	nesladl_register_all(N);
 	neslaext_register_all(N);
@@ -465,6 +475,7 @@ void init_stuff(nes_state *N)
 	}
 	preppath(N, conffile);
 	nes_setcfunc(N, &N->g, "TextInput",  (void *)nes_textinput);
+	nes_setcfunc(N, &N->g, "PassInput",  (void *)nes_passinput);
 	nes_setcfunc(N, &N->g, "TrayNotice", (void *)nes_traynotice);
 	if (stat(conffile, &sb)==0) {
 		lastfile=sb.st_mtime;

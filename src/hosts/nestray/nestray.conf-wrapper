@@ -1,0 +1,27 @@
+/*
+ * you can encrypt your menu script by moving nestray.conf to nestraymenu.nes
+ * and putting this file in its place.
+ */
+
+var rfilename=".\\nestraymenu.nes";
+var cfilename=".\\nestraymenu.aes";
+
+if (typeof(file.stat(cfilename))!='table') {
+	key=PassInput("", "NesLaunchPad Auth - Enter NEW Password");
+	key="hex:"+string.md5(key);
+	x=file.read(rfilename);
+	x=crypto.aes_cbc_encrypt(x, key);
+	x=base64.encode(x, 76);
+	file.write(cfilename, x);
+}
+if (typeof(file.stat(cfilename))=='table') {
+	key=PassInput("", "NesLaunchPad Auth - Enter Your Password");
+	key="hex:"+string.md5(key);
+	x=file.read(cfilename);
+	x=base64.decode(x);
+	x=crypto.aes_cbc_decrypt(x, key);
+//	file.write(rfilename+".txt", x);
+	exec(x);
+} else {
+	include(rfilename);
+}
