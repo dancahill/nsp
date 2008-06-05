@@ -156,6 +156,14 @@ function dotests() {
 			if (config_inc++) config_ne2+=", ";
 			config_ne2+="have_dl=true";
 		}
+
+		if (testsub("DNS", "-lresolv", "#include <resolv.h>\n#include <arpa/nameser.h>\nint main() { return 0; }\n")) {
+			config_mak+="CFLAGS  += -DHAVE_DNS\nLDFLAGS += -lresolv\n\n";
+			config_nes+="CFLAGS  += \" -DHAVE_DNS\";\nLDFLAGS += \" -lresolv\";\n\n";
+			if (config_inc++) config_ne2+=", ";
+			config_ne2+="have_dns=true";
+		}
+
 		if (testsub("LDAP", "-lldap", "#include <ldap.h>\nint main() { return 0; }\n")) {
 			config_mak+="CFLAGS  += -DHAVE_LDAP\nLDFLAGS += -lneslaldap -lldap\n\n";
 			config_nes+="CFLAGS  += \" -DHAVE_LDAP\";\nLDFLAGS += \" -lneslaldap -lldap\";\n\n";
@@ -195,6 +203,12 @@ function dotests() {
 			config_ne2+="have_openssl=true";
 */
 		}
+		if (testsub("PIPE", "", "#include <sys/wait.h>\nint main() { return 0; }\n")) {
+			config_mak+="CFLAGS  += -DHAVE_PIPE\nLDFLAGS += -lneslapipe\n\n";
+			config_nes+="CFLAGS  += \" -DHAVE_PIPE\";\nLDFLAGS += \" -lneslapipe\";\n\n";
+			if (config_inc++) config_ne2+=", ";
+			config_ne2+="have_pipe=true";
+		}
 		if (testsub("PGSQL", "-lpq", "#include <libpq-fe.h>\nint main() { return 0; }\n")) {
 			config_mak+="CFLAGS  += -DHAVE_PGSQL\nLDFLAGS += -lneslapgsql -lpq\n\n";
 			config_nes+="CFLAGS  += \" -DHAVE_PGSQL\";\nLDFLAGS += \" -lneslapgsql -lpq\";\n\n";
@@ -203,6 +217,14 @@ function dotests() {
 		}
 		config_mak+="CFLAGS  += -DHAVE_REGEX\nLDFLAGS += -lneslaregex\n\n";
 		config_nes+="CFLAGS  += \" -DHAVE_REGEX\";\nLDFLAGS += \" -lneslaregex\";\n\n";
+
+		if (testsub("SSH2", "-lssh2", "#include <libssh2.h>\nLIBSSH2_SESSION *session;\nint main() { return 0; }\n")) {
+			config_mak+="CFLAGS  += -DHAVE_SSH2\nLDFLAGS += -lneslassh -lssh2 -lcrypto -lssl\n\n";
+			config_nes+="CFLAGS  += \" -DHAVE_SSH2\";\nLDFLAGS += \" -lneslassh -lssh2 -lcrypto -lssl\";\n\n";
+			if (config_inc++) config_ne2+=", ";
+			config_ne2+="have_ssh2=true";
+		}
+
 		if (testsub("SQLITE3", "-lsqlite3", "#include <sqlite3.h>\nint main() { return 0; }\n")) {
 			config_mak+="CFLAGS  += -DHAVE_SQLITE3\nLDFLAGS += -lneslasqlite3 -lsqlite3\n\n";
 			config_nes+="CFLAGS  += \" -DHAVE_SQLITE3\";\nLDFLAGS += \" -lneslasqlite3 -lsqlite3\";\n\n";
@@ -234,6 +256,12 @@ function dotests() {
 			if (config_inc++) config_ne2+=", ";
 			config_ne2+="have_dl=true";
 		}
+		if (testsub("DNS", "", "#include <winsock2.h>\n#include <windns.h>\n#pragma comment(lib, \"dnsapi.lib\")\nint main() { DnsQuery_A(\"\", 0, 0, NULL, NULL, NULL); return 0; }\n")) {
+			config_mak+="CFLAGS  = $(CFLAGS) -DHAVE_DNS\nLDFLAGS = $(LDFLAGS) dnsapi.lib\n\n";
+			config_nes+="CFLAGS  += \" -DHAVE_DNS\";\nLDFLAGS += \" dnsapi.lib\";\n\n";
+			if (config_inc++) config_ne2+=", ";
+			config_ne2+="have_dns=true";
+		}
 		if (testsub("MATH", "", "#include <math.h>\nint main() { return 0; }\n")) {
 			config_mak+="CFLAGS  = $(CFLAGS) -DHAVE_MATH\nLDFLAGS = $(LDFLAGS) libneslamath.lib\n\n";
 			config_nes+="CFLAGS  += \" -DHAVE_MATH\";\nLDFLAGS += \" libneslamath.lib\";\n\n";
@@ -246,8 +274,20 @@ function dotests() {
 			if (config_inc++) config_ne2+=", ";
 			config_ne2+="have_odbc=true";
 		}
+		config_mak+="CFLAGS  = $(CFLAGS) -DHAVE_PIPE\nLDFLAGS = $(LDFLAGS) libneslapipe.lib\n\n";
+		config_nes+="CFLAGS  += \" -DHAVE_PIPE\";\nLDFLAGS += \" libneslapipe.lib\";\n\n";
+		if (config_inc++) config_ne2+=", ";
+		config_ne2+="have_pipe=true";
+
 		config_mak+="CFLAGS  = $(CFLAGS) -DHAVE_REGEX\nLDFLAGS = $(LDFLAGS) libneslaregex.lib\n\n";
 		config_nes+="CFLAGS  += \" -DHAVE_REGEX\";\nLDFLAGS += \" libneslaregex.lib\";\n\n";
+		if (testsub("SSH2", "", "#include <libssh2.h>\nLIBSSH2_SESSION *session;\nint main() { return 0; }\n")) {
+			/* openssl makes all this rather ugly, but it works... */
+			config_mak+="CFLAGS  = $(CFLAGS) -DHAVE_SSH2\nLDFLAGS = $(LDFLAGS) libneslassh.lib libssh2.lib ssleay32MT.lib libeay32MT.lib WS2_32.LIB ADVAPI32.LIB GDI32.LIB USER32.LIB\n\n";
+			config_nes+="CFLAGS  += \" -DHAVE_SSH2\";\nLDFLAGS += \" libneslassh.lib libssh2.lib\";\n\n";
+			if (config_inc++) config_ne2+=", ";
+			config_ne2+="have_ssh2=true";
+		}
 		if (testsub("XYSSL", "", "#include <xyssl/ssl.h>\nint main() { return 0; }\n")) {
 			config_mak+="CFLAGS  = $(CFLAGS) -DHAVE_XYSSL\nLDFLAGS = $(LDFLAGS) xyssl.lib\n\n";
 			config_nes+="CFLAGS  += \" -DHAVE_XYSSL\";\nLDFLAGS += \" xyssl.lib\";\n\n";

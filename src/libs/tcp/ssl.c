@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,10 +26,11 @@
 #define closesocket close
 #endif
 
-#ifdef HAVE_OPENSSL
+#if defined HAVE_OPENSSL
 
 int ossl_init(nes_state *N, TCP_SOCKET *sock, short srvmode, char *certfile, char *keyfile)
 {
+#define __FUNCTION__ __FILE__ ":ossl_init()"
 	SSL_load_error_strings();
 	SSLeay_add_ssl_algorithms();
 	if (srvmode) {
@@ -38,23 +40,24 @@ int ossl_init(nes_state *N, TCP_SOCKET *sock, short srvmode, char *certfile, cha
 	}
 	sock->ssl_ctx=SSL_CTX_new(sock->ssl_meth);
 	if (!sock->ssl_ctx) {
-		n_warn(N, "ossl_init", "SSL Error");
+		n_warn(N, __FUNCTION__, "SSL Error");
 		return -1;
 	}
 	if ((certfile==NULL)||(keyfile==NULL)) return 0;
 	if (SSL_CTX_use_certificate_file(sock->ssl_ctx, certfile, SSL_FILETYPE_PEM)<=0) {
-		n_warn(N, "ossl_init", "SSL Error loading certificate '%s'", certfile);
+		n_warn(N, __FUNCTION__, "SSL Error loading certificate '%s'", certfile);
 		return -1;
 	}
 	if (SSL_CTX_use_PrivateKey_file(sock->ssl_ctx, keyfile, SSL_FILETYPE_PEM)<=0) {
-		n_warn(N, "ossl_init", "SSL Error loading private key '%s'", keyfile);
+		n_warn(N, __FUNCTION__, "SSL Error loading private key '%s'", keyfile);
 		return -1;
 	}
 	if (!SSL_CTX_check_private_key(sock->ssl_ctx)) {
-		n_warn(N, "ossl_init", "Private key does not match the public certificate");
+		n_warn(N, __FUNCTION__, "Private key does not match the public certificate");
 		return -1;
 	}
 	return 0;
+#undef __FUNCTION__
 }
 
 int ossl_accept(nes_state *N, TCP_SOCKET *bsock, TCP_SOCKET *asock)
@@ -72,6 +75,7 @@ int ossl_accept(nes_state *N, TCP_SOCKET *bsock, TCP_SOCKET *asock)
 
 int ossl_connect(nes_state *N, TCP_SOCKET *sock)
 {
+#define __FUNCTION__ __FILE__ ":ossl_connect()"
 	/* X509 *server_cert; */
 	int rc;
 
@@ -79,7 +83,7 @@ int ossl_connect(nes_state *N, TCP_SOCKET *sock)
 	sock->ssl=SSL_new(sock->ssl_ctx);
 	SSL_set_fd(sock->ssl, sock->socket);
 	if ((rc=SSL_connect(sock->ssl))==-1) {
-		n_warn(N, "ossl_connect", "SSL_connect error %d", rc);
+		n_warn(N, __FUNCTION__, "SSL_connect error %d", rc);
 		return -1;
 	}
 	/* the rest is optional */
@@ -90,6 +94,7 @@ int ossl_connect(nes_state *N, TCP_SOCKET *sock)
 	}
 */
 	return 0;
+#undef __FUNCTION__
 }
 
 int ossl_read(nes_state *N, TCP_SOCKET *sock, void *buf, int max)
@@ -132,9 +137,7 @@ int ossl_shutdown(nes_state *N, TCP_SOCKET *sock)
 	return 0;
 }
 
-#else
-
-#ifdef HAVE_XYSSL
+#elif defined HAVE_XYSSL
 
 #include "xyssl/certs.h"
 #include "xyssl/net.h"
@@ -144,6 +147,13 @@ int ossl_shutdown(nes_state *N, TCP_SOCKET *sock)
  * to use a precomputed value (provided below as an example).
  * Run the dh_genprime program to generate an acceptable P.
  */
+char *dhm_P = 
+ "B1D36BED209EFC365817CAAE55F4E5D7C67F84AC74343A1A546DF4BD7821C3BD48436476E02092ED85396EA953F44F1EDA389962A416242FDC798D2A12A86FED" \
+ "655F4885D8BFCE85A866FB52D0BE97CFA780CFE42CD976A4ED1B199C5111096A0FD857B0D50F2BB003C023DA6597432F9EB47D437FF94998424370BB28EA7673";
+char *dhm_G = "4";
+//G = 04
+
+/*
 char *dhm_P = 
     "E4004C1F94182000103D883A448B3F80" \
     "2CE4B44A83301270002C20D0321CFD00" \
@@ -156,6 +166,7 @@ char *dhm_P =
 
 char *dhm_G = "4";
 
+*/
 /*
  * sorted by order of preference
  */
@@ -171,49 +182,52 @@ int my_preferred_ciphers[] = {
 
 int xyssl_init(nes_state *N, TCP_SOCKET *sock, short srvmode, char *certfile, char *keyfile)
 {
+#define __FUNCTION__ __FILE__ ":xyssl_init()"
 	int rc;
 
 	if ((certfile==NULL)||(keyfile==NULL)) {
 		rc=x509parse_crt(&sock->srvcert, (unsigned char *)test_srv_crt, nc_strlen(test_srv_crt));
 		if (rc!=0) {
-			n_warn(N, "xyssl_init", "failed  ! x509parse_crt returned %08x", rc);
+			n_warn(N, __FUNCTION__, "x509parse_crt returned %08x", rc);
 			return -1;
 		}
 		rc=x509parse_crt(&sock->srvcert, (unsigned char *)test_ca_crt, nc_strlen(test_ca_crt));
 		if (rc!=0) {
-			n_warn(N, "xyssl_init", "failed  ! x509parse_crt returned %08x", rc);
+			n_warn(N, __FUNCTION__, "x509parse_crt returned %08x", rc);
 			return -1;
 		}
 		rc=x509parse_key(&sock->rsa, (unsigned char *)test_srv_key, nc_strlen(test_srv_key), NULL, 0);
 		if (rc!=0) {
-			n_warn(N, "xyssl_init", "failed  ! x509_parse_key returned %08x", rc);
+			n_warn(N, __FUNCTION__, "x509_parse_key returned %08x", rc);
 			return -1;
 		}
 	} else {
 		rc=x509parse_crtfile(&sock->srvcert, certfile);
 		if (rc!=0) {
-			n_warn(N, "xyssl_init", "failed  ! x509_read_crtfile returned %08x", rc);
+			n_warn(N, __FUNCTION__, "x509_read_crtfile returned %08x", rc);
 			return -1;
 		}
 		rc=x509parse_keyfile(&sock->rsa, keyfile, NULL);
 		if (rc!=0) {
-			n_warn(N, "xyssl_init", "failed  ! x509_read_keyfile returned %08x", rc);
+			n_warn(N, __FUNCTION__, "x509_read_keyfile returned %08x", rc);
 			return -1;
 		}
 	}
+#undef __FUNCTION__
 	return 0;
 }
 
 int xyssl_accept(nes_state *N, TCP_SOCKET *bsock, TCP_SOCKET *asock)
 {
+#define __FUNCTION__ __FILE__ ":xyssl_accept()"
 	int rc;
 
 	havege_init(&asock->hs);
 	if ((rc=ssl_init(&asock->ssl))!=0) {
-		n_warn(N, "xyssl_accept", "failed  ! ssl_init returned %08x", rc);
+		n_warn(N, __FUNCTION__, "ssl_init returned %08x", rc);
 		return rc;
 	}
-	ssl_set_debuglvl(&asock->ssl, 0);
+//	ssl_set_debuglvl(&asock->ssl, 0);
 	ssl_set_endpoint(&asock->ssl, SSL_IS_SERVER);
 	ssl_set_authmode(&asock->ssl, SSL_VERIFY_NONE);
 	ssl_set_rng(&asock->ssl, havege_rand, &asock->hs);
@@ -231,23 +245,25 @@ int xyssl_accept(nes_state *N, TCP_SOCKET *bsock, TCP_SOCKET *asock)
 
 	while((rc=ssl_handshake(&asock->ssl))!=0) {
 		if (rc!=XYSSL_ERR_NET_TRY_AGAIN) {
-			n_warn(N, "xyssl_accept", "failed  ! ssl_handshake returned %08x", rc);
+			n_warn(N, __FUNCTION__, "ssl_handshake returned %08x", rc);
 			return rc;
 		}
 	}
 	return 0;
+#undef __FUNCTION__
 }
 
 int xyssl_connect(nes_state *N, TCP_SOCKET *sock)
 {
+#define __FUNCTION__ __FILE__ ":xyssl_connect()"
 	int rc;
 
 	havege_init(&sock->hs);
 	if ((rc=ssl_init(&sock->ssl))!=0) {
-		n_warn(N, "xyssl_connect", "ssl_init returned %d", rc);
+		n_warn(N, __FUNCTION__, "ssl_init returned %08x", rc);
 		return rc;
 	}
-	ssl_set_debuglvl(&sock->ssl, 0);
+//	ssl_set_debuglvl(&sock->ssl, 0);
 	ssl_set_endpoint(&sock->ssl, SSL_IS_CLIENT);
 	ssl_set_authmode(&sock->ssl, SSL_VERIFY_NONE);
 	ssl_set_rng(&sock->ssl, havege_rand, &sock->hs);
@@ -256,46 +272,54 @@ int xyssl_connect(nes_state *N, TCP_SOCKET *sock)
 	nc_memset(&sock->ssn, 0, sizeof(ssl_session));
 	ssl_set_session(&sock->ssl, 1, 600, &sock->ssn);
 	return 0;
+#undef __FUNCTION__
 }
 
 int xyssl_read(nes_state *N, TCP_SOCKET *sock, void *buf, int max)
 {
+#define __FUNCTION__ __FILE__ ":xyssl_read()"
 	int rc;
 
 	while ((rc=ssl_read(&sock->ssl, (void *)buf, max))<=0) {
 		if (rc==XYSSL_ERR_NET_TRY_AGAIN) continue;
 		switch (rc) {
 		case XYSSL_ERR_NET_RECV_FAILED:
-			n_warn(N, "\nxyssl_read", "xyssl_read returned XYSSL_ERR_NET_RECV_FAILED");
+			n_warn(N, __FUNCTION__, "XYSSL_ERR_NET_RECV_FAILED");
 			break;
 		case XYSSL_ERR_NET_CONN_RESET:
-//			n_warn(N, "\nxyssl_read", "xyssl_read returned XYSSL_ERR_NET_CONN_RESET");
+//			n_warn(N, __FUNCTION__, "XYSSL_ERR_NET_CONN_RESET");
 			break;
 		default:
-			n_warn(N, "\nxyssl_read", "xyssl_read returned %d ", rc);
+			n_warn(N, __FUNCTION__, "%08x", rc);
 		}
 		return -1;
 	}
 	return rc;
+#undef __FUNCTION__
 }
 
 int xyssl_write(nes_state *N, TCP_SOCKET *sock, const void *buf, int len)
 {
+#define __FUNCTION__ __FILE__ ":xyssl_write()"
 	int rc;
 
 	while ((rc=ssl_write(&sock->ssl, (void *)buf, len))<=0) {
 		if (rc==XYSSL_ERR_NET_TRY_AGAIN) continue;
 		switch (rc) {
 		case XYSSL_ERR_NET_SEND_FAILED:
-			n_warn(N, "\nxyssl_write", "xyssl_write returned XYSSL_ERR_NET_SEND_FAILED");
+			n_warn(N, __FUNCTION__, "XYSSL_ERR_NET_SEND_FAILED");
+			break;
+		case XYSSL_ERR_NET_CONN_RESET:
+//			n_warn(N, __FUNCTION__, "XYSSL_ERR_NET_CONN_RESET");
 			break;
 		default:
-			n_warn(N, "\nxyssl_write", "xyssl_write returned %d ", rc);
+			n_warn(N, __FUNCTION__, "%08x", rc);
 			break;
 		}
 		return -1;
 	}
 	return len;
+#undef __FUNCTION__
 }
 
 int xyssl_close(nes_state *N, TCP_SOCKET *sock)
@@ -322,7 +346,4 @@ int xyssl_shutdown(nes_state *N, TCP_SOCKET *sock)
 	return 0;
 }
 
-
-#endif /* HAVE_XYSSL */
-
-#endif /* HAVE_OPENSSL */
+#endif

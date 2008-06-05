@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -66,34 +67,28 @@ static int lib_close(void *handle)
 
 NES_FUNCTION(nesladl_loadlib)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
+	NES_CFUNC cfunc;
 #ifdef WIN32
 	HINSTANCE l;
 #else
 	void *l;
 #endif
-	NES_CFUNC cfunc;
-	int rc=0;
 
-	if ((cobj1->val->type==NT_STRING)&&(cobj1->val->size>0)) {
-		l=lib_open(cobj1->val->d.str);
-		if (l==NULL) {
-			nes_setstr(N, &N->r, "", lib_error(), -1);
-			return 0;
-		} else {
-			cfunc=(NES_CFUNC)lib_sym(l, "neslalib_init");
-			if (cfunc==NULL) {
-				nes_setstr(N, &N->r, "", lib_error(), -1);
-				lib_close(l);
-				return 0;
-			} else {
-				rc=cfunc(N);
-			}
-		}
-	} else {
-		rc=-1;
+	if (cobj1->val->type!=NT_STRING||cobj1->val->size<1) {
+		nes_setstr(N, &N->r, "", "missing lib name", -1);
+		return 0;
 	}
-	nes_setnum(N, &N->r, "", rc);
+	if ((l=lib_open(cobj1->val->d.str))==NULL) {
+		nes_setstr(N, &N->r, "", lib_error(), -1);
+		return 0;
+	}
+	if ((cfunc=(NES_CFUNC)lib_sym(l, "neslalib_init"))==NULL) {
+		nes_setstr(N, &N->r, "", lib_error(), -1);
+		lib_close(l);
+		return 0;
+	}
+	nes_setnum(N, &N->r, "", cfunc(N));
 	return 0;
 }
 

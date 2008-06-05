@@ -1,0 +1,57 @@
+<!-- CONTENTS_START -->
+<a name="nesla_ssh_open"></a>
+<H2>ssh.open<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Open an SSH connection to a given host/port.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>ssh-conn</I> <B>=</B> <B>ssh.open(</B><I>hostname</I>[, <I>port</I>]<B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>hostname</I> </TD><TD>String containing the name of the server to connect to.</TD></TR>
+<TR><TD><I>port</I> </TD><TD>Number containing the server port to connect to (default is 22).</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns an ssh-conn connection object if successful.  Any number returned likely indicates an error.
+</BLOCKQUOTE><P>
+
+<H4>Remarks</H4>
+<BLOCKQUOTE><P>
+<P>None
+</BLOCKQUOTE><P>
+
+<H4>Example</H4>
+<BLOCKQUOTE><P>
+The following example demonstrates how to connect to a host and verify success.
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+<B>if</B> (<B>typeof</B>(conn=<B>ssh.open</B>("192.168.0.1", 22))!='ssh-conn') {<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<B>print</B>("failed connection");<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<B>exit</B>;<BR>
+}<BR>
+<FONT COLOR='green'>/* checking the host's RSA key fingerprint is optional, but a good idea. */</FONT><BR>
+key="ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff";<BR>
+<B>if</B> ((k=ssh.hostkey(conn))!=key) {<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<B>print</B>("expected = "+key+"\nrecieved = "+k+"\n");<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<B>print</B>("Host key verification failed.\n");<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<B>exit</B>;<BR>
+}<BR>
+<B>print</B>("RSA key fingerprint is "+k+".\n");<BR>
+<B>if</B> (<B>ssh.auth</B>(conn, "username", "password")!=true) {<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<B>print</B>("failed auth");<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<B>exit</B>;<BR>
+}<BR>
+<FONT COLOR='green'>/*<BR>
+&nbsp;* do something useful here<BR>
+&nbsp;*/</FONT><BR>
+<B>ssh.close</B>(conn);<BR>
+</CODE></TD></TR></TABLE>
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->

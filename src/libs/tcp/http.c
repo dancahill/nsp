@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,11 +28,12 @@
 
 NES_FUNCTION(neslatcp_http_get)
 {
+#define __FUNCTION__ __FILE__ ":neslatcp_http_get()"
 	TCP_SOCKET sock;
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1); /* SSL */
-	obj_t *cobj2=nes_getiobj(N, &N->l, 2); /* host */
-	obj_t *cobj3=nes_getiobj(N, &N->l, 3); /* port*/
-	obj_t *cobj4=nes_getiobj(N, &N->l, 4); /* uri */
+	obj_t *cobj1=nes_getobj(N, &N->l, "1"); /* SSL */
+	obj_t *cobj2=nes_getobj(N, &N->l, "2"); /* host */
+	obj_t *cobj3=nes_getobj(N, &N->l, "3"); /* port*/
+	obj_t *cobj4=nes_getobj(N, &N->l, "4"); /* uri */
 	obj_t *cobj;
 	int cl=-1, len=0, rc;
 	char tmpbuf[2048];
@@ -39,13 +41,13 @@ NES_FUNCTION(neslatcp_http_get)
 	obj_t *tobj2;
 	char *p, *p1, *p2;
 
-	if (cobj1->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a number for arg1");
-	if (cobj2->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg2");
-	if (cobj3->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a number for arg3");
-	if (cobj4->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg4");
+	if (cobj1->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a number for arg1");
+	if (cobj2->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg2");
+	if (cobj3->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a number for arg3");
+	if (cobj4->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg4");
 	nc_memset((char *)&sock, 0, sizeof(sock));
 	if ((rc=tcp_connect(N, &sock, cobj2->val->d.str, (unsigned short)cobj3->val->d.num, (unsigned short)cobj1->val->d.num))<0) {
-		nes_setstr(N, &N->r, "", "tcp error", strlen("tcp error"));
+		nes_setstr(N, &N->r, "", "tcp error", -1);
 		return -1;
 	}
 	/* why does php insert random data when i try to use HTTP/1.1? */
@@ -53,7 +55,7 @@ NES_FUNCTION(neslatcp_http_get)
 	tobj.val=n_newval(N, NT_TABLE);
 	rc=tcp_fgets(N, &sock, tmpbuf, sizeof(tmpbuf)-1);
 	if (rc>0) {
-		cobj=nes_setstr(N, &tobj, "status", tmpbuf, strlen(tmpbuf));
+		cobj=nes_setstr(N, &tobj, "status", tmpbuf, -1);
 		while ((cobj->val->size>0)&&((cobj->val->d.str[cobj->val->size-1]=='\r')||(cobj->val->d.str[cobj->val->size-1]=='\n'))) cobj->val->d.str[--cobj->val->size]='\0';
 		tobj2=nes_settable(N, &tobj, "stat");
 		striprn(tmpbuf);
@@ -62,7 +64,7 @@ NES_FUNCTION(neslatcp_http_get)
 		if ((*p1)&&(*p2)) {
 			*p2++='\0';
 			while (nc_isspace(*p2)) p2++;
-			nes_setstr(N, tobj2, "a", p1, strlen(p1));
+			nes_setstr(N, tobj2, "a", p1, -1);
 		}
 		p1=p2;
 		p2=nc_strchr(p2, ' ');
@@ -71,11 +73,11 @@ NES_FUNCTION(neslatcp_http_get)
 			while (nc_isspace(*p2)) p2++;
 			p=p1; while (nc_isdigit(*p)) p++;
 			if (*p) {
-				nes_setstr(N, tobj2, "b", p1, strlen(p1));
+				nes_setstr(N, tobj2, "b", p1, -1);
 			} else {
 				nes_setnum(N, tobj2, "b", atoi(p1));
 			}
-			nes_setstr(N, tobj2, "c", p2, strlen(p2));
+			nes_setstr(N, tobj2, "c", p2, -1);
 		}
 	}
 	cobj=nes_setstr(N, &tobj, "head", NULL, 0);
@@ -98,13 +100,13 @@ NES_FUNCTION(neslatcp_http_get)
 			if (nc_strcmp(p1, "content-length")==0) {
 				p=p2; while (nc_isdigit(*p)) p++;
 				if (*p) {
-					nes_setstr(N, tobj2, p1, p2, strlen(p2));
+					nes_setstr(N, tobj2, p1, p2, -1);
 				} else {
 					cl=atoi(p2);
 					nes_setnum(N, tobj2, p1, cl);
 				}
 			} else {
-				nes_setstr(N, tobj2, p1, p2, strlen(p2));
+				nes_setstr(N, tobj2, p1, p2, -1);
 			}
 		}
 	}
@@ -121,8 +123,9 @@ NES_FUNCTION(neslatcp_http_get)
 		if ((cl>-1)&&(len>=cl)) break;
 	}
 	tcp_close(N, &sock, 1);
-	if (N->debug) n_warn(N, "neslatcp_http_get", "Content-Length: %d/%d", len, cl);
+	if (N->debug) n_warn(N, __FUNCTION__, "Content-Length: %d/%d", len, cl);
 	nes_linkval(N, &N->r, &tobj);
 	nes_unlinkval(N, &tobj);
 	return 0;
+#undef __FUNCTION__
 }

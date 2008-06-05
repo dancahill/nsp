@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -103,10 +104,11 @@ static int n_dirlist(nes_state *N, obj_t *dobj, const char *dirname)
 
 NES_FUNCTION(neslaext_dirlist)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+#define __FUNCTION__ __FILE__ ":neslaext_dirlist()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
 	obj_t tobj;
 
-	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
 	nc_memset((void *)&tobj, 0, sizeof(obj_t));
 	nes_linkval(N, &tobj, NULL);
 	tobj.val->type=NT_TABLE;
@@ -115,4 +117,5 @@ NES_FUNCTION(neslaext_dirlist)
 	nes_linkval(N, &N->r, &tobj);
 	nes_unlinkval(N, &tobj);
 	return 0;
+#undef __FUNCTION__
 }

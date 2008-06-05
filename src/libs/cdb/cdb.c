@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,7 +55,8 @@ static unsigned long cdb_hash(const void *buf, unsigned long len)
 
 NES_FUNCTION(neslacdb_read)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+#define __FUNCTION__ __FILE__ ":neslacdb_read()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
 	obj_t *cobj;
 	obj_t tobj;
 	char namebuf[MAX_OBJNAMELEN+1];
@@ -70,7 +72,7 @@ NES_FUNCTION(neslacdb_read)
 	int offset;
 	int len;
 
-	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
 	if (stat(cobj1->val->d.str, &sb)!=0) {
 		nes_setnum(N, &N->r, "", -1);
 		return -1;
@@ -126,6 +128,7 @@ NES_FUNCTION(neslacdb_read)
 	nes_linkval(N, &N->r, &tobj);
 	nes_unlinkval(N, &tobj);
 	return 0;
+#undef __FUNCTION__
 }
 
 /*
@@ -139,7 +142,8 @@ NES_FUNCTION(neslacdb_read)
  */
 NES_FUNCTION(neslacdb_write)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+#define __FUNCTION__ __FILE__ ":neslacdb_write()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
 	obj_t *cobj2=nes_getobj(N, &N->l, "2");
 	obj_t *cobj;
 	char nbuf[4];
@@ -156,8 +160,8 @@ NES_FUNCTION(neslacdb_write)
 	int i, j;
 	int numkeys=0;
 
-	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
-	if (cobj2->val->type!=NT_TABLE) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a table for arg2");
+	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
+	if (cobj2->val->type!=NT_TABLE) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a table for arg2");
 	if ((fd=open(cobj1->val->d.str, O_WRONLY|O_BINARY|O_CREAT|O_TRUNC, S_IREAD|S_IWRITE))==-1) {
 		nes_setnum(N, &N->r, "", -1);
 		return -1;
@@ -227,6 +231,7 @@ NES_FUNCTION(neslacdb_write)
 	if (cdb_idx) n_free(N, (void *)&cdb_idx);
 	n_free(N, (void *)&cdb_toc);
 	return 0;
+#undef __FUNCTION__
 }
 
 int neslacdb_register_all(nes_state *N)

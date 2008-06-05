@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,13 +17,14 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #ifdef WIN32
-#include "nesla/nesla.h"
+#include "nesla/libnesla.h"
 #include "nesla/libcdb.h"
 #include "nesla/libcrypt.h"
 #include "nesla/libdl.h"
 #include "nesla/libext.h"
 #include "nesla/libmath.h"
 #include "nesla/libodbc.h"
+#include "nesla/libpipe.h"
 #include "nesla/libregex.h"
 #include "nesla/libtcp.h"
 #include "nesla/libwinapi.h"
@@ -35,364 +37,32 @@
 #include <sys/stat.h>
 #include "resource.h"
 
+//#pragma comment(lib, "dnsapi.lib")
 #pragma comment(lib, "winmm.lib")
+//#pragma comment(lib, "xyssl.lib")
 
-#define snprintf _snprintf
-#define vsnprintf _vsnprintf
-#define strcasecmp stricmp
-#define strncasecmp strnicmp
+#define CONFFILE "nestray.conf"
+#define IDT_TIMER1 6901
+#define IDT_TIMER2 6902
 
-static nes_state *N;
-static HWND hDLG;
+typedef struct GLOBALS {
+	HWND wnd;
+	HINSTANCE instance;
+	time_t lastpoll;
+	time_t lastfile;
+	int iconstatus;
+	int index;
+	char noticetext[240];
+} GLOBALS;
 
-static int iconstatus=0;
-static HINSTANCE hInst;
-static UINT tc;
-static time_t lastpoll;
-static time_t lastfile;
-static int index;
+GLOBALS G;
+nes_state *N;
 
-static char *conffile="nestray.conf";
+NES_FUNCTION(nes_textinput);
+NES_FUNCTION(nes_passinput);
+NES_FUNCTION(nes_traynotice);
 
-void new_menu(nes_state *N);
-void init_stuff(nes_state *N);
-int winsystem(WORD show_hide, const char *format, ...);
-obj_t *getindex(obj_t *tobj, int i);
-BOOL submenu(HMENU hMenu, obj_t *tobj);
-
-static BOOL TrayMessage(DWORD dwMessage)
-{
-	obj_t *mobj=nes_getobj(N, &N->g, "PROGNAME");
-        BOOL res;
-	HICON hIcon;
-	NOTIFYICONDATA tnd;
-
-	if (iconstatus) {
-                hIcon=LoadImage(hInst, MAKEINTRESOURCE(IDI_ICON2), IMAGE_ICON, 16, 16, 0);
-	} else {
-                hIcon=LoadImage(hInst, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 16, 16, 0);
-	}
-	tnd.cbSize		= sizeof(NOTIFYICONDATA);
-	tnd.hWnd		= hDLG;
-	tnd.uID			= 0;
-	tnd.uFlags		= NIF_MESSAGE|NIF_ICON|NIF_TIP;
-	tnd.uCallbackMessage	= IDM_STATE;
-	tnd.hIcon		= hIcon;
-	snprintf(tnd.szTip, sizeof(tnd.szTip)-1, "%s", nes_isstr(mobj)?nes_tostr(N, mobj):"Nesla SysTray Host");
-	res=Shell_NotifyIcon(dwMessage, &tnd);
-	if (hIcon) DestroyIcon(hIcon);
-	return res;
-}
-
-static void TrayIcon(int newstatus)
-{
-	if (iconstatus!=newstatus) {
-		iconstatus=newstatus;
-		TrayMessage(NIM_MODIFY);
-	}
-	return;
-}
-
-static BOOL APIENTRY DrawPopupMenu(POINT point)
-{
-	HMENU hMenu=CreatePopupMenu(); 
-	obj_t *mobj=nes_getobj(N, &N->g, "MENUITEMS");
-
-	if (!nes_istable(mobj)) {
-		new_menu(N);
-		MessageBox(NULL, "missing config", "Script Error", MB_ICONSTOP);
-	}
-	if (!hMenu) return (FALSE);
-	index=0;
-	submenu(hMenu, mobj);
-	SetForegroundWindow(hDLG);
-	TrackPopupMenu(hMenu, TPM_LEFTBUTTON|TPM_RIGHTBUTTON, point.x, point.y, 0, hDLG, NULL);
-	PostMessage(hDLG, WM_USER, 0, 0);
-	return (FALSE);
-}
-
-static BOOL CALLBACK ExecPopupMenu(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	obj_t *mobj=nes_getobj(N, &N->g, "MENUITEMS");
-	obj_t *cobj, *cobj2, *tobj;
-	UINT nNewMode;
-	POINT point;
-	char *p;
-
-	if (!nes_istable(mobj)) {
-		new_menu(N);
-		MessageBox(NULL, "missing config", "Script Error", MB_ICONSTOP);
-	}
-	hDLG=hDlg;
-	if (uMsg==tc) {
-		TrayMessage(NIM_ADD);
-		return DefWindowProc(hDlg, uMsg, wParam, lParam);
-	}
-	switch (uMsg) {
-	case WM_INITDIALOG:
-		TrayMessage(NIM_ADD);
-		break;
-	case WM_COMMAND:
-		nNewMode=GET_WM_COMMAND_ID(wParam, lParam)-(IDM_STATE);
-		tobj=getindex(mobj, nNewMode);
-		if (nes_isnull(tobj)) break;
-		if (tobj->val->type!=NT_TABLE) break;
-		cobj=nes_getobj(N, tobj, "type");
-		if ((cobj->val->type!=NT_STRING)||(cobj->val->d.str==NULL)) break;
-		if (strcasecmp(cobj->val->d.str, "exit")==0) {
-			PostMessage(hDLG, WM_CLOSE, 0, 0);
-		} else if (strcasecmp(cobj->val->d.str, "message")==0) {
-			TrayIcon(1);
-			cobj=nes_getobj(N, tobj, "text");
-			if ((cobj->val->type==NT_STRING)&&(cobj->val->d.str!=NULL)) {
-				cobj2=nes_getobj(N, tobj, "title");
-				if ((cobj2->val->type==NT_STRING)&&(cobj2->val->d.str!=NULL)) p=cobj2->val->d.str; else p="";
-				MessageBox(NULL, cobj->val->d.str, p, MB_OK);
-			}
-			TrayIcon(0);
-		} else if (strcasecmp(cobj->val->d.str, "script")==0) {
-			TrayIcon(1);
-			cobj=nes_getobj(N, tobj, "command");
-			if ((cobj->val->type!=NT_STRING)||(cobj->val->d.str==NULL)) break;
-			nes_exec(N, cobj->val->d.str);
-			if (N->err) MessageBox(NULL, N->errbuf, "Script Error", MB_ICONSTOP);
-			TrayIcon(0);
-		} else if (strcasecmp(cobj->val->d.str, "CreateProcess")==0) {
-			TrayIcon(1);
-			cobj=nes_getobj(N, tobj, "command");
-			if ((cobj->val->type==NT_STRING)&&(cobj->val->d.str!=NULL)) {
-				winsystem(SW_SHOW, cobj->val->d.str);
-			}
-			TrayIcon(0);
-		} else if (strcasecmp(cobj->val->d.str, "ShellExecute")==0) {
-			TrayIcon(1);
-			cobj=nes_getobj(N, tobj, "command");
-			if ((cobj->val->type==NT_STRING)&&(cobj->val->d.str!=NULL)) {
-				ShellExecute(NULL, "open", cobj->val->d.str, NULL, NULL, SW_SHOWMAXIMIZED);
-			}
-			TrayIcon(0);
-		}
-		break;
-	case IDM_STATE:
-		switch (lParam) {
-		case WM_LBUTTONDOWN:
-			break;
-		case WM_RBUTTONDOWN:
-			GetCursorPos(&point);
-			DrawPopupMenu(point);
-			break;
-		default:
-			break;
-		}
-		break;
-	case WM_CLOSE:
-	case WM_QUIT:
-	case WM_DESTROY:
-		TrayMessage(NIM_DELETE);
-		EndDialog(hDLG, TRUE);
-		break;
-	default:
-		return(FALSE);
-	}
-	return(TRUE);
-}
-
-void CALLBACK UpdateNotifyProc(HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime)
-{
-	obj_t *cobj;
-	struct stat sb;
-	time_t t;
-
-	if (stat(conffile, &sb)==0) {
-		if (sb.st_mtime>lastfile) {
-			lastfile=sb.st_mtime;
-			/* sometimes it's easier to destroy the world and start over... */
-			nes_endstate(N);
-			if ((N=nes_newstate())==NULL) return;
-			init_stuff(N);
-			if (N->err) MessageBox(NULL, N->errbuf, "Script Error", MB_ICONSTOP);
-			cobj=nes_getobj(N, &N->g, "onreload");
-			TrayIcon(1);
-			if (cobj->val->type==NT_NFUNC) {
-				nes_exec(N, "onreload();");
-				if (N->err) MessageBox(NULL, N->errbuf, "Script Error", MB_ICONSTOP);
-			}
-			TrayIcon(0);
-		}
-	} else {
-		/* no config? */
-		cobj=nes_getobj(N, &N->g, "MENUITEMS");
-		if (!nes_istable(cobj)) {
-			new_menu(N);
-			MessageBox(NULL, "missing config", "Script Error", MB_ICONSTOP);
-		}
-	}
-	t=time(NULL);
-	if ((t%60)<(lastpoll%60)) {
-		lastpoll=t;
-		TrayIcon(1);
-		cobj=nes_getobj(N, &N->g, "cron");
-		if (cobj->val->type==NT_NFUNC) {
-			nes_exec(N, "cron();");
-			if (N->err) MessageBox(NULL, N->errbuf, "Script Error", MB_ICONSTOP);
-		}
-		TrayIcon(0);
-	} else {
-		lastpoll=t;
-	}
-}
-
-static BOOL CALLBACK TextInputDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
-	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
-	char buffer[512];
-
-	switch (uMsg) {
-	case WM_INITDIALOG:
-		SetWindowText(hDlg, nes_tostr(N, cobj2));
-		SetDlgItemText(hDlg, IDC_EDIT1, nes_tostr(N, cobj1));
-		break;
-	case WM_COMMAND:
-		switch (LOWORD(wParam)) {
-		case IDOK:
-			GetDlgItemText(hDlg, IDC_EDIT1, buffer, sizeof(buffer)-1);
-			EndDialog(hDlg, 0);
-			nes_setstr(N, &N->r, "", buffer, strlen(buffer));
-			return (TRUE);
-		case IDCANCEL:
-			EndDialog(hDlg, 0);
-			nes_setnum(N, &N->r, "", -1);
-			return (TRUE);
-		}
-		break;
-	case WM_CLOSE:
-	case WM_QUIT:
-	case WM_DESTROY:
-		EndDialog(hDlg, 0);
-		break;
-	default:
-		return(FALSE);
-	}
-	return(TRUE);
-}
-
-NES_FUNCTION(nes_textinput)
-{
-	TrayIcon(1);
-	DialogBox(hInst, MAKEINTRESOURCE(IDD_TEXTINPUT1), NULL, TextInputDlgProc);
-	TrayIcon(0);
-	return 0;
-}
-
-NES_FUNCTION(nes_passinput)
-{
-	TrayIcon(1);
-	DialogBox(hInst, MAKEINTRESOURCE(IDD_TEXTINPUT2), NULL, TextInputDlgProc);
-	TrayIcon(0);
-	return 0;
-}
-
-void CALLBACK TrayNotifyProc(HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime)
-{
-	PostMessage(hwnd, WM_CLOSE, 0, 0);
-}
-
-static BOOL CALLBACK TrayNoticeDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
-	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
-	obj_t *cobj3=nes_getiobj(N, &N->l, 3);
-	int t;
-	HDC hDC;
-	PAINTSTRUCT Ps;
-	RECT rect;
-	HFONT hFont;
-	static char buf[240];
-
-	switch (uMsg) {
-	case WM_CREATE:
-		SetWindowText(hwnd, nes_tostr(N, cobj2));
-		t=nes_isnum(cobj3)?(int)nes_tonum(N, cobj3):5;
-		if (t) SetTimer(hwnd, 12345, t*1000, TrayNotifyProc);
-		snprintf(buf, sizeof(buf)-1, "%s", nes_tostr(N, cobj1));
-		break;
-	case WM_PAINT:
-		hDC=BeginPaint(hwnd, &Ps);
-		hFont=CreateFont(14,0,0,0,FW_SEMIBOLD,FALSE,FALSE,FALSE,ANSI_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,DEFAULT_PITCH|FF_DONTCARE,"arial");
-		SelectObject(hDC, hFont);
-		SetBkMode(hDC, TRANSPARENT);
-		SetTextColor(hDC,0xFF0000);
-		GetClientRect(hwnd, &rect);
-		rect.top+=5; rect.left+=5;
-		rect.bottom-=5; rect.right-=5;
-//		DPtoLP(hDC, (LPPOINT)&rect, 2);
-		DrawText(hDC, buf, -1, &rect, DT_TOP|DT_LEFT|DT_WORDBREAK|DT_EXPANDTABS);
-		DeleteObject(hFont);
-		EndPaint(hwnd, &Ps);
-		break;
-	case WM_CLOSE:
-//	case WM_QUIT:
-//	case WM_DESTROY:
-//		CloseWindow(hwnd);
-		DestroyWindow(hwnd);
-		break;
-	default:
-		return DefWindowProc(hwnd, uMsg, wParam, lParam);
-	}
-	return(TRUE);
-}
-
-NES_FUNCTION(nes_traynotice)
-{
-	HWND hwnd;
-	WNDCLASSEX WndClsEx;
-	static int init=0;
-	int x, y;
-	int w, h;
-	int tbh;
-
-	TrayIcon(1);
-	x=GetSystemMetrics(SM_CXSCREEN);
-	y=GetSystemMetrics(SM_CYSCREEN);
-	/* w=240; h=120; */
-	w=220; h=110;
-	/* how do we get the height of the taskbar? */
-	tbh=30;
-	memset(&WndClsEx, 0, sizeof(WndClsEx));
-	WndClsEx.cbSize        = sizeof(WNDCLASSEX);
-	WndClsEx.style         = CS_OWNDC | CS_VREDRAW | CS_HREDRAW;
-	WndClsEx.lpfnWndProc   = TrayNoticeDlgProc;
-	WndClsEx.hInstance     = hInst;
-	WndClsEx.hCursor       = LoadCursor(NULL, IDC_ARROW);
-//	WndClsEx.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
-	WndClsEx.hbrBackground = (HBRUSH)GetStockObject(LTGRAY_BRUSH);
-	WndClsEx.lpszClassName = "TrayNotice";
-	if (!init) {
-		if (!RegisterClassEx(&WndClsEx)) return 0;
-		init=1;
-	}
-	hwnd=CreateWindowEx(
-		WS_EX_PALETTEWINDOW,
-		"TrayNotice",
-		"Tray Notification",
-		WS_POPUPWINDOW,
-		x-w,
-		y-h-tbh,
-		w,
-		h,
-		NULL,
-		NULL,
-		hInst,
-		NULL
-	);
-//	SetWindowPos(hwnd, HWND_TOPMOST, x-w, y-h-tbh, w, h, SWP_SHOWWINDOW);
-	ShowWindow(hwnd, SW_SHOW);
-	TrayIcon(0);
-	return 0;
-}
-
-static void preppath(nes_state *N, char *name)
+void preppath(nes_state *N, char *name)
 {
 	char buf[1024];
 	char *p;
@@ -418,8 +88,8 @@ static void preppath(nes_state *N, char *name)
 	for (j=strlen(buf)-1;j>0;j--) {
 		if (buf[j]=='/') { buf[j]='\0'; p=buf+j+1; break; }
 	}
-	nes_setstr(N, &N->g, "_filename", p, strlen(p));
-	nes_setstr(N, &N->g, "_filepath", buf, strlen(buf));
+	nes_setstr(N, &N->g, "_filename", p, -1);
+	nes_setstr(N, &N->g, "_filepath", buf, -1);
 	return;
 }
 
@@ -455,6 +125,7 @@ void init_stuff(nes_state *N)
 	neslaext_register_all(N);
 	neslamath_register_all(N);
 	neslaodbc_register_all(N);
+	neslapipe_register_all(N);
 	neslaregex_register_all(N);
 	neslatcp_register_all(N);
 	neslawinapi_register_all(N);
@@ -471,15 +142,15 @@ void init_stuff(nes_state *N)
 		p=tmpbuf; while (*p) *p++=toupper(*p);
 
 		p=strchr(environ[i], '=')+1;
-		nes_setstr(N, tobj, tmpbuf, p, strlen(p));
+		nes_setstr(N, tobj, tmpbuf, p, -1);
 	}
-	preppath(N, conffile);
-	nes_setcfunc(N, &N->g, "TextInput",  (void *)nes_textinput);
-	nes_setcfunc(N, &N->g, "PassInput",  (void *)nes_passinput);
-	nes_setcfunc(N, &N->g, "TrayNotice", (void *)nes_traynotice);
-	if (stat(conffile, &sb)==0) {
-		lastfile=sb.st_mtime;
-		nes_execfile(N, conffile);
+	preppath(N, CONFFILE);
+	nes_setcfunc(N, &N->g, "TextInput",  nes_textinput);
+	nes_setcfunc(N, &N->g, "PassInput",  nes_passinput);
+	nes_setcfunc(N, &N->g, "TrayNotice", nes_traynotice);
+	if (stat(CONFFILE, &sb)==0) {
+		G.lastfile=sb.st_mtime;
+		nes_execfile(N, CONFFILE);
 		if (N->err) {
 			MessageBox(NULL, N->errbuf, "Script Error", MB_ICONSTOP);
 		} else {
@@ -487,27 +158,27 @@ void init_stuff(nes_state *N)
 			if (!nes_istable(mobj)) new_menu(N);
 		}
 	} else {
-		lastfile=0;
+		G.lastfile=0;
 	}
-	lastpoll=time(NULL);
+	G.lastpoll=time(NULL);
 	return;
 }
 
 int winsystem(WORD show_hide, const char *format, ...)
 {
-	DWORD exitcode=0;
-	HANDLE hMyProcess=GetCurrentProcess();
+//	DWORD exitcode=0;
+//	HANDLE hMyProcess=GetCurrentProcess();
 	PROCESS_INFORMATION pi;
 	STARTUPINFO si;
-	char command[256];
+	char command[512];
 	va_list ap;
-	int pid;
+//	int pid;
 
 	ZeroMemory(&pi, sizeof(pi));
 	ZeroMemory(&si, sizeof(si));
-	memset(command, 0, sizeof(command));
+	ZeroMemory(&command, sizeof(command));
 	va_start(ap, format);
-	vsnprintf(command, sizeof(command)-1, format, ap);
+	_vsnprintf(command, sizeof(command)-1, format, ap);
 	va_end(ap);
 	si.cb=sizeof(si);
 //	si.dwFlags=STARTF_USESHOWWINDOW|STARTF_USESTDHANDLES;
@@ -520,7 +191,7 @@ int winsystem(WORD show_hide, const char *format, ...)
 		MessageBox(NULL, command, "CreateProcess error", MB_ICONSTOP);
 		return -1;
 	}
-	pid=pi.dwProcessId;
+//	pid=pi.dwProcessId;
 //	CloseHandle(si.hStdInput);
 //	CloseHandle(si.hStdOutput);
 	CloseHandle(pi.hThread);
@@ -532,87 +203,444 @@ obj_t *getindex(obj_t *tobj, int i)
 {
 	obj_t *cobj;
 
-	if (tobj->val->type!=NT_TABLE) return (FALSE);
+	if (!nes_istable(tobj)) return NULL;
 	for (tobj=tobj->val->d.table;tobj;tobj=tobj->next) {
-		if (tobj->val->type!=NT_TABLE) continue;
+		if (!nes_istable(tobj)) continue;
 		cobj=nes_getobj(N, tobj, "index");
-		if (cobj->val->type!=NT_NUMBER) {
+		if (!nes_isnum(cobj)) {
 			cobj=nes_getobj(N, tobj, "table");
-			if (cobj->val->type!=NT_TABLE) continue;
+			if (!nes_istable(cobj)) continue;
 			if ((cobj=getindex(cobj, i))==NULL) continue;
 			return cobj;
 		}
-		if (cobj->val->d.num==i) return tobj;
+		if (nes_tonum(N, cobj)==i) return tobj;
 	}
 	return NULL;
 }
 
-BOOL submenu(HMENU hMenu, obj_t *tobj)
+BOOL IconNotify(DWORD dwMessage)
+{
+	obj_t *mobj=nes_getobj(N, &N->g, "PROGNAME");
+        BOOL res;
+	HICON hIcon;
+	NOTIFYICONDATA tnd;
+
+	if (G.iconstatus) {
+		hIcon=LoadImage(G.instance, MAKEINTRESOURCE(IDI_ICON2), IMAGE_ICON, 16, 16, 0);
+	} else {
+		hIcon=LoadImage(G.instance, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 16, 16, 0);
+	}
+	tnd.cbSize		= sizeof(tnd);
+	tnd.hWnd		= G.wnd;
+	tnd.uID			= 0;
+	tnd.uFlags		= NIF_MESSAGE|NIF_ICON|NIF_TIP;
+	tnd.uCallbackMessage	= IDM_STATE;
+	tnd.hIcon		= hIcon;
+	_snprintf(tnd.szTip, sizeof(tnd.szTip)-1, "%s", nes_isstr(mobj)?nes_tostr(N, mobj):"Nesla SysTray Host");
+	res=Shell_NotifyIcon(dwMessage, &tnd);
+	if (hIcon) DestroyIcon(hIcon);
+	return res;
+}
+
+void IconStatus(int newstatus)
+{
+	if (G.iconstatus!=newstatus) {
+		G.iconstatus=newstatus;
+		IconNotify(NIM_MODIFY);
+	}
+	return;
+}
+
+void PopupTimer(void)
+{
+	obj_t *cobj;
+	struct stat sb;
+	time_t t;
+
+	if (stat(CONFFILE, &sb)==0&&sb.st_mtime>G.lastfile) {
+		G.lastfile=sb.st_mtime;
+		/* sometimes it's easier to destroy the world and start over... */
+		nes_endstate(N);
+		if ((N=nes_newstate())==NULL) return;
+		init_stuff(N);
+		if (N->err) MessageBox(NULL, N->errbuf, "Script Error", MB_ICONSTOP);
+		cobj=nes_getobj(N, &N->g, "onreload");
+		IconStatus(1);
+		if (nes_typeof(cobj)==NT_NFUNC) {
+			nes_exec(N, "onreload();");
+			if (N->err) MessageBox(NULL, N->errbuf, "Script Error", MB_ICONSTOP);
+		}
+		IconStatus(0);
+	} else {
+		/* no config? */
+		cobj=nes_getobj(N, &N->g, "MENUITEMS");
+		if (!nes_istable(cobj)) {
+			new_menu(N);
+			MessageBox(NULL, "missing config", "Script Error", MB_ICONSTOP);
+		}
+	}
+	t=time(NULL);
+	if ((t%60)<(G.lastpoll%60)) {
+		G.lastpoll=t;
+		IconStatus(1);
+		cobj=nes_getobj(N, &N->g, "cron");
+		if (nes_typeof(cobj)==NT_NFUNC) {
+			nes_exec(N, "cron();");
+			if (N->err) MessageBox(NULL, N->errbuf, "Script Error", MB_ICONSTOP);
+		}
+		IconStatus(0);
+	} else {
+		G.lastpoll=t;
+	}
+	return;
+}
+
+BOOL PopupMenuDrawSub(HMENU hMenu, obj_t *tobj)
 {
 	obj_t *cobj;
 	char *p;
 	HMENU hMenuSub;
-	BOOL bRet;
+	BOOL ret;
 
-	if (tobj->val->type!=NT_TABLE) return (FALSE);
+	if (!nes_istable(tobj)) return FALSE;
 	for (tobj=tobj->val->d.table;tobj;tobj=tobj->next) {
-		if (tobj->val->type!=NT_TABLE) continue;
+		if (!nes_istable(tobj)) continue;
 		cobj=nes_getobj(N, tobj, "type");
-		if (cobj->val->type==NT_NULL) continue;
+		if (nes_isnull(cobj)) continue;
 		p=nes_tostr(N, cobj);
-		if (strcasecmp(p, "menu")==0) {
-			if ((hMenuSub=CreateMenu())!=NULL) {
-				submenu(hMenuSub, nes_getobj(N, tobj, "table"));
-				bRet=AppendMenu(hMenu, MF_POPUP|MF_BYPOSITION, (DWORD)hMenuSub, nes_getstr(N, tobj, "name"));
-			}
-		} else if (strcasecmp(p, "separator")==0) {
-			bRet=AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+		if (stricmp(p, "menu")==0) {
+			if ((hMenuSub=CreateMenu())==NULL) continue;
+			PopupMenuDrawSub(hMenuSub, nes_getobj(N, tobj, "table"));
+			ret=AppendMenu(hMenu, MF_POPUP|MF_BYPOSITION, (DWORD)hMenuSub, nes_getstr(N, tobj, "name"));
+		} else if (stricmp(p, "separator")==0) {
+			ret=AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 		} else {
 			p=nes_getstr(N, tobj, "name");
-			bRet=AppendMenu(hMenu, MF_STRING, IDM_STATE+index, p);
-			nes_setnum(N, tobj, "index", index++);
+			ret=AppendMenu(hMenu, MF_STRING, IDM_STATE+G.index, p);
+			nes_setnum(N, tobj, "index", G.index++);
 		}
 	}
-	if (!bRet) {
-		DestroyMenu(hMenu);
-		return (FALSE);
+	if (!ret) DestroyMenu(hMenu);
+	return FALSE;
+}
+
+BOOL APIENTRY PopupMenuDraw(POINT point)
+{
+	HMENU hMenu;
+	obj_t *mobj;
+
+	mobj=nes_getobj(N, &N->g, "MENUITEMS");
+	if (!nes_istable(mobj)) {
+		new_menu(N);
+		MessageBox(NULL, "missing config", "Script Error", MB_ICONSTOP);
 	}
-	return (FALSE);
+	hMenu=CreatePopupMenu();
+	if (hMenu) {
+		G.index=0;
+		PopupMenuDrawSub(hMenu, mobj);
+		SetForegroundWindow(G.wnd);
+		TrackPopupMenu(hMenu, TPM_LEFTBUTTON|TPM_RIGHTBUTTON, point.x, point.y, 0, G.wnd, NULL);
+		PostMessage(G.wnd, WM_USER, 0, 0);
+	}
+	return FALSE;
+}
+
+BOOL CALLBACK PopupMenuExec(HWND wnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	static int lock=0;
+
+	G.wnd=wnd;
+	switch (uMsg) {
+	case WM_INITDIALOG:
+		IconNotify(NIM_ADD);
+		SetTimer(wnd, IDT_TIMER1, 1000, NULL);
+		break;
+	case WM_TIMER:
+		if (lock>0) return FALSE;
+		lock++;
+		PopupTimer();
+		lock--;
+		break;
+	case WM_COMMAND: {
+		obj_t *cobj, *cobj2, *mobj, *tobj;
+		UINT nNewMode;
+		char *p, *t;
+
+		while (lock>0) Sleep(1);
+		lock++;
+		mobj=nes_getobj(N, &N->g, "MENUITEMS");
+		if (!nes_istable(mobj)) {
+			new_menu(N);
+			MessageBox(NULL, "missing config", "Script Error", MB_ICONSTOP);
+		}
+		nNewMode=GET_WM_COMMAND_ID(wParam, lParam)-(IDM_STATE);
+		tobj=getindex(mobj, nNewMode);
+		if (!nes_istable(tobj)) {
+			lock--;
+			break;
+		}
+		cobj=nes_getobj(N, tobj, "type");
+		if (!nes_isstr(cobj)||cobj->val->size<1) {
+			lock--;
+			break;
+		}
+		t=nes_tostr(N, cobj);
+		if (stricmp(t, "exit")==0) {
+			PostMessage(wnd, WM_CLOSE, 0, 0);
+			lock--;
+			break;
+		}
+		IconStatus(1);
+		if (stricmp(t, "message")==0) {
+			cobj=nes_getobj(N, tobj, "text");
+			if (nes_isstr(cobj)&&cobj->val->size>0) {
+				cobj2=nes_getobj(N, tobj, "title");
+				if ((cobj2->val->type==NT_STRING)&&(cobj2->val->d.str!=NULL)) p=cobj2->val->d.str; else p="";
+				MessageBox(NULL, nes_tostr(N, cobj), p, MB_OK);
+			}
+		} else if (stricmp(t, "script")==0) {
+			cobj=nes_getobj(N, tobj, "command");
+			if (nes_isstr(cobj)&&cobj->val->size>0) {
+				nes_exec(N, nes_tostr(N, cobj));
+				if (N->err) MessageBox(NULL, N->errbuf, "Script Error", MB_ICONSTOP);
+			}
+		} else if (stricmp(t, "CreateProcess")==0) {
+			cobj=nes_getobj(N, tobj, "command");
+			if (nes_isstr(cobj)&&cobj->val->size>0) {
+				winsystem(SW_SHOW, nes_tostr(N, cobj));
+			}
+		} else if (stricmp(t, "ShellExecute")==0) {
+			cobj=nes_getobj(N, tobj, "command");
+			if (nes_isstr(cobj)&&cobj->val->size>0) {
+				ShellExecute(NULL, "open", nes_tostr(N, cobj), NULL, NULL, SW_SHOWMAXIMIZED);
+			}
+		}
+		IconStatus(0);
+		lock--;
+		break;
+	}
+	case IDM_STATE: {
+		obj_t *cobj;
+		POINT point;
+
+		switch (lParam) {
+		case WM_LBUTTONDBLCLK:
+			while (lock>0) Sleep(1);
+			lock++;
+			cobj=nes_getobj(N, &N->g, "onclick");
+			IconStatus(1);
+			if (nes_typeof(cobj)==NT_NFUNC) {
+				nes_exec(N, "onclick();");
+				if (N->err) MessageBox(NULL, N->errbuf, "Script Error", MB_ICONSTOP);
+			}
+			IconStatus(0);
+			lock--;
+			break;
+		case WM_LBUTTONDOWN:
+			break;
+		case WM_RBUTTONDOWN:
+			GetCursorPos(&point);
+			while (lock>0) Sleep(1);
+			lock++;
+			PopupMenuDraw(point);
+			lock--;
+			break;
+		default:
+			break;
+		}
+		break;
+	}
+	case WM_CLOSE:
+	case WM_QUIT:
+	case WM_DESTROY:
+		IconNotify(NIM_DELETE);
+		EndDialog(wnd, TRUE);
+		break;
+	default:
+		return FALSE;
+	}
+	return TRUE;
+}
+
+BOOL CALLBACK DlgTextInput(HWND wnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch (uMsg) {
+	case WM_INITDIALOG: {
+		obj_t *cobj1=nes_getobj(N, &N->l, "1");
+		obj_t *cobj2=nes_getobj(N, &N->l, "2");
+
+		SetWindowText(wnd, nes_tostr(N, cobj2));
+		SetDlgItemText(wnd, IDC_EDIT1, nes_tostr(N, cobj1));
+		break;
+	}
+	case WM_COMMAND: {
+		char buffer[512];
+
+		switch (LOWORD(wParam)) {
+		case IDOK:
+			GetDlgItemText(wnd, IDC_EDIT1, buffer, sizeof(buffer)-1);
+			EndDialog(wnd, 0);
+			nes_setstr(N, &N->r, "", buffer, -1);
+			return TRUE;
+		case IDCANCEL:
+			EndDialog(wnd, 0);
+			nes_setnum(N, &N->r, "", -1);
+			return TRUE;
+		}
+		break;
+	}
+	case WM_CLOSE:
+	case WM_QUIT:
+	case WM_DESTROY:
+		EndDialog(wnd, 0);
+		break;
+	default:
+		return FALSE;
+	}
+	return TRUE;
+}
+
+BOOL CALLBACK DlgTrayNotice(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch (uMsg) {
+	case WM_PAINT: {
+		HDC dc;
+		HFONT font;
+		PAINTSTRUCT ps;
+		RECT rect;
+
+		GetClientRect(hwnd, &rect);
+		rect.top+=5; rect.left+=5;
+		rect.bottom-=5; rect.right-=5;
+		dc=BeginPaint(hwnd, &ps);
+		font=CreateFont(14,0,0,0,FW_SEMIBOLD,FALSE,FALSE,FALSE,ANSI_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,DEFAULT_PITCH|FF_DONTCARE,"arial");
+		SelectObject(dc, font);
+		SetBkMode(dc, TRANSPARENT);
+		SetTextColor(dc,0xFF0000);
+		DrawText(dc, G.noticetext, -1, &rect, DT_TOP|DT_LEFT|DT_WORDBREAK|DT_EXPANDTABS);
+		DeleteObject(font);
+		EndPaint(hwnd, &ps);
+		break;
+	}
+	case WM_TIMER:
+		KillTimer(hwnd, IDT_TIMER2);
+		DestroyWindow(hwnd);
+		break;
+	default:
+		return DefWindowProc(hwnd, uMsg, wParam, lParam);
+	}
+	return TRUE;
+}
+
+NES_FUNCTION(nes_textinput)
+{
+	IconStatus(1);
+	DialogBox(G.instance, MAKEINTRESOURCE(IDD_TEXTINPUT1), NULL, DlgTextInput);
+	IconStatus(0);
+	return 0;
+}
+
+NES_FUNCTION(nes_passinput)
+{
+	IconStatus(1);
+	DialogBox(G.instance, MAKEINTRESOURCE(IDD_TEXTINPUT2), NULL, DlgTextInput);
+	IconStatus(0);
+	return 0;
+}
+
+NES_FUNCTION(nes_traynotice)
+{
+	obj_t *cobj1, *cobj2, *cobj3;
+	HWND hwnd;
+	WNDCLASSEX WndClsEx;
+	static int init=0;
+	int x, y;
+	int w, h;
+	int tbh;
+	short int t;
+
+	IconStatus(1);
+	cobj1=nes_getobj(N, &N->l, "1");
+	cobj2=nes_getobj(N, &N->l, "2");
+	cobj3=nes_getobj(N, &N->l, "3");
+	t=nes_isnum(cobj3)?(int)nes_tonum(N, cobj3):5;
+	if (t<1) {
+		IconStatus(0);
+		return 0;
+	}
+	x=GetSystemMetrics(SM_CXSCREEN);
+	y=GetSystemMetrics(SM_CYSCREEN);
+	w=220; h=110;
+	/* how do we get the height of the taskbar? */
+	tbh=30;
+	if (!init) {
+		memset(&WndClsEx, 0, sizeof(WndClsEx));
+		WndClsEx.cbSize        = sizeof(WNDCLASSEX);
+		WndClsEx.style         = CS_OWNDC | CS_VREDRAW | CS_HREDRAW;
+		WndClsEx.lpfnWndProc   = DlgTrayNotice;
+		WndClsEx.hInstance     = G.instance;
+		WndClsEx.hCursor       = LoadCursor(NULL, IDC_ARROW);
+		WndClsEx.hbrBackground = (HBRUSH)GetStockObject(LTGRAY_BRUSH);
+		WndClsEx.lpszClassName = "TrayNotice";
+		if (!RegisterClassEx(&WndClsEx)) return 0;
+		init=1;
+	}
+	hwnd=CreateWindowEx(
+		WS_EX_PALETTEWINDOW,
+		"TrayNotice",
+		"Tray Notification",
+		WS_POPUPWINDOW,
+		x-w,
+		y-h-tbh,
+		w,
+		h,
+		NULL,
+		NULL,
+		G.instance,
+		NULL
+	);
+//	SetWindowPos(hwnd, HWND_TOPMOST, x-w, y-h-tbh, w, h, SWP_SHOWWINDOW);
+//	SetWindowPos(hwnd, NULL, rc.left, rc.top, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
+	_snprintf(G.noticetext, sizeof(G.noticetext)-1, "%s", nes_tostr(N, cobj1));
+	SetWindowText(hwnd, nes_tostr(N, cobj2));
+	SetTimer(hwnd, IDT_TIMER2, t*1000, NULL);
+	ShowWindow(hwnd, SW_SHOW);
+	IconStatus(0);
+	return 0;
 }
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	HANDLE hMutex;
+	HANDLE mutex;
 	obj_t *cobj;
 
-	hInst=hInstance;
+	memset(&G, 0, sizeof(G));
+	G.instance=hInstance;
 	if ((N=nes_newstate())==NULL) return -1;
 	init_stuff(N);
 	cobj=nes_getobj(N, &N->g, "MUTEXNAME");
-	if ((cobj->val->type==NT_STRING)&&(cobj->val->size>0)) {
-		hMutex=CreateMutex(NULL, FALSE, cobj->val->d.str);
+	if (nes_isstr(cobj)&&cobj->val->size>0) {
+		mutex=CreateMutex(NULL, FALSE, nes_tostr(N, cobj));
 	} else {
-		hMutex=CreateMutex(NULL, FALSE, "NESTRAY_MUTEX");
+		mutex=CreateMutex(NULL, FALSE, "NESTRAY_MUTEX");
 	}
-	if ((hMutex==NULL)||(GetLastError()==ERROR_ALREADY_EXISTS)) {
-		if (hMutex) CloseHandle(hMutex);
+	if ((mutex==NULL)||(GetLastError()==ERROR_ALREADY_EXISTS)) {
+		if (mutex) CloseHandle(mutex);
 		nes_endstate(N);
 		return 0;
 	}
 	cobj=nes_getobj(N, &N->g, "onload");
-	if (cobj->val->type==NT_NFUNC) {
+	if (nes_typeof(cobj)==NT_NFUNC) {
 		nes_exec(N, "onload();");
 		if (N->err) MessageBox(NULL, N->errbuf, "Script Error", MB_ICONSTOP);
 	}
-	tc=RegisterWindowMessage("TaskbarCreated");
-	SetTimer(0, 1234, 1000, UpdateNotifyProc);
-	DialogBox(hInstance, MAKEINTRESOURCE(IDD_NULLDIALOG), NULL, ExecPopupMenu);
-	CloseHandle(hMutex);
+	DialogBox(G.instance, MAKEINTRESOURCE(IDD_NULLDIALOG), NULL, PopupMenuExec);
 	cobj=nes_getobj(N, &N->g, "onexit");
-	if (cobj->val->type==NT_NFUNC) {
+	if (nes_typeof(cobj)==NT_NFUNC) {
 		nes_exec(N, "onexit();");
 		if (N->err) MessageBox(NULL, N->errbuf, "Script Error", MB_ICONSTOP);
 	}
+	CloseHandle(mutex);
 	nes_endstate(N);
 	return 0;
 }

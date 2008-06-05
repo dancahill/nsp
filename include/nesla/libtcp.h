@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -84,6 +85,13 @@ typedef struct {
 	char      recvbuf[4096];
 } TCP_SOCKET;
 
+/* ftp.c */
+NES_FUNCTION(neslatcp_ftp_open);
+NES_FUNCTION(neslatcp_ftp_close);
+NES_FUNCTION(neslatcp_ftp_ls);
+NES_FUNCTION(neslatcp_ftp_retr);
+NES_FUNCTION(neslatcp_ftp_stor);
+
 /* http.c */
 NES_FUNCTION(neslatcp_http_get);
 
@@ -119,6 +127,11 @@ int     tcp_fprintf(nes_state *N, TCP_SOCKET *socket, const char *format, ...);
 int     tcp_recv   (nes_state *N, TCP_SOCKET *socket, char *buffer, int max, int flags);
 int     tcp_send   (nes_state *N, TCP_SOCKET *socket, const char *buffer, int len, int flags);
 int     tcp_close  (nes_state *N, TCP_SOCKET *socket, short int owner_killed);
+
+#ifdef HAVE_DNS
+NES_FUNCTION(neslatcp_dns_addr2name);
+NES_FUNCTION(neslatcp_dns_name2addr);
+#endif
 
 NES_FUNCTION(neslatcp_tcp_bind);
 NES_FUNCTION(neslatcp_tcp_accept);

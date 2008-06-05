@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,10 +35,11 @@ static void sqlite3Disconnect(nes_state *N, SQLITE3_CONN *conn)
 
 static int sqlite3Connect(nes_state *N, SQLITE3_CONN *conn, char *dbname)
 {
+#define __FUNCTION__ __FILE__ ":sqlite3Connect()"
 	char *zErrMsg=NULL;
 
 	if (sqlite3_open(dbname, &conn->db3)!=SQLITE_OK) {
-		n_warn(N, "sqlite3Connect", "SQLite connection error - %s", zErrMsg);
+		n_warn(N, __FUNCTION__, "connection error - %s", zErrMsg);
 		return -1;
 	}
 	sqlite3_exec(conn->db3, "PRAGMA empty_result_callbacks = ON;", NULL, 0, &zErrMsg);
@@ -46,19 +48,22 @@ static int sqlite3Connect(nes_state *N, SQLITE3_CONN *conn, char *dbname)
 	/* PRAGMA temp_store = "default"|"memory"|"file" */
 	sqlite3_exec(conn->db3, "PRAGMA temp_store = memory;", NULL, 0, &zErrMsg);
 	return 0;
+#undef __FUNCTION__
 }
 
 void sqlite3_murder(nes_state *N, obj_t *cobj)
 {
+#define __FUNCTION__ __FILE__ ":sqlite3Connect()"
 	SQLITE3_CONN *conn;
 
-	n_warn(N, "sqlite3_murder", "reaper is claiming another lost soul");
+	n_warn(N, __FUNCTION__, "reaper is claiming another lost soul");
 	if ((cobj->val->type!=NT_CDATA)||(cobj->val->d.str==NULL)||(nc_strcmp(cobj->val->d.str, "sqlite3-conn")!=0))
-		n_error(N, NE_SYNTAX, "sqlite3_murder", "expected a sqlite3 conn");
+		n_error(N, NE_SYNTAX, __FUNCTION__, "expected a sqlite3 conn");
 	conn=(SQLITE3_CONN *)cobj->val->d.str;
 	sqlite3Disconnect(N, conn);
 	n_free(N, (void *)&cobj->val->d.str);
 	return;
+#undef __FUNCTION__
 }
 /*
 static int sqlite3Update(nes_state *N, SQLITE3_CONN *conn, char *sqlquery)
@@ -82,7 +87,7 @@ static int sqlite3Callback(void *vptr, int argc, char **argv, char **azColName)
 	tobj=nes_getobj(NULL, qobj, "_rows");
 	if (tobj->val->type!=NT_TABLE) return -1;
 	memset(name, 0, sizeof(name));
-	sprintf(name, "%d", numtuples);
+	n_ntoa(NULL, name, numtuples, 10, 0);
 	/* get pointer to this record table */
 	tobj=nes_settable(NULL, tobj, name);
 	tobj->val->attr&=~NST_AUTOSORT;
@@ -90,7 +95,7 @@ static int sqlite3Callback(void *vptr, int argc, char **argv, char **azColName)
 	for (field=0;field<numfields;field++) {
 		if (argv==NULL) continue;
 		p=argv[field]?argv[field]:"NULL";
-		nes_setstr(NULL, tobj, azColName[field], p, strlen(p));
+		nes_setstr(NULL, tobj, azColName[field], p, -1);
 	}
 	if (argv!=NULL) nes_setnum(NULL, qobj, "_tuples", numtuples+1);
 	return 0;
@@ -98,11 +103,12 @@ static int sqlite3Callback(void *vptr, int argc, char **argv, char **azColName)
 
 static int sqlite3Query(nes_state *N, SQLITE3_CONN *conn, char *sqlquery, obj_t *qobj)
 {
+#define __FUNCTION__ __FILE__ ":sqlite3Query()"
 	obj_t *tobj;
 	char *zErrMsg=0;
 	int rc;
 
-	nes_setstr(NULL, qobj, "_query", sqlquery, strlen(sqlquery));
+	nes_setstr(NULL, qobj, "_query", sqlquery, -1);
 	tobj=nes_settable(NULL, qobj, "_rows");
 	if (tobj->val->type!=NT_TABLE) return -1;
 	nes_setnum(NULL, qobj, "_fields", 0);
@@ -112,30 +118,32 @@ static int sqlite3Query(nes_state *N, SQLITE3_CONN *conn, char *sqlquery, obj_t 
 	switch (rc) {
 	case SQLITE_BUSY:
 	case SQLITE_CORRUPT:
-		n_warn(N, "sqlite3Query", "SQLite query error (busy or corrupt?) - %d %s", rc, zErrMsg);
+		n_warn(N, __FUNCTION__, "query error (busy or corrupt?) - %d %s", rc, zErrMsg);
 		break;
 	default:
-		n_warn(N, "sqlite3Query", "SQLite query error - %d %s", rc, zErrMsg);
+		n_warn(N, __FUNCTION__, "query error - %d %s", rc, zErrMsg);
 		break;
 	}
 	return -1;
+#undef __FUNCTION__
 }
 
 NES_FUNCTION(neslasqlite3_query)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
-	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
+#define __FUNCTION__ __FILE__ ":neslasqlite3_query()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
+	obj_t *cobj2=nes_getobj(N, &N->l, "2");
 	obj_t tobj;
 	SQLITE3_CONN *conn;
 	int rc;
 
-	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
-	if (cobj2->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg2");
+	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
+	if (cobj2->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg2");
 	conn=calloc(1, sizeof(SQLITE3_CONN)+1);
 	strcpy(conn->obj_type, "sqlite3-conn");
 	rc=sqlite3Connect(N, conn, cobj1->val->d.str);
 	if (rc<0) {
-		nes_setstr(N, &N->r, "", "sqlite3 connection error", strlen("sqlite3 connection error"));
+		nes_setstr(N, &N->r, "", "sqlite3 connection error", -1);
 		n_free(N, (void *)&conn);
 		return -1;
 	}
@@ -149,6 +157,7 @@ NES_FUNCTION(neslasqlite3_query)
 	sqlite3Disconnect(N, conn);
 	n_free(N, (void *)&conn);
 	return 0;
+#undef __FUNCTION__
 }
 
 int neslasqlite3_register_all(nes_state *N)

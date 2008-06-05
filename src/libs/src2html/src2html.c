@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -89,6 +90,7 @@ static void n_addblank(nes_state *N, obj_t *cobj)
 
 static void n_addquote(nes_state *N, unsigned short c, obj_t *cobj)
 {
+#define __FUNCTION__ __FILE__ ":n_addquote()"
 	uchar *p=N->readptr;
 
 	p++;
@@ -111,17 +113,19 @@ static void n_addquote(nes_state *N, unsigned short c, obj_t *cobj)
 		}
 		p++;
 		if (!*p) {
-			n_warn(N, "n_addquote", "unterminated string");
+			n_warn(N, __FUNCTION__, "unterminated string");
 			return;
 		}
 	}
 	nes_strcat(N, cobj, (char *)N->readptr, p-N->readptr);
 	N->readptr=p;
 	return;
+#undef __FUNCTION__
 }
 
 static obj_t *n_src2html(nes_state *N, uchar *rawtext)
 {
+#define __FUNCTION__ __FILE__ ":n_src2html()"
 	char lastname[MAX_OBJNAMELEN+1];
 	obj_t *cobj;
 	char *p;
@@ -133,7 +137,7 @@ static obj_t *n_src2html(nes_state *N, uchar *rawtext)
 		n_addblank(N, cobj);
 		op=n_getop(N, lastname);
 		if (op==OP_UNDEFINED) {
-			n_warn(N, "x", "bad op? index=x op=%d:%d name='%s'", op, N->readptr[0], lastname);
+			n_warn(N, __FUNCTION__, "bad op? index=x op=%d:%d name='%s'", op, N->readptr[0], lastname);
 			nl_flush(N);
 			/* printf("\n%.40s\n", N->readptr); */
 			return NULL;
@@ -173,17 +177,20 @@ static obj_t *n_src2html(nes_state *N, uchar *rawtext)
 	}
 	nes_strcat(N, cobj, "</PRE>", -1);
 	return cobj;
+#undef __FUNCTION__
 }
 
 static NES_FUNCTION(nesla_src2html)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+#define __FUNCTION__ __FILE__ ":nesla_src2html()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
 	uchar *p=N->readptr;
 
-	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
 	n_src2html(N, (uchar *)nes_tostr(N, cobj1));
 	N->readptr=p;
 	return 0;
+#undef __FUNCTION__
 }
 
 static int nesla_src2html_register_all(nes_state *N)

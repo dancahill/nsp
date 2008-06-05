@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -406,7 +407,8 @@ int main(int argc, char *argv[])
 #endif
 NES_FUNCTION(neslacrypto_md5_file)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+#define __FUNCTION__ __FILE__ ":neslacrypto_md5_file()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
 	char *hex="0123456789abcdef";
 	unsigned char buffer[1024];
 	unsigned char md[MD5_SIZE];
@@ -415,7 +417,7 @@ NES_FUNCTION(neslacrypto_md5_file)
 	int fd;
 	int i;
 
-	if ((cobj1->val->type!=NT_STRING)||(cobj1->val->size<1)) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	if (cobj1->val->type!=NT_STRING||cobj1->val->size<1) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
 	if ((fd=open(cobj1->val->d.str, O_RDONLY|O_BINARY))==-1) {
 		nes_setnum(N, &N->r, "", -1);
 		return -1;
@@ -430,37 +432,43 @@ NES_FUNCTION(neslacrypto_md5_file)
 	close(fd);
 	memset(token, 0, sizeof(token));
 	for (i=0;i<MD5_SIZE;i++) { token[i*2]=hex[md[i]>>4]; token[i*2+1]=hex[md[i]&15]; }
-	nes_setstr(N, &N->r, "", token, strlen(token));
+	nes_setstr(N, &N->r, "", token, -1);
 	return 0;
+#undef __FUNCTION__
 }
 
 NES_FUNCTION(neslacrypto_md5_string)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+#define __FUNCTION__ __FILE__ ":neslacrypto_md5_string()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
 	char *hex="0123456789abcdef";
 	unsigned char md[MD5_SIZE];
 	char token[64]; /* should only need 32+'\0' */
 	MD5_CONTEXT c;
 	int i;
+	char *p;
 
-	if ((cobj1->val->type!=NT_STRING)||(cobj1->val->size<1)) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
+	p=cobj1->val->size>0?cobj1->val->d.str:"";
 	md5_init(&c);
-	md5_update(&c, (uchar *)cobj1->val->d.str, cobj1->val->size);
+	md5_update(&c, (uchar *)p, cobj1->val->size);
 	md5_final(&c, &(md[0]));
 	memset(token, 0, sizeof(token));
 	for (i=0;i<MD5_SIZE;i++) { token[i*2]=hex[md[i]>>4]; token[i*2+1]=hex[md[i]&15]; }
-	nes_setstr(N, &N->r, "", token, strlen(token));
+	nes_setstr(N, &N->r, "", token, -1);
 	return 0;
+#undef __FUNCTION__
 }
 
 NES_FUNCTION(neslacrypto_md5_passwd)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
-	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
+#define __FUNCTION__ __FILE__ ":neslacrypto_md5_passwd()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
+	obj_t *cobj2=nes_getobj(N, &N->l, "2");
 	char pass[80];
 	char salt[12];
 
-	if ((cobj1->val->type!=NT_STRING)||(cobj1->val->size<1)) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	if ((cobj1->val->type!=NT_STRING)||(cobj1->val->size<1)) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
 	memset(salt, 0, sizeof(salt));
 	if ((cobj1->val->type==NT_STRING)&&(cobj1->val->size==8)) {
 		strncpy(salt, cobj2->val->d.str, 8);
@@ -468,6 +476,7 @@ NES_FUNCTION(neslacrypto_md5_passwd)
 		strncpy(salt, "abcdefgh", 8);
 	}
 	md5_crypt(pass, cobj1->val->d.str, cobj2->val->d.str);
-	nes_setstr(N, &N->r, "", pass, strlen(pass));
+	nes_setstr(N, &N->r, "", pass, -1);
 	return 0;
+#undef __FUNCTION__
 }

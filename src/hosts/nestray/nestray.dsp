@@ -50,7 +50,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /pdb:none /machine:I386 /nodefaultlib:"libc"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libcmt.lib /nologo /subsystem:windows /pdb:none /machine:I386 /nodefaultlib:"libc"
 # SUBTRACT LINK32 /map
 # Begin Target
 
@@ -101,6 +101,18 @@ SOURCE=..\..\..\lib\libnesla.lib
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\lib\libneslacdb.lib
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\lib\libneslacrypto.lib
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\lib\libnesladl.lib
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\lib\libneslaext.lib
 # End Source File
 # Begin Source File
@@ -113,11 +125,11 @@ SOURCE=..\..\..\lib\libneslaodbc.lib
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\lib\libneslatcp.lib
+SOURCE=..\..\..\lib\libneslapipe.lib
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\..\..\..\..\..\utils\VC98\lib\xyssl.lib
+SOURCE=..\..\..\lib\libneslatcp.lib
 # End Source File
 # Begin Source File
 
@@ -130,14 +142,6 @@ SOURCE=..\..\..\lib\libneslawinapi.lib
 # Begin Source File
 
 SOURCE=..\..\..\lib\libneslazip.lib
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\lib\libneslacrypto.lib
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\lib\libnesladl.lib
 # End Source File
 # End Target
 # End Project

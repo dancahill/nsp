@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,7 +53,7 @@ static void neslaext_xml_trimtree(nes_state *N, obj_t *tobj)
  */
 static char *neslaext_xml_readsub(nes_state *N, obj_t *tobj, char *ptr, char *otag, int *eb)
 {
-#define __FUNCTION__ "neslaext_xml_readsub"
+#define __FUNCTION__ __FILE__ ":neslaext_xml_readsub()"
 	char tagbuf[MAX_OBJNAMELEN+1];
 	char namebuf[MAX_OBJNAMELEN+1];
 	obj_t *cobj;
@@ -132,7 +133,7 @@ static char *neslaext_xml_readsub(nes_state *N, obj_t *tobj, char *ptr, char *ot
 					}
 					nobj=nes_settable(N, nobj, n_ntoa(N, namebuf, ++j, 10, 0));
 
-					if (N->debug) n_warn(N, __FUNCTION__, "new node '%s'", namebuf);
+					/* if (N->debug) n_warn(N, __FUNCTION__, "new node '%s'", namebuf); */
 					/* start adding attributes */
 					aobj=NULL;
 					for (;;) {
@@ -320,13 +321,14 @@ continue;
 
 NES_FUNCTION(neslaext_xml_read)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
-	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
+#define __FUNCTION__ __FILE__ ":neslaext_xml_read()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
+	obj_t *cobj2=nes_getobj(N, &N->l, "2");
 	obj_t tobj;
 	int eb=0;
 	int trim=1;
 
-	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
 	nc_memset((void *)&tobj, 0, sizeof(obj_t));
 	nes_linkval(N, &tobj, NULL);
 	tobj.val->type=NT_TABLE;
@@ -336,4 +338,5 @@ NES_FUNCTION(neslaext_xml_read)
 	nes_linkval(N, &N->r, &tobj);
 	nes_unlinkval(N, &tobj);
 	return 0;
+#undef __FUNCTION__
 }

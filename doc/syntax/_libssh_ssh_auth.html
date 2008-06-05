@@ -1,0 +1,63 @@
+<!-- CONTENTS_START -->
+<a name="nesla_ssh_auth"></a>
+<H2>ssh.auth<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Authenticate an SSH connection.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>boolean</I> <B>=</B> <B>ssh.auth(</B><I>sshconn</I>, <I>username</I>, <I>password</I> | <I>{ pass, prv, pub }</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>sshconn</I> </TD><TD>An active ssh-conn connection.</TD></TR>
+<TR><TD><I>username</I> </TD><TD>String containing the account username to connect as.</TD></TR>
+<TR><TD><I>password</I> </TD><TD>String containing the account password.</TD></TR>
+<TR><TD><I>pass</I> </TD><TD>String containing the passphrase of the private key (used with key-based authentication).</TD></TR>
+<TR><TD><I>prv</I> </TD><TD>String containing the location of the private key (used with key-based authentication).</TD></TR>
+<TR><TD><I>pub</I> </TD><TD>String containing the location of the public key (used with key-based authentication).</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns true if successful.  Any failure to authenticate returns false.
+</BLOCKQUOTE><P>
+
+<H4>Remarks</H4>
+<BLOCKQUOTE><P>
+<P>None
+</BLOCKQUOTE><P>
+
+<H4>Example</H4>
+<BLOCKQUOTE><P>
+The following example demonstrates how to authenticate via user/pass or a keypair.
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+
+<PRE>
+global username = "user";
+global password = "pass";
+global rsa_keys = {
+	pass="rsapass",
+	prv="~/.ssh/id_rsa",
+	pub="~/.ssh/id_rsa.pub"
+};
+
+<FONT COLOR=green>/* you can authenticate with a user/pass pair */</FONT>
+<B>if</B> (<B>ssh.auth</B>(conn, username, password)!=true) {
+	<B>print</B>("failed auth");
+	<B>exit</B>;
+}
+<FONT COLOR=green>/* or you can authenticate with keys */</FONT>
+<B>if</B> (<B>ssh.auth</B>(conn, username, rsa_keys)!=true) {
+	<B>print</B>("failed auth");
+	<B>exit</B>;
+}
+</PRE>
+
+</CODE></TD></TR></TABLE>
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->

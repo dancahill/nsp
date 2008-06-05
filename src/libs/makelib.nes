@@ -73,22 +73,23 @@ function build_objs(CC, CFLAGS, OBJECTS, OTYPE, INTDIR) {
 		if (string.sub(INTDIR, 0, 8)=='libnesla') INTDIR=string.sub(INTDIR, 8);
 	}
 	OLIST=string.split(OBJECTS, " ");
+//	if (string.sub(_ostype_, 0, 7)=="Windows") 
 	for (i=0;i<sizeof(OLIST);i++) {
 		s1=file.stat(swapslash(OBJDIR+"/"+INTDIR));
-		if (typeof(s1)!='table') system("mkdir "+swapslash(OBJDIR+"/"+INTDIR));
+		if (typeof(s1)!='table') file.mkdir(swapslash(OBJDIR+"/"+INTDIR));
 		s1=file.stat(swapslash(OBJDIR+"/"+INTDIR+"/"+OTYPE));
-		if (typeof(s1)!='table') system("mkdir "+swapslash(OBJDIR+"/"+INTDIR+"/"+OTYPE));
+		if (typeof(s1)!='table') file.mkdir(swapslash(OBJDIR+"/"+INTDIR+"/"+OTYPE));
 		ONAME=string.split(OLIST[i], ".");
 		if (ONAME[1]!='o') continue;
 		if (newer(ONAME[0]+".c", swapslash(OBJDIR+"/"+INTDIR+"/"+OTYPE+"/"+ONAME[0]+".o"))) {
 //			print("  "+CC+" "+ONAME[0]+".o\n");
 			if (OTYPE=='shared') {
 //				print (CC+" "+DLFLAGS+CFLAGS+swapslash(OBJDIR+"/"+INTDIR+"/"+OTYPE+"/"+ONAME[0]+".o")+" "+ONAME[0]+".c"+"\n");
-				print ("  CC "+ONAME[0]+".o\n");
+				if (CC!='cl.exe') print ("  CC "+ONAME[0]+".o\n");
 				system(CC+" "+DLFLAGS+CFLAGS+swapslash(OBJDIR+"/"+INTDIR+"/"+OTYPE+"/"+ONAME[0]+".o")+" "+ONAME[0]+".c"+HIDDEN);
 			} else {
 //				print (CC+" "+CFLAGS+swapslash(OBJDIR+"/"+INTDIR+"/"+OTYPE+"/"+ONAME[0]+".o")+" "+ONAME[0]+".c"+"\n");
-				print ("  CC "+ONAME[0]+".o\n");
+				if (CC!='cl.exe') print ("  CC "+ONAME[0]+".o\n");
 				system(CC+" "+CFLAGS+swapslash(OBJDIR+"/"+INTDIR+"/"+OTYPE+"/"+ONAME[0]+".o")+" "+ONAME[0]+".c"+HIDDEN);
 			}
 		}

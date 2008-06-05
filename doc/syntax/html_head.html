@@ -43,7 +43,7 @@ function showpage(c,p) {
 </TR>
 <TR>
 	<TD HEIGHT="100%" WIDTH="200" BGCOLOR="#003399" VALIGN=TOP>
-		<HR NOSHADE SIZE="0.5" WIDTH="160">
+		<HR NOSHADE SIZE="0.5" WIDTH="170">
 		<H2 CLASS="lefttitle"><FONT COLOR="#399CDE">&nbsp;Menu</FONT></H2>
 		<P CLASS="smenu">
 		<A CLASS="smenu" HREF="#c1p0"               onClick="showpage('1', '0');               return false;"><NOBR>Introduction</NOBR></A><BR>
@@ -68,6 +68,8 @@ function showpage(c,p) {
 </DIV>
 		<A CLASS="smenu" HREF="#c3p0"               onClick="showpage('3', '0');               return false;"><NOBR>Functions - file</NOBR></A><BR>
 <DIV ID=c3m STYLE='display: block'>
+		<A CLASS="smenu" HREF="#c3p_file_append"    onClick="showpage('3', '_file_append');    return false;">&nbsp;&nbsp;file.append();</A><BR>
+		<A CLASS="smenu" HREF="#c3p_file_mkdir"     onClick="showpage('3', '_file_mkdir');     return false;">&nbsp;&nbsp;file.mkdir();</A><BR>
 		<A CLASS="smenu" HREF="#c3p_file_read"      onClick="showpage('3', '_file_read');      return false;">&nbsp;&nbsp;file.read();</A><BR>
 		<A CLASS="smenu" HREF="#c3p_file_stat"      onClick="showpage('3', '_file_stat');      return false;">&nbsp;&nbsp;file.stat();</A><BR>
 		<A CLASS="smenu" HREF="#c3p_file_unlink"    onClick="showpage('3', '_file_unlink');    return false;">&nbsp;&nbsp;file.unlink();</A><BR>
@@ -127,19 +129,35 @@ function showpage(c,p) {
 		<A CLASS="smenu" HREF="#c8p_libext_sort_byname"   onClick="showpage('8', '_libext_sort_byname');   return false;">&nbsp;&nbsp;sort.byname();</A><BR>
 		<A CLASS="smenu" HREF="#c8p_libext_xml_read"      onClick="showpage('8', '_libext_xml_read');      return false;">&nbsp;&nbsp;xml.read();</A><BR>
 </DIV>
-		<A CLASS="smenu" HREF="#c9p0"               onClick="showpage('9', '0');               return false;"><NOBR>libtcp</NOBR></A><BR>
+		<A CLASS="smenu" HREF="#c9p0"               onClick="showpage('9', '0');               return false;"><NOBR>libssh</NOBR></A><BR>
 <DIV ID=c9m STYLE='display: block'>
-		<A CLASS="smenu" HREF="#c9p_libtcp_http_get"   onClick="showpage('9', '_libtcp_http_get');   return false;">&nbsp;&nbsp;http.get();</A><BR>
-		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_accept" onClick="showpage('9', '_libtcp_tcp_accept'); return false;">&nbsp;&nbsp;tcp.accept();</A><BR>
-		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_bind"   onClick="showpage('9', '_libtcp_tcp_bind');   return false;">&nbsp;&nbsp;tcp.bind();</A><BR>
-		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_close"  onClick="showpage('9', '_libtcp_tcp_close');  return false;">&nbsp;&nbsp;tcp.close();</A><BR>
-		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_gets"   onClick="showpage('9', '_libtcp_tcp_gets');   return false;">&nbsp;&nbsp;tcp.gets();</A><BR>
-		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_open"   onClick="showpage('9', '_libtcp_tcp_open');   return false;">&nbsp;&nbsp;tcp.open();</A><BR>
-		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_read"   onClick="showpage('9', '_libtcp_tcp_read');   return false;">&nbsp;&nbsp;tcp.read();</A><BR>
-		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_write"  onClick="showpage('9', '_libtcp_tcp_write');  return false;">&nbsp;&nbsp;tcp.write();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_ssh_open"    onClick="showpage('9', '_libssh_ssh_open');    return false;">&nbsp;&nbsp;ssh.open();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_ssh_close"   onClick="showpage('9', '_libssh_ssh_close');   return false;">&nbsp;&nbsp;ssh.close();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_ssh_hostkey" onClick="showpage('9', '_libssh_ssh_hostkey'); return false;">&nbsp;&nbsp;ssh.hostkey();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_ssh_auth"    onClick="showpage('9', '_libssh_ssh_auth');    return false;">&nbsp;&nbsp;ssh.auth();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_ssh_cmd"     onClick="showpage('9', '_libssh_ssh_cmd');     return false;">&nbsp;&nbsp;ssh.cmd();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_sftp_get"    onClick="showpage('9', '_libssh_sftp_get');    return false;">&nbsp;&nbsp;ssh.sftp_get();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_sftp_ls"     onClick="showpage('9', '_libssh_sftp_ls');     return false;">&nbsp;&nbsp;ssh.sftp_ls();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_sftp_mkdir"  onClick="showpage('9', '_libssh_sftp_mkdir');  return false;">&nbsp;&nbsp;ssh.sftp_mkdir();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_sftp_put"    onClick="showpage('9', '_libssh_sftp_put');    return false;">&nbsp;&nbsp;ssh.sftp_put();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_sftp_rename" onClick="showpage('9', '_libssh_sftp_rename'); return false;">&nbsp;&nbsp;ssh.sftp_rename();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_sftp_rmdir"  onClick="showpage('9', '_libssh_sftp_rmdir');  return false;">&nbsp;&nbsp;ssh.sftp_rmdir();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_sftp_unlink" onClick="showpage('9', '_libssh_sftp_unlink'); return false;">&nbsp;&nbsp;ssh.sftp_unlink();</A><BR>
 </DIV>
-		<A CLASS="smenu" HREF="#c10p0"              onClick="showpage('10', '0');              return false;"><NOBR>C API</NOBR></A><BR>
+		<A CLASS="smenu" HREF="#c10p0"               onClick="showpage('10', '0');               return false;"><NOBR>libtcp</NOBR></A><BR>
 <DIV ID=c10m STYLE='display: block'>
+		<A CLASS="smenu" HREF="#c10p_libtcp_http_get"   onClick="showpage('10', '_libtcp_http_get');   return false;">&nbsp;&nbsp;http.get();</A><BR>
+		<A CLASS="smenu" HREF="#c10p_libtcp_tcp_accept" onClick="showpage('10', '_libtcp_tcp_accept'); return false;">&nbsp;&nbsp;tcp.accept();</A><BR>
+		<A CLASS="smenu" HREF="#c10p_libtcp_tcp_bind"   onClick="showpage('10', '_libtcp_tcp_bind');   return false;">&nbsp;&nbsp;tcp.bind();</A><BR>
+		<A CLASS="smenu" HREF="#c10p_libtcp_tcp_close"  onClick="showpage('10', '_libtcp_tcp_close');  return false;">&nbsp;&nbsp;tcp.close();</A><BR>
+		<A CLASS="smenu" HREF="#c10p_libtcp_tcp_gets"   onClick="showpage('10', '_libtcp_tcp_gets');   return false;">&nbsp;&nbsp;tcp.gets();</A><BR>
+		<A CLASS="smenu" HREF="#c10p_libtcp_tcp_info"   onClick="showpage('10', '_libtcp_tcp_info');   return false;">&nbsp;&nbsp;tcp.info();</A><BR>
+		<A CLASS="smenu" HREF="#c10p_libtcp_tcp_open"   onClick="showpage('10', '_libtcp_tcp_open');   return false;">&nbsp;&nbsp;tcp.open();</A><BR>
+		<A CLASS="smenu" HREF="#c10p_libtcp_tcp_read"   onClick="showpage('10', '_libtcp_tcp_read');   return false;">&nbsp;&nbsp;tcp.read();</A><BR>
+		<A CLASS="smenu" HREF="#c10p_libtcp_tcp_write"  onClick="showpage('10', '_libtcp_tcp_write');  return false;">&nbsp;&nbsp;tcp.write();</A><BR>
+</DIV>
+		<A CLASS="smenu" HREF="#c11p0"              onClick="showpage('11', '0');              return false;"><NOBR>C API</NOBR></A><BR>
+<DIV ID=c11m STYLE='display: block'>
 </DIV>
 		</p>
 		<HR NOSHADE SIZE="0.5" WIDTH="160">

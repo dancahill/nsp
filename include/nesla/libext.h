@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,6 +21,11 @@ NES_FUNCTION(neslaext_base64_decode);
 NES_FUNCTION(neslaext_base64_encode);
 /* dir.c */
 NES_FUNCTION(neslaext_dirlist);
+/* mime.c */
+NES_FUNCTION(neslaext_mime_read);
+NES_FUNCTION(neslaext_mime_write);
+NES_FUNCTION(neslaext_mime_qp_decode);
+NES_FUNCTION(neslaext_mime_rfc2047_decode);
 /* rot13.c */
 NES_FUNCTION(neslaext_rot13);
 /* sort.c */

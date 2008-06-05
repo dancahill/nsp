@@ -20,6 +20,8 @@ doc+="<DIV ID=c2p_core_typeof    STYLE='display: block'>"+file.read("_core_typeo
 doc+="<DIV ID=c2p_core_write     STYLE='display: block'>"+file.read("_core_write.html")+"</DIV>";
 /* file functions */
 doc+="<DIV ID=c3p0 STYLE='display: block'>"+file.read("_chapter3_intro.html")+"</DIV>";
+doc+="<DIV ID=c3p_file_append    STYLE='display: block'>"+file.read("_file_append.html")+"</DIV>";
+doc+="<DIV ID=c3p_file_mkdir     STYLE='display: block'>"+file.read("_file_mkdir.html")+"</DIV>";
 doc+="<DIV ID=c3p_file_read      STYLE='display: block'>"+file.read("_file_read.html")+"</DIV>";
 doc+="<DIV ID=c3p_file_stat      STYLE='display: block'>"+file.read("_file_stat.html")+"</DIV>";
 doc+="<DIV ID=c3p_file_unlink    STYLE='display: block'>"+file.read("_file_unlink.html")+"</DIV>";
@@ -73,19 +75,34 @@ doc+="<DIV ID=c8p_libext_rot13         STYLE='display: block'>"+file.read("_libe
 doc+="<DIV ID=c8p_libext_sort_bykey    STYLE='display: block'>"+file.read("_libext_sort_bykey.html")+"</DIV>";
 doc+="<DIV ID=c8p_libext_sort_byname   STYLE='display: block'>"+file.read("_libext_sort_byname.html")+"</DIV>";
 doc+="<DIV ID=c8p_libext_xml_read      STYLE='display: block'>"+file.read("_libext_xml_read.html")+"</DIV>";
-/* tcp/ip extension functions */
+/* ssh extension functions */
 doc+="<DIV ID=c9p0 STYLE='display: block'>"+file.read("_chapter9_intro.html")+"</DIV>";
-doc+="<DIV ID=c9p_libtcp_http_get      STYLE='display: block'>"+file.read("_libtcp_http_get.html")+"</DIV>";
-doc+="<DIV ID=c9p_libtcp_tcp_accept    STYLE='display: block'>"+file.read("_libtcp_tcp_accept.html")+"</DIV>";
-doc+="<DIV ID=c9p_libtcp_tcp_bind      STYLE='display: block'>"+file.read("_libtcp_tcp_bind.html")+"</DIV>";
-doc+="<DIV ID=c9p_libtcp_tcp_close     STYLE='display: block'>"+file.read("_libtcp_tcp_close.html")+"</DIV>";
-doc+="<DIV ID=c9p_libtcp_tcp_gets      STYLE='display: block'>"+file.read("_libtcp_tcp_gets.html")+"</DIV>";
-doc+="<DIV ID=c9p_libtcp_tcp_open      STYLE='display: block'>"+file.read("_libtcp_tcp_open.html")+"</DIV>";
-doc+="<DIV ID=c9p_libtcp_tcp_read      STYLE='display: block'>"+file.read("_libtcp_tcp_read.html")+"</DIV>";
-doc+="<DIV ID=c9p_libtcp_tcp_write     STYLE='display: block'>"+file.read("_libtcp_tcp_write.html")+"</DIV>";
+doc+="<DIV ID=c9p_libssh_ssh_open       STYLE='display: block'>"+file.read("_libssh_ssh_open.html")+"</DIV>";
+doc+="<DIV ID=c9p_libssh_ssh_close      STYLE='display: block'>"+file.read("_libssh_ssh_close.html")+"</DIV>";
+doc+="<DIV ID=c9p_libssh_ssh_hostkey    STYLE='display: block'>"+file.read("_libssh_ssh_hostkey.html")+"</DIV>";
+doc+="<DIV ID=c9p_libssh_ssh_auth       STYLE='display: block'>"+file.read("_libssh_ssh_auth.html")+"</DIV>";
+doc+="<DIV ID=c9p_libssh_ssh_cmd        STYLE='display: block'>"+file.read("_libssh_ssh_cmd.html")+"</DIV>";
+doc+="<DIV ID=c9p_libssh_sftp_get       STYLE='display: block'>"+file.read("_libssh_sftp_get.html")+"</DIV>";
+doc+="<DIV ID=c9p_libssh_sftp_ls        STYLE='display: block'>"+file.read("_libssh_sftp_ls.html")+"</DIV>";
+doc+="<DIV ID=c9p_libssh_sftp_mkdir     STYLE='display: block'>"+file.read("_libssh_sftp_mkdir.html")+"</DIV>";
+doc+="<DIV ID=c9p_libssh_sftp_put       STYLE='display: block'>"+file.read("_libssh_sftp_put.html")+"</DIV>";
+doc+="<DIV ID=c9p_libssh_sftp_rename    STYLE='display: block'>"+file.read("_libssh_sftp_rename.html")+"</DIV>";
+doc+="<DIV ID=c9p_libssh_sftp_rmdir     STYLE='display: block'>"+file.read("_libssh_sftp_rmdir.html")+"</DIV>";
+doc+="<DIV ID=c9p_libssh_sftp_unlink    STYLE='display: block'>"+file.read("_libssh_sftp_unlink.html")+"</DIV>";
+/* tcp/ip extension functions */
+doc+="<DIV ID=c10p0 STYLE='display: block'>"+file.read("_chapter10_intro.html")+"</DIV>";
+doc+="<DIV ID=c10p_libtcp_http_get      STYLE='display: block'>"+file.read("_libtcp_http_get.html")+"</DIV>";
+doc+="<DIV ID=c10p_libtcp_tcp_accept    STYLE='display: block'>"+file.read("_libtcp_tcp_accept.html")+"</DIV>";
+doc+="<DIV ID=c10p_libtcp_tcp_bind      STYLE='display: block'>"+file.read("_libtcp_tcp_bind.html")+"</DIV>";
+doc+="<DIV ID=c10p_libtcp_tcp_close     STYLE='display: block'>"+file.read("_libtcp_tcp_close.html")+"</DIV>";
+doc+="<DIV ID=c10p_libtcp_tcp_gets      STYLE='display: block'>"+file.read("_libtcp_tcp_gets.html")+"</DIV>";
+doc+="<DIV ID=c10p_libtcp_tcp_info      STYLE='display: block'>"+file.read("_libtcp_tcp_info.html")+"</DIV>";
+doc+="<DIV ID=c10p_libtcp_tcp_open      STYLE='display: block'>"+file.read("_libtcp_tcp_open.html")+"</DIV>";
+doc+="<DIV ID=c10p_libtcp_tcp_read      STYLE='display: block'>"+file.read("_libtcp_tcp_read.html")+"</DIV>";
+doc+="<DIV ID=c10p_libtcp_tcp_write     STYLE='display: block'>"+file.read("_libtcp_tcp_write.html")+"</DIV>";
 /* C API functions */
-doc+="<DIV ID=c10p0 STYLE='display: block'>
-<h1>10 - The C API</h1>
+doc+="<DIV ID=c11p0 STYLE='display: block'>
+<h1>11 - The C API</h1>
 <p>
 I'm lazy, so here's the long ugly version.  This is everything your C program
 will ever need to know about Nesla.  Actually, it needs to know a lot less, but

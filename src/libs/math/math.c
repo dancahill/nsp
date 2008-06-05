@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,53 +21,53 @@
 #include <math.h>
 NES_FUNCTION(neslamath_math2)
 {
-	obj_t *cobj0=nes_getiobj(N, &N->l, 0);
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
-	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
+	obj_t *cobj2=nes_getobj(N, &N->l, "2");
+	char *fname=nes_getstr(N, &N->l, "0");
 	num_t n;
 
-	if (cobj1->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, nes_tostr(N, cobj0), "expected a number");
-	if (nc_strcmp(cobj0->val->d.str, "ceil")==0) {
+	if (cobj1->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, fname, "expected a number for arg1");
+	if (nc_strcmp(fname, "ceil")==0) {
 		n=ceil(cobj1->val->d.num);
-	} else if (nc_strcmp(cobj0->val->d.str, "floor")==0) {
+	} else if (nc_strcmp(fname, "floor")==0) {
 		n=floor(cobj1->val->d.num);
 	/* add trig functions */
-	} else if (nc_strcmp(cobj0->val->d.str, "acos")==0) {
+	} else if (nc_strcmp(fname, "acos")==0) {
 		n=acos(cobj1->val->d.num);
-	} else if (nc_strcmp(cobj0->val->d.str, "asin")==0) {
+	} else if (nc_strcmp(fname, "asin")==0) {
 		n=asin(cobj1->val->d.num);
-	} else if (nc_strcmp(cobj0->val->d.str, "atan")==0) {
+	} else if (nc_strcmp(fname, "atan")==0) {
 		n=atan(cobj1->val->d.num);
-	} else if (nc_strcmp(cobj0->val->d.str, "atan2")==0) {
-		if (cobj2->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, nes_tostr(N, cobj0), "expected a number for arg2");
+	} else if (nc_strcmp(fname, "atan2")==0) {
+		if (cobj2->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, fname, "expected a number for arg2");
 		n=atan2(cobj1->val->d.num, cobj2->val->d.num);
-	} else if (nc_strcmp(cobj0->val->d.str, "cos")==0) {
+	} else if (nc_strcmp(fname, "cos")==0) {
 		n=cos(cobj1->val->d.num);
-	} else if (nc_strcmp(cobj0->val->d.str, "sin")==0) {
+	} else if (nc_strcmp(fname, "sin")==0) {
 		n=sin(cobj1->val->d.num);
-	} else if (nc_strcmp(cobj0->val->d.str, "tan")==0) {
+	} else if (nc_strcmp(fname, "tan")==0) {
 		n=tan(cobj1->val->d.num);
 	/* add exp and log functions */
-	} else if (nc_strcmp(cobj0->val->d.str, "exp")==0) {
+	} else if (nc_strcmp(fname, "exp")==0) {
 		n=exp(cobj1->val->d.num);
-	} else if (nc_strcmp(cobj0->val->d.str, "log")==0) {
-		if (cobj1->val->d.num<=0) n_error(N, NE_SYNTAX, nes_tostr(N, cobj0), "arg must not be zero");
+	} else if (nc_strcmp(fname, "log")==0) {
+		if (cobj1->val->d.num<=0) n_error(N, NE_SYNTAX, fname, "arg must not be zero");
 		n=log(cobj1->val->d.num);
-	} else if (nc_strcmp(cobj0->val->d.str, "log10")==0) {
-		if (cobj1->val->d.num<=0) n_error(N, NE_SYNTAX, nes_tostr(N, cobj0), "arg must not be zero");
+	} else if (nc_strcmp(fname, "log10")==0) {
+		if (cobj1->val->d.num<=0) n_error(N, NE_SYNTAX, fname, "arg must not be zero");
 		n=log10(cobj1->val->d.num);
-	} else if (nc_strcmp(cobj0->val->d.str, "pow")==0) {
-		if (cobj2->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, nes_tostr(N, cobj0), "expected a number for arg2");
+	} else if (nc_strcmp(fname, "pow")==0) {
+		if (cobj2->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, fname, "expected a number for arg2");
 		n=pow(cobj1->val->d.num, cobj2->val->d.num);
 	/* add hyperbolic functions */
-	} else if (nc_strcmp(cobj0->val->d.str, "cosh")==0) {
+	} else if (nc_strcmp(fname, "cosh")==0) {
 		n=cosh(cobj1->val->d.num);
-	} else if (nc_strcmp(cobj0->val->d.str, "sinh")==0) {
+	} else if (nc_strcmp(fname, "sinh")==0) {
 		n=sinh(cobj1->val->d.num);
-	} else if (nc_strcmp(cobj0->val->d.str, "tanh")==0) {
+	} else if (nc_strcmp(fname, "tanh")==0) {
 		n=tanh(cobj1->val->d.num);
 	/* add other functions */
-	} else if (nc_strcmp(cobj0->val->d.str, "sqrt")==0) {
+	} else if (nc_strcmp(fname, "sqrt")==0) {
 		n=sqrt(cobj1->val->d.num);
 	} else {
 		n=0;

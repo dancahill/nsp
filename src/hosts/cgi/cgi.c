@@ -1,6 +1,6 @@
 /*
     nesla.cgi -- simple Nesla CGI host
-    Copyright (C) 2000-2007 Dan Cahill
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -378,12 +378,12 @@ void cgi_readenv()
 	int i;
 	int x;
 
-	nes_setstr(N, servobj, "NESLA_VERSION", NESLA_VERSION, strlen(NESLA_VERSION));
+	nes_setstr(N, servobj, "NESLA_VERSION", NESLA_VERSION, -1);
 	/* strip trailing slashes for thttpd */
 	strncpy(boundary, nes_getstr(N, servobj, "SCRIPT_NAME"), sizeof(boundary)-1);
 	while ((boundary[strlen(boundary)-1]=='/')) {
 		boundary[strlen(boundary)-1]='\0';
-		nes_setstr(N, servobj, "SCRIPT_NAME", boundary, strlen(boundary));
+		nes_setstr(N, servobj, "SCRIPT_NAME", boundary, -1);
 	}
 	cobj=nes_getobj(N, servobj, "REQUEST_URI");
 	if (cobj->val->type==NT_STRING) {
@@ -433,9 +433,16 @@ void cgi_readenv()
 				printf("malloc error");
 				exit(0);
 			}
+			/* fgets doesn't exactly tell us if the input is complete... */
+			/* fgets(p1, clen+1, stdin); */
 			while (i<clen) {
 				x=fgetc(stdin);
-				if (x==EOF) break;
+				if (x==EOF) {
+					send_header(0, "text/html", -1, -1);
+					printf("premature end to POST data. %d bytes read", i);
+					exit(0);
+//					break;
+				}
 				p1[i++]=x;
 			}
 			cobj=nes_setstr(N, &N->g, "POSTRAWDATA", NULL, 0);
@@ -536,7 +543,7 @@ void cgi_readenv()
 				if (filename[0]!='\0') {
 					cobj->val->attr|=NST_HIDDEN; /* hide attached files from var dumps */
 					snprintf(tmpbuf2, sizeof(tmpbuf2)-1, "%s_NAME", tmpbuf);
-					nes_setstr(N, pobj, tmpbuf2, filename, strlen(filename));
+					nes_setstr(N, pobj, tmpbuf2, filename, -1);
 					snprintf(tmpbuf2, sizeof(tmpbuf2)-1, "%s_SIZE", tmpbuf);
 					nes_setnum(N, pobj, tmpbuf2, i);
 				}
@@ -610,7 +617,7 @@ char *fileul(char *xfilename, char *xfilesize)
 
 	if (cobj->val->type==NT_STRING) {
 		snprintf(xfilename, 1024, "%s", nes_getstr(N, pobj, "ATTACHMENT1_NAME"));
-		snprintf(xfilesize, 9, "%d", cobj->val->size);
+		snprintf(xfilesize, 9, "%u", (unsigned int)cobj->val->size);
 		if ((xfilename[0]=='\0')||(cobj->val->size==0)) return NULL;
 		return cobj->val->d.str;
 	}
@@ -636,18 +643,23 @@ void send_header(int cacheable, char *mime_type, int length, time_t mod)
 	if (sent) return;
 	if (mod!=(time_t)-1) {
 		strftime(timebuf, sizeof(timebuf), RFC1123FMT, gmtime(&mod));
-		nes_setstr(N, headobj, "LAST_MODIFIED", timebuf, strlen(timebuf));
+		nes_setstr(N, headobj, "LAST_MODIFIED", timebuf, -1);
 	}
 	now=time(NULL);
 	strftime(timebuf, sizeof(timebuf), RFC1123FMT, gmtime(&now));
-	nes_setstr(N, headobj, "DATE", timebuf, strlen(timebuf));
+	nes_setstr(N, headobj, "DATE", timebuf, -1);
 	if (cacheable) {
-		nes_setstr(N, headobj, "CACHE_CONTROL", "public", strlen("public"));
-		nes_setstr(N, headobj, "PRAGMA", "public", strlen("public"));
+		cobj=nes_getobj(N, headobj, "CACHE_CONTROL");
+		if (cobj->val->type==NT_NULL) nes_setstr(N, headobj, "CACHE_CONTROL", "public", -1);
+		cobj=nes_getobj(N, headobj, "PRAGMA");
+		if (cobj->val->type==NT_NULL) nes_setstr(N, headobj, "PRAGMA", "public", -1);
 	} else {
-		nes_setstr(N, headobj, "CACHE_CONTROL", "no-cache, no-store, must-revalidate", strlen("no-cache, no-store, must-revalidate"));
-		nes_setstr(N, headobj, "EXPIRES", timebuf, strlen(timebuf));
-		nes_setstr(N, headobj, "PRAGMA", "no-cache", strlen("no-cache"));
+		cobj=nes_getobj(N, headobj, "CACHE_CONTROL");
+		if (cobj->val->type==NT_NULL) nes_setstr(N, headobj, "CACHE_CONTROL", "no-cache, no-store, must-revalidate", -1);
+		cobj=nes_getobj(N, headobj, "EXPIRES");
+		if (cobj->val->type==NT_NULL) nes_setstr(N, headobj, "EXPIRES", timebuf, -1);
+		cobj=nes_getobj(N, headobj, "PRAGMA");
+		if (cobj->val->type==NT_NULL) nes_setstr(N, headobj, "PRAGMA", "no-cache", -1);
 	}
 	/* IIS bursts into flames when we do a redirect, so use nph- */
 	if (strstr(nes_getstr(N, servobj, "SCRIPT_NAME"), "nph-")!=NULL) {

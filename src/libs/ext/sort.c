@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -125,31 +126,35 @@ end:
 
 NES_FUNCTION(neslaext_sort_byname)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
-	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
-	obj_t *cobj3=nes_getiobj(N, &N->l, 3);
+#define __FUNCTION__ __FILE__ ":neslaext_sort_byname()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
+	obj_t *cobj2=nes_getobj(N, &N->l, "2");
+	obj_t *cobj3=nes_getobj(N, &N->l, "3");
 	int order=1;
 	int rec=0;
 
-	if (cobj1->val->type!=NT_TABLE) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a table for arg1");
+	if (cobj1->val->type!=NT_TABLE) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a table for arg1");
 	if (cobj2->val->type==NT_NUMBER) rec=(int)nes_tonum(N, cobj2);
 	if (cobj3->val->type==NT_NUMBER) order=(int)nes_tonum(N, cobj3);
 	sort_byname(N, cobj1, rec, order);
 	nes_setnum(N, &N->r, "", 0);
 	return 0;
+#undef __FUNCTION__
 }
 
 NES_FUNCTION(neslaext_sort_bykey)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
-	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
-	obj_t *cobj3=nes_getiobj(N, &N->l, 3);
+#define __FUNCTION__ __FILE__ ":neslaext_sort_bykey()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
+	obj_t *cobj2=nes_getobj(N, &N->l, "2");
+	obj_t *cobj3=nes_getobj(N, &N->l, "3");
 	int order=1;
 
-	if (cobj1->val->type!=NT_TABLE) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a table for arg1");
-	if (cobj2->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg2");
+	if (cobj1->val->type!=NT_TABLE) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a table for arg1");
+	if (cobj2->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg2");
 	if (cobj3->val->type==NT_NUMBER) order=(int)nes_tonum(N, cobj3);
 	sort_bykey(N, cobj1, cobj2->val->d.str, order);
 	nes_setnum(N, &N->r, "", 0);
 	return 0;
+#undef __FUNCTION__
 }

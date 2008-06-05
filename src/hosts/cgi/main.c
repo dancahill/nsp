@@ -1,6 +1,6 @@
 /*
     nesla.cgi -- simple Nesla CGI host
-    Copyright (C) 2000-2007 Dan Cahill
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ static NES_FUNCTION(nescgi_flush)
 {
 	static short headersent=0;
 
-	if (N->outbuflen==0) return 0;
+	if (N==NULL||N->outbuflen==0) return 0;
 	if (!headersent) {
 		send_header(0, "text/html", -1, -1);
 		headersent=1;
@@ -50,7 +50,7 @@ static NES_FUNCTION(nescgi_flush)
 static NES_FUNCTION(nescgi_sendfile)
 {
 	char tmppath[512];
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
 	obj_t *headobj=nes_settable(N, &N->g, "_HEADER");
 	obj_t *cobj, *robj;
 	struct stat sb;
@@ -81,7 +81,7 @@ static NES_FUNCTION(nescgi_sendfile)
 	if (cobj->val->type==NT_NULL) {
 		if ((p=strrchr(cobj1->val->d.str, '/'))!=NULL) p++; else p=cobj1->val->d.str;
 		snprintf(tmppath, sizeof(tmppath)-1, "attachment; filename=\"%s\"", p);
-		nes_setstr(N, headobj, "CONTENT_DISPOSITION", tmppath, strlen(tmppath));
+		nes_setstr(N, headobj, "CONTENT_DISPOSITION", tmppath, -1);
 	}
 	cobj=nes_getobj(N, headobj, "CONTENT_LENGTH");
 	if (cobj->val->type==NT_NULL) {
@@ -91,7 +91,7 @@ static NES_FUNCTION(nescgi_sendfile)
 	p=NULL;
 	if (cobj->val->type==NT_NULL) {
 		p=get_mime_type(cobj1->val->d.str);
-		nes_setstr(N, headobj, "CONTENT_TYPE", p, strlen(p));
+		nes_setstr(N, headobj, "CONTENT_TYPE", p, -1);
 	}
 	send_header(0, p, sb.st_size, sb.st_mtime);
 	bl=sb.st_size;
@@ -134,8 +134,8 @@ static void preppath(nes_state *N, char *name)
 	for (j=strlen(buf)-1;j>0;j--) {
 		if (buf[j]=='/') { buf[j]='\0'; p=buf+j+1; break; }
 	}
-	nes_setstr(N, &N->g, "_filename", p, strlen(p));
-	nes_setstr(N, &N->g, "_filepath", buf, strlen(buf));
+	nes_setstr(N, &N->g, "_filename", p, -1);
+	nes_setstr(N, &N->g, "_filepath", buf, -1);
 	return;
 }
 
@@ -226,13 +226,13 @@ int main(int argc, char *argv[])
 		if (!p) continue;
 		*p='\0';
 		p=strchr(environ[i], '=')+1;
-		nes_setstr(N, servobj, tmpbuf, p, strlen(p));
+		nes_setstr(N, servobj, tmpbuf, p, -1);
 	}
 	/* add args */
 	tobj=nes_settable(N, &N->g, "_ARGS");
 	for (i=0;i<argc;i++) {
-		sprintf(tmpbuf, "%d", i);
-		nes_setstr(N, tobj, tmpbuf, argv[i], strlen(argv[i]));
+		n_ntoa(N, tmpbuf, i, 10, 0);
+		nes_setstr(N, tobj, tmpbuf, argv[i], -1);
 	}
 	config_read();
 	setsigs();
@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
 	PathTranslated=nes_getstr(N, servobj, "PATH_TRANSLATED");
 	if ((PathTranslated)&&(strlen(PathTranslated))) {
 		p=nes_getstr(N, servobj, "SCRIPT_NAME");
-		nes_setstr(N, servobj, "SCRIPT_NAME_ORIG", p, strlen(p));
+		nes_setstr(N, servobj, "SCRIPT_NAME_ORIG", p, -1);
 		cobj=nes_getobj(N, servobj, "PATH_INFO");
 		if ((cobj->val->type!=NT_STRING)||(cobj->val->d.str==NULL)) {
 			send_header(0, "text/html", -1, -1);
@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
 			goto err;
 		}
 		p=nes_tostr(N, cobj);
-		nes_setstr(N, servobj, "SCRIPT_NAME", p, strlen(p));
+		nes_setstr(N, servobj, "SCRIPT_NAME", p, -1);
 		if (stat(PathTranslated, &sb)!=0) {
 			send_header(0, "text/html", -1, -1);
 			printf("no script found<BR>");

@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,6 +29,13 @@ int neslaext_register_all(nes_state *N)
 	nes_setcfunc(N, tobj,  "encode",  (NES_CFUNC)neslaext_base64_encode);
 
 	nes_setcfunc(N, &N->g, "dirlist", (NES_CFUNC)neslaext_dirlist);
+
+	tobj=nes_settable(N, &N->g, "mime");
+	tobj->val->attr|=NST_HIDDEN;
+	nes_setcfunc(N, tobj,  "read",           (NES_CFUNC)neslaext_mime_read);
+	nes_setcfunc(N, tobj,  "write",          (NES_CFUNC)neslaext_mime_write);
+	nes_setcfunc(N, tobj,  "decode_qp",      (NES_CFUNC)neslaext_mime_qp_decode);
+	nes_setcfunc(N, tobj,  "decode_rfc2047", (NES_CFUNC)neslaext_mime_rfc2047_decode);
 
 	nes_setcfunc(N, &N->g, "rot13",   (NES_CFUNC)neslaext_rot13);
 

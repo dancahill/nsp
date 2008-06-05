@@ -12,10 +12,24 @@ NESLA NullLogic Embedded Scripting Language ChangeLog
 </h1>
 <small>
 <a href="copyright.html">Copyright</a>
-&copy; 2007 Dan Cahill.  All rights reserved.
+&copy; 2007-2008 Dan Cahill.  All rights reserved.
 </small>
 <hr>
 
+<h2>0.9.2 (2008-06-01)</h2>
+<ul>
+  <li>added basic signal handling to allow shutdown requests in multithreaded environments, etc.</li>
+  <li>fixed broken eval of break and exit values</li>
+  <li>fixed output of large values in printvar()</li>
+  <li>added simple MIME parser able to digest e-mails (and probably HTTP MIME POST data)</li>
+  <li>added quoted-printable and rfc2047 header decoding for MIME</li>
+  <li>added support for libssh2 (sftp and shell support)</li>
+  <li>added crude support for reading from and writing to pipes</li>
+  <li>added file.append(), file.mkdir(), tcp.info()</li>
+  <li>added DNS query code to libtcp</li>
+  <li>added tcp ftp helper functions to upload/download files and list dirs</li>
+  <li>fixed io.flush to not cause an error when being used to report an error</li>
+</ul>
 <h2>0.9.1 (2007-11-07)</h2>
 <ul>
   <li>updated xyssl lib to support v0.8</li>

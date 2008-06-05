@@ -1,6 +1,6 @@
 /*
     nesla.cgi -- simple Nesla CGI host
-    Copyright (C) 2000-2007 Dan Cahill
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,16 +26,16 @@ int config_read()
 	htnes_runscript(CONFIG_FILENAME);
 	/* fill in values for missing vars */
 	cobj=nes_getobj(N, confobj, "language");
-	if (cobj->val->type==NT_NULL) nes_setstr(N, confobj, "language", CONFIG_LANGUAGE, strlen(CONFIG_LANGUAGE));
+	if (cobj->val->type==NT_NULL) nes_setstr(N, confobj, "language", CONFIG_LANGUAGE, -1);
 	cobj=nes_getobj(N, confobj, "max_runtime");
 	if (cobj->val->type==NT_NULL) nes_setnum(N, confobj, "max_runtime",  CONFIG_MAX_RUNTIME);
 	cobj=nes_getobj(N, confobj, "max_postsize");
 	if (cobj->val->type==NT_NULL) nes_setnum(N, confobj, "max_postsize", CONFIG_MAX_POSTSIZE);
 	cobj=nes_getobj(N, confobj, "use_syslog");
 #ifdef CONFIG_USE_SYSLOG
-	if (cobj->val->type==NT_NULL) nes_setstr(N, confobj, "use_syslog", "y", strlen("y"));
+	if (cobj->val->type==NT_NULL) nes_setstr(N, confobj, "use_syslog", "y", -1);
 #else
-	if (cobj->val->type==NT_NULL) nes_setstr(N, confobj, "use_syslog", "n", strlen("n"));
+	if (cobj->val->type==NT_NULL) nes_setstr(N, confobj, "use_syslog", "n", -1);
 #endif
 	return 0;
 }

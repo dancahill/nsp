@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,7 +23,8 @@ static const char b64chars[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx
 
 NES_FUNCTION(neslaext_base64_decode)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+#define __FUNCTION__ __FILE__ ":neslaext_base64_decode()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
 	obj_t *robj;
 	char *src;
 	char *dest;
@@ -31,13 +33,12 @@ NES_FUNCTION(neslaext_base64_decode)
 	int ch;
 	int x;
 
-	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
-	src=cobj1->val->d.str;
+	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
 	robj=nes_setstr(N, &N->r, "", NULL, 0);
 	if (cobj1->val->size<1) return 0;
 	/* should actually be about 3/4 the size of cobj1->val->size */
 	if ((robj->val->d.str=n_alloc(N, cobj1->val->size+1, 0))==NULL) return 0;
-	robj->val->size=0;
+	src=cobj1->val->d.str;
 	dest=robj->val->d.str;
 	while ((ch=*src++)!='\0') {
 		if (nc_isspace(ch)) continue;
@@ -57,31 +58,23 @@ NES_FUNCTION(neslaext_base64_decode)
 		}
 		switch (state) {
 		case 0:
-			if (dest) {
-				dest[destidx]=x<<2;
-			}
+			dest[destidx]=x<<2;
 			state=1;
 			break;
 		case 1:
-			if (dest) {
-				dest[destidx]|=x>>4;
-				dest[destidx+1]=(x&0x0f)<<4;
-			}
+			dest[destidx]|=x>>4;
+			dest[destidx+1]=(x&0x0f)<<4;
 			destidx++;
 			state=2;
 			break;
 		case 2:
-			if (dest) {
-				dest[destidx]|=x>>2;
-				dest[destidx+1]=(x&0x03)<<6;
-			}
+			dest[destidx]|=x>>2;
+			dest[destidx+1]=(x&0x03)<<6;
 			destidx++;
 			state=3;
 			break;
 		case 3:
-			if (dest) {
-				dest[destidx]|=x;
-			}
+			dest[destidx]|=x;
 			destidx++;
 			state=0;
 			break;
@@ -90,18 +83,20 @@ NES_FUNCTION(neslaext_base64_decode)
 	dest[destidx]='\0';
 	robj->val->size=destidx;
 	return 0;
+#undef __FUNCTION__
 }
 
 NES_FUNCTION(neslaext_base64_encode)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
-	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
+#define __FUNCTION__ __FILE__ ":neslaext_base64_encode()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
+	obj_t *cobj2=nes_getobj(N, &N->l, "2");
 	obj_t *robj;
 	char *dest;
 	uchar a, b, c, d, *cp;
 	int dst, i, enclen, remlen, linelen, maxline=0;
 
-	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
 	cp=(uchar *)cobj1->val->d.str;
 	robj=nes_setstr(N, &N->r, "", NULL, 0);
 	if (cobj1->val->size<1) return 0;
@@ -158,4 +153,5 @@ NES_FUNCTION(neslaext_base64_encode)
 	dest[dst]='\0';
 	robj->val->size=dst;
 	return 0;
+#undef __FUNCTION__
 }

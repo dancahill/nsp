@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,10 +32,11 @@
  */
 NES_FUNCTION(neslaldap_search)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1); /* host   */
-	obj_t *cobj2=nes_getiobj(N, &N->l, 2); /* port   */
-	obj_t *cobj3=nes_getiobj(N, &N->l, 3); /* basedn */
-	obj_t *cobj4=nes_getiobj(N, &N->l, 4); /* search */
+#define __FUNCTION__ __FILE__ ":neslaldap_search()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1"); /* host   */
+	obj_t *cobj2=nes_getobj(N, &N->l, "2"); /* port   */
+	obj_t *cobj3=nes_getobj(N, &N->l, "3"); /* basedn */
+	obj_t *cobj4=nes_getobj(N, &N->l, "4"); /* search */
 	obj_t qobj, *robj, *tobj;
 	LDAP *ld;
 	LDAPMessage *e, *res;
@@ -49,29 +51,29 @@ NES_FUNCTION(neslaldap_search)
 	char tmpbuf[MAX_OBJNAMELEN];
 	char *p;
 
-	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
-	if (cobj2->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a number for arg2");
-	if (cobj3->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg3");
-	if (cobj4->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg4");
+	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
+	if (cobj2->val->type!=NT_NUMBER) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a number for arg2");
+	if (cobj3->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg3");
+	if (cobj4->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg4");
 	host=cobj1->val->d.str;
 	port=(int)cobj2->val->d.num;
 	basedn=cobj3->val->d.str;
 	search=cobj4->val->d.str;
 /*	ldap_create */
 	if ((ld=ldap_init(host, port))==NULL) {
-		n_warn(N, "neslaldap_search", "error connecting to %s", host);
+		n_warn(N, __FUNCTION__, "error connecting to %s", host);
 		nes_setnum(N, &N->r, "", -1);
 		return -1;
 	}
 /*	ldap_sasl_bind_s */
 	if (ldap_simple_bind_s(ld, NULL, NULL)!=LDAP_SUCCESS) {
-		n_warn(N, "neslaldap_search", "error binding to %s", host);
+		n_warn(N, __FUNCTION__, "error binding to %s", host);
 		nes_setnum(N, &N->r, "", -2);
 		return -1;
 	}
 /*	ldap_search_ext_s */
 	if (ldap_search_s(ld, basedn, LDAP_SCOPE_SUBTREE, search, NULL, 0, &res)!=LDAP_SUCCESS) {
-		n_warn(N, "neslaldap_search", "error searching %s", host);
+		n_warn(N, __FUNCTION__, "error searching %s", host);
 		nes_setnum(N, &N->r, "", -2);
 		return -1;
 	}
@@ -86,11 +88,11 @@ NES_FUNCTION(neslaldap_search)
 	numtuples=0;
 	for (e=ldap_first_entry(ld, res); e!=NULL; e=ldap_next_entry(ld, e)) {
 		memset(name, 0, sizeof(name));
-		sprintf(name, "%d", numtuples++);
+		n_ntoa(N, name, numtuples++, 10, 0);
 		tobj=nes_settable(NULL, robj, name);
 		tobj->val->attr&=~NST_AUTOSORT;
 		dn=ldap_get_dn(ld, e);
-		nes_setstr(NULL, tobj, "dn", dn, strlen(dn));
+		nes_setstr(NULL, tobj, "dn", dn, -1);
 		ldap_memfree(dn);
 		for (a=ldap_first_attribute(ld, e, &ber); a!=NULL; a=ldap_next_attribute(ld, e, ber)) {
 /*			ldap_get_values_len */
@@ -106,7 +108,7 @@ NES_FUNCTION(neslaldap_search)
 				tmpbuf[MAX_OBJNAMELEN-1]='\0';
 
 				for (i=0; vals[i]!=NULL; i++) {
-					nes_setstr(NULL, tobj, tmpbuf, vals[i], strlen(vals[i]));
+					nes_setstr(NULL, tobj, tmpbuf, vals[i], -1);
 				}
 /*				ldap_values_free_len */
 				ldap_value_free(vals);
@@ -120,6 +122,7 @@ NES_FUNCTION(neslaldap_search)
 	nes_linkval(N, &N->r, &qobj);
 	nes_unlinkval(N, &qobj);
 	return 0;
+#undef __FUNCTION__
 }
 
 int neslaldap_register_all(nes_state *N)

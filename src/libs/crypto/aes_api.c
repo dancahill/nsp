@@ -441,7 +441,7 @@ int cipherUpdateRounds(cipherInstance *cipher, keyInstance *key,
 #endif /* INTERMEDIATE_VALUE_KAT */
 
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -494,10 +494,10 @@ static int prep_key(keyInstance *key, int keylen, BYTE dir, char *keytext, int k
 NES_FUNCTION(neslacrypto_aes_encrypt)
 {
 	char *fname=nes_getstr(N, &N->l, "0");
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
-	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
-	obj_t *cobj3=nes_getiobj(N, &N->l, 3);
-	obj_t *cobj4=nes_getiobj(N, &N->l, 4);
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
+	obj_t *cobj2=nes_getobj(N, &N->l, "2");
+	obj_t *cobj3=nes_getobj(N, &N->l, "3");
+	obj_t *cobj4=nes_getobj(N, &N->l, "4");
 	obj_t *robj;
 	char *iv=NULL;
 	keyInstance keyInst;
@@ -551,10 +551,10 @@ NES_FUNCTION(neslacrypto_aes_encrypt)
 NES_FUNCTION(neslacrypto_aes_decrypt)
 {
 	char *fname=nes_getstr(N, &N->l, "0");
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
-	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
-	obj_t *cobj3=nes_getiobj(N, &N->l, 3);
-	obj_t *cobj4=nes_getiobj(N, &N->l, 4);
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
+	obj_t *cobj2=nes_getobj(N, &N->l, "2");
+	obj_t *cobj3=nes_getobj(N, &N->l, "3");
+	obj_t *cobj4=nes_getobj(N, &N->l, "4");
 	obj_t *robj;
 	char *iv=NULL;
 	keyInstance keyInst;
@@ -595,9 +595,20 @@ NES_FUNCTION(neslacrypto_aes_decrypt)
 	}
 	n=padDecrypt(&cipherInst, &keyInst, (uchar *)cobj1->val->d.str, cobj1->val->size, (uchar *)robj->val->d.str);
 	switch (n) {
-	case BAD_DATA        : n_error(N, NE_SYNTAX, fname, "Data contents are invalid, e.g., invalid padding");
-	case BAD_CIPHER_STATE: n_error(N, NE_SYNTAX, fname, "Cipher in wrong state (e.g., not initialized)");
-	default              : if (n<0) n_error(N, NE_SYNTAX, fname, "broken size returned %d", n);
+	case BAD_DATA        :
+		n_warn(N, fname, "Data contents are invalid, e.g., invalid padding");
+		nes_setnum(N, &N->r, "", -1);
+		return -1;
+	case BAD_CIPHER_STATE:
+		n_warn(N, fname, "Cipher in wrong state (e.g., not initialized)");
+		nes_setnum(N, &N->r, "", -1);
+		return -1;
+	default              :
+		if (n<0) {
+			n_warn(N, fname, "broken size returned %d", n);
+			nes_setnum(N, &N->r, "", -1);
+			return -1;
+		}
 	}
 //	printf("d[%d][%d] %d %d\n", cobj1->val->size, n, sizeof(keyInst), sizeof(cipherInst));
 	robj->val->size=n;

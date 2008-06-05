@@ -9,7 +9,7 @@ if (typeof(_SERVER)=='table') {
 
 if (typeof(io.gets)!='function') { print("you need io.gets()\n"); exit; }
 if (typeof(regex.replace)!='function') { print("you need regex.replace()\n"); exit; }
-if (include(_filepath+"/eliza-l.nes")!=0) { print("can't find language file eliza-l.nes\n"); exit; }
+if (include(_filepath+"/lis-l.nes")!=0) { print("can't find language file lis-l.nes\n"); exit; }
 
 function print_response(res) {
 	if (_ENV['TERM']!=null) {
@@ -38,7 +38,7 @@ function transpose(input) {
 	return output;
 }
 
-print("eliza\n\n");
+print("lis\n\n");
 i=math.rand(sizeof(greetings));
 print_response(greetings[i]);
 for (loop=0;;loop++) {

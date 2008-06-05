@@ -1,5 +1,6 @@
 /*
-    NullLogic Groupware - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -93,24 +94,24 @@ static void mod_nes_register_variables(nes_state *N)
 	cobj=nes_settable(N, &N->g, "_SERVER");
 	nes_setnum(N, cobj, "CONTENT_LENGTH",    sid->dat->in_ContentLength);
 	if (!strlen(sid->dat->in_ContentType)) {
-		nes_setstr(N, cobj, "CONTENT_TYPE", "application/x-www-form-urlencoded", strlen("application/x-www-form-urlencoded"));
+		nes_setstr(N, cobj, "CONTENT_TYPE", "application/x-www-form-urlencoded", -1);
 	} else {
-		nes_setstr(N, cobj, "CONTENT_TYPE", sid->dat->in_ContentType, strlen(sid->dat->in_ContentType));
+		nes_setstr(N, cobj, "CONTENT_TYPE", sid->dat->in_ContentType, -1);
 	}
-	nes_setstr(N, cobj, "GATEWAY_INTERFACE", "CGI/1.1", strlen("CGI/1.1"));
-	nes_setstr(N, cobj, "HTTP_COOKIE",       sid->dat->in_Cookie, strlen(sid->dat->in_Cookie));
-	nes_setstr(N, cobj, "HTTP_USER_AGENT",   sid->dat->in_UserAgent, strlen(sid->dat->in_UserAgent));
-	nes_setstr(N, cobj, "PATH_TRANSLATED",   "?", strlen("?"));
-	nes_setstr(N, cobj, "NESLA_SELF",        sid->dat->in_CGIScriptName, strlen(sid->dat->in_CGIScriptName));
-	nes_setstr(N, cobj, "QUERY_STRING",      sid->dat->in_QueryString, strlen(sid->dat->in_QueryString));
-	nes_setstr(N, cobj, "REMOTE_ADDR",       sid->dat->in_RemoteAddr, strlen(sid->dat->in_RemoteAddr));
+	nes_setstr(N, cobj, "GATEWAY_INTERFACE", "CGI/1.1", -1);
+	nes_setstr(N, cobj, "HTTP_COOKIE",       sid->dat->in_Cookie,         -1);
+	nes_setstr(N, cobj, "HTTP_USER_AGENT",   sid->dat->in_UserAgent,      -1);
+	nes_setstr(N, cobj, "PATH_TRANSLATED",   "?", -1);
+	nes_setstr(N, cobj, "NESLA_SELF",        sid->dat->in_CGIScriptName,  -1);
+	nes_setstr(N, cobj, "QUERY_STRING",      sid->dat->in_QueryString,    -1);
+	nes_setstr(N, cobj, "REMOTE_ADDR",       sid->dat->in_RemoteAddr,     -1);
 	nes_setnum(N, cobj, "REMOTE_PORT",       sid->dat->in_RemotePort);
-	nes_setstr(N, cobj, "REMOTE_USER",       sid->dat->user_username, strlen(sid->dat->user_username));
-	nes_setstr(N, cobj, "REQUEST_METHOD",    sid->dat->in_RequestMethod, strlen(sid->dat->in_RequestMethod));
-	nes_setstr(N, cobj, "REQUEST_URI",       sid->dat->in_RequestURI, strlen(sid->dat->in_RequestURI));
-	nes_setstr(N, cobj, "SCRIPT_NAME",       sid->dat->in_CGIScriptName, strlen(sid->dat->in_CGIScriptName));
-	nes_setstr(N, cobj, "SERVER_PROTOCOL",   "HTTP/1.1", strlen("HTTP/1.1"));
-	nes_setstr(N, cobj, "SERVER_SOFTWARE",   PACKAGE_NAME, strlen(PACKAGE_NAME));
+	nes_setstr(N, cobj, "REMOTE_USER",       sid->dat->user_username,     -1);
+	nes_setstr(N, cobj, "REQUEST_METHOD",    sid->dat->in_RequestMethod,  -1);
+	nes_setstr(N, cobj, "REQUEST_URI",       sid->dat->in_RequestURI,     -1);
+	nes_setstr(N, cobj, "SCRIPT_NAME",       sid->dat->in_CGIScriptName,  -1);
+	nes_setstr(N, cobj, "SERVER_PROTOCOL",   "HTTP/1.1",                  -1);
+	nes_setstr(N, cobj, "SERVER_SOFTWARE",   PACKAGE_NAME,                -1);
 	nes_settable(N, &N->g, "_GET");
 	nes_settable(N, &N->g, "_POST");
 	if (strlen(sid->dat->in_QueryString)>=0) {
@@ -137,11 +138,11 @@ static void mod_nes_register_variables(nes_state *N)
 				ptemp++;
 			}
 			decodeurl(sid->dat->smallbuf[1]);
-			nes_setstr(N, cobj, sid->dat->smallbuf[0], sid->dat->smallbuf[1], strlen(sid->dat->smallbuf[1]));
+			nes_setstr(N, cobj, sid->dat->smallbuf[0], sid->dat->smallbuf[1], -1);
 		}
 	}
 	if (strcmp(sid->dat->in_RequestMethod, "POST")==0) {
-		nes_setstr(N, &N->g, "RAWPOSTDATA", sid->PostData, strlen(sid->PostData));
+		nes_setstr(N, &N->g, "RAWPOSTDATA", sid->PostData, -1);
 		ptemp=sid->PostData;
 		if ((cobj=nes_getobj(N, &N->g, "_POST"))==NULL) {
 			/* good place for an error */
@@ -165,7 +166,7 @@ static void mod_nes_register_variables(nes_state *N)
 				ptemp++;
 			}
 			decodeurl(sid->dat->smallbuf[1]);
-			nes_setstr(N, cobj, sid->dat->smallbuf[0], sid->dat->smallbuf[1], strlen(sid->dat->smallbuf[1]));
+			nes_setstr(N, cobj, sid->dat->smallbuf[0], sid->dat->smallbuf[1], -1);
 		}
 	}
 	return;
@@ -197,8 +198,8 @@ static void preppath(nes_state *N, char *name)
 	for (j=strlen(buf)-1;j>0;j--) {
 		if (buf[j]=='/') { buf[j]='\0'; p=buf+j+1; break; }
 	}
-	nes_setstr(N, &N->g, "_filename", p, strlen(p));
-	nes_setstr(N, &N->g, "_filepath", buf, strlen(buf));
+	nes_setstr(N, &N->g, "_filename", p, -1);
+	nes_setstr(N, &N->g, "_filepath", buf, -1);
 	return;
 }
 

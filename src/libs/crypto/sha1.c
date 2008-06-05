@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -307,7 +308,8 @@ static void sha1_final(SHA1_CTX* context, uint8 digest[20])
 #endif
 NES_FUNCTION(neslacrypto_sha1_file)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+#define __FUNCTION__ __FILE__ ":neslacrypto_sha1_file()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
 	char *hex="0123456789abcdef";
 	unsigned char buffer[1024];
 	unsigned char md[SHA1_DIGEST_LENGTH];
@@ -316,7 +318,7 @@ NES_FUNCTION(neslacrypto_sha1_file)
 	int fd;
 	int i;
 
-	if ((cobj1->val->type!=NT_STRING)||(cobj1->val->size<1)) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	if (cobj1->val->type!=NT_STRING||cobj1->val->size<1) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
 	if ((fd=open(cobj1->val->d.str, O_RDONLY|O_BINARY))==-1) {
 		nes_setnum(N, &N->r, "", -1);
 		return -1;
@@ -331,25 +333,28 @@ NES_FUNCTION(neslacrypto_sha1_file)
 	close(fd);
 	memset(token, 0, sizeof(token));
 	for (i=0;i<SHA1_DIGEST_LENGTH;i++) { token[i*2]=hex[md[i]>>4]; token[i*2+1]=hex[md[i]&15]; }
-	nes_setstr(N, &N->r, "", token, strlen(token));
+	nes_setstr(N, &N->r, "", token, -1);
 	return 0;
+#undef __FUNCTION__
 }
 
 NES_FUNCTION(neslacrypto_sha1_string)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+#define __FUNCTION__ __FILE__ ":neslacrypto_sha1_string()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
 	char *hex="0123456789abcdef";
 	unsigned char md[SHA1_DIGEST_LENGTH];
 	char token[64]; /* should only need 32+'\0' */
 	SHA1_CTX c;
 	int i;
 
-	if ((cobj1->val->type!=NT_STRING)||(cobj1->val->size<1)) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	if (cobj1->val->type!=NT_STRING||cobj1->val->size<1) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
 	sha1_init(&c);
 	sha1_update(&c, (uchar *)cobj1->val->d.str, cobj1->val->size);
 	sha1_final(&c, &(md[0]));
 	memset(token, 0, sizeof(token));
 	for (i=0;i<SHA1_DIGEST_LENGTH;i++) { token[i*2]=hex[md[i]>>4]; token[i*2+1]=hex[md[i]&15]; }
-	nes_setstr(N, &N->r, "", token, strlen(token));
+	nes_setstr(N, &N->r, "", token, -1);
 	return 0;
+#undef __FUNCTION__
 }

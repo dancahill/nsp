@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -48,6 +49,7 @@ extern char **environ;
 #endif
 static int flush(nes_state *N)
 {
+	if (N==NULL||N->outbuflen==0) return 0;
 	N->outbuf[N->outbuflen]='\0';
 	write(STDOUT_FILENO, N->outbuf, N->outbuflen);
 	N->outbuflen=0;
@@ -123,14 +125,14 @@ static void preppath(nes_state *N, char *name)
 	for (j=strlen(buf)-1;j>0;j--) {
 		if (buf[j]=='/') { buf[j]='\0'; p=buf+j+1; break; }
 	}
-	nes_setstr(N, &N->g, "_filename", p, strlen(p));
-	nes_setstr(N, &N->g, "_filepath", buf, strlen(buf));
+	nes_setstr(N, &N->g, "_filename", p, -1);
+	nes_setstr(N, &N->g, "_filepath", buf, -1);
 	return;
 }
 
 void do_banner() {
 	printf("\r\nNullLogic Embedded Scripting Language Version " NESLA_VERSION);
-	printf("\r\nCopyright (C) 2007 Dan Cahill\r\n\r\n");
+	printf("\r\nCopyright (C) 2007-2008 Dan Cahill\r\n\r\n");
 	return;
 }
 
@@ -172,13 +174,13 @@ int main(int argc, char *argv[])
 		if (!p) continue;
 		*p='\0';
 		p=strchr(environ[i], '=')+1;
-		nes_setstr(N, tobj, tmpbuf, p, strlen(p));
+		nes_setstr(N, tobj, tmpbuf, p, -1);
 	}
 	/* add args */
 	tobj=nes_settable(N, &N->g, "_ARGS");
 	for (i=0;i<argc;i++) {
 		n_ntoa(N, tmpbuf, i, 10, 0);
-		nes_setstr(N, tobj, tmpbuf, argv[i], strlen(argv[i]));
+		nes_setstr(N, tobj, tmpbuf, argv[i], -1);
 	}
 	tobj=nes_settable(N, &N->g, "io");
 	nes_setcfunc(N, tobj, "gets", (NES_CFUNC)neslib_io_gets);

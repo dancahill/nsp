@@ -23,7 +23,7 @@ dirs:
 
 # rules for libs
 
-static_libs: _libneslacdb _libneslacrypto _libnesladl _libneslaext _libneslaldap _libneslamath _libneslamysql _libneslaodbc _libneslapgsql _libneslaregex _libneslasqlite3 _libneslatcp _libneslawinapi _libneslazip
+static_libs: _libneslacdb _libneslacrypto _libnesladl _libneslaext _libneslaldap _libneslamath _libneslamysql _libneslaodbc _libneslapipe _libneslapgsql _libneslaregex _libneslasqlite3 _libneslassh _libneslatcp _libneslawinapi _libneslazip
 
 _libnesla: dirs
 	@cd src\libnesla
@@ -70,6 +70,11 @@ _libneslaodbc:
 	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
 	@cd ..\..\..
 
+_libneslapipe:
+	@cd src\libs\pipe
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@cd ..\..\..
+
 _libneslapgsql:
 	@cd src\libs\pgsql
 	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
@@ -82,6 +87,11 @@ _libneslaregex:
 
 _libneslasqlite3:
 	@cd src\libs\sqlite3
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@cd ..\..\..
+
+_libneslassh:
+	@cd src\libs\ssh
 	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
 	@cd ..\..\..
 
@@ -122,6 +132,9 @@ shared_libs:
 	@cd src\libs\odbc
 	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
 	@cd ..\..\..
+	@cd src\libs\pipe
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@cd ..\..\..
 	@cd src\libs\pgsql
 	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
 	@cd ..\..\..
@@ -129,6 +142,9 @@ shared_libs:
 	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
 	@cd ..\..\..
 	@cd src\libs\sqlite3
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@cd ..\..\..
+	@cd src\libs\ssh
 	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
 	@cd ..\..\..
 	@cd src\libs\tcp
@@ -206,6 +222,9 @@ clean: lite
 	@cd src\libs\odbc
 	@..\..\..\$(NESLITE) Makefile.nes clean
 	@cd ..\..\..
+	@cd src\libs\pipe
+	@..\..\..\$(NESLITE) Makefile.nes clean
+	@cd ..\..\..
 	@cd src\libs\pgsql
 	@..\..\..\$(NESLITE) Makefile.nes clean
 	@cd ..\..\..
@@ -213,6 +232,9 @@ clean: lite
 	@..\..\..\$(NESLITE) Makefile.nes clean
 	@cd ..\..\..
 	@cd src\libs\sqlite3
+	@..\..\..\$(NESLITE) Makefile.nes clean
+	@cd ..\..\..
+	@cd src\libs\ssh
 	@..\..\..\$(NESLITE) Makefile.nes clean
 	@cd ..\..\..
 	@cd src\libs\tcp

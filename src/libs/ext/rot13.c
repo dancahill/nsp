@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,11 +21,12 @@
 
 NES_FUNCTION(neslaext_rot13)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+#define __FUNCTION__ __FILE__ ":neslaext_rot13()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
 	obj_t *robj;
 	char *p;
 
-	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
 	robj=nes_setstr(N, &N->r, "", cobj1->val->d.str, cobj1->val->size);
 	if (robj->val->d.str==NULL) return 0;
 	p=robj->val->d.str;
@@ -37,4 +39,5 @@ NES_FUNCTION(neslaext_rot13)
 		p++;
 	}
 	return 0;
+#undef __FUNCTION__
 }

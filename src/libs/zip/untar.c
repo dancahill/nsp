@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -161,6 +162,7 @@ static obj_t *subdir(nes_state *N, obj_t *tobj, char *dirname)
 
 static int untar(nes_state *N, char *TARfile, int artype, int action, obj_t *tobj)
 {
+#define __FUNCTION__ __FILE__ ":untar()"
 	union  tar_buffer buffer;
 	int    len;
 	int    getheader = 1;
@@ -194,7 +196,7 @@ static int untar(nes_state *N, char *TARfile, int artype, int action, obj_t *tob
 #endif
 	} else {
 		nes_unlinkval(N, tobj);
-		n_error(N, NE_SYNTAX, "untar", "unknown compression type");
+		n_error(N, NE_SYNTAX, __FUNCTION__, "unknown compression type");
 	}
 	while (1) {
 		len=0;
@@ -203,14 +205,14 @@ static int untar(nes_state *N, char *TARfile, int artype, int action, obj_t *tob
 			len*=BLOCKSIZE;
 			if (len<BLOCKSIZE) {
 				nes_unlinkval(N, tobj);
-				n_error(N, NE_SYNTAX, "untar", "fread error");
+				n_error(N, NE_SYNTAX, __FUNCTION__, "fread error");
 			}
 #ifdef HAVE_ZLIB
 		} else if (artype==AR_GZIP) {
 			len=gzread(fg, &buffer, BLOCKSIZE);
 			if (len<0) {
 				nes_unlinkval(N, tobj);
-				n_error(N, NE_SYNTAX, "untar", gzerror(fg, &err));
+				n_error(N, NE_SYNTAX, __FUNCTION__, gzerror(fg, &err));
 			}
 #endif
 		}
@@ -249,7 +251,7 @@ static int untar(nes_state *N, char *TARfile, int artype, int action, obj_t *tob
 				 */
 				if (strncmp(fname,buffer.header.name,SHORTNAMESIZE-1) != 0) {
 					nes_unlinkval(N, tobj);
-					n_error(N, NE_SYNTAX, "untar", "bad long name");
+					n_error(N, NE_SYNTAX, __FUNCTION__, "bad long name");
 				}
 				getheader = 1;
 			}
@@ -292,7 +294,7 @@ static int untar(nes_state *N, char *TARfile, int artype, int action, obj_t *tob
 							cobj->val->d.str=n_alloc(N, cobj->val->size+1, 0);
 							if (cobj->val->d.str==NULL) {
 								nes_unlinkval(N, tobj);
-								n_error(N, NE_SYNTAX, "untar", "malloc() error while creating tar cache");
+								n_error(N, NE_SYNTAX, __FUNCTION__, "malloc() error while creating tar cache");
 							}
 							cobj->val->d.str[0]=0;
 							cobj->val->d.str[cobj->val->size]=0;
@@ -317,7 +319,7 @@ static int untar(nes_state *N, char *TARfile, int artype, int action, obj_t *tob
 						}
 						if (outfile==NULL) {
 							nes_unlinkval(N, tobj);
-							n_error(N, NE_SYNTAX, "untar", "error create file");
+							n_error(N, NE_SYNTAX, __FUNCTION__, "error create file");
 						}
 					} else {
 						outfile = NULL;
@@ -337,7 +339,7 @@ static int untar(nes_state *N, char *TARfile, int artype, int action, obj_t *tob
 					outfile = NULL;
 					remove(fname);
 					nes_unlinkval(N, tobj);
-					n_error(N, NE_SYNTAX, "untar", "error writing file");
+					n_error(N, NE_SYNTAX, __FUNCTION__, "error writing file");
 				}
 			} else if (outptr != NULL) {
 				memcpy(outptr, &buffer, bytes);
@@ -358,7 +360,7 @@ static int untar(nes_state *N, char *TARfile, int artype, int action, obj_t *tob
 		 */
 		if (action == TAR_INVALID) {
 			nes_unlinkval(N, tobj);
-			n_error(N, NE_SYNTAX, "untar", "broken tar archive");
+			n_error(N, NE_SYNTAX, __FUNCTION__, "broken tar archive");
 			break;
 		}
 	}
@@ -370,28 +372,30 @@ static int untar(nes_state *N, char *TARfile, int artype, int action, obj_t *tob
 	if (artype==AR_RAW) {
 		if (fclose(f)!=0) {
 			nes_unlinkval(N, tobj);
-			n_error(N, NE_SYNTAX, "untar", "failed fclose");
+			n_error(N, NE_SYNTAX, __FUNCTION__, "failed fclose");
 		}
 #ifdef HAVE_ZLIB
 	} else if (artype==AR_GZIP) {
 		if (gzclose(fg)!=Z_OK) {
 			nes_unlinkval(N, tobj);
-			n_error(N, NE_SYNTAX, "untar", "failed gzclose");
+			n_error(N, NE_SYNTAX, __FUNCTION__, "failed gzclose");
 		}
 #endif
 	}
 
 	return 0;
+#undef __FUNCTION__
 }
 
 NES_FUNCTION(neslazip_untar_list)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+#define __FUNCTION__ __FILE__ ":neslazip_untar_list()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
 	obj_t tobj;
 	char *p;
 
-	if ((cobj1->val->type!=NT_STRING)||(cobj1->val->d.str==NULL)) {
-		n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	if (cobj1->val->type!=NT_STRING||cobj1->val->d.str==NULL) {
+		n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
 		return -1;
 	}
 	if (access(cobj1->val->d.str, F_OK)!=0) {
@@ -415,16 +419,18 @@ NES_FUNCTION(neslazip_untar_list)
 	nes_linkval(N, &N->r, &tobj);
 	nes_unlinkval(N, &tobj);
 	return 0;
+#undef __FUNCTION__
 }
 
 NES_FUNCTION(neslazip_untar_cache)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
+#define __FUNCTION__ __FILE__ ":neslazip_untar_cache()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
 	obj_t tobj;
 	char *p;
 
-	if ((cobj1->val->type!=NT_STRING)||(cobj1->val->d.str==NULL)) {
-		n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
+	if (cobj1->val->type!=NT_STRING||cobj1->val->d.str==NULL) {
+		n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
 		return -1;
 	}
 	if (access(cobj1->val->d.str, F_OK)!=0) {
@@ -448,6 +454,7 @@ NES_FUNCTION(neslazip_untar_cache)
 	nes_linkval(N, &N->r, &tobj);
 	nes_unlinkval(N, &tobj);
 	return 0;
+#undef __FUNCTION__
 }
 
 int neslazip_register_all(nes_state *N)

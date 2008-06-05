@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,7 +16,10 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "nesla/nesla.h"
+#include "nesla/libnesla.h"
+#ifdef HAVE_CDB
+#include "nesla/libcdb.h"
+#endif
 #ifdef HAVE_CRYPTO
 #include "nesla/libcrypt.h"
 #endif
@@ -35,8 +39,20 @@
 #ifdef HAVE_ODBC
 #include "nesla/libodbc.h"
 #endif
+#ifdef HAVE_PIPE
+#include "nesla/libpipe.h"
+#endif
+#ifdef HAVE_PGSQL
+#include "nesla/libpgsql.h"
+#endif
+#ifdef HAVE_REGEX
+#include "nesla/libregex.h"
+#endif
 #ifdef HAVE_SQLITE3
 #include "nesla/libsqlite3.h"
+#endif
+#ifdef HAVE_SSH2
+#include "nesla/libssh.h"
 #endif
 #ifndef __TURBOC__
 #include "nesla/libtcp.h"
@@ -63,11 +79,14 @@ nes_state *N;
 
 extern char **environ;
 
+#define striprn(s) { int n=strlen(s)-1; while (n>-1&&(s[n]=='\r'||s[n]=='\n')) s[n--]='\0'; }
+
 #ifndef STDOUT_FILENO
 #define STDOUT_FILENO 1
 #endif
 static int flush(nes_state *N)
 {
+	if (N==NULL||N->outbuflen==0) return 0;
 	N->outbuf[N->outbuflen]='\0';
 	write(STDOUT_FILENO, N->outbuf, N->outbuflen);
 	N->outbuflen=0;
@@ -80,8 +99,10 @@ static void sig_trap(int sig)
 	switch (sig) {
 	case 11:
 		printf("Segmentation Violation\r\n");
-		if ((N)&&(N->readptr)) printf("[%.40s]\r\n", N->readptr);
+		if ((N)&&(N->readptr)) printf("[%s][%.40s]\r\n", N->tracefn, N->readptr);
 		exit(-1);
+	case 13: /* SIGPIPE */
+		return;
 	default:
 		printf("Unexpected signal [%d] received\r\n", sig);
 	}
@@ -104,6 +125,17 @@ static void setsigs(void)
 	return;
 }
 
+static NES_FUNCTION(neslib_io_gets)
+{
+	char buf[1024];
+
+	flush(N);
+	fgets(buf, sizeof(buf)-1, stdin);
+	striprn(buf);
+	nes_setstr(N, &N->r, "", buf, -1);
+	return 0;
+}
+
 static void preppath(nes_state *N, char *name)
 {
 	char buf[1024];
@@ -117,12 +149,12 @@ static void preppath(nes_state *N, char *name)
 	} else if (name[0]=='.') {
 		/* looks relative... */
 		getcwd(buf, sizeof(buf)-strlen(name)-2);
-		strcat(buf, "/");
-		strcat(buf, name);
+		strncat(buf, "/", sizeof(buf)-strlen(buf));
+		strncat(buf, name, sizeof(buf)-strlen(buf));
 	} else {
 		getcwd(buf, sizeof(buf)-strlen(name)-2);
-		strcat(buf, "/");
-		strcat(buf, name);
+		strncat(buf, "/", sizeof(buf)-strlen(buf));
+		strncat(buf, name, sizeof(buf)-strlen(buf));
 	}
 	for (j=0;j<strlen(buf);j++) {
 		if (buf[j]=='\\') buf[j]='/';
@@ -130,8 +162,21 @@ static void preppath(nes_state *N, char *name)
 	for (j=strlen(buf)-1;j>0;j--) {
 		if (buf[j]=='/') { buf[j]='\0'; p=buf+j+1; break; }
 	}
-	nes_setstr(N, &N->g, "_filename", p, strlen(p));
-	nes_setstr(N, &N->g, "_filepath", buf, strlen(buf));
+	nes_setstr(N, &N->g, "_filename", p, -1);
+	nes_setstr(N, &N->g, "_filepath", buf, -1);
+	return;
+}
+
+void do_banner() {
+	printf("\r\nNullLogic Embedded Scripting Language Version " NESLA_VERSION);
+	printf("\r\nCopyright (C) 2007-2008 Dan Cahill\r\n\r\n");
+	return;
+}
+
+void do_help(char *arg0) {
+	printf("Usage : %s [-e] [-f] file.nes\r\n", arg0);
+	printf("  -e  execute string\r\n");
+	printf("  -f  execute file\r\n\r\n");
 	return;
 }
 
@@ -146,7 +191,7 @@ int main(int argc, char *argv[])
 /*
 	if (argc<2) {
 		printf("\r\nNullLogic Embedded Scripting Language Version " NESLA_VERSION);
-		printf("\r\nCopyright (C) 2007 Dan Cahill\r\n\r\n");
+		printf("\r\nCopyright (C) 2007-2008 Dan Cahill\r\n\r\n");
 		printf("\tno script was specified.  go away.\r\n\r\n");
 		return -1;
 	}
@@ -154,6 +199,9 @@ int main(int argc, char *argv[])
 	if ((N=nes_newstate())==NULL) return -1;
 	setsigs();
 	N->debug=0;
+#ifdef HAVE_CDB
+	neslacdb_register_all(N);
+#endif
 #ifdef HAVE_CRYPTO
 	neslacrypto_register_all(N);
 #endif
@@ -173,8 +221,20 @@ int main(int argc, char *argv[])
 #ifdef HAVE_ODBC
 	neslaodbc_register_all(N);
 #endif
+#ifdef HAVE_PIPE
+	neslapipe_register_all(N);
+#endif
+#ifdef HAVE_PGSQL
+	neslapgsql_register_all(N);
+#endif
+#ifdef HAVE_REGEX
+	neslaregex_register_all(N);
+#endif
 #ifdef HAVE_SQLITE3
 	neslasqlite3_register_all(N);
+#endif
+#ifdef HAVE_SSH2
+	neslassh_register_all(N);
 #endif
 #ifndef __TURBOC__
 #ifndef TINYCC
@@ -192,26 +252,18 @@ int main(int argc, char *argv[])
 		if (!p) continue;
 		*p='\0';
 		p=strchr(environ[i], '=')+1;
-		nes_setstr(N, tobj, tmpbuf, p, strlen(p));
+		nes_setstr(N, tobj, tmpbuf, p, -1);
 	}
 	/* add args */
 	tobj=nes_settable(N, &N->g, "_ARGS");
 	for (i=0;i<argc;i++) {
-		sprintf(tmpbuf, "%d", i);
-		nes_setstr(N, tobj, tmpbuf, argv[i], strlen(argv[i]));
+		n_ntoa(N, tmpbuf, i, 10, 0);
+		nes_setstr(N, tobj, tmpbuf, argv[i], -1);
 	}
+	tobj=nes_settable(N, &N->g, "io");
+	nes_setcfunc(N, tobj, "gets", (NES_CFUNC)neslib_io_gets);
 
 	/* BEGIN CRASH TESTS */
-	tobj=nes_settable(N, &N->g, "_TEST1");
-	cobj=nes_evalf(N, "{ name='[SHOW TABLES] (SQLITE)', query='SELECT tbl_name FROM sqlite_master WHERE type = \\'table\\'' }");
-	nes_linkval(N, tobj, cobj);
-	if (N->err) { printf("errno=%d :: \r\n%s\r\n", N->err, N->errbuf); N->err=0; }
-	cobj=nes_getobj(N, tobj, "query");
-	tobj=nes_settable(N, &N->g, "_TEST2");
-	cobj=nes_evalf(N, "{ a=' }");
-	nes_linkval(N, tobj, cobj);
-	if (N->err) { printf("errno=%d :: \r\n%s\r\n", N->err, N->errbuf); N->err=0; }
-	nes_exec(N, "print(_TEST1['query'],\"\\n\");");
 	nes_exec(N, " asdf laiur oiqwur9yh ishdzfu z98xfnszd9 m9sdf7 nasdfyq90E RUIZJZXCH GFKJSAEHF WEYR 8768&SZTdg f98as 8fbsa");
 	if (N->err) { printf("errno=%d :: \r\n%s\r\n", N->err, N->errbuf); N->err=0; }
 	/*

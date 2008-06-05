@@ -75,7 +75,7 @@ BEGIN
             VALUE "ProductVersion",   "0.9.1\0"
             VALUE "InternalName",     "NESLA.EXE\0"
             VALUE "OriginalFilename", "NESLA.EXE\0"
-            VALUE "LegalCopyright",   "Copyright © 2007\0"
+            VALUE "LegalCopyright",   "Copyright © 2007-2008\0"
         END
     END
     BLOCK "VarFileInfo"

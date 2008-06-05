@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -64,8 +65,8 @@ static int winsystem(WORD show_hide, const char *format, ...)
 
 NES_FUNCTION(neslawinapi_createprocess)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
-	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
+	obj_t *cobj2=nes_getobj(N, &N->l, "2");
 	WORD show_hide=SW_SHOW;
 
 	if (cobj2!=NULL&&cobj2->val!=NULL) {
@@ -82,7 +83,7 @@ NES_FUNCTION(neslawinapi_createprocess)
 
 NES_FUNCTION(neslawinapi_messagebox)
 {
-	obj_t *cobj3=nes_getiobj(N, &N->l, 3);
+	obj_t *cobj3=nes_getobj(N, &N->l, "3");
 	UINT uType=0;
 	int rc;
 
@@ -94,8 +95,8 @@ NES_FUNCTION(neslawinapi_messagebox)
 
 NES_FUNCTION(neslawinapi_playsound)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
-	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
+	obj_t *cobj2=nes_getobj(N, &N->l, "2");
 	int opt=SND_ASYNC|SND_NODEFAULT|SND_FILENAME;
 	int rc=0;
 

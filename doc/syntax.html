@@ -43,7 +43,7 @@ function showpage(c,p) {
 </TR>
 <TR>
 	<TD HEIGHT="100%" WIDTH="200" BGCOLOR="#003399" VALIGN=TOP>
-		<HR NOSHADE SIZE="0.5" WIDTH="160">
+		<HR NOSHADE SIZE="0.5" WIDTH="170">
 		<H2 CLASS="lefttitle"><FONT COLOR="#399CDE">&nbsp;Menu</FONT></H2>
 		<P CLASS="smenu">
 		<A CLASS="smenu" HREF="#c1p0"               onClick="showpage('1', '0');               return false;"><NOBR>Introduction</NOBR></A><BR>
@@ -68,6 +68,8 @@ function showpage(c,p) {
 </DIV>
 		<A CLASS="smenu" HREF="#c3p0"               onClick="showpage('3', '0');               return false;"><NOBR>Functions - file</NOBR></A><BR>
 <DIV ID=c3m STYLE='display: block'>
+		<A CLASS="smenu" HREF="#c3p_file_append"    onClick="showpage('3', '_file_append');    return false;">&nbsp;&nbsp;file.append();</A><BR>
+		<A CLASS="smenu" HREF="#c3p_file_mkdir"     onClick="showpage('3', '_file_mkdir');     return false;">&nbsp;&nbsp;file.mkdir();</A><BR>
 		<A CLASS="smenu" HREF="#c3p_file_read"      onClick="showpage('3', '_file_read');      return false;">&nbsp;&nbsp;file.read();</A><BR>
 		<A CLASS="smenu" HREF="#c3p_file_stat"      onClick="showpage('3', '_file_stat');      return false;">&nbsp;&nbsp;file.stat();</A><BR>
 		<A CLASS="smenu" HREF="#c3p_file_unlink"    onClick="showpage('3', '_file_unlink');    return false;">&nbsp;&nbsp;file.unlink();</A><BR>
@@ -127,19 +129,35 @@ function showpage(c,p) {
 		<A CLASS="smenu" HREF="#c8p_libext_sort_byname"   onClick="showpage('8', '_libext_sort_byname');   return false;">&nbsp;&nbsp;sort.byname();</A><BR>
 		<A CLASS="smenu" HREF="#c8p_libext_xml_read"      onClick="showpage('8', '_libext_xml_read');      return false;">&nbsp;&nbsp;xml.read();</A><BR>
 </DIV>
-		<A CLASS="smenu" HREF="#c9p0"               onClick="showpage('9', '0');               return false;"><NOBR>libtcp</NOBR></A><BR>
+		<A CLASS="smenu" HREF="#c9p0"               onClick="showpage('9', '0');               return false;"><NOBR>libssh</NOBR></A><BR>
 <DIV ID=c9m STYLE='display: block'>
-		<A CLASS="smenu" HREF="#c9p_libtcp_http_get"   onClick="showpage('9', '_libtcp_http_get');   return false;">&nbsp;&nbsp;http.get();</A><BR>
-		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_accept" onClick="showpage('9', '_libtcp_tcp_accept'); return false;">&nbsp;&nbsp;tcp.accept();</A><BR>
-		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_bind"   onClick="showpage('9', '_libtcp_tcp_bind');   return false;">&nbsp;&nbsp;tcp.bind();</A><BR>
-		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_close"  onClick="showpage('9', '_libtcp_tcp_close');  return false;">&nbsp;&nbsp;tcp.close();</A><BR>
-		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_gets"   onClick="showpage('9', '_libtcp_tcp_gets');   return false;">&nbsp;&nbsp;tcp.gets();</A><BR>
-		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_open"   onClick="showpage('9', '_libtcp_tcp_open');   return false;">&nbsp;&nbsp;tcp.open();</A><BR>
-		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_read"   onClick="showpage('9', '_libtcp_tcp_read');   return false;">&nbsp;&nbsp;tcp.read();</A><BR>
-		<A CLASS="smenu" HREF="#c9p_libtcp_tcp_write"  onClick="showpage('9', '_libtcp_tcp_write');  return false;">&nbsp;&nbsp;tcp.write();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_ssh_open"    onClick="showpage('9', '_libssh_ssh_open');    return false;">&nbsp;&nbsp;ssh.open();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_ssh_close"   onClick="showpage('9', '_libssh_ssh_close');   return false;">&nbsp;&nbsp;ssh.close();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_ssh_hostkey" onClick="showpage('9', '_libssh_ssh_hostkey'); return false;">&nbsp;&nbsp;ssh.hostkey();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_ssh_auth"    onClick="showpage('9', '_libssh_ssh_auth');    return false;">&nbsp;&nbsp;ssh.auth();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_ssh_cmd"     onClick="showpage('9', '_libssh_ssh_cmd');     return false;">&nbsp;&nbsp;ssh.cmd();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_sftp_get"    onClick="showpage('9', '_libssh_sftp_get');    return false;">&nbsp;&nbsp;ssh.sftp_get();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_sftp_ls"     onClick="showpage('9', '_libssh_sftp_ls');     return false;">&nbsp;&nbsp;ssh.sftp_ls();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_sftp_mkdir"  onClick="showpage('9', '_libssh_sftp_mkdir');  return false;">&nbsp;&nbsp;ssh.sftp_mkdir();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_sftp_put"    onClick="showpage('9', '_libssh_sftp_put');    return false;">&nbsp;&nbsp;ssh.sftp_put();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_sftp_rename" onClick="showpage('9', '_libssh_sftp_rename'); return false;">&nbsp;&nbsp;ssh.sftp_rename();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_sftp_rmdir"  onClick="showpage('9', '_libssh_sftp_rmdir');  return false;">&nbsp;&nbsp;ssh.sftp_rmdir();</A><BR>
+		<A CLASS="smenu" HREF="#c9p_libssh_sftp_unlink" onClick="showpage('9', '_libssh_sftp_unlink'); return false;">&nbsp;&nbsp;ssh.sftp_unlink();</A><BR>
 </DIV>
-		<A CLASS="smenu" HREF="#c10p0"              onClick="showpage('10', '0');              return false;"><NOBR>C API</NOBR></A><BR>
+		<A CLASS="smenu" HREF="#c10p0"               onClick="showpage('10', '0');               return false;"><NOBR>libtcp</NOBR></A><BR>
 <DIV ID=c10m STYLE='display: block'>
+		<A CLASS="smenu" HREF="#c10p_libtcp_http_get"   onClick="showpage('10', '_libtcp_http_get');   return false;">&nbsp;&nbsp;http.get();</A><BR>
+		<A CLASS="smenu" HREF="#c10p_libtcp_tcp_accept" onClick="showpage('10', '_libtcp_tcp_accept'); return false;">&nbsp;&nbsp;tcp.accept();</A><BR>
+		<A CLASS="smenu" HREF="#c10p_libtcp_tcp_bind"   onClick="showpage('10', '_libtcp_tcp_bind');   return false;">&nbsp;&nbsp;tcp.bind();</A><BR>
+		<A CLASS="smenu" HREF="#c10p_libtcp_tcp_close"  onClick="showpage('10', '_libtcp_tcp_close');  return false;">&nbsp;&nbsp;tcp.close();</A><BR>
+		<A CLASS="smenu" HREF="#c10p_libtcp_tcp_gets"   onClick="showpage('10', '_libtcp_tcp_gets');   return false;">&nbsp;&nbsp;tcp.gets();</A><BR>
+		<A CLASS="smenu" HREF="#c10p_libtcp_tcp_info"   onClick="showpage('10', '_libtcp_tcp_info');   return false;">&nbsp;&nbsp;tcp.info();</A><BR>
+		<A CLASS="smenu" HREF="#c10p_libtcp_tcp_open"   onClick="showpage('10', '_libtcp_tcp_open');   return false;">&nbsp;&nbsp;tcp.open();</A><BR>
+		<A CLASS="smenu" HREF="#c10p_libtcp_tcp_read"   onClick="showpage('10', '_libtcp_tcp_read');   return false;">&nbsp;&nbsp;tcp.read();</A><BR>
+		<A CLASS="smenu" HREF="#c10p_libtcp_tcp_write"  onClick="showpage('10', '_libtcp_tcp_write');  return false;">&nbsp;&nbsp;tcp.write();</A><BR>
+</DIV>
+		<A CLASS="smenu" HREF="#c11p0"              onClick="showpage('11', '0');              return false;"><NOBR>C API</NOBR></A><BR>
+<DIV ID=c11m STYLE='display: block'>
 </DIV>
 		</p>
 		<HR NOSHADE SIZE="0.5" WIDTH="160">
@@ -667,6 +685,14 @@ This function is binary safe.
 </BLOCKQUOTE><P>
 <!-- CONTENTS_END -->
 </DIV><DIV ID=c3p0 STYLE='display: block'><h1>3 - file.*()</h1>
+</DIV><DIV ID=c3p_file_append    STYLE='display: block'><hr><h3><a name="nesla_file_append"><code>(string) file.append(string filename[, object]);</code></a></h3>
+<p>
+Writes the entire object to the end of an existing file as a string and returns the result code.
+This function is binary safe.
+</p>
+</DIV><DIV ID=c3p_file_mkdir     STYLE='display: block'><hr><h3><a name="nesla_file_mkdir"><code>(string) file.mkdir(string dirname[, number mode]);</code></a></h3>
+<p>
+</p>
 </DIV><DIV ID=c3p_file_read      STYLE='display: block'><hr><h3><a name="nesla_file_read"><code>(string) file.read(string filename);</code></a></h3>
 <p>
 Reads the entire file into a string and returns that string.
@@ -1000,7 +1026,7 @@ system date.
 <CODE>
 	<B>print</B>(<B>sqldate</B>());
 </CODE></TD></TR></TABLE>
-<P>The above example will output something similar to: "<B>2007-07-01</B>"</P>
+<P>The above example will output something similar to: "<B>2008-01-01</B>"</P>
 <P>
 <TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
 <CODE>
@@ -1097,35 +1123,198 @@ Read the supplied XML text and return a digested table.
 This is _not_ a pretty function.
 </p>
 
-</DIV><DIV ID=c9p0 STYLE='display: block'><h1>9 - tcp.*()</h1>
-</DIV><DIV ID=c9p_libtcp_http_get      STYLE='display: block'><hr><h3><a name="nesla_http_get"><code>(table) http.get(number ssl, string host, number port, string uri);</code></a></h3>
+</DIV><DIV ID=c9p0 STYLE='display: block'><h1>9 - ssh.*()</h1>
+</DIV><DIV ID=c9p_libssh_ssh_open       STYLE='display: block'><!-- CONTENTS_START -->
+<a name="nesla_ssh_open"></a>
+<H2>ssh.open<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Open an SSH connection to a given host/port.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>ssh-conn</I> <B>=</B> <B>ssh.open(</B><I>hostname</I>[, <I>port</I>]<B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>hostname</I> </TD><TD>String containing the name of the server to connect to.</TD></TR>
+<TR><TD><I>port</I> </TD><TD>Number containing the server port to connect to (default is 22).</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns an ssh-conn connection object if successful.  Any number returned likely indicates an error.
+</BLOCKQUOTE><P>
+
+<H4>Remarks</H4>
+<BLOCKQUOTE><P>
+<P>None
+</BLOCKQUOTE><P>
+
+<H4>Example</H4>
+<BLOCKQUOTE><P>
+The following example demonstrates how to connect to a host and verify success.
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+<B>if</B> (<B>typeof</B>(conn=<B>ssh.open</B>("192.168.0.1", 22))!='ssh-conn') {<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<B>print</B>("failed connection");<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<B>exit</B>;<BR>
+}<BR>
+<FONT COLOR='green'>/* checking the host's RSA key fingerprint is optional, but a good idea. */</FONT><BR>
+key="ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff";<BR>
+<B>if</B> ((k=ssh.hostkey(conn))!=key) {<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<B>print</B>("expected = "+key+"\nrecieved = "+k+"\n");<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<B>print</B>("Host key verification failed.\n");<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<B>exit</B>;<BR>
+}<BR>
+<B>print</B>("RSA key fingerprint is "+k+".\n");<BR>
+<B>if</B> (<B>ssh.auth</B>(conn, "username", "password")!=true) {<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<B>print</B>("failed auth");<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<B>exit</B>;<BR>
+}<BR>
+<FONT COLOR='green'>/*<BR>
+&nbsp;* do something useful here<BR>
+&nbsp;*/</FONT><BR>
+<B>ssh.close</B>(conn);<BR>
+</CODE></TD></TR></TABLE>
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
+</DIV><DIV ID=c9p_libssh_ssh_close      STYLE='display: block'><!-- CONTENTS_START -->
+<a name="nesla_ssh_close"></a>
+<H2>ssh.open<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Cloae an SSH connection.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>number</I> <B>=</B> <B>ssh.close(</B><I>conn</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>conn</I> </TD><TD>Server connection object to be closed.</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Always returns zero.
+</BLOCKQUOTE><P>
+
+<H4>Remarks</H4>
+<BLOCKQUOTE><P>
+<P>None
+</BLOCKQUOTE><P>
+
+<H4>Example</H4>
+<BLOCKQUOTE><P>
+The following example demonstrates how to close a host connection.
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+	<B>ssh.close</B>(conn);
+</CODE></TD></TR></TABLE>
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
+</DIV><DIV ID=c9p_libssh_ssh_hostkey    STYLE='display: block'></DIV><DIV ID=c9p_libssh_ssh_auth       STYLE='display: block'><!-- CONTENTS_START -->
+<a name="nesla_ssh_auth"></a>
+<H2>ssh.auth<BR><HR></H2>
+
+<H4>Description</H4>
+<BLOCKQUOTE><P>
+<P>Authenticate an SSH connection.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><P><I>boolean</I> <B>=</B> <B>ssh.auth(</B><I>sshconn</I>, <I>username</I>, <I>password</I> | <I>{ pass, prv, pub }</I><B>)<BR></B></BLOCKQUOTE><P>
+<BLOCKQUOTE>
+<TABLE BGCOLOR="#E0E0E0" WIDTH=87% CELLPADDING=5 CELLSPACING=0>
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>sshconn</I> </TD><TD>An active ssh-conn connection.</TD></TR>
+<TR><TD><I>username</I> </TD><TD>String containing the account username to connect as.</TD></TR>
+<TR><TD><I>password</I> </TD><TD>String containing the account password.</TD></TR>
+<TR><TD><I>pass</I> </TD><TD>String containing the passphrase of the private key (used with key-based authentication).</TD></TR>
+<TR><TD><I>prv</I> </TD><TD>String containing the location of the private key (used with key-based authentication).</TD></TR>
+<TR><TD><I>pub</I> </TD><TD>String containing the location of the public key (used with key-based authentication).</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE><P>
+<P>Returns true if successful.  Any failure to authenticate returns false.
+</BLOCKQUOTE><P>
+
+<H4>Remarks</H4>
+<BLOCKQUOTE><P>
+<P>None
+</BLOCKQUOTE><P>
+
+<H4>Example</H4>
+<BLOCKQUOTE><P>
+The following example demonstrates how to authenticate via user/pass or a keypair.
+<P>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
+<CODE>
+
+<PRE>
+global username = "user";
+global password = "pass";
+global rsa_keys = {
+	pass="rsapass",
+	prv="~/.ssh/id_rsa",
+	pub="~/.ssh/id_rsa.pub"
+};
+
+<FONT COLOR=green>/* you can authenticate with a user/pass pair */</FONT>
+<B>if</B> (<B>ssh.auth</B>(conn, username, password)!=true) {
+	<B>print</B>("failed auth");
+	<B>exit</B>;
+}
+<FONT COLOR=green>/* or you can authenticate with keys */</FONT>
+<B>if</B> (<B>ssh.auth</B>(conn, username, rsa_keys)!=true) {
+	<B>print</B>("failed auth");
+	<B>exit</B>;
+}
+</PRE>
+
+</CODE></TD></TR></TABLE>
+</BLOCKQUOTE><P>
+<!-- CONTENTS_END -->
+</DIV><DIV ID=c9p_libssh_ssh_cmd        STYLE='display: block'></DIV><DIV ID=c9p_libssh_sftp_get       STYLE='display: block'></DIV><DIV ID=c9p_libssh_sftp_ls        STYLE='display: block'></DIV><DIV ID=c9p_libssh_sftp_mkdir     STYLE='display: block'></DIV><DIV ID=c9p_libssh_sftp_put       STYLE='display: block'></DIV><DIV ID=c9p_libssh_sftp_rename    STYLE='display: block'></DIV><DIV ID=c9p_libssh_sftp_rmdir     STYLE='display: block'></DIV><DIV ID=c9p_libssh_sftp_unlink    STYLE='display: block'></DIV><DIV ID=c10p0 STYLE='display: block'><h1>10 - tcp.*()</h1>
+</DIV><DIV ID=c10p_libtcp_http_get      STYLE='display: block'><hr><h3><a name="nesla_http_get"><code>(table) http.get(number ssl, string host, number port, string uri);</code></a></h3>
 <p>
 Connect to an HTTP server and retrieve the requested uri. Returns a table with { head, body } elements.
 </p>
 <hr>
-</DIV><DIV ID=c9p_libtcp_tcp_accept    STYLE='display: block'><hr><h3><a name="nesla_tcp_accept"><code>(sock4) tcp.accept(sock4 bindsock);</code></a></h3>
+</DIV><DIV ID=c10p_libtcp_tcp_accept    STYLE='display: block'><hr><h3><a name="nesla_tcp_accept"><code>(sock4) tcp.accept(sock4 bindsock);</code></a></h3>
 <p>
-</DIV><DIV ID=c9p_libtcp_tcp_bind      STYLE='display: block'><hr><h3><a name="nesla_tcp_bind"><code>(sock4) tcp.bind(string host, number port, number ssl);</code></a></h3>
+</DIV><DIV ID=c10p_libtcp_tcp_bind      STYLE='display: block'><hr><h3><a name="nesla_tcp_bind"><code>(sock4) tcp.bind(string host, number port, number ssl);</code></a></h3>
 <p>
-</DIV><DIV ID=c9p_libtcp_tcp_close     STYLE='display: block'><hr><h3><a name="nesla_tcp_close"><code>(number) tcp.close(sock4 socket);</code></a></h3>
+</DIV><DIV ID=c10p_libtcp_tcp_close     STYLE='display: block'><hr><h3><a name="nesla_tcp_close"><code>(number) tcp.close(sock4 socket);</code></a></h3>
 <p>
-</DIV><DIV ID=c9p_libtcp_tcp_gets      STYLE='display: block'><hr><h3><a name="nesla_tcp_gets"><code>(string) tcp.gets(sock4 socket);</code></a></h3>
+</DIV><DIV ID=c10p_libtcp_tcp_gets      STYLE='display: block'><hr><h3><a name="nesla_tcp_gets"><code>(string) tcp.gets(sock4 socket);</code></a></h3>
 <p>
-</DIV><DIV ID=c9p_libtcp_tcp_open      STYLE='display: block'><hr><h3><a name="nesla_tcp_open"><code>(sock4) tcp.open(string host, number port, number ssl);</code></a></h3>
+</DIV><DIV ID=c10p_libtcp_tcp_info      STYLE='display: block'><hr><h3><a name="nesla_tcp_info"><code>(sock4) tcp.info(sock4 socket);</code></a></h3>
 <p>
-</DIV><DIV ID=c9p_libtcp_tcp_read      STYLE='display: block'><hr><h3><a name="nesla_tcp_read"><code>(string) tcp.read(sock4 socket);</code></a></h3>
+Returns a table containing information about the socket.
+</p>
+</DIV><DIV ID=c10p_libtcp_tcp_open      STYLE='display: block'><hr><h3><a name="nesla_tcp_open"><code>(sock4) tcp.open(string host, number port, number ssl);</code></a></h3>
 <p>
-</DIV><DIV ID=c9p_libtcp_tcp_write     STYLE='display: block'><hr><h3><a name="nesla_tcp_write"><code>(number) tcp.write(sock4 socket, string str);</code></a></h3>
+</DIV><DIV ID=c10p_libtcp_tcp_read      STYLE='display: block'><hr><h3><a name="nesla_tcp_read"><code>(string) tcp.read(sock4 socket);</code></a></h3>
 <p>
-</DIV><DIV ID=c10p0 STYLE='display: block'>
-<h1>10 - The C API</h1>
+</DIV><DIV ID=c10p_libtcp_tcp_write     STYLE='display: block'><hr><h3><a name="nesla_tcp_write"><code>(number) tcp.write(sock4 socket, string str);</code></a></h3>
+<p>
+</DIV><DIV ID=c11p0 STYLE='display: block'>
+<h1>11 - The C API</h1>
 <p>
 I'm lazy, so here's the long ugly version.  This is everything your C program
 will ever need to know about Nesla.  Actually, it needs to know a lot less, but
 hey.
 </p>
 <PRE>/*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1235,6 +1424,8 @@ typedef struct nes_state {
 	short cnt;
 	short ret;
 	short err;
+	/* intended for external signals to the parser.  for now, non-zero just means to shut down */
+	short signal;
 	short debug;
 	short single;
 	short strict;
@@ -1317,7 +1508,7 @@ obj_t     *nes_evalf      (nes_state *N, const char *fmt, ...);
 		</FONT>
 		</TD><TD ALIGN="right" VALIGN="BOTTOM" WIDTH="50%">
 		<FONT FACE=Arial COLOR="#000000" SIZE=-2>
-		Copyright &copy; 2007 NullLogic<BR>
+		Copyright &copy; 2008 NullLogic<BR>
 		All rights reserved
 		</FONT>
 		</TD></TR>

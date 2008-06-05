@@ -15,13 +15,23 @@ if (typeof(file.stat(cfilename))!='table') {
 	file.write(cfilename, x);
 }
 if (typeof(file.stat(cfilename))=='table') {
-	key=PassInput("", "NesLaunchPad Auth - Enter Your Password");
-	key="hex:"+string.md5(key);
-	x=file.read(cfilename);
-	x=base64.decode(x);
-	x=crypto.aes_cbc_decrypt(x, key);
-//	file.write(rfilename+".txt", x);
-	exec(x);
+	for (i=0;i<3;i++) {
+		key=PassInput("", "NesLaunchPad Auth - Enter Your Password");
+		key="hex:"+string.md5(key);
+		x=file.read(cfilename);
+		x=base64.decode(x);
+		x=crypto.aes_cbc_decrypt(x, key);
+		if (typeof(x)=='string') break;
+		win.MessageBox("Please try your password again", "Bad Password");
+	}
+	if (typeof(x)=='string') {
+//		win.MessageBox(tostring(x));
+//		file.write(rfilename+".txt", x);
+		exec(x);
+	} else {
+		win.MessageBox("Go away", "Bad Password");
+		exit;
+	}
 } else {
 	include(rfilename);
 }

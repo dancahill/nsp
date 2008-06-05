@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,6 +39,9 @@
 #ifdef HAVE_ODBC
 #include "nesla/libodbc.h"
 #endif
+#ifdef HAVE_PIPE
+#include "nesla/libpipe.h"
+#endif
 #ifdef HAVE_PGSQL
 #include "nesla/libpgsql.h"
 #endif
@@ -47,8 +51,14 @@
 #ifdef HAVE_SQLITE3
 #include "nesla/libsqlite3.h"
 #endif
+#ifdef HAVE_SSH2
+#include "nesla/libssh.h"
+#endif
 #ifndef __TURBOC__
 #include "nesla/libtcp.h"
+#endif
+#ifdef WIN32
+#include "nesla/libwinapi.h"
 #endif
 #ifdef HAVE_ZLIB
 #include "nesla/libzip.h"
@@ -79,6 +89,7 @@ extern char **environ;
 #endif
 static int flush(nes_state *N)
 {
+	if (N==NULL||N->outbuflen==0) return 0;
 	N->outbuf[N->outbuflen]='\0';
 	write(STDOUT_FILENO, N->outbuf, N->outbuflen);
 	N->outbuflen=0;
@@ -91,7 +102,7 @@ static void sig_trap(int sig)
 	switch (sig) {
 	case 11:
 		printf("Segmentation Violation\r\n");
-		if ((N)&&(N->readptr)) printf("[%.40s]\r\n", N->readptr);
+		if ((N)&&(N->readptr)) printf("[%s][%.40s]\r\n", N->tracefn, N->readptr);
 		exit(-1);
 	case 13: /* SIGPIPE */
 		return;
@@ -154,14 +165,14 @@ static void preppath(nes_state *N, char *name)
 	for (j=strlen(buf)-1;j>0;j--) {
 		if (buf[j]=='/') { buf[j]='\0'; p=buf+j+1; break; }
 	}
-	nes_setstr(N, &N->g, "_filename", p, strlen(p));
-	nes_setstr(N, &N->g, "_filepath", buf, strlen(buf));
+	nes_setstr(N, &N->g, "_filename", p, -1);
+	nes_setstr(N, &N->g, "_filepath", buf, -1);
 	return;
 }
 
 void do_banner() {
 	printf("\r\nNullLogic Embedded Scripting Language Version " NESLA_VERSION);
-	printf("\r\nCopyright (C) 2007 Dan Cahill\r\n\r\n");
+	printf("\r\nCopyright (C) 2007-2008 Dan Cahill\r\n\r\n");
 	return;
 }
 
@@ -211,6 +222,9 @@ int main(int argc, char *argv[])
 #ifdef HAVE_ODBC
 	neslaodbc_register_all(N);
 #endif
+#ifdef HAVE_PIPE
+	neslapipe_register_all(N);
+#endif
 #ifdef HAVE_PGSQL
 	neslapgsql_register_all(N);
 #endif
@@ -220,10 +234,16 @@ int main(int argc, char *argv[])
 #ifdef HAVE_SQLITE3
 	neslasqlite3_register_all(N);
 #endif
+#ifdef HAVE_SSH2
+	neslassh_register_all(N);
+#endif
 #ifndef __TURBOC__
 #ifndef TINYCC
 	neslatcp_register_all(N);
 #endif
+#endif
+#ifdef WIN32
+	neslawinapi_register_all(N);
 #endif
 #ifdef HAVE_ZLIB
 	neslazip_register_all(N);
@@ -236,13 +256,13 @@ int main(int argc, char *argv[])
 		if (!p) continue;
 		*p='\0';
 		p=strchr(environ[i], '=')+1;
-		nes_setstr(N, tobj, tmpbuf, p, strlen(p));
+		nes_setstr(N, tobj, tmpbuf, p, -1);
 	}
 	/* add args */
 	tobj=nes_settable(N, &N->g, "_ARGS");
 	for (i=0;i<argc;i++) {
 		n_ntoa(N, tmpbuf, i, 10, 0);
-		nes_setstr(N, tobj, tmpbuf, argv[i], strlen(argv[i]));
+		nes_setstr(N, tobj, tmpbuf, argv[i], -1);
 	}
 	tobj=nes_settable(N, &N->g, "io");
 	nes_setcfunc(N, tobj, "gets", (NES_CFUNC)neslib_io_gets);
@@ -276,17 +296,7 @@ int main(int argc, char *argv[])
 		}
 	}
 err:
-	if (N->err) {
-		printf("errno=%d (%d) :: \r\n%s\r\n", N->err, N->warnings, N->errbuf);
-	}
+	if (N->err) printf("errno=%d (%d) :: \r\n%s\r\n", N->err, N->warnings, N->errbuf);
 	nes_endstate(N);
-/*
-#include <limits.h>
-	printf("\nchar[%d]\nshort[%d]\nint[%d]\nlong[%d]\n"
-		"float[%d]\ndouble[%d]\nlong double[%d]\n"
-		"int_min[%d]\nint_max[%d]\n",
-		sizeof(char), sizeof(short), sizeof(int), sizeof(long), sizeof(float), sizeof(double), sizeof(long double),
-		INT_MIN, INT_MAX);
-*/
 	return 0;
 }

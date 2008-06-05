@@ -1,5 +1,6 @@
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language
+    Copyright (C) 2007-2008 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1250,44 +1251,47 @@ char *op;
 
 NES_FUNCTION(neslaregex_match)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
-	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
+#define __FUNCTION__ __FILE__ ":neslaregex_match()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
+	obj_t *cobj2=nes_getobj(N, &N->l, "2");
 	char *p1, *p2;
 	regexp *r;
 	int rc=-1;
 
-	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
-	if (cobj2->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg2");
+	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
+	if (cobj2->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg2");
 	if (cobj1->val->d.str==NULL) p1=""; else p1=cobj1->val->d.str;
 	if (cobj2->val->d.str==NULL) p2=""; else p2=cobj2->val->d.str;
 	if ((r=regcomp(N, p1))==NULL) {
-		n_warn(N, "regex.match", "regcomp failure in `%s'", p1);
+		n_warn(N, __FUNCTION__, "regcomp failure in `%s'", p1);
 	} else {
 		rc=regexec(N, r, p2);
 		free((char *)r);
 	}
 	nes_setnum(N, &N->r, "", rc);
 	return 0;
+#undef __FUNCTION__
 }
 
 NES_FUNCTION(neslaregex_replace)
 {
-	obj_t *cobj1=nes_getiobj(N, &N->l, 1);
-	obj_t *cobj2=nes_getiobj(N, &N->l, 2);
-	obj_t *cobj3=nes_getiobj(N, &N->l, 3);
+#define __FUNCTION__ __FILE__ ":neslaregex_replace()"
+	obj_t *cobj1=nes_getobj(N, &N->l, "1");
+	obj_t *cobj2=nes_getobj(N, &N->l, "2");
+	obj_t *cobj3=nes_getobj(N, &N->l, "3");
 	char *p1, *p2, *p3;
 	regexp *r;
 	char dbuf[BUFSIZE];
 
-	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg1");
-	if (cobj2->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg2");
-	if (cobj3->val->type!=NT_STRING) n_error(N, NE_SYNTAX, nes_getstr(N, &N->l, "0"), "expected a string for arg3");
+	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
+	if (cobj2->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg2");
+	if (cobj3->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg3");
 	if (cobj1->val->d.str==NULL) p1=""; else p1=cobj1->val->d.str;
 	if (cobj2->val->d.str==NULL) p2=""; else p2=cobj2->val->d.str;
 	if (cobj3->val->d.str==NULL) p3=""; else p3=cobj3->val->d.str;
 	dbuf[0]=0;
 	if ((r=regcomp(N, p1))==NULL) {
-		n_warn(N, "regex.replace", "regcomp failure in `%s'", p1);
+		n_warn(N, __FUNCTION__, "regcomp failure in `%s'", p1);
 		nes_setnum(N, &N->r, "", -1);
 		return 0;
 	} else {
@@ -1296,16 +1300,17 @@ NES_FUNCTION(neslaregex_replace)
 			regsub(N, r, p2, dbuf);
 			nes_setstr(N, &N->r, "", dbuf, -1);
 		} else {
-			n_warn(N, "regex.replace", "regexec failure in `%s'", p1);
+			n_warn(N, __FUNCTION__, "regexec failure in `%s'", p1);
 			nes_setstr(N, &N->r, "", p3, cobj3->val->size);
 		}
 		free((char *)r);
 	}
 /*
-	n_warn(N, "regex.replace", "[%s][%s][%s]", p1, p2, p3);
-	n_warn(N, "regex.replace", "result '%s'", dbuf);
+	n_warn(N, __FUNCTION__, "[%s][%s][%s]", p1, p2, p3);
+	n_warn(N, __FUNCTION__, "result '%s'", dbuf);
 */
 	return 0;
+#undef __FUNCTION__
 }
 
 int neslaregex_register_all(nes_state *N)
