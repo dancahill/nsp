@@ -12,7 +12,7 @@ all: _libnesla lite deps static_libs cli nestray cgi
 
 deps:
 	@cd src\libs
-	@..\..\$(NESLITE) autoconf.nes msvc windows
+	@..\..\$(NESLITE) autoconf.ns msvc windows
 	@cd ..\..
 
 dirs:
@@ -32,132 +32,132 @@ _libnesla: dirs
 
 _libneslacdb:
 	@cd src\libs\cdb
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 _libneslacrypto:
 	@cd src\libs\crypto
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 _libnesladl:
 	@cd src\libs\dl
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 _libneslaext:
 	@cd src\libs\ext
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 _libneslaldap:
 	@cd src\libs\ldap
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 _libneslamath:
 	@cd src\libs\math
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 _libneslamysql:
 	@cd src\libs\mysql
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 _libneslaodbc:
 	@cd src\libs\odbc
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 _libneslapipe:
 	@cd src\libs\pipe
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 _libneslapgsql:
 	@cd src\libs\pgsql
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 _libneslaregex:
 	@cd src\libs\regex
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 _libneslasqlite3:
 	@cd src\libs\sqlite3
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 _libneslassh:
 	@cd src\libs\ssh
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 _libneslatcp:
 	@cd src\libs\tcp
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 _libneslawinapi:
 	@cd src\libs\winapi
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 _libneslazip:
 	@cd src\libs\zip
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 shared_libs:
 	@cd src\libs\cdb
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\crypto
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\ext
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\ldap
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\math
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\mysql
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\odbc
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\pipe
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\pgsql
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\regex
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\sqlite3
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\ssh
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\tcp
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\test
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\winapi
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\zip
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 
 # rules for hosts
@@ -199,55 +199,55 @@ nullgw: _libnesla
 clean: lite
 #	@touch src\config.mak
 	@cd src\libs\cdb
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\crypto
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\dl
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\ext
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\ldap
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\math
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\mysql
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\odbc
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\pipe
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\pgsql
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\regex
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\sqlite3
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\ssh
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\tcp
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\test
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\winapi
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\zip
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\hosts\cgi
 	@$(MAKE) MAKEFILE.VC clean
@@ -281,4 +281,4 @@ hack:
 	del *.obj
 
 test:
-	bin\nesla.exe scripts\tests\test1.nes
+	bin\nesla.exe scripts\tests\test1.ns

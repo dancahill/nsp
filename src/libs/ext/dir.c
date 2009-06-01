@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2008 Dan Cahill
+    Copyright (C) 2007-2009 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -81,6 +81,7 @@ static int n_dirlist(nes_state *N, obj_t *dobj, const char *dirname)
 #endif
 #endif
 		tobj2=nes_settable(N, dobj, name);
+		nes_setstr(N, tobj2, "name", name, -1);
 		nes_setnum(N, tobj2, "mtime", sb.st_mtime);
 		if (sym==2) {
 			nes_setnum(N, tobj2, "size", 0);

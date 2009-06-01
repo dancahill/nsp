@@ -441,7 +441,7 @@ int cipherUpdateRounds(cipherInstance *cipher, keyInstance *key,
 #endif /* INTERMEDIATE_VALUE_KAT */
 
 /*
-    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007-2008 Dan Cahill
+    NESLA NullLogic Embedded Scripting Language - Copyright (C) 2007-2009 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2008 Dan Cahill
+    Copyright (C) 2007-2009 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 
 static void sort_byname(nes_state *N, obj_t *tobj, int recurse, int order)
 {
-	obj_t *cobj, *nobj, *robj=tobj->val->d.table;
+	obj_t *cobj, *nobj, *robj=tobj->val->d.table.f;
 	short change, swap;
 
 reloop:
@@ -67,13 +67,13 @@ reloop:
 	}
 	if (change) goto reloop;
 end:
-	tobj->val->d.table=robj;
+	tobj->val->d.table.f=robj;
 	return;
 }
 
 static void sort_bykey(nes_state *N, obj_t *tobj, char *key, int order)
 {
-	obj_t *cobj, *nobj, *robj=tobj->val->d.table;
+	obj_t *cobj, *nobj, *robj=tobj->val->d.table.f;
 	obj_t *sub1, *sub2;
 	short change, swap;
 
@@ -120,7 +120,7 @@ reloop:
 	}
 	if (change) goto reloop;
 end:
-	tobj->val->d.table=robj;
+	tobj->val->d.table.f=robj;
 	return;
 }
 

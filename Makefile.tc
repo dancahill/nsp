@@ -14,7 +14,7 @@ all: _libnesla lite deps static_libs cli
 
 deps:
 	@cd src\libs
-	@..\..\$(NESLITE) autoconf.nes turboc dos
+	@..\..\$(NESLITE) autoconf.ns turboc dos
 	@cd ..\..
 
 dirs:
@@ -33,22 +33,22 @@ _libnesla: dirs
 
 _libneslaext:
 	@cd src\libs\ext
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 _libneslacrypto:
 	@cd src\libs\crypto
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 _libneslamath:
 	@cd src\libs\math
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 _libneslaregex:
 	@cd src\libs\regex
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.nes');"
+	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 # rules for hosts
@@ -70,16 +70,16 @@ lite: _libnesla
 clean: lite
 #	@touch src\config.mak
 	@cd src\libs\crypto
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\ext
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\math
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\regex
-	@..\..\..\$(NESLITE) Makefile.nes clean
+	@..\..\..\$(NESLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\hosts\cli
 	@$(MAKE) MAKEFILE.TC clean
@@ -106,4 +106,4 @@ hack:
 	nesla.exe -e "var x='\n\ngnikrow dna ';print('Standard Interpreter built');for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));"
 
 test:
-	bin\nesla.exe scripts\tests\test1.nes
+	bin\nesla.exe scripts\tests\test1.ns

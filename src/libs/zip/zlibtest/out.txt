@@ -1,0 +1,177 @@
+==22170== Memcheck, a memory error detector.
+==22170== Copyright (C) 2002-2006, and GNU GPL'd, by Julian Seward et al.
+==22170== Using LibVEX rev 1658, a library for dynamic binary translation.
+==22170== Copyright (C) 2004-2006, and GNU GPL'd, by OpenWorks LLP.
+==22170== Using valgrind-3.2.1, a dynamic binary instrumentation framework.
+==22170== Copyright (C) 2000-2006, and GNU GPL'd, by Julian Seward et al.
+==22170== 
+--22170-- Command line
+--22170--    ./a.out
+--22170-- Startup, with flags:
+--22170--    -v
+--22170--    --leak-check=full
+--22170--    --leak-resolution=high
+--22170--    --show-reachable=yes
+--22170-- Contents of /proc/version:
+--22170--   Linux version 2.6.18-53.1.14.el5 (mockbuild@builder6.centos.org) (gcc version 4.1.2 20070626 (Red Hat 4.1.2-14)) #1 SMP Wed Mar 5 11:36:49 EST 2008
+--22170-- Arch and hwcaps: X86, x86-sse1
+--22170-- Valgrind library directory: /usr/lib/valgrind
+--22170-- Reading syms from /lib/ld-2.5.so (0x7AE000)
+--22170-- Reading syms from /home/dan/zlibtest/a.out (0x8048000)
+--22170-- Reading syms from /usr/lib/valgrind/x86-linux/memcheck (0x38000000)
+--22170--    object doesn't have a dynamic symbol table
+--22170-- Reading suppressions file: /usr/lib/valgrind/default.supp
+--22170-- REDIR: 0x7C3640 (index) redirected to 0x38027D0F (vgPlain_x86_linux_REDIR_FOR_index)
+--22170-- Reading syms from /usr/lib/valgrind/x86-linux/vgpreload_core.so (0x4000000)
+--22170-- Reading syms from /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so (0x4003000)
+==22170== WARNING: new redirection conflicts with existing -- ignoring it
+--22170--     new: 0x007C3640 (index     ) R-> 0x04006080 index
+--22170-- REDIR: 0x7C37E0 (strlen) redirected to 0x4006250 (strlen)
+--22170-- Reading syms from /usr/lib/libz.so.1.2.3 (0x9C6000)
+--22170--    object doesn't have a symbol table
+--22170-- Reading syms from /lib/libc-2.5.so (0x7D0000)
+--22170-- REDIR: 0x83D340 (rindex) redirected to 0x4005F60 (rindex)
+--22170-- REDIR: 0x838270 (malloc) redirected to 0x400533B (malloc)
+--22170-- REDIR: 0x83E1E0 (memset) redirected to 0x4006540 (memset)
+--22170-- REDIR: 0x83E6D0 (memcpy) redirected to 0x4006C20 (memcpy)
+==22170== Conditional jump or move depends on uninitialised value(s)
+==22170==    at 0x9C9D91: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CAEA0: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CA2D6: deflate (in /usr/lib/libz.so.1.2.3)
+==22170==    by 0x8048532: main (main.c:29)
+==22170== 
+==22170== Conditional jump or move depends on uninitialised value(s)
+==22170==    at 0x9C9DA3: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CAEA0: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CA2D6: deflate (in /usr/lib/libz.so.1.2.3)
+==22170==    by 0x8048532: main (main.c:29)
+==22170== 
+==22170== Conditional jump or move depends on uninitialised value(s)
+==22170==    at 0x9C9DB2: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CAEA0: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CA2D6: deflate (in /usr/lib/libz.so.1.2.3)
+==22170==    by 0x8048532: main (main.c:29)
+==22170== 
+==22170== Conditional jump or move depends on uninitialised value(s)
+==22170==    at 0x9C9D3C: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CAEA0: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CA2D6: deflate (in /usr/lib/libz.so.1.2.3)
+==22170==    by 0x8048532: main (main.c:29)
+==22170== 
+==22170== Conditional jump or move depends on uninitialised value(s)
+==22170==    at 0x9C9D4F: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CAEA0: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CA2D6: deflate (in /usr/lib/libz.so.1.2.3)
+==22170==    by 0x8048532: main (main.c:29)
+==22170== 
+==22170== Conditional jump or move depends on uninitialised value(s)
+==22170==    at 0x9C9D61: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CAEA0: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CA2D6: deflate (in /usr/lib/libz.so.1.2.3)
+==22170==    by 0x8048532: main (main.c:29)
+==22170== 
+==22170== Conditional jump or move depends on uninitialised value(s)
+==22170==    at 0x9C9D70: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CAEA0: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CA2D6: deflate (in /usr/lib/libz.so.1.2.3)
+==22170==    by 0x8048532: main (main.c:29)
+==22170== 
+==22170== Conditional jump or move depends on uninitialised value(s)
+==22170==    at 0x9C9D82: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CAEA0: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CA2D6: deflate (in /usr/lib/libz.so.1.2.3)
+==22170==    by 0x8048532: main (main.c:29)
+--22170-- REDIR: 0x839F30 (free) redirected to 0x4004F55 (free)
+==22170== 
+==22170== ERROR SUMMARY: 19 errors from 8 contexts (suppressed: 13 from 1)
+==22170== 
+==22170== 2 errors in context 1 of 8:
+==22170== Conditional jump or move depends on uninitialised value(s)
+==22170==    at 0x9C9D82: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CAEA0: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CA2D6: deflate (in /usr/lib/libz.so.1.2.3)
+==22170==    by 0x8048532: main (main.c:29)
+==22170== 
+==22170== 2 errors in context 2 of 8:
+==22170== Conditional jump or move depends on uninitialised value(s)
+==22170==    at 0x9C9D70: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CAEA0: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CA2D6: deflate (in /usr/lib/libz.so.1.2.3)
+==22170==    by 0x8048532: main (main.c:29)
+==22170== 
+==22170== 2 errors in context 3 of 8:
+==22170== Conditional jump or move depends on uninitialised value(s)
+==22170==    at 0x9C9D61: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CAEA0: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CA2D6: deflate (in /usr/lib/libz.so.1.2.3)
+==22170==    by 0x8048532: main (main.c:29)
+==22170== 
+==22170== 2 errors in context 4 of 8:
+==22170== Conditional jump or move depends on uninitialised value(s)
+==22170==    at 0x9C9D4F: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CAEA0: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CA2D6: deflate (in /usr/lib/libz.so.1.2.3)
+==22170==    by 0x8048532: main (main.c:29)
+==22170== 
+==22170== 2 errors in context 5 of 8:
+==22170== Conditional jump or move depends on uninitialised value(s)
+==22170==    at 0x9C9D3C: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CAEA0: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CA2D6: deflate (in /usr/lib/libz.so.1.2.3)
+==22170==    by 0x8048532: main (main.c:29)
+==22170== 
+==22170== 3 errors in context 6 of 8:
+==22170== Conditional jump or move depends on uninitialised value(s)
+==22170==    at 0x9C9DB2: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CAEA0: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CA2D6: deflate (in /usr/lib/libz.so.1.2.3)
+==22170==    by 0x8048532: main (main.c:29)
+==22170== 
+==22170== 3 errors in context 7 of 8:
+==22170== Conditional jump or move depends on uninitialised value(s)
+==22170==    at 0x9C9DA3: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CAEA0: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CA2D6: deflate (in /usr/lib/libz.so.1.2.3)
+==22170==    by 0x8048532: main (main.c:29)
+==22170== 
+==22170== 3 errors in context 8 of 8:
+==22170== Conditional jump or move depends on uninitialised value(s)
+==22170==    at 0x9C9D91: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CAEA0: (within /usr/lib/libz.so.1.2.3)
+==22170==    by 0x9CA2D6: deflate (in /usr/lib/libz.so.1.2.3)
+==22170==    by 0x8048532: main (main.c:29)
+--22170-- 
+--22170-- supp:   13 Fedora-Core-6-hack3-ld25
+==22170== 
+==22170== IN SUMMARY: 19 errors from 8 contexts (suppressed: 13 from 1)
+==22170== 
+==22170== malloc/free: in use at exit: 0 bytes in 0 blocks.
+==22170== malloc/free: 5 allocs, 5 frees, 267,968 bytes allocated.
+==22170== 
+==22170== All heap blocks were freed -- no leaks are possible.
+--22170--  memcheck: sanity checks: 0 cheap, 1 expensive
+--22170--  memcheck: auxmaps: 0 auxmap entries (0k, 0M) in use
+--22170--  memcheck: auxmaps: 0 searches, 0 comparisons
+--22170--  memcheck: SMs: n_issued      = 14 (224k, 0M)
+--22170--  memcheck: SMs: n_deissued    = 0 (0k, 0M)
+--22170--  memcheck: SMs: max_noaccess  = 65535 (1048560k, 1023M)
+--22170--  memcheck: SMs: max_undefined = 0 (0k, 0M)
+--22170--  memcheck: SMs: max_defined   = 21 (336k, 0M)
+--22170--  memcheck: SMs: max_non_DSM   = 14 (224k, 0M)
+--22170--  memcheck: max sec V bit nodes:    0 (0k, 0M)
+--22170--  memcheck: set_sec_vbits8 calls: 0 (new: 0, updates: 0)
+--22170--  memcheck: max shadow mem size:   528k, 0M
+--22170-- translate:            fast SP updates identified: 1,752 ( 90.0%)
+--22170-- translate:   generic_known SP updates identified: 111 (  5.7%)
+--22170-- translate: generic_unknown SP updates identified: 83 (  4.2%)
+--22170--     tt/tc: 3,855 tt lookups requiring 3,893 probes
+--22170--     tt/tc: 3,855 fast-cache updates, 3 flushes
+--22170--  transtab: new        1,819 (41,154 -> 681,848; ratio 165:10) [0 scs]
+--22170--  transtab: dumped     0 (0 -> ??)
+--22170--  transtab: discarded  5 (113 -> ??)
+--22170-- scheduler: 51,340 jumps (bb entries).
+--22170-- scheduler: 0/2,088 major/minor sched events.
+--22170--    sanity: 1 cheap, 1 expensive checks.
+--22170--    exectx: 30,011 lists, 26 contexts (avg 0 per list)
+--22170--    exectx: 42 searches, 16 full compares (380 per 1000)
+--22170--    exectx: 0 cmp2, 218 cmp4, 0 cmpAll

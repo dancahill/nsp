@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2008 Dan Cahill
+    Copyright (C) 2007-2009 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -239,7 +239,7 @@ DllExport int mod_main(CONN *sid)
 		filesend(sid, filename);
 		return 0;
 	}
-	if ((strcmp(ext, ".nes")!=0)&&(strcmp(ext, ".n")!=0)) {
+	if ((strcmp(ext, ".ns")!=0)&&(strcmp(ext, ".n")!=0)) {
 		filesend(sid, filename);
 		return 0;
 	}

@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2008 Dan Cahill
+    Copyright (C) 2007-2009 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -204,7 +204,7 @@ obj_t *getindex(obj_t *tobj, int i)
 	obj_t *cobj;
 
 	if (!nes_istable(tobj)) return NULL;
-	for (tobj=tobj->val->d.table;tobj;tobj=tobj->next) {
+	for (tobj=tobj->val->d.table.f;tobj;tobj=tobj->next) {
 		if (!nes_istable(tobj)) continue;
 		cobj=nes_getobj(N, tobj, "index");
 		if (!nes_isnum(cobj)) {
@@ -264,10 +264,10 @@ void PopupTimer(void)
 		if ((N=nes_newstate())==NULL) return;
 		init_stuff(N);
 		if (N->err) MessageBox(NULL, N->errbuf, "Script Error", MB_ICONSTOP);
-		cobj=nes_getobj(N, &N->g, "onreload");
+		cobj=nes_getobj(N, nes_getobj(N, &N->g, "NesTray"), "onreload");
 		IconStatus(1);
 		if (nes_typeof(cobj)==NT_NFUNC) {
-			nes_exec(N, "onreload();");
+			nes_exec(N, "NesTray.onreload();");
 			if (N->err) MessageBox(NULL, N->errbuf, "Script Error", MB_ICONSTOP);
 		}
 		IconStatus(0);
@@ -283,9 +283,9 @@ void PopupTimer(void)
 	if ((t%60)<(G.lastpoll%60)) {
 		G.lastpoll=t;
 		IconStatus(1);
-		cobj=nes_getobj(N, &N->g, "cron");
+		cobj=nes_getobj(N, nes_getobj(N, &N->g, "NesTray"), "ontimer");
 		if (nes_typeof(cobj)==NT_NFUNC) {
-			nes_exec(N, "cron();");
+			nes_exec(N, "NesTray.ontimer();");
 			if (N->err) MessageBox(NULL, N->errbuf, "Script Error", MB_ICONSTOP);
 		}
 		IconStatus(0);
@@ -303,7 +303,7 @@ BOOL PopupMenuDrawSub(HMENU hMenu, obj_t *tobj)
 	BOOL ret;
 
 	if (!nes_istable(tobj)) return FALSE;
-	for (tobj=tobj->val->d.table;tobj;tobj=tobj->next) {
+	for (tobj=tobj->val->d.table.f;tobj;tobj=tobj->next) {
 		if (!nes_istable(tobj)) continue;
 		cobj=nes_getobj(N, tobj, "type");
 		if (nes_isnull(cobj)) continue;
@@ -427,10 +427,10 @@ BOOL CALLBACK PopupMenuExec(HWND wnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case WM_LBUTTONDBLCLK:
 			while (lock>0) Sleep(1);
 			lock++;
-			cobj=nes_getobj(N, &N->g, "onclick");
+			cobj=nes_getobj(N, nes_getobj(N, &N->g, "NesTray"), "onclick");
 			IconStatus(1);
 			if (nes_typeof(cobj)==NT_NFUNC) {
-				nes_exec(N, "onclick();");
+				nes_exec(N, "NesTray.onclick();");
 				if (N->err) MessageBox(NULL, N->errbuf, "Script Error", MB_ICONSTOP);
 			}
 			IconStatus(0);
@@ -629,15 +629,15 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		nes_endstate(N);
 		return 0;
 	}
-	cobj=nes_getobj(N, &N->g, "onload");
+	cobj=nes_getobj(N, nes_getobj(N, &N->g, "NesTray"), "onload");
 	if (nes_typeof(cobj)==NT_NFUNC) {
-		nes_exec(N, "onload();");
+		nes_exec(N, "NesTray.onload();");
 		if (N->err) MessageBox(NULL, N->errbuf, "Script Error", MB_ICONSTOP);
 	}
 	DialogBox(G.instance, MAKEINTRESOURCE(IDD_NULLDIALOG), NULL, PopupMenuExec);
-	cobj=nes_getobj(N, &N->g, "onexit");
+	cobj=nes_getobj(N, nes_getobj(N, &N->g, "NesTray"), "onexit");
 	if (nes_typeof(cobj)==NT_NFUNC) {
-		nes_exec(N, "onexit();");
+		nes_exec(N, "NesTray.onexit();");
 		if (N->err) MessageBox(NULL, N->errbuf, "Script Error", MB_ICONSTOP);
 	}
 	CloseHandle(mutex);

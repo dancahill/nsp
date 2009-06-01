@@ -12,10 +12,24 @@ NESLA NullLogic Embedded Scripting Language ChangeLog
 </h1>
 <small>
 <a href="copyright.html">Copyright</a>
-&copy; 2007-2008 Dan Cahill.  All rights reserved.
+&copy; 2007-2009 Dan Cahill.  All rights reserved.
 </small>
 <hr>
 
+<h2>0.9.3 (2009-??-??)</h2>
+<ul>
+  <li>added ternary conditional expression operator ?:</li>
+  <li>added catch, finally and throw to try</li>
+  <li>added 'new' to control behaviour of object constructor functions</li>
+  <li>fixed odbc data retrieval</li>
+  <li>added string.itoa and string.atoi function pair</li>
+  <li>added foreach (x in y) loops</li>
+  <li>added \0 to string&lt;-&gt;character mapping</li>
+  <li>added 'this' between local and global var lookups to create a transparent illusion of oo support</li>
+  <li>moved 'this' from the last function argument to the first to fix bug with missing args</li>
+  <li>added === operator for strict comparisons</li>
+  <li>fixed explicit variable declaration of locals when matching globals exist</li>
+</ul>
 <h2>0.9.2 (2008-06-01)</h2>
 <ul>
   <li>added basic signal handling to allow shutdown requests in multithreaded environments, etc.</li>
@@ -53,8 +67,8 @@ NESLA NullLogic Embedded Scripting Language ChangeLog
   <li>fixed returned strings defaulting to zero length in string.sub()</li>
   <li>added ival() to compliment iname()</li>
   <li>added extension module to convert source to html</li>
-  <li>added popsync.nes - a working pop3/pop3s client</li>
-  <li>added httpd.nes - a working http server (with and without ssl)</li>
+  <li>added popsync.ns - a working pop3/pop3s client</li>
+  <li>added httpd.ns - a working http server (with and without ssl)</li>
   <li>added tcp server support for xyssl and openssl</li>
   <li>added support for xyssl encryption lib (aes, md5 and sha1 sums, tcp, etc...)</li>
   <li>fixed broken table comparisons</li>

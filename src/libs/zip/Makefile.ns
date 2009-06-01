@@ -1,0 +1,28 @@
+#!../../../bin/neslite
+include("../../config.ns");
+include("../makelib.ns");
+CFLAGS  = CFLAGS+" -I../../../include ";
+if (CC=='cl.exe') CFLAGS=CFLAGS+"/c /Fo";
+else if (CC=='tcc.exe') CFLAGS=CFLAGS+"-c -o";
+else CFLAGS=CFLAGS+"-c -o ";
+OBJECTS = "_ioapi.o _iowin32.o _unzip.o _zip.o zip.o";
+TNAME   = "libneslazip";
+if (cmd==null) if (_ARGS[2]=='clean') cmd='clean'; else cmd='build';
+if (cmd=='build') {
+	t=newer2(OBJECTS, _LINKAGE_, TNAME);
+	if (t>0) {
+		print("building ",_LINKAGE_," lib zip\n");
+		if (CC=='cl.exe') file.write("dlldefs.def", "LIBRARY\t\tlibneslazip\r\nVERSION\t\t"+_version_+"\r\nEXPORTS\r\n\tneslazip_register_all\r\n\tneslalib_init\r\n");
+		build_objs(CC, CFLAGS, OBJECTS, _LINKAGE_, TNAME);
+		ILIB="";
+		if (config.have_zlib==true) {
+			/* try to make this shared lib self-sufficient */
+			if (typeof(file.stat("/usr/lib/libz.a"))=='table') {
+				ILIB=" /usr/lib/libz.a";
+			}
+		}
+		build_lib(CC, TNAME, OBJECTS+ILIB, _LINKAGE_, TNAME);
+	}
+} else if (cmd=='clean') {
+	build_clean(TNAME, OBJECTS);
+}

@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2008 Dan Cahill
+    Copyright (C) 2007-2009 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ static NES_FUNCTION(neslatest_hello)
 	return 0;
 }
 
-static int neslatest_register_all(nes_state *N)
+int neslatest_register_all(nes_state *N)
 {
 	nes_setcfunc(N, &N->g, "dltest", (NES_CFUNC)neslatest_hello);
 	return 0;

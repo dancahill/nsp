@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2008 Dan Cahill
+    Copyright (C) 2007-2009 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ static char *mime_read_head(nes_state *N, obj_t *tobj, char *inptr)
 				cobj=nes_setstr(N, iobj, n_ntoa(N, namebuf, 1, 10, 0), p, inptr-p);
 			} else if (nes_istable(cobj)) {
 				size=0;
-				for (iobj=cobj->val->d.table;iobj;iobj=iobj->next) {
+				for (iobj=cobj->val->d.table.f;iobj;iobj=iobj->next) {
 					if (iobj->val->attr&NST_SYSTEM) { size--; continue; }
 					if (!nes_isnull(iobj)) size++;
 				}

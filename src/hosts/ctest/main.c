@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2008 Dan Cahill
+    Copyright (C) 2007-2009 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -169,12 +169,12 @@ static void preppath(nes_state *N, char *name)
 
 void do_banner() {
 	printf("\r\nNullLogic Embedded Scripting Language Version " NESLA_VERSION);
-	printf("\r\nCopyright (C) 2007-2008 Dan Cahill\r\n\r\n");
+	printf("\r\nCopyright (C) 2007-2009 Dan Cahill\r\n\r\n");
 	return;
 }
 
 void do_help(char *arg0) {
-	printf("Usage : %s [-e] [-f] file.nes\r\n", arg0);
+	printf("Usage : %s [-e] [-f] file.ns\r\n", arg0);
 	printf("  -e  execute string\r\n");
 	printf("  -f  execute file\r\n\r\n");
 	return;

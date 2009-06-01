@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2008 Dan Cahill
+    Copyright (C) 2007-2009 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,15 +30,15 @@ static void neslaext_xml_trimtree(nes_state *N, obj_t *tobj)
 {
 	obj_t *cobj=tobj, *nobj;
 
-	if (!nes_istable(cobj)||cobj->val->d.table==NULL) return;
-	nobj=cobj->val->d.table;
+	if (!nes_istable(cobj)||cobj->val->d.table.f==NULL) return;
+	nobj=cobj->val->d.table.f;
 	if (nobj->next==NULL&&nes_istable(nobj)&&nc_strcmp(nobj->name, "0")==0) {
 		n_free(N, (void *)&cobj->val);
 		cobj->val=nobj->val;
 		n_free(N, (void *)&nobj);
 	}
 	if (!nes_istable(cobj)) return;
-	for (cobj=cobj->val->d.table;cobj;cobj=cobj->next) {
+	for (cobj=cobj->val->d.table.f;cobj;cobj=cobj->next) {
 		if (nes_istable(cobj)) neslaext_xml_trimtree(N, cobj);
 	}
 	return;
@@ -128,7 +128,7 @@ static char *neslaext_xml_readsub(nes_state *N, obj_t *tobj, char *ptr, char *ot
 
 					j=-1;
 					nobj=nes_settable(N, tobj, tagbuf);
-					for (cobj=nobj->val->d.table;cobj;cobj=cobj->next) {
+					for (cobj=nobj->val->d.table.f;cobj;cobj=cobj->next) {
 						if (nc_isdigit(cobj->name[0])) j=(int)n_aton(N, cobj->name);
 					}
 					nobj=nes_settable(N, nobj, n_ntoa(N, namebuf, ++j, 10, 0));
@@ -236,7 +236,7 @@ continue;
 //			if (N->debug) 
 //			n_warn(N, __FUNCTION__, "new label '%s'", namebuf);
 			j=-1;
-			for (cobj=nobj->val->d.table; cobj; cobj=cobj->next) {
+			for (cobj=nobj->val->d.table.f; cobj; cobj=cobj->next) {
 				if (nc_isdigit(cobj->name[0])) j=(int)n_aton(N, cobj->name);
 			}
 			nobj=nes_settable(N, nobj, n_ntoa(N, namebuf, ++j, 10, 0));

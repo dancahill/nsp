@@ -1,0 +1,208 @@
+#!../bin/neslite
+
+function expect(msg, a, b) {
+	print("  ", string.sub(msg+"                      ", 0, 20), " ");
+	if (b==true) print("pass\n"); else print("fail\n");
+	return;
+}
+
+function testsub(title, l, c, showfail) {
+	file.unlink("conftest.c");
+	file.unlink("conftest.exe");
+	file.unlink("conftest.out");
+	file.unlink("conftest.obj");
+	if (ostype=='posix') {
+		file.write("conftest.c", c);
+		r1=system(cc+" conftest.c "+l+" -o conftest.out 2>/dev/null");
+		if (r1==0) r2=file.stat("conftest.out");
+	} else if (ostype=='windows') {
+		file.write("conftest.c", c);
+		r1=system(cc+" -nologo conftest.c "+l+" -o conftest.exe > nul");
+		if (r1==0) r2=file.stat("conftest.exe");
+	} else {
+		print("unknown ostype '", ostype, "'[", _ENV['OS'], "][", _ENV['OSTYPE'], "]\n");
+		printvar(_GLOBALS);
+		expect("testing "+title, true, false);
+		return 0;
+	}
+	file.unlink("conftest.c");
+	file.unlink("conftest.exe");
+	file.unlink("conftest.out");
+	file.unlink("conftest.obj");
+	if ((r1==0)&&(typeof(r2)=='table')) {
+		expect("testing "+title, true, true);
+		return 1;
+	} else {
+		if (showfail!=false) expect("testing "+title, true, false);
+		return 0;
+	}
+}
+
+function dotests() {
+	x=file.stat("../config.mak");
+	if (typeof(x)=='table') if (x.size>0) return;
+	if (_ARGS[2]!=null) global cctype=_ARGS[2];
+	if (_ARGS[3]!=null) global ostype=_ARGS[3];
+	// print("\t[", cctype, "][", ostype, "]\n");
+	if (ostype==null) {
+		if (_ENV['OS']=='Windows_NT') {
+			if (_ENV['MAKE_MODE']=='unix') {
+				global ostype='posix';
+				global cygwin=true; // probably
+			} else {
+				global ostype='windows';
+			}
+		} else {
+			global ostype='posix';
+		}
+	}
+	config_mak="";
+	config_nes="global ostype  = '"+ostype+"';\n";
+	config_ne2="global config  = { ";
+	config_inc=0;
+	if (ostype=='dos') {
+		if (system("tcc.exe 1>nul 2>nul")==0) {
+			print("  found TurboC++ on DOS\n");
+			global cc="tcc.exe";
+			memmodel="l";
+			config_mak+="MODEL="+memmodel+"\n";
+			config_mak+="CC = "+cc+"\n";
+			config_mak+="CFLAGS = -w-par -m$(MODEL) -v-\n\n";
+
+			config_nes+="global CC      = \""+cc+"\";\n";
+			config_nes+="global CFLAGS  = \"-w-par -m"+memmodel+" -v-\";\n";
+			config_nes+="global LDFLAGS = \"\";\n\n";
+
+			config_mak+="CFLAGS  += -DHAVE_MATH\nLDFLAGS += -lneslamath -lm\n\n";
+			config_nes+="CFLAGS  += \" -DHAVE_MATH\";\nLDFLAGS += \" -lneslamath -lm\";\n\n";
+			if (config_inc++) config_ne2+=", ";
+			config_ne2+="have_math=true";
+		}
+	}
+	if (ostype=='windows') {
+		if (system("cl.exe 1>nul 2>nul")==0) {
+			print("  found VC on Win32 OS\n");
+			global cc="cl.exe";
+			config_mak+="CC     = "+cc+"\n";
+			config_mak+="CFLAGS = \n";
+			config_mak+="LDLAGS = \n\n";
+
+			config_nes+="global CC      = \""+cc+"\";\n";
+			config_nes+="global CFLAGS  = \"-nologo -W3 -O2 -ML -GX -DWIN32 -DNDEBUG -D_MBCS -D_LIB -FD\";\n";
+			config_nes+="global LDFLAGS = \"\";\n\n";
+		} else if (system("gcc --version > nul")==0) {
+			print("  found GCC on Win32 OS (MinGW?)\n");
+			global cc="gcc";
+			// not a good hack, but i'm lazy
+			global ostype="posix";
+			global ossubtype="mingw";
+		} else {
+			print("\tcan't find your compiler type...\n");
+		}
+	}
+	if (ostype=='posix') {
+		if (system("gcc --version 1>/dev/null 2>/dev/null")==0) {
+			print("  found GCC on posix OS\n");
+			global cc="gcc";
+			config_mak+="CC = "+cc+"\n";
+			config_mak+="CFLAGS = -Wall -g -O2\n\n";
+
+			config_nes+="global CC      = \""+cc+"\";\n";
+			config_nes+="global CFLAGS  = \"-Wall -g -O2\";\n";
+			config_nes+="global LDFLAGS = \"\";\n\n";
+		} else {
+			print("\tcan't find your compiler type...\n");
+		}
+	}
+	if (ostype=='posix') {
+		config_mak+="CFLAGS  += -DHAVE_CDB\nLDFLAGS += -lneslacdb\n\n";
+		config_nes+="CFLAGS  += \" -DHAVE_CDB\";\nLDFLAGS += \" -lneslacdb\";\n\n";
+
+		config_mak+="CFLAGS  += -DHAVE_CRYPTO\nLDFLAGS += -lneslacrypto\n\n";
+		config_nes+="CFLAGS  += \" -DHAVE_CRYPTO\";\nLDFLAGS += \" -lneslacrypto\";\n\n";
+
+		if (testsub("-pipe", "-pipe", "int main() { return 0; }\n")) {
+			config_mak+="CFLAGS  += -pipe\n\n";
+			config_nes+="CFLAGS  += \" -pipe\";\n\n";
+		}
+		if (testsub("-fPIC", "-fPIC", "int main() { return 0; }\n")) {
+			config_mak+="DLFLAGS = -fPIC -DPIC\n\n";
+			config_nes+="global DLFLAGS = \"-fPIC -DPIC \";\n\n";
+		}
+		if (testsub("-rdynamic", "-rdynamic", "int main() { return 0; }\n")) {
+			config_mak+="LDFLAGS += -rdynamic\n\n";
+			config_nes+="LDFLAGS += \" -rdynamic\";\n\n";
+		}
+		if (testsub("socklen_t", "", "#include <netdb.h>\nsocklen_t t;\nint main() { return 0; }\n")==0) {
+			config_mak+="CFLAGS  += -DMISSING_SOCKLEN\n\n";
+			config_nes+="CFLAGS  += \" -DMISSING_SOCKLEN\";\n\n";
+			if (config_inc++) config_ne2+=", ";
+			config_ne2+="missing_socklen=true";
+		}
+		/* BSD doesn't like -ldl */
+		if (testsub("DL", "-ldl", "#include <dlfcn.h>\nint main() { return 0; }\n", false)) {
+			config_mak+="CFLAGS  += -DHAVE_DL\nLDFLAGS += -lnesladl -ldl\n\n";
+			config_nes+="CFLAGS  += \" -DHAVE_DL\";\nLDFLAGS += \" -lnesladl -ldl\";\n\n";
+			if (config_inc++) config_ne2+=", ";
+			config_ne2+="have_dl=true";
+		} else if (testsub("DL", "", "#include <dlfcn.h>\nint main() { return 0; }\n")) {
+			config_mak+="CFLAGS  += -DHAVE_DL\nLDFLAGS += -lnesladl\n\n";
+			config_nes+="CFLAGS  += \" -DHAVE_DL\";\nLDFLAGS += \" -lnesladl\";\n\n";
+			if (config_inc++) config_ne2+=", ";
+			config_ne2+="have_dl=true";
+		}
+		if (testsub("MATH", "-lm", "#include <math.h>\nint main() { return 0; }\n")) {
+			config_mak+="CFLAGS  += -DHAVE_MATH\nLDFLAGS += -lneslamath -lm\n\n";
+			config_nes+="CFLAGS  += \" -DHAVE_MATH\";\nLDFLAGS += \" -lneslamath -lm\";\n\n";
+			if (config_inc++) config_ne2+=", ";
+			config_ne2+="have_math=true";
+		}
+		config_mak+="CFLAGS  += -DHAVE_REGEX\nLDFLAGS += -lneslaregex\n\n";
+		config_nes+="CFLAGS  += \" -DHAVE_REGEX\";\nLDFLAGS += \" -lneslaregex\";\n\n";
+		if (testsub("XYSSL", "-lxyssl", "#include <xyssl/ssl.h>\nint main() { return 0; }\n")) {
+			config_mak+="CFLAGS  += -DHAVE_XYSSL\nLDFLAGS += -lxyssl\n\n";
+			config_nes+="CFLAGS  += \" -DHAVE_XYSSL\";\nLDFLAGS += \" -lxyssl\";\n\n";
+			if (config_inc++) config_ne2+=", ";
+			config_ne2+="have_xyssl=true";
+		}
+	} else if (ostype=='windows') {
+		config_mak+="CFLAGS  = $(CFLAGS) -DHAVE_CDB\nLDFLAGS = $(LDFLAGS) libneslacdb.lib\n\n";
+		config_nes+="CFLAGS  += \" -DHAVE_CDB\";\nLDFLAGS += \" libneslacdb.lib\";\n\n";
+
+		config_mak+="CFLAGS  = $(CFLAGS) -DHAVE_CRYPTO\nLDFLAGS = $(LDFLAGS) libneslacrypto.lib\n\n";
+		config_nes+="CFLAGS  += \" -DHAVE_CRYPTO\";\nLDFLAGS += \" libneslacrypto.lib\";\n\n";
+
+		if (testsub("DL", "", "#include <windows.h>\nint main() { LoadLibrary(\"\"); return 0; }\n")) {
+			config_mak+="CFLAGS  = $(CFLAGS) -DHAVE_DL\nLDFLAGS = $(LDFLAGS) libnesladl.lib\n\n";
+			config_nes+="CFLAGS  += \" -DHAVE_DL\";\nLDFLAGS += \" libnesladl.lib\";\n\n";
+			if (config_inc++) config_ne2+=", ";
+			config_ne2+="have_dl=true";
+		}
+		if (testsub("MATH", "", "#include <math.h>\nint main() { return 0; }\n")) {
+			config_mak+="CFLAGS  = $(CFLAGS) -DHAVE_MATH\nLDFLAGS = $(LDFLAGS) libneslamath.lib\n\n";
+			config_nes+="CFLAGS  += \" -DHAVE_MATH\";\nLDFLAGS += \" libneslamath.lib\";\n\n";
+			if (config_inc++) config_ne2+=", ";
+			config_ne2+="have_math=true";
+		}
+		if (testsub("ODBC", "", "#include <windows.h>\n\n#include <sql.h>\n#include <sqlext.h>\nint main() { return 0; }\n")) {
+			config_mak+="CFLAGS  = $(CFLAGS) -DHAVE_ODBC\nLDFLAGS = $(LDFLAGS) libneslaodbc.lib\n\n";
+			config_nes+="CFLAGS  += \" -DHAVE_ODBC\";\nLDFLAGS += \" libneslaodbc.lib\";\n\n";
+			if (config_inc++) config_ne2+=", ";
+			config_ne2+="have_odbc=true";
+		}
+		config_mak+="CFLAGS  = $(CFLAGS) -DHAVE_REGEX\nLDFLAGS = $(LDFLAGS) libneslaregex.lib\n\n";
+		config_nes+="CFLAGS  += \" -DHAVE_REGEX\";\nLDFLAGS += \" libneslaregex.lib\";\n\n";
+		if (testsub("XYSSL", "", "#include <xyssl/ssl.h>\nint main() { return 0; }\n")) {
+			config_mak+="CFLAGS  = $(CFLAGS) -DHAVE_XYSSL\nLDFLAGS = $(LDFLAGS) xyssl.lib\n\n";
+			config_nes+="CFLAGS  += \" -DHAVE_XYSSL\";\nLDFLAGS += \" xyssl.lib\";\n\n";
+			if (config_inc++) config_ne2+=", ";
+			config_ne2+="have_xyssl=true";
+		}
+	}
+	file.write("../config.mak", config_mak);
+	config_ne2+=" };\n";
+	file.write("../config.ns", config_ne2+config_nes);
+	print("\n");
+	return;
+}
+dotests();

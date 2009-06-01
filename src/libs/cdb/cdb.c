@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2008 Dan Cahill
+    Copyright (C) 2007-2009 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -167,7 +167,7 @@ NES_FUNCTION(neslacdb_write)
 		return -1;
 	}
 	w=write(fd, cdb_toc, 2048);
-	for (cobj=cobj2->val->d.table;cobj;cobj=cobj->next) {
+	for (cobj=cobj2->val->d.table.f;cobj;cobj=cobj->next) {
 		kl=nc_strlen(cobj->name);
 		if (cobj->val->type==NT_STRING) {
 			p=cobj->val->d.str?cobj->val->d.str:"";
@@ -202,7 +202,7 @@ NES_FUNCTION(neslacdb_write)
 	if (numkeys>0) {
 		cdb_idx=n_alloc(N, numkeys*8, 1);
 		w=2048;
-		for (cobj=cobj2->val->d.table;cobj;cobj=cobj->next) {
+		for (cobj=cobj2->val->d.table.f;cobj;cobj=cobj->next) {
 			kl=nc_strlen(cobj->name);
 			if (cobj->val->type==NT_STRING) {
 				p=cobj->val->d.str?cobj->val->d.str:"";
@@ -244,5 +244,13 @@ int neslacdb_register_all(nes_state *N)
 	nes_setcfunc(N, tobj, "write", (NES_CFUNC)neslacdb_write);
 	return 0;
 }
+
+#ifdef PIC
+DllExport int neslalib_init(nes_state *N)
+{
+	neslacdb_register_all(N);
+	return 0;
+}
+#endif
 
 #endif /* HAVE_CDB */

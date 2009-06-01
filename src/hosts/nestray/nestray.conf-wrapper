@@ -1,9 +1,9 @@
 /*
- * you can encrypt your menu script by moving nestray.conf to nestraymenu.nes
+ * you can encrypt your menu script by moving nestray.conf to nestraymenu.ns
  * and putting this file in its place.
  */
 
-var rfilename=".\\nestraymenu.nes";
+var rfilename=".\\nestraymenu.ns";
 var cfilename=".\\nestraymenu.aes";
 
 if (typeof(file.stat(cfilename))!='table') {

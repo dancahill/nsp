@@ -16,7 +16,11 @@ P { text-align:justify }
 <SCRIPT LANGUAGE=JavaScript TYPE="text/javascript">
 <!--
 function showpage(c,p) {
-	var coll=document.all.tags("DIV");
+	if (document.all) {
+		var coll=document.all.tags("DIV");
+	} else {
+		var coll=document.getElementsByTagName("DIV");
+	}
 	if (coll==null) return;
 	for (i=0;i<coll.length;i++) {
 		if (coll[i].id=='c'+c+'m') {

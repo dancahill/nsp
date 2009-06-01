@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2008 Dan Cahill
+    Copyright (C) 2007-2009 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -91,6 +91,8 @@ void odbc_murder(nes_state *N, obj_t *cobj)
 #undef __FUNCTION__
 }
 
+#define FBUFSIZE 1024
+
 static int odbcQuery(nes_state *N, ODBC_CONN *conn, char *sqlquery, obj_t *qobj)
 {
 #define __FUNCTION__ __FILE__ ":odbcQuery()"
@@ -103,6 +105,7 @@ static int odbcQuery(nes_state *N, ODBC_CONN *conn, char *sqlquery, obj_t *qobj)
 	char colname[MAX_OBJNAMELEN+1];
 	unsigned int field, numfields, numtuples;
 	obj_t *robj, *tobj, *cobj;
+	char fbuf[FBUFSIZE];
 
 	rc=SQLAllocHandle(SQL_HANDLE_STMT, conn->hDBC, &conn->hSTMT);
 	if ((rc!=SQL_SUCCESS)&&(rc!=SQL_SUCCESS_WITH_INFO)) {
@@ -141,17 +144,17 @@ static int odbcQuery(nes_state *N, ODBC_CONN *conn, char *sqlquery, obj_t *qobj)
 		for (field=0;field<numfields;field++) {
 			rc=SQLDescribeCol(conn->hSTMT, (SQLSMALLINT)(field+1), (SQLPOINTER)colname, MAX_OBJNAMELEN, NULL, NULL, NULL, NULL, NULL);
 			cobj=nes_setstr(NULL, tobj, colname, NULL, 0);
-			/* isn't there a way to peek at the size instead of faking a get? */
-			rc=SQLGetData(conn->hSTMT, (SQLUSMALLINT)(field+1), SQL_C_CHAR, NULL, 0, &slen);
-			if (slen>0) {
-				cobj->val->size=slen;
-				cobj->val->d.str=n_alloc(N, cobj->val->size+1, 0);
-				if (cobj->val->d.str==NULL) n_error(N, NE_SYNTAX, __FUNCTION__, "malloc() error while creating SQL cursor.");
-				rc=SQLGetData(conn->hSTMT, (SQLUSMALLINT)(field+1), SQL_C_CHAR, cobj->val->d.str, cobj->val->size+1, &slen);
-				cobj->val->d.str[cobj->val->size]=0;
-			}
+			do {
+				rc=SQLGetData(conn->hSTMT, (SQLUSMALLINT)(field+1), SQL_C_CHAR, fbuf, FBUFSIZE, &slen);
+				if ((rc!=SQL_SUCCESS)&&(rc!=SQL_SUCCESS_WITH_INFO)) {
+					n_warn(N, __FUNCTION__, "Error %d retrieving field %d:%d", rc, numtuples, field);
+					goto err;
+				}
+				if (slen>0) nes_strcat(NULL, cobj, fbuf, slen<FBUFSIZE?slen:FBUFSIZE-1);
+			} while (rc==SQL_SUCCESS_WITH_INFO);
 		}
 	}
+err:
 	nes_setnum(NULL, qobj, "_tuples", numtuples);
 	SQLFreeHandle(SQL_HANDLE_STMT, conn->hSTMT);
 	conn->hSTMT=NULL;

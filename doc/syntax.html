@@ -16,7 +16,11 @@ P { text-align:justify }
 <SCRIPT LANGUAGE=JavaScript TYPE="text/javascript">
 <!--
 function showpage(c,p) {
-	var coll=document.all.tags("DIV");
+	if (document.all) {
+		var coll=document.all.tags("DIV");
+	} else {
+		var coll=document.getElementsByTagName("DIV");
+	}
 	if (coll==null) return;
 	for (i=0;i<coll.length;i++) {
 		if (coll[i].id=='c'+c+'m') {
@@ -166,7 +170,7 @@ function showpage(c,p) {
 <DIV ID=c1p0 STYLE='display: block'><h1>1 - Introduction</h1>
 <p>
 I suck at writing documentation, so this will be short and bitter.  For working
-samples, check out scripts/tests/*.nes
+samples, check out scripts/tests/*.ns
 </p>
 <p>
 Nesla's earliest lines of code were derived from all the configuration file
@@ -339,8 +343,8 @@ The following example demonstrates how to load a script and verify its success.
 <P>
 <TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
 <CODE>
-	rval=<B>include</B>("./somefile.nes");<BR>
-	<B>if</B> (rval!=0) <B>print</B>("error loading ./somefile.nes\n");
+	rval=<B>include</B>("./somefile.ns");<BR>
+	<B>if</B> (rval!=0) <B>print</B>("error loading ./somefile.ns\n");
 </CODE></TD></TR></TABLE>
 </BLOCKQUOTE><P>
 <!-- CONTENTS_END -->
@@ -1026,7 +1030,7 @@ system date.
 <CODE>
 	<B>print</B>(<B>sqldate</B>());
 </CODE></TD></TR></TABLE>
-<P>The above example will output something similar to: "<B>2008-01-01</B>"</P>
+<P>The above example will output something similar to: "<B>2009-01-01</B>"</P>
 <P>
 <TABLE BORDER="0" BGCOLOR="#E0E0E0" CELLPADDING="5"><TR><TD>
 <CODE>
@@ -1314,7 +1318,7 @@ hey.
 </p>
 <PRE>/*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2008 Dan Cahill
+    Copyright (C) 2007-2009 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1508,7 +1512,7 @@ obj_t     *nes_evalf      (nes_state *N, const char *fmt, ...);
 		</FONT>
 		</TD><TD ALIGN="right" VALIGN="BOTTOM" WIDTH="50%">
 		<FONT FACE=Arial COLOR="#000000" SIZE=-2>
-		Copyright &copy; 2008 NullLogic<BR>
+		Copyright &copy; 2009 NullLogic<BR>
 		All rights reserved
 		</FONT>
 		</TD></TR>

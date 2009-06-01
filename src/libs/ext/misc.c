@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2008 Dan Cahill
+    Copyright (C) 2007-2009 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -47,6 +47,7 @@ int neslaext_register_all(nes_state *N)
 	tobj=nes_settable(N, &N->g, "xml");
 	tobj->val->attr|=NST_HIDDEN;
 	nes_setcfunc(N, tobj,  "read",    (NES_CFUNC)neslaext_xml_read);
+
 	return 0;
 }
 

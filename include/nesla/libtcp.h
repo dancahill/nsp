@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2008 Dan Cahill
+    Copyright (C) 2007-2009 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,6 +16,11 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef WIN32
 #  pragma comment(lib, "ws2_32.lib")
 #  ifdef __CYGWIN__
@@ -140,3 +145,7 @@ NES_FUNCTION(neslatcp_tcp_close);
 NES_FUNCTION(neslatcp_tcp_read);
 NES_FUNCTION(neslatcp_tcp_gets);
 NES_FUNCTION(neslatcp_tcp_write);
+
+#ifdef __cplusplus
+}
+#endif

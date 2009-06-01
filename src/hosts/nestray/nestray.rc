@@ -73,7 +73,7 @@ BEGIN
             VALUE "FileDescription", "Nesla Tray Host\0"
             VALUE "FileVersion", "0.9.1\0"
             VALUE "InternalName", "NESTRAY.EXE\0"
-            VALUE "LegalCopyright", "Copyright © 2007-2008\0"
+            VALUE "LegalCopyright", "Copyright © 2007-2009\0"
             VALUE "OriginalFilename", "NESTRAY.EXE\0"
             VALUE "ProductName", "Nesla Tray Host\0"
             VALUE "ProductVersion", "0.9.1\0"

@@ -1,6 +1,6 @@
 /*
     nesla.cgi -- simple Nesla CGI host
-    Copyright (C) 2007-2008 Dan Cahill
+    Copyright (C) 2007-2009 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -282,7 +282,7 @@ char *get_mime_type(char *name)
 		{ ".shtml","text/html" },
 		{ ".css",  "text/css" },
 		{ ".txt",  "text/plain" },
-		{ ".nes",  "text/plain" },
+		{ ".ns",   "text/plain" },
 		{ ".php",  "text/plain" },
 		{ ".mdb",  "application/msaccess" },
 		{ ".xls",  "application/msexcel" },
@@ -665,7 +665,7 @@ void send_header(int cacheable, char *mime_type, int length, time_t mod)
 	if (strstr(nes_getstr(N, servobj, "SCRIPT_NAME"), "nph-")!=NULL) {
 		printf("HTTP/1.0 200 OK\r\n");
 	}
-	for (cobj=headobj->val->d.table; cobj; cobj=cobj->next) {
+	for (cobj=headobj->val->d.table.f; cobj; cobj=cobj->next) {
 		if ((cobj->val->type!=NT_STRING)&&(cobj->val->type!=NT_NUMBER)) continue;
 		if (strcmp(cobj->name, "CONTENT_TYPE")==0) { ctobj=cobj; continue; }
 		strncpy(tmpbuf, cobj->name, sizeof(tmpbuf)-1);

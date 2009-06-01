@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2008 Dan Cahill
+    Copyright (C) 2007-2009 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,6 +16,11 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* base64.c */
 NES_FUNCTION(neslaext_base64_decode);
 NES_FUNCTION(neslaext_base64_encode);
@@ -35,3 +40,7 @@ NES_FUNCTION(neslaext_sort_bykey);
 NES_FUNCTION(neslaext_xml_read);
 
 int neslaext_register_all(nes_state *N);
+
+#ifdef __cplusplus
+}
+#endif
