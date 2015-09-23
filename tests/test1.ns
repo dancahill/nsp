@@ -1,0 +1,4 @@
+#!/usr/bin/nsp
+global stuff=true;
+include("testlib.ns");
+testlib.runtests();

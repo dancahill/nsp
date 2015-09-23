@@ -1,0 +1,51 @@
+#!/bin/sh
+# if the NSP CLI does not work with the default LD flags, this
+# script may fix the problem.  Just run it, and re'make'.
+# The output of this script is only used by 'src/hosts/cli/Makefile'.
+
+#if [ -f "src/preconf.mak" ]
+#then
+#	echo "exists"
+#fi
+LDFLAGS="-L../../../lib"
+
+# begin test for -rdynamic
+rm -f /tmp/conftest.c /tmp/conftest.out
+cat > /tmp/conftest.c << EOF
+int main() { return 0; }
+EOF
+cc /tmp/conftest.c -rdynamic -o /tmp/conftest.out 2>/dev/null
+if [ -f "/tmp/conftest.out" ]
+then
+	LDFLAGS="${LDFLAGS} -rdynamic"
+fi
+rm -f /tmp/conftest.c /tmp/conftest.out
+# end test for -rdynamic
+
+# begin test for libdl
+rm -f /tmp/conftest.c /tmp/conftest.out
+cat > /tmp/conftest.c << EOF
+int main() { return 0; }
+EOF
+cc /tmp/conftest.c -ldl -o /tmp/conftest.out 2>/dev/null
+if [ -f "/tmp/conftest.out" ]
+then
+	LDFLAGS="${LDFLAGS} -ldl"
+fi
+rm -f /tmp/conftest.c /tmp/conftest.out
+# end test for libdl
+
+# begin test for libm
+rm -f /tmp/conftest.c /tmp/conftest.out
+cat > /tmp/conftest.c << EOF
+int main() { return 0; }
+EOF
+cc /tmp/conftest.c -lm -o /tmp/conftest.out 2>/dev/null
+if [ -f "/tmp/conftest.out" ]
+then
+	LDFLAGS="${LDFLAGS} -lm"
+fi
+rm -f /tmp/conftest.c /tmp/conftest.out
+# end test for libm
+
+echo -e "LDFLAGS = ${LDFLAGS} -lnsp\n" > "src/preconf.mak"

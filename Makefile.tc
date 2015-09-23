@@ -7,14 +7,14 @@ CC      = tcc
 TLIB    = tlib
 TLINK   = tcc
 MAKE    = make -s -f
-NESLITE = .\bin\neslite.exe
+NSPLITE = .\bin\nsplite.exe
 
-all: _libnesla lite deps static_libs cli
+all: _libnsp lite deps static_libs cli
 	@echo Run 'make targets' to list more options.
 
 deps:
 	@cd src\libs
-	@..\..\$(NESLITE) autoconf.ns turboc dos
+	@..\..\$(NSPLITE) autoconf.ns turboc dos
 	@cd ..\..
 
 dirs:
@@ -24,62 +24,62 @@ dirs:
 
 # rules for libs
 
-static_libs: _libneslacrypto _libneslaext _libneslamath _libneslaregex
+static_libs: _libnspcrypto _libnspext _libnspmath _libnspregex
 
-_libnesla: dirs
-	@cd src\libnesla
+_libnsp: dirs
+	@cd src\libnsp
 	@$(MAKE) Makefile.tc
 	@cd ..\..
 
-_libneslaext:
+_libnspext:
 	@cd src\libs\ext
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
-_libneslacrypto:
+_libnspcrypto:
 	@cd src\libs\crypto
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
-_libneslamath:
+_libnspmath:
 	@cd src\libs\math
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
-_libneslaregex:
+_libnspregex:
 	@cd src\libs\regex
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 # rules for hosts
 
-cli: _libnesla
+cli: _libnsp
 	@cd src\hosts\cli
 	@$(MAKE) Makefile.tc
 	@cd ..\..\..
-#	@$(NESLITE) -e "print('\nStandard Interpreter built');var x='gnikrow dna ';for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));print('\n\n');"
+#	@$(NSPLITE) -e "print('\nStandard Interpreter built');var x='gnikrow dna ';for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));print('\n\n');"
 
-lite: _libnesla
+lite: _libnsp
 	@cd src\hosts\lite
 	@$(MAKE) Makefile.tc
 	@cd ..\..\..
-#	@$(NESLITE) -e "print('\nMinimal Interpreter built');var x='gnikrow dna ';for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));print('\n\n');"
+#	@$(NSPLITE) -e "print('\nMinimal Interpreter built');var x='gnikrow dna ';for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));print('\n\n');"
 
 # rules for everything else
 
 clean: lite
 #	@touch src\config.mak
 	@cd src\libs\crypto
-	@..\..\..\$(NESLITE) Makefile.ns clean
+	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\ext
-	@..\..\..\$(NESLITE) Makefile.ns clean
+	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\math
-	@..\..\..\$(NESLITE) Makefile.ns clean
+	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\regex
-	@..\..\..\$(NESLITE) Makefile.ns clean
+	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\hosts\cli
 	@$(MAKE) MAKEFILE.TC clean
@@ -87,7 +87,7 @@ clean: lite
 	@cd src\hosts\lite
 	@$(MAKE) MAKEFILE.TC clean
 	@cd ..\..\..
-	@cd src\libnesla
+	@cd src\libnsp
 	@$(MAKE) MAKEFILE.TC clean
 	@cd ..\..
 	@del bin\*.exe
@@ -99,11 +99,11 @@ distclean: clean
 
 hack:
 	del *.obj
-	tcc -w-par -ml -v- -I..\include -eneslite.exe libnesla\*.c hosts\lite\main.c
+	tcc -w-par -ml -v- -I..\include -ensplite.exe libnsp\*.c hosts\lite\main.c
 	rem if all else fails, you can build it complete with just the next line by itself
-	tcc -w-par -ml -v- -I..\include -enesla.exe -DHAVE_MATH -DHAVE_REGEX libnesla\*.c libs\ext\*.c libs\math\*.c hosts\cli\main.c
+	tcc -w-par -ml -v- -I..\include -ensp.exe -DHAVE_MATH -DHAVE_REGEX libnsp\*.c libs\ext\*.c libs\math\*.c hosts\cli\main.c
 	del *.obj
-	nesla.exe -e "var x='\n\ngnikrow dna ';print('Standard Interpreter built');for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));"
+	nsp.exe -e "var x='\n\ngnikrow dna ';print('Standard Interpreter built');for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));"
 
 test:
-	bin\nesla.exe scripts\tests\test1.ns
+	bin\nsp.exe scripts\tests\test1.ns

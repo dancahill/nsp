@@ -5,14 +5,14 @@
 CC      = cl.exe
 LINK    = link.exe
 MAKE    = make.exe -f
-NESLITE = .\bin\neslite.exe
+NSPLITE = .\bin\nsplite.exe
 
-all: _libnesla lite #deps static_libs cli nestray cgi
+all: _libnsp lite #deps static_libs cli nestray cgi
 	@echo Run 'make targets' to list more options.
 
 deps:
 	@cd src\libs
-	@..\..\$(NESLITE) autoconf.ns borlandc windows
+	@..\..\$(NSPLITE) autoconf.ns borlandc windows
 	@cd ..\..
 
 dirs:
@@ -23,150 +23,145 @@ dirs:
 
 # rules for libs
 
-static_libs: _libneslacrypto _libnesladl _libneslaext _libneslaldap _libneslamath _libneslamysql _libneslaodbc _libneslapgsql _libneslaregex _libneslasqlite3 _libneslatcp _libneslawinapi _libneslazip
+static_libs: _libnspcrypto _libnspdl _libnspext _libnspldap _libnspmath _libnspmysql _libnspodbc _libnsppgsql _libnspregex _libnspsqlite3 _libnsptcp _libnspwinapi _libnspzip
 
-_libnesla: dirs
-	@cd src\libnesla
+_libnsp: dirs
+	@cd src\libnsp
 	@$(MAKE) Makefile.bc
 	@cd ..\..
 
-_libneslacrypto:
+_libnspcrypto:
 	@cd src\libs\crypto
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
-_libnesladl:
+_libnspdl:
 	@cd src\libs\dl
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
-_libneslaext:
+_libnspext:
 	@cd src\libs\ext
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
-_libneslaldap:
+_libnspldap:
 	@cd src\libs\ldap
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
-_libneslamath:
+_libnspmath:
 	@cd src\libs\math
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
-_libneslamysql:
+_libnspmysql:
 	@cd src\libs\mysql
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
-_libneslaodbc:
+_libnspodbc:
 	@cd src\libs\odbc
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
-_libneslapgsql:
+_libnsppgsql:
 	@cd src\libs\pgsql
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
-_libneslaregex:
+_libnspregex:
 	@cd src\libs\regex
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
-_libneslasqlite3:
+_libnspsqlite3:
 	@cd src\libs\sqlite3
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
-_libneslatcp:
+_libnsptcp:
 	@cd src\libs\tcp
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
-_libneslawinapi:
+_libnspwinapi:
 	@cd src\libs\winapi
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
-_libneslazip:
+_libnspzip:
 	@cd src\libs\zip
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
 shared_libs:
 	@cd src\libs\crypto
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\ext
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\ldap
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\math
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\mysql
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\odbc
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\pgsql
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\regex
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\sqlite3
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\tcp
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\test
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\winapi
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\zip
-	@..\..\..\$(NESLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 
 # rules for hosts
 
-cgi: _libnesla
+cgi: _libnsp
 	@cd src\hosts\cgi
 	@$(MAKE) Makefile.bc
 	@cd ..\..\..
 
-cli: _libnesla
+cli: _libnsp
 	@cd src\hosts\cli
 	@$(MAKE) Makefile.bc
 	@cd ..\..\..
-	@$(NESLITE) -e "print('\nStandard Interpreter built');var x='gnikrow dna ';for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));print('\n\n');"
+	@$(NSPLITE) -e "print('\nStandard Interpreter built');var x='gnikrow dna ';for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));print('\n\n');"
 
-ctest: _libnesla
+ctest: _libnsp
 	@cd src\hosts\ctest
 	@$(MAKE) Makefile.bc
 	@cd ..\..\..
 
-lite: _libnesla
+lite: _libnsp
 	@cd src\hosts\lite
 	@$(MAKE) Makefile.bc
 	@cd ..\..\..
-	@$(NESLITE) -e "print('\nMinimal Interpreter built');var x='gnikrow dna ';for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));print('\n\n');"
+	@$(NSPLITE) -e "print('\nMinimal Interpreter built');var x='gnikrow dna ';for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));print('\n\n');"
 
-nestray: _libnesla
+nestray: _libnsp
 	@cd src\hosts\nestray
-	@$(MAKE) Makefile.bc
-	@cd ..\..\..
-
-nullgw: _libnesla
-	@cd src\hosts\nullgw
 	@$(MAKE) Makefile.bc
 	@cd ..\..\..
 
@@ -175,46 +170,46 @@ nullgw: _libnesla
 clean: lite
 #	@touch src\config.mak
 	@cd src\libs\crypto
-	@..\..\..\$(NESLITE) Makefile.ns clean
+	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\dl
-	@..\..\..\$(NESLITE) Makefile.ns clean
+	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\ext
-	@..\..\..\$(NESLITE) Makefile.ns clean
+	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\ldap
-	@..\..\..\$(NESLITE) Makefile.ns clean
+	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\math
-	@..\..\..\$(NESLITE) Makefile.ns clean
+	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\mysql
-	@..\..\..\$(NESLITE) Makefile.ns clean
+	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\odbc
-	@..\..\..\$(NESLITE) Makefile.ns clean
+	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\pgsql
-	@..\..\..\$(NESLITE) Makefile.ns clean
+	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\regex
-	@..\..\..\$(NESLITE) Makefile.ns clean
+	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\sqlite3
-	@..\..\..\$(NESLITE) Makefile.ns clean
+	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\tcp
-	@..\..\..\$(NESLITE) Makefile.ns clean
+	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\test
-	@..\..\..\$(NESLITE) Makefile.ns clean
+	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\winapi
-	@..\..\..\$(NESLITE) Makefile.ns clean
+	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\zip
-	@..\..\..\$(NESLITE) Makefile.ns clean
+	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\hosts\cgi
 	@$(MAKE) MAKEFILE.bc clean
@@ -231,10 +226,7 @@ clean: lite
 	@cd src\hosts\nestray
 	@$(MAKE) MAKEFILE.bc clean
 	@cd ..\..\..
-	@cd src\hosts\nullgw
-	@$(MAKE) MAKEFILE.bc clean
-	@cd ..\..\..
-	@cd src\libnesla
+	@cd src\libnsp
 	@$(MAKE) MAKEFILE.bc clean
 	@cd ..\..
 #	@rm -f bin\* lib\*
@@ -244,8 +236,8 @@ distclean: clean
 	@del src\config.???
 
 hack:
-	cl.exe /DWIN32 /I./include src/libnesla/*.c src/hosts/lite/main.c -Febin/nesla_h.exe
+	cl.exe /DWIN32 /I./include src/libnsp/*.c src/hosts/lite/main.c -Febin/nsp_h.exe
 	del *.obj
 
 test:
-	bin\nesla.exe scripts\tests\test1.ns
+	bin\nsp.exe scripts\tests\test1.ns

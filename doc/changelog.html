@@ -1,22 +1,55 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!DOCTYPE html>
 <html>
 <head>
-<title>NESLA NullLogic Embedded Scripting Language ChangeLog</title>
-<link rel="stylesheet" href="nesla.css">
+<title>NSP ChangeLog</title>
+<link href="nsp.css" rel="stylesheet" type="text/css">
 </head>
 <body>
 <hr>
 <h1>
-<a href="http://nesla.sourceforge.net/"><img src="nesla.png" alt="" border="0" height="32" width="32"></a>
-NESLA NullLogic Embedded Scripting Language ChangeLog
+NSP ChangeLog
 </h1>
 <small>
 <a href="copyright.html">Copyright</a>
-&copy; 2007-2009 Dan Cahill.  All rights reserved.
+&copy; 2007-2015 Dan Cahill.  All rights reserved.
 </small>
 <hr>
 
-<h2>0.9.3 (2009-??-??)</h2>
+<h2>0.9.4 (2015-09-23)</h2>
+<ul>
+  <li>base types now have access to common methods, i.e. string.toupper(x) can now be executed as x.toupper()</li>
+  <li>classes and functions can now be declared with explicit scope without using lambda declaration syntax</li>
+  <li>added internal memory usage auditing tool</li>
+  <li>added working native class for Firebird SQL</li>
+  <li>added native smtp client class to net library</li>
+  <li>updated xyssl/polarssl to work with mbed TLS 2.0</li>
+  <li>added openssl api library (far from complete)</li>
+  <li>added primitive S/MIME support to openssl lib</li>
+  <li>added primitive support for inheritance</li>
+  <li>added 'delete'</li>
+  <li>replaced printvar with serialize which can return the same data as a string</li>
+  <li>fixed foreach segfault when array was redefined mid-loop</li>
+  <li>changed foreach args from (val in array) to ([name, ]val in array)</li>
+  <li>fixed inline lambda execution</li>
+  <li>fixed debug output when executing nonexistent functions</li>
+  <li>fixed literal string var names in table declarations</li>
+  <li>rewrote odbc as a native class</li>
+  <li>rewrote sqlite3 as a native class</li>
+  <li>fixed unary operator '!'</li>
+  <li>added native class for reading DBF files</li>
+  <li>fixed resetting of pre-existing null values with implicit scope</li>
+  <li>added support for switch() blocks</li>
+  <li>dl.load now uses dl.path to look for shared libs when trying to load them</li>
+  <li>fixed ternary conditions to skip unused eval</li>
+  <li>added support for var pointers</li>
+  <li>reduced use of heap for transient vals</li>
+  <li>fixed autosort and floating indexing on tables for faster table lookups</li>
+  <li>sizes for blocks and conds are now precalculated</li>
+  <li>added '&lt;&lt;' and '&gt;&gt;' shift operators</li>
+  <li>added printf and sprintf functions</li>
+  <li>fixed integer size mismatches on 64 bit cpus</li>
+</ul>
+<h2>0.9.3 (2009-06-01)</h2>
 <ul>
   <li>added ternary conditional expression operator ?:</li>
   <li>added catch, finally and throw to try</li>

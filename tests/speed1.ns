@@ -1,0 +1,115 @@
+#!/usr/bin/nsp
+/*
+
+tested on:
+	OS          : CentOS release 5.4 (Final)
+	model name  : Intel(R) Xeon(TM) CPU 2.80GHz
+	cpu MHz     : 2783.873
+	bogomips    : 5567.08
+
+100001 loops: (best times (not averages))
+	C       =    3.4ms
+	LUA     =   15.2ms
+	Nesla   =   68.9ms <- merged
+	Nesla   =   75.0ms
+	PERL    =   40.4ms
+	PHP     =   49.1ms
+
+----====----
+
+tested on:
+	OS          : CentOS release 5.4 (Final)
+	model name  : Intel(R) Pentium(R) 4 CPU 1.60GHz
+	cpu MHz     : 1600.176
+	bogomips    : 3202.32
+
+100001 loops: (best times (not averages))
+	C       =      4ms
+	LUA     =     22ms
+	Nesla   =    117ms <- merged
+	Nesla   =    128ms
+	PERL    =     69ms
+	PHP     =     74ms
+	Python  =    137ms
+	Ruby    =    477ms
+
+1000001 loops: (best times (not averages))
+	C       =     15ms
+	LUA     =    199ms
+	Nesla   =   1159ms <- merged
+	Nesla   =   1309ms
+	PERL    =    635ms
+	PHP     =    500ms
+	Python  =   1123ms
+	Ruby    =   4665ms
+
+ */
+//print("\e[2J"+"\e[H");
+
+
+function test(title, code) {
+	print("\e[01;37;40m",title,"\e[00m\t");
+	oldtime=runtime();
+	system(code);
+	t=runtime()-oldtime;
+	if (besttimes[title]==null || tonumber(besttimes[title])>t) besttimes[title]=t;
+//	print("\ttime = ", tostring(t, 3), " (", tostring(t/basetime, 1), "xC)\n");
+	print("\t", string.sub("   "+math.floor(t*1000), -4), "ms (", string.tostring(t/basetime, 1), "xC)\n");
+	return;
+}
+
+function dotests(nloops, rounds) {
+	nstats=math.floor(nloops/5);
+	for (round=0;round<rounds;round++) {
+		file.writeall("timetest.c", "#include <stdio.h>\nint main()\n{\n\tunsigned int i;\n\tfor (i=1;i<"+nloops+";i++) if (i%"+nstats+"==0) printf(\"%d\", i/"+nstats+");\n\treturn 0;\n}\n");
+//		system("cc -O2 -s -static timetest.c -o timetest.bin");
+		system("cc -O2 -s timetest.c -o timetest.bin");
+		print("\n\e[01;37;40mC\e[00m\t");
+		oldtime=runtime();
+		system("./timetest.bin");
+		global basetime=runtime()-oldtime;
+		file.unlink("timetest.c", "timetest.bin");
+		print("\t", string.sub("   "+math.floor(basetime*1000), -4), "ms\n");
+		if (besttimes['C']==null || tonumber(besttimes['C'])>basetime) besttimes['C']=basetime;
+
+		test("LUA",    "lua    -e \"for i=1,"+nloops+" do if  math.mod(i,"+nstats+")==0 then io.write(i/"+nstats+") end end\"");
+		test("NSP",    "nsp    -b -e \"for (\\$i=1;\\$i<"+nloops+";\\$i++) { if (\\$i%"+nstats+"==0) { print(\\$i/"+nstats+"); } }\"");
+		test("PERL",   "perl   -e \"for (\\$i=1;\\$i<"+nloops+";\\$i++) { if (\\$i%"+nstats+"==0) { print(\\$i/"+nstats+"); } }\"");
+		test("PHP",    "php    -r \"for (\\$i=1;\\$i<"+nloops+";\\$i++) { if (\\$i%"+nstats+"==0) { print(\\$i/"+nstats+"); } }\"");
+		test("Python", "python -c \"import sys\nfor i in range(1,"+nloops+"):\n\tif i%"+nstats+"==0:\n\t\tsys.stdout.write(str(i/"+nstats+"))\"");
+		test("Ruby",   "ruby   -e 'for i in 1 .. "+nloops+"; if (i % "+nstats+") == 0; print i/"+nstats+"; end; end;'");
+		if (rounds>1) {
+			print("\e[2J"+"\e[H");
+			print("Best Times:\r\n");
+			foreach (n,v in besttimes) {
+				print(string.sub(n+"      ", 0, 7), " = ", tostring(v*1000, 3), " ms\r\n");
+			}
+			print("\r\n",round+1," runs so far\r\n");
+		}
+	}
+}
+
+global besttimes = {};
+nloops=100001;
+//nloops=1000001;
+//nloops=10000001;
+dotests(nloops, 1);
+//dotests(nloops, 50);
+
+/*
+print("-strcat-\r\n");
+test("Nesla",  "nsp    -b -e \"\\$i=\\\"\\\"; for (\\$j=0;\\$j<100000;\\$j++) { \\$i+=\\$j; }\"");
+test("PERL",   "perl   -e \"\\$i=\\\"\\\"; for (\\$j=0;\\$j<100000;\\$j++) { \\$i+=\\$j; }\"");
+test("PHP",    "php    -r \"\\$i=\\\"\\\"; for (\\$j=0;\\$j<100000;\\$j++) { \\$i+=\\$j; }\"");
+print("-...-\r\n");
+test("Nesla",  "nsp    -b -e \"for (\\$j=0;\\$j<100000;\\$j++) { }\"");
+test("PERL",   "perl   -e \"for (\\$j=0;\\$j<100000;\\$j++) { }\"");
+test("PHP",    "php    -r \"for (\\$j=0;\\$j<100000;\\$j++) { }\"");
+*/
+/*
+test("Nesla",  "nsp    -s -e \"for (\\$i=1;\\$i<"+nloops+";\\$i++) { if (\\$i%"+nstats+"==0) { print(\\$i/"+nstats+"); } }\"");
+test("Nesla",  "nsp    -s -e \"for (\\$i=1;\\$i<"+nloops+";\\$i++) { if (\\$i%"+nstats+"==0) { } }\"");
+test("Nesla",  "nsp    -s -e \"for (\\$i=1;\\$i<"+nloops+";\\$i++) { if (1) { } }\"");
+test("Nesla",  "nsp    -s -e \"for (\\$i=1;\\$i<"+nloops+";\\$i++) { if () { } }\"");
+test("Nesla",  "nsp    -s -e \"for (\\$j=0;\\$j<100000;\\$j++) { }\"");
+*/

@@ -1,4 +1,62 @@
-#!/usr/bin/nesla
+#!/usr/bin/nsp
+
+function inno_build() {
+	if (string.sub(_ostype_, 0, 7)!="Windows") return;
+	innoexe=""+ProgramFiles+"\\Inno Setup 5\\Compil32.exe";
+	if (typeof(file.stat(innoexe))=='table') {
+		system("\""+innoexe+"\" /cc nsp.iss");
+	}
+	return;
+}
+
+function win_make(vcver, private_inc, private_lib) {
+	if (string.sub(_ostype_, 0, 7)!="Windows") return;
+	switch (vcver) {
+	case 6:
+		print("Visual Studio 6 (98)\r\n");
+		env="@SET INCLUDE="+private_inc+""+ProgramFiles+"\\Microsoft Visual Studio\\VC98\\atl\\include;"
+			+""+ProgramFiles+"\\Microsoft Visual Studio\\VC98\\mfc\\include;"+ProgramFiles+"\\Microsoft Visual Studio\\VC98\\include\r\n"
+		+"@SET LIB="+private_lib+""+ProgramFiles+"\\Microsoft Visual Studio\\VC98\\mfc\\lib;"+ProgramFiles+"\\Microsoft Visual Studio\\VC98\\lib\r\n"
+		+"@SET MSDevDir="+ProgramFiles+"\\Microsoft Visual Studio\\Common\\MSDev98\r\n"
+		+"@SET PATH="+ProgramFiles+"\\Microsoft Visual Studio\\Common\\Tools\\WinNT;"+ProgramFiles+"\\Microsoft Visual Studio\\Common\\MSDev98\\Bin;"
+			+""+ProgramFiles+"\\Microsoft Visual Studio\\Common\\Tools;"+ProgramFiles+"\\Microsoft Visual Studio\\VC98\\bin;%PATH%\r\n";
+		env_set=true;
+		break;
+	case 8:
+		print("Visual Studio 8 (2005)\r\n");
+		env="@SET INCLUDE="+private_inc+""+ProgramFiles+"\\Microsoft Visual Studio 8\\VC\\include;"+ProgramFiles+"\\Microsoft Visual Studio 8\\VC\\PlatformSDK\\Include\r\n"
+		+"@SET LIB="+private_lib+""+ProgramFiles+"\\Microsoft Visual Studio 8\\VC\\lib;"+ProgramFiles+"\\Microsoft Visual Studio 8\\VC\\PlatformSDK\\Lib\r\n"
+		+"@SET PATH="+ProgramFiles+"\\Microsoft Visual Studio 8\\VC\\bin;"+ProgramFiles+"\\Microsoft Visual Studio 8\\Common7\\IDE;%PATH%\r\n";
+		env_set=true;
+		break;
+	case 9:
+		print("Visual Studio 9 (2008)\r\n");
+		env="@SET INCLUDE="+private_inc+""+ProgramFiles+"\\Microsoft Visual Studio 9.0\\VC\\include;"+ProgramFiles+"\\Microsoft SDKs\\Windows\\v6.0A\\Include\r\n"
+		+"@SET LIB="+private_lib+""+ProgramFiles+"\\Microsoft Visual Studio 9.0\\VC\\lib;"+ProgramFiles+"\\Microsoft SDKs\\Windows\\v6.0A\\Lib\r\n"
+		+"@SET PATH="+ProgramFiles+"\\Microsoft Visual Studio 9.0\\VC\\bin;"+ProgramFiles+"\\Microsoft Visual Studio 9.0\\Common7\\IDE;"+ProgramFiles+"\\Microsoft SDKs\\Windows\\v6.0A\\bin;%PATH%\r\n";
+		env_set=true;
+		break;
+	default:
+		print("fail\r\n");
+	}
+	if (env_set) {
+		cmd="@nmake -f Makefile.vc all shared_libs";
+		batchfile=_ENV['TEMP']+"\\win_make.cmd";
+		file.writeall(batchfile, env+cmd+"\r\n");
+		system(batchfile);
+		inno_build();
+	}
+	print("\ndone - press enter\n");
+	io.gets();
+	exit;
+}
+if (_ostype_=="Windows/msvc") {
+	global ProgramFiles="C:\\Program Files (x86)";
+	win_make(6, "C:\\NullLogic\\utils\\VC6\\include;", "C:\\NullLogic\\utils\\VC6\\lib;");
+//	win_make(9, "C:\\NullLogic\\utils\\VC6\\include;", "C:\\NullLogic\\utils\\VC6\\lib;");
+//	win_make(9, "C:\\null\\VC6\\include;", "C:\\null\\VC6\\lib;");
+}
+
 print("ostype="+_ostype_+"\n");
 if (_ostype_=="Windows/msvc") {
 	cmd="nmake -f Makefile.vc";
@@ -13,13 +71,19 @@ tcount=0;
 for (i=2;i<10;i++) {
 	var x=iname(_ARGS, i);
 	if (typeof(x)!='string') break;
+	if (string.len(_ARGS[x])<1) break;
+	print("["+cmd+" "+_ARGS[x]+"]\r\n");
 	rc=system(cmd+" "+_ARGS[x]);
 	tcount++;
 	if (rc) break;
 }
 if (tcount<1) {
 	rc=system(cmd);
+	if (_ostype_=="Windows/msvc") {
+		rc=system("nmake -f Makefile.vc shared_libs");
+	}
 }
+inno_build();
 if (typeof(io.gets)=='function'&&string.sub(_ostype_, 0, 7)=="Windows") {
 	print("\ndone - press enter\n");
 	io.gets();

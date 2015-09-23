@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>NSP WEB TEST</title>
+</head>
+<body>
+<script type="text/javascript">
+function showdebug() {
+	var displaystyle = document.getElementById('debug').style.display;
+	displaystyle = displaystyle=='none'?'block':'none';
+}
+</script>
+<h1>NSP WEB TEST</h1>
+<div id="test1" style="font-family:courier;font-size:small;white-space:pre">
+<?nsp
+global stuff=true;
+include("testlib.ns");
+testlib.runtests();
+?>
+</div>
+<a href="javascript:showdebug()">show debug</a>
+<div id="debug" style="display:none"><pre>
+global _GLOBALS = <?nsp print(serialize(_GLOBALS)); ?>;
+</pre></div>
+</body>
+</html>

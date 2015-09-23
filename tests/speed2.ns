@@ -1,0 +1,67 @@
+#!/usr/bin/nsp
+
+function test1() {
+	table={};
+	printf("\e[01;37;40m%s\e[00m\r\n", "test1");
+	oldtime=runtime();
+	for (i=0;i<1024*20;i++) {
+		table[i]=i;
+		if (i%1000==0) {
+			print(""+i+"");
+			t=runtime()-oldtime;
+			oldtime=runtime();
+			print("\t", string.sub("      "+math.floor(t*1000), -7), "ms\t");
+			if (string.sub(_ostype_, 0, 7)!="Windows") {
+				system("ps aux | grep [n]sp | grep -v grep > /tmp/ps.txt");
+				x=file.readall("/tmp/ps.txt");
+				x=string.replace(x, "\n", "");
+				print("[",x,"]\n");
+				file.unlink("/tmp/ps.txt");
+			}
+			io.flush();
+		}
+	}
+	table={};
+	return;
+}
+function test2() {
+	table={
+		y = 1;
+		x = {};
+	};
+	printf("\e[01;37;40m%s\e[00m\r\n", "test2");
+	oldtime=runtime();
+	for (i=1;i<20001;i++) {
+		table['x'][i]={ testdata1="x"*512, testdata2="x"*512 };
+		if (i%1000==0) {
+			print(""+i+"");
+			t=runtime()-oldtime;
+			oldtime=runtime();
+			print("\t", string.sub("      "+math.floor(t*1000), -7), "ms\t");
+			if (string.sub(_ostype_, 0, 7)!="Windows") {
+				system("ps aux | grep [n]sp | grep -v grep > /tmp/ps.txt");
+				x=file.readall("/tmp/ps.txt");
+				x=string.replace(x, "\n", "");
+				print("[",x,"]\n");
+				file.unlink("/tmp/ps.txt");
+			}
+			io.flush();
+		}
+	}
+	table={};
+	print(serialize(table));
+	print("\n");
+	return;
+}
+
+if (string.sub(_ostype_, 0, 7)!="Windows") system("clear");
+
+test1();
+test2();
+
+if (string.sub(_ostype_, 0, 7)!="Windows") system("ps aux | grep [n]nsp | grep -v grep");
+if (typeof(io.gets)=='function'&&string.sub(_ostype_, 0, 7)=="Windows") {
+	print("\ndone - press enter\n");
+	io.gets();
+}
+if (meminfo) print(serialize(meminfo()));

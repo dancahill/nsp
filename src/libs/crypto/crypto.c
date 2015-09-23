@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2009 Dan Cahill
+    Copyright (C) 2007-2015 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,34 +17,40 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "nesla/libnesla.h"
-#include "nesla/libcrypt.h"
+#include "nsp/nsplib.h"
+#include "libcrypto.h"
 
-int neslacrypto_register_all(nes_state *N)
+#if defined HAVE_OPENSSL
+int nspopenssl_register_all(nsp_state *N);
+#endif
+
+int nspcrypto_register_all(nsp_state *N)
 {
 	obj_t *tobj;
 
-	tobj=nes_settable(N, &N->g, "crypto");
-	tobj->val->attr|=NST_HIDDEN;
-	nes_setcfunc(N, tobj, "aes_cbc_encrypt", (NES_CFUNC)neslacrypto_aes_encrypt);
-	nes_setcfunc(N, tobj, "aes_cbc_decrypt", (NES_CFUNC)neslacrypto_aes_decrypt);
-	nes_setcfunc(N, tobj, "aes_ecb_encrypt", (NES_CFUNC)neslacrypto_aes_encrypt);
-	nes_setcfunc(N, tobj, "aes_ecb_decrypt", (NES_CFUNC)neslacrypto_aes_decrypt);
-	nes_setcfunc(N, tobj, "md5_passwd",      (NES_CFUNC)neslacrypto_md5_passwd);
-
-	tobj=nes_settable(N, &N->g, "file");
-	nes_setcfunc(N, tobj, "md5",             (NES_CFUNC)neslacrypto_md5_file);
-	nes_setcfunc(N, tobj, "sha1",            (NES_CFUNC)neslacrypto_sha1_file);
-	tobj=nes_settable(N, &N->g, "string");
-	nes_setcfunc(N, tobj, "md5",             (NES_CFUNC)neslacrypto_md5_string);
-	nes_setcfunc(N, tobj, "sha1",            (NES_CFUNC)neslacrypto_sha1_string);
+	tobj = nsp_settable(N, &N->g, "crypto");
+	tobj->val->attr |= NST_HIDDEN;
+	nsp_setcfunc(N, tobj, "aes_cbc_encrypt", (NSP_CFUNC)libnsp_crypto_aes_encrypt);
+	nsp_setcfunc(N, tobj, "aes_cbc_decrypt", (NSP_CFUNC)libnsp_crypto_aes_decrypt);
+	nsp_setcfunc(N, tobj, "aes_ecb_encrypt", (NSP_CFUNC)libnsp_crypto_aes_encrypt);
+	nsp_setcfunc(N, tobj, "aes_ecb_decrypt", (NSP_CFUNC)libnsp_crypto_aes_decrypt);
+	nsp_setcfunc(N, tobj, "md5_passwd", (NSP_CFUNC)libnsp_crypto_md5_passwd);
+	tobj = nsp_settable(N, &N->g, "file");
+	nsp_setcfunc(N, tobj, "md5", (NSP_CFUNC)libnsp_crypto_md5_file);
+	nsp_setcfunc(N, tobj, "sha1", (NSP_CFUNC)libnsp_crypto_sha1_file);
+	tobj = nsp_settable(N, &N->g, "string");
+	nsp_setcfunc(N, tobj, "md5", (NSP_CFUNC)libnsp_crypto_md5_string);
+	nsp_setcfunc(N, tobj, "sha1", (NSP_CFUNC)libnsp_crypto_sha1_string);
+#if defined HAVE_OPENSSL
+	nspopenssl_register_all(N);
+#endif
 	return 0;
 }
 
 #ifdef PIC
-DllExport int neslalib_init(nes_state *N)
+DllExport int nsplib_init(nsp_state *N)
 {
-	neslacrypto_register_all(N);
+	nspcrypto_register_all(N);
 	return 0;
 }
 #endif

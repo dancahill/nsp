@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2009 Dan Cahill
+    Copyright (C) 2007-2015 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "nesla/libnesla.h"
-#include "nesla/libcrypt.h"
+#include "nsp/nsplib.h"
+#include "libcrypto.h"
 #include <fcntl.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -32,11 +32,15 @@
 #endif
 
 /* MD5 */
-#ifdef __alpha
+/*
+#if defined(__alpha)
+typedef unsigned int uint32;
+#elif defined(_LP64)
 typedef unsigned int uint32;
 #else
 typedef unsigned long uint32;
 #endif
+*/
 struct MD5Context {
 	uint32 buf[4];
 	uint32 bits[2];
@@ -79,9 +83,9 @@ static void byteReverse(unsigned char *buf, unsigned longs)
 	uint32 t;
 
 	do {
-		t=(uint32)((unsigned)buf[3]<<8|buf[2])<<16|((unsigned)buf[1]<<8|buf[0]);
-		*(uint32 *)buf=t;
-		buf+=4;
+		t = (uint32)((unsigned)buf[3] << 8 | buf[2]) << 16 | ((unsigned)buf[1] << 8 | buf[0]);
+		*(uint32 *)buf = t;
+		buf += 4;
 	} while (--longs);
 }
 #endif
@@ -93,12 +97,12 @@ static void byteReverse(unsigned char *buf, unsigned longs)
 */
 static void md5_init(struct MD5Context *ctx)
 {
-	ctx->buf[0]=0x67452301;
-	ctx->buf[1]=0xefcdab89;
-	ctx->buf[2]=0x98badcfe;
-	ctx->buf[3]=0x10325476;
-	ctx->bits[0]=0;
-	ctx->bits[1]=0;
+	ctx->buf[0] = 0x67452301;
+	ctx->buf[1] = 0xefcdab89;
+	ctx->buf[2] = 0x98badcfe;
+	ctx->buf[3] = 0x10325476;
+	ctx->bits[0] = 0;
+	ctx->bits[1] = 0;
 }
 
 /*
@@ -111,33 +115,33 @@ static void md5_update(struct MD5Context *ctx, unsigned char const *buf, unsigne
 
 	/* Update bitcount */
 
-	t=ctx->bits[0];
-	if ((ctx->bits[0]=t+((uint32)len<<3))<t)
+	t = ctx->bits[0];
+	if ((ctx->bits[0] = t + ((uint32)len << 3)) < t)
 		ctx->bits[1]++;		/* Carry from low to high */
-	ctx->bits[1]+=len>>29;
-	t=(t>>3)&0x3f;		/* Bytes already in shsInfo->data */
+	ctx->bits[1] += len >> 29;
+	t = (t >> 3) & 0x3f;		/* Bytes already in shsInfo->data */
 	/* Handle any leading odd-sized chunks */
 	if (t) {
-		unsigned char *p=(unsigned char *)ctx->in+t;
+		unsigned char *p = (unsigned char *)ctx->in + t;
 
-		t=64-t;
-		if (len<t) {
+		t = 64 - t;
+		if (len < t) {
 			memcpy(p, buf, len);
 			return;
 		}
 		memcpy(p, buf, t);
 		byteReverse(ctx->in, 16);
 		md5_transform(ctx->buf, (uint32 *)ctx->in);
-		buf+=t;
-		len-=t;
+		buf += t;
+		len -= t;
 	}
 	/* Process data in 64-byte chunks */
-	while (len>=64) {
+	while (len >= 64) {
 		memcpy(ctx->in, buf, 64);
 		byteReverse(ctx->in, 16);
 		md5_transform(ctx->buf, (uint32 *)ctx->in);
-		buf+=64;
-		len-=64;
+		buf += 64;
+		len -= 64;
 	}
 	/* Handle any remaining bytes of data. */
 	memcpy(ctx->in, buf, len);
@@ -153,29 +157,30 @@ static void md5_final(struct MD5Context *ctx, unsigned char digest[16])
 	unsigned char *p;
 
 	/* Compute number of bytes mod 64 */
-	count=(ctx->bits[0]>>3)&0x3F;
+	count = (ctx->bits[0] >> 3) & 0x3F;
 	/* Set the first char of padding to 0x80.  This is safe since there is
 	always at least one byte free */
-	p=ctx->in+count;
-	*p++=0x80;
+	p = ctx->in + count;
+	*p++ = 0x80;
 	/* Bytes of padding needed to make 64 bytes */
-	count=64-1-count;
+	count = 64 - 1 - count;
 	/* Pad out to 56 mod 64 */
-	if (count<8) {
+	if (count < 8) {
 		/* Two lots of padding:  Pad the first block to 64 bytes */
 		memset(p, 0, count);
 		byteReverse(ctx->in, 16);
 		md5_transform(ctx->buf, (uint32 *)ctx->in);
 		/* Now fill the next block with 56 bytes */
 		memset(ctx->in, 0, 56);
-	} else {
+	}
+	else {
 		/* Pad block to 56 bytes */
-		memset(p, 0, count-8);
+		memset(p, 0, count - 8);
 	}
 	byteReverse(ctx->in, 14);
 	/* Append length in bits and transform */
-	((uint32 *)ctx->in)[14]=ctx->bits[0];
-	((uint32 *)ctx->in)[15]=ctx->bits[1];
+	((uint32 *)ctx->in)[14] = ctx->bits[0];
+	((uint32 *)ctx->in)[15] = ctx->bits[1];
 	md5_transform(ctx->buf, (uint32 *)ctx->in);
 	byteReverse((unsigned char *)ctx->buf, 4);
 	memcpy(digest, ctx->buf, 16);
@@ -202,10 +207,10 @@ static void md5_transform(uint32 buf[4], uint32 const in[16])
 {
 	register uint32 a, b, c, d;
 
-	a=buf[0];
-	b=buf[1];
-	c=buf[2];
-	d=buf[3];
+	a = buf[0];
+	b = buf[1];
+	c = buf[2];
+	d = buf[3];
 
 	MD5STEP(F1, a, b, c, d, in[0] + 0xd76aa478, 7);
 	MD5STEP(F1, d, a, b, c, in[1] + 0xe8c7b756, 12);
@@ -275,43 +280,43 @@ static void md5_transform(uint32 buf[4], uint32 const in[16])
 	MD5STEP(F4, c, d, a, b, in[2] + 0x2ad7d2bb, 15);
 	MD5STEP(F4, b, c, d, a, in[9] + 0xeb86d391, 21);
 
-	buf[0]+=a;
-	buf[1]+=b;
-	buf[2]+=c;
-	buf[3]+=d;
+	buf[0] += a;
+	buf[1] += b;
+	buf[2] += c;
+	buf[3] += d;
 }
 
 #endif
 
 /* begin FreeBSD code */
 /*static const char rcsid[]="$FreeBSD: src/lib/libcrypt/crypt-md5.c,v 1.5 1999/12/17 20:21:45 peter Exp $";*/
-static unsigned char itoa64[]="./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+static unsigned char itoa64[] = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 static void _crypt_to64(char *s, unsigned long v, int n)
 {
 	while (--n >= 0) {
-		*s++ = itoa64[v&0x3f];
+		*s++ = itoa64[v & 0x3f];
 		v >>= 6;
 	}
 }
 
 static char *md5_crypt(char *cpass, char *pw, char *salt)
 {
-	char *magic="$1$";
-	char *sp,*ep, *p;
+	char *magic = "$1$";
+	char *sp, *ep, *p;
 	unsigned char final[MD5_SIZE];
-	int sl,pl,i;
-	MD5_CONTEXT ctx,ctx1;
+	int sl, pl, i;
+	MD5_CONTEXT ctx, ctx1;
 	unsigned long l;
 
 	/* Refine the Salt first */
-	sp=salt;
+	sp = salt;
 	/* If it starts with the magic string, then skip that */
-	if (!strncmp(sp, magic, strlen(magic))) sp+=strlen(magic);
+	if (!strncmp(sp, magic, strlen(magic))) sp += strlen(magic);
 	/* It stops at the first '$', max 8 chars */
-	for (ep=sp;*ep&&*ep!='$'&&ep<(sp+8);ep++) continue;
+	for (ep = sp;*ep&&*ep != '$'&&ep < (sp + 8);ep++) continue;
 	/* get the length of the true salt */
-	sl=ep-sp;
+	sl = ep - sp;
 	md5_init(&ctx);
 	/* The password first, since that is what is most unknown */
 	md5_update(&ctx, (unsigned char *)pw, strlen(pw));
@@ -321,66 +326,66 @@ static char *md5_crypt(char *cpass, char *pw, char *salt)
 	md5_update(&ctx, (unsigned char *)sp, sl);
 	/* Then just as many characters of the MD5(pw,salt,pw) */
 	md5_init(&ctx1);
-	md5_update(&ctx1,(unsigned char *)pw,strlen(pw));
-	md5_update(&ctx1,(unsigned char *)sp,sl);
-	md5_update(&ctx1,(unsigned char *)pw,strlen(pw));
+	md5_update(&ctx1, (unsigned char *)pw, strlen(pw));
+	md5_update(&ctx1, (unsigned char *)sp, sl);
+	md5_update(&ctx1, (unsigned char *)pw, strlen(pw));
 	md5_final(&ctx1, final);
 	for (pl = strlen(pw); pl > 0; pl -= MD5_SIZE)
-		md5_update(&ctx,final,pl>MD5_SIZE ? MD5_SIZE : pl);
+		md5_update(&ctx, final, pl > MD5_SIZE ? MD5_SIZE : pl);
 	/* Don't leave anything around in vm they could use. */
-	memset(final,0,sizeof final);
+	memset(final, 0, sizeof final);
 	/* Then something really weird... */
-	for (i = strlen(pw); i ; i >>= 1)
-		if(i&1)
-		    md5_update(&ctx, (unsigned char *)final, 1);
+	for (i = strlen(pw); i; i >>= 1)
+		if (i & 1)
+			md5_update(&ctx, (unsigned char *)final, 1);
 		else
-		    md5_update(&ctx, (unsigned char *)pw, 1);
+			md5_update(&ctx, (unsigned char *)pw, 1);
 
 	/* Now make the output string */
 	strncpy(cpass, magic, 4);
-	strncat(cpass,sp,sl);
-	strncat(cpass,"$",sl-1);
+	strncat(cpass, sp, sl);
+	strncat(cpass, "$", sl - 1);
 	md5_final(&ctx, final);
 	/*
 	 * and now, just to make sure things don't run too fast
 	 * On a 60 Mhz Pentium this takes 34 msec, so you would
 	 * need 30 seconds to build a 1000 entry dictionary...
 	 */
-	for(i=0;i<1000;i++) {
+	for (i = 0;i < 1000;i++) {
 		md5_init(&ctx1);
-		if(i & 1)
-			md5_update(&ctx1,(unsigned char *)pw,strlen(pw));
+		if (i & 1)
+			md5_update(&ctx1, (unsigned char *)pw, strlen(pw));
 		else
-			md5_update(&ctx1,final,MD5_SIZE);
+			md5_update(&ctx1, final, MD5_SIZE);
 
-		if(i % 3)
-			md5_update(&ctx1,(unsigned char *)sp,sl);
+		if (i % 3)
+			md5_update(&ctx1, (unsigned char *)sp, sl);
 
-		if(i % 7)
-			md5_update(&ctx1,(unsigned char *)pw,strlen(pw));
+		if (i % 7)
+			md5_update(&ctx1, (unsigned char *)pw, strlen(pw));
 
-		if(i & 1)
-			md5_update(&ctx1,final,MD5_SIZE);
+		if (i & 1)
+			md5_update(&ctx1, final, MD5_SIZE);
 		else
-			md5_update(&ctx1,(unsigned char *)pw,strlen(pw));
+			md5_update(&ctx1, (unsigned char *)pw, strlen(pw));
 		md5_final(&ctx1, final);
 	}
 	p = cpass + strlen(cpass);
-	l = (final[ 0]<<16) | (final[ 6]<<8) | final[12];
-	_crypt_to64(p,l,4); p += 4;
-	l = (final[ 1]<<16) | (final[ 7]<<8) | final[13];
-	_crypt_to64(p,l,4); p += 4;
-	l = (final[ 2]<<16) | (final[ 8]<<8) | final[14];
-	_crypt_to64(p,l,4); p += 4;
-	l = (final[ 3]<<16) | (final[ 9]<<8) | final[15];
-	_crypt_to64(p,l,4); p += 4;
-	l = (final[ 4]<<16) | (final[10]<<8) | final[ 5];
-	_crypt_to64(p,l,4); p += 4;
+	l = (final[0] << 16) | (final[6] << 8) | final[12];
+	_crypt_to64(p, l, 4); p += 4;
+	l = (final[1] << 16) | (final[7] << 8) | final[13];
+	_crypt_to64(p, l, 4); p += 4;
+	l = (final[2] << 16) | (final[8] << 8) | final[14];
+	_crypt_to64(p, l, 4); p += 4;
+	l = (final[3] << 16) | (final[9] << 8) | final[15];
+	_crypt_to64(p, l, 4); p += 4;
+	l = (final[4] << 16) | (final[10] << 8) | final[5];
+	_crypt_to64(p, l, 4); p += 4;
 	l = final[11];
-	_crypt_to64(p,l,2); p += 2;
+	_crypt_to64(p, l, 2); p += 2;
 	*p = '\0';
 	/* Don't leave anything around in vm they could use. */
-	memset(final,0,sizeof final);
+	memset(final, 0, sizeof final);
 	return cpass;
 }
 /*
@@ -405,11 +410,11 @@ int main(int argc, char *argv[])
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
-NES_FUNCTION(neslacrypto_md5_file)
+NSP_FUNCTION(libnsp_crypto_md5_file)
 {
-#define __FUNCTION__ __FILE__ ":neslacrypto_md5_file()"
-	obj_t *cobj1=nes_getobj(N, &N->l, "1");
-	char *hex="0123456789abcdef";
+#define __FN__ __FILE__ ":libnsp_crypto_md5_file()"
+	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	char *hex = "0123456789abcdef";
 	unsigned char buffer[1024];
 	unsigned char md[MD5_SIZE];
 	char token[64]; /* should only need 32+'\0' */
@@ -417,66 +422,67 @@ NES_FUNCTION(neslacrypto_md5_file)
 	int fd;
 	int i;
 
-	if (cobj1->val->type!=NT_STRING||cobj1->val->size<1) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
-	if ((fd=open(cobj1->val->d.str, O_RDONLY|O_BINARY))==-1) {
-		nes_setnum(N, &N->r, "", -1);
+	if (cobj1->val->type != NT_STRING || cobj1->val->size < 1) n_error(N, NE_SYNTAX, __FN__, "expected a string for arg1");
+	if ((fd = open(cobj1->val->d.str, O_RDONLY | O_BINARY)) == -1) {
+		nsp_setnum(N, &N->r, "", -1);
 		return -1;
 	}
 	md5_init(&c);
 	for (;;) {
-		i=read(fd, buffer, sizeof(buffer));
-		if (i<1) break;
+		i = read(fd, buffer, sizeof(buffer));
+		if (i < 1) break;
 		md5_update(&c, buffer, i);
 	}
 	md5_final(&c, md);
 	close(fd);
 	memset(token, 0, sizeof(token));
-	for (i=0;i<MD5_SIZE;i++) { token[i*2]=hex[md[i]>>4]; token[i*2+1]=hex[md[i]&15]; }
-	nes_setstr(N, &N->r, "", token, -1);
+	for (i = 0;i < MD5_SIZE;i++) { token[i * 2] = hex[md[i] >> 4]; token[i * 2 + 1] = hex[md[i] & 15]; }
+	nsp_setstr(N, &N->r, "", token, -1);
 	return 0;
-#undef __FUNCTION__
+#undef __FN__
 }
 
-NES_FUNCTION(neslacrypto_md5_string)
+NSP_FUNCTION(libnsp_crypto_md5_string)
 {
-#define __FUNCTION__ __FILE__ ":neslacrypto_md5_string()"
-	obj_t *cobj1=nes_getobj(N, &N->l, "1");
-	char *hex="0123456789abcdef";
+#define __FN__ __FILE__ ":libnsp_crypto_md5_string()"
+	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	char *hex = "0123456789abcdef";
 	unsigned char md[MD5_SIZE];
 	char token[64]; /* should only need 32+'\0' */
 	MD5_CONTEXT c;
 	int i;
 	char *p;
 
-	if (cobj1->val->type!=NT_STRING) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
-	p=cobj1->val->size>0?cobj1->val->d.str:"";
+	if (cobj1->val->type != NT_STRING) n_error(N, NE_SYNTAX, __FN__, "expected a string for arg1");
+	p = cobj1->val->size > 0 ? cobj1->val->d.str : "";
 	md5_init(&c);
 	md5_update(&c, (uchar *)p, cobj1->val->size);
 	md5_final(&c, &(md[0]));
 	memset(token, 0, sizeof(token));
-	for (i=0;i<MD5_SIZE;i++) { token[i*2]=hex[md[i]>>4]; token[i*2+1]=hex[md[i]&15]; }
-	nes_setstr(N, &N->r, "", token, -1);
+	for (i = 0;i < MD5_SIZE;i++) { token[i * 2] = hex[md[i] >> 4]; token[i * 2 + 1] = hex[md[i] & 15]; }
+	nsp_setstr(N, &N->r, "", token, -1);
 	return 0;
-#undef __FUNCTION__
+#undef __FN__
 }
 
-NES_FUNCTION(neslacrypto_md5_passwd)
+NSP_FUNCTION(libnsp_crypto_md5_passwd)
 {
-#define __FUNCTION__ __FILE__ ":neslacrypto_md5_passwd()"
-	obj_t *cobj1=nes_getobj(N, &N->l, "1");
-	obj_t *cobj2=nes_getobj(N, &N->l, "2");
+#define __FN__ __FILE__ ":libnsp_crypto_md5_passwd()"
+	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
 	char pass[80];
 	char salt[12];
 
-	if ((cobj1->val->type!=NT_STRING)||(cobj1->val->size<1)) n_error(N, NE_SYNTAX, __FUNCTION__, "expected a string for arg1");
+	if ((cobj1->val->type != NT_STRING) || (cobj1->val->size < 1)) n_error(N, NE_SYNTAX, __FN__, "expected a string for arg1");
 	memset(salt, 0, sizeof(salt));
-	if ((cobj1->val->type==NT_STRING)&&(cobj1->val->size==8)) {
+	if ((cobj1->val->type == NT_STRING) && (cobj1->val->size == 8)) {
 		strncpy(salt, cobj2->val->d.str, 8);
-	} else {
+	}
+	else {
 		strncpy(salt, "abcdefgh", 8);
 	}
 	md5_crypt(pass, cobj1->val->d.str, cobj2->val->d.str);
-	nes_setstr(N, &N->r, "", pass, -1);
+	nsp_setstr(N, &N->r, "", pass, -1);
 	return 0;
-#undef __FUNCTION__
+#undef __FN__
 }

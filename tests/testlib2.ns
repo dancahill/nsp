@@ -1,0 +1,188 @@
+#!/usr/bin/nsp
+
+global testlib = {
+	function runtests() {
+		global stuff=true;
+		//include("testlib.ns");
+		global numtests=0;
+		global numerrors=0;
+		global expect=testlib.expect;
+
+		if (!quiet) print("        STARTING TESTS\n");
+		foreach (n,v in testlib) {
+			if (n=='expect' || n=='runtests') continue;
+			if (n=='_load' || n=='_regex') continue;
+			//printf("[%s][%s]\r\n", n, v.gettype());
+			try {
+				if (!quiet) printf("-- %s %s\n", n, "-"*(63-n.length()));
+				v();
+			} catch (ex) {
+				term=_ENV['TERM'];
+				print("-------------------------------------------------------------------\n");
+				print("\t",(term?"\e[00;31;40m":""),"UNHANDLED EXCEPTION -> (",ex.errno,") ",ex.description,(term?"\e[00m":""),n,"\n");
+				print("-------------------------------------------------------------------\n");
+				exit;
+			}
+			//if (numerrors>0) break;
+		}
+		print("-------------------------------------------------------------------\n");
+		if (_ENV['HOME']!=null) {
+			var f=_ENV['HOME']+"/test.ns";
+			if (typeof(file.stat(f))=='table') {
+				print("\trunning ", f, "\n");
+				include(f);
+				print("-------------------------------------------------------------------\n");
+			}
+		}
+		if (typeof(sqlquery)=='function') Q=sqlquery("SELECT * FROM nullsd_sessions");
+		if (typeof(dirlist)=='function') D=dirlist(_filepath);
+		x=quiet;
+		global quiet=false;
+		expect("tests passed/total", sprintf("%d/%d", numtests, numtests), sprintf("%d/%d", numtests-numerrors, numtests));
+		if (numerrors>1) numerrors--;
+		global quiet=x;
+		numtests--;
+		print("-------------------------------------------------------------------\n");
+		if (!quiet) print("        FINISHED TESTS       = "+runtime()+" seconds\n");
+		global decomped_script=null;
+	//	global _ARGS={};
+		global _ENV={};
+		if (typeof(_SERVER)!='table') {
+	//		print("global _GLOBALS = ",serialize(_GLOBALS),";\n");
+		}
+		//print(serialize(testlist));
+		if (string.sub(_ostype_, 0, 7)=="Windows" && typeof(_SERVER)!='table' && typeof(io.gets)=='function') {
+			print("\ndone - press enter\n");
+			io.gets();
+		}
+		return;
+	};
+	// _expect.ns
+	function expect(msg, a, b) {
+		var sp="                              ";
+		msg=msg.tostring();
+		a=a.tostring();
+		b=b.tostring();
+		if (_SERVER) {
+			md=sizeof(msg);
+			msg=string.replace(msg, '&', '&amp;');
+			md=sizeof(msg)-md;
+			colour_emph="<FONT COLOR='BLUE'>";
+			colour_good="<FONT COLOR='GREEN'>";
+			colour_fail="<FONT COLOR='RED'>";
+			colour_norm="</FONT>";
+		} else if (_ENV['TERM']) {
+			md=0;
+			colour_emph="\e[01;37;40m";
+			colour_good="\e[00;32;40m";
+			colour_fail="\e[00;31;40m";
+			colour_norm="\e[00m";
+		} else {
+			md=0;
+			colour_emph="";
+			colour_good="";
+			colour_fail="";
+			colour_norm="";
+		}
+		if (a==b) {
+			if (!quiet) {
+				print("        ", string.sub(msg+sp, 0, 20+md));
+				print(" = ",colour_emph,"",string.sub(b+sp, 0, 27),colour_norm," ");
+				print("[",colour_good,"  OK  ",colour_norm,"]\n");
+			}
+		} else {
+			print("        ", string.sub(msg+sp, 0, 20));
+			print(" = ",colour_emph,"",string.sub(b+sp, 0, 27),colour_norm," ");
+			print("[",colour_fail,"FAILED",colour_norm,"] expected [ ", a, " ]\n");
+			global numerrors++;
+		}
+		global numtests++;
+		io.flush();
+		return;
+	};
+	function fbsql() {
+		ci = { host="localhost", port=3050, username="SYSDBA", password="masterkey", database="/tmp/nstest.fdb" };
+		file.unlink(ci.database);
+		file.writeall("/tmp/nstest.sql", sprintf("SET SQL DIALECT 3;\r\nCREATE DATABASE '%s'\r\nUSER '%s' PASSWORD '%s'\r\nPAGE_SIZE 16384;\r\n", ci.database, ci.username, ci.password));
+		system("isql-fb -input /tmp/nstest.sql 2> /dev/null");
+		file.unlink("/tmp/nstest.sql");
+		try {
+			dl.load("data");
+			dl.load("fbsql");
+			db=new data.fbsql.client(ci);
+			shared_sql_tests(db);
+		} catch (ex) {
+			printf("Exception: %s\r\n", ex.description);
+		}
+		file.unlink(ci.database);
+		return;
+	};
+	function mysql() {
+		ci = { host="localhost", port=3306, username="root", password="test", database="nstest" };
+		system(sprintf("mysql -u%s -p%s -e \"DROP DATABASE IF EXISTS nstest\"", ci.username, ci.password));
+		system(sprintf("mysql -u%s -p%s -e \"CREATE DATABASE nstest\"", ci.username, ci.password));
+		try {
+			dl.load("data");
+			dl.load("mysql");
+			db=new data.mysql.client(ci);
+			shared_sql_tests(db);
+		} catch (ex) {
+			printf("Exception: %s\r\n", ex.description);
+		}
+		//system(sprintf("mysql -u%s -p%s -e \"DROP DATABASE IF EXISTS nstest\"", ci.username, ci.password));
+		return;
+	};
+	function pgsql() {
+		ci = { host="localhost", port=5432, username="postgres", password="test", database="nstest" };
+		system(sprintf("export PGPASSWORD=%s && dropdb -h localhost -U %s %s", ci.password, ci.username, ci.database));
+		system(sprintf("export PGPASSWORD=%s && createdb -h localhost -U %s %s", ci.password, ci.username, ci.database));
+		try {
+			dl.load("data");
+			dl.load("pgsql");
+			db=new data.pgsql.client(ci);
+			shared_sql_tests(db);
+		} catch (ex) {
+			printf("Exception: %s\r\n", ex.description);
+		}
+		system(sprintf("export PGPASSWORD=%s && dropdb -h localhost -U %s %s", ci.password, ci.username, ci.database));
+		return;
+	};
+	function sqlite() {
+		ci = { database="/tmp/nstest.db" };
+		file.unlink(ci.database);
+		try {
+			dl.load("data");
+			dl.load("sqlite");
+			db=new data.sqlite.client(ci);
+			shared_sql_tests(db);
+		} catch (ex) {
+			printf("Exception: %s\r\n", ex.description);
+		}
+		file.unlink(ci.database);
+	};
+};
+
+function shared_sql_tests(db) {
+	db.open();
+	db.query("CREATE TABLE test_table ( id integer, col1 varchar(8), col2 varchar(8) );", false);
+	printf("db.changes = %d;\r\n", db.changes);
+	db.begin();
+	db.query(sprintf("INSERT INTO test_table (id, col1, col2) VALUES (1, 'a', '%s');", db.escape("abc")), false);
+	printf("db.changes = %d;\r\n", db.changes);
+	db.query(sprintf("INSERT INTO test_table (id, col1, col2) VALUES (2, 'b', '%s');", db.escape("a'b'c")), false);
+	printf("db.changes = %d;\r\n", db.changes);
+	db.query(sprintf("INSERT INTO test_table (id, col1, col2) VALUES (3, 'c', '%s');", db.escape('a"b"c')), false);
+	printf("db.changes = %d;\r\n", db.changes);
+	db.commit();
+	//db.rollback();
+	db.query("SELECT * FROM test_table;");
+	printf("db.last_query = \"%s\";\r\n", db.last_query);
+	while ((row=db.getnext())!=null) {
+		printf("row = %s;\r\n", serialize(row).replace('\r', '').replace('\n', ' ').replace('\t', ''));
+	}
+	db.endquery();
+	printf("db.changes = %d;\r\n", db.changes);
+	db.close();
+};
+
+if (stuff==null) print("run test2.ns\r\n");

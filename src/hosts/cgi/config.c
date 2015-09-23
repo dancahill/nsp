@@ -1,6 +1,6 @@
 /*
-    nesla.cgi -- simple Nesla CGI host
-    Copyright (C) 2007-2009 Dan Cahill
+    nsp.cgi -- simple Nesla CGI host
+    Copyright (C) 2007-2015 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,22 +20,24 @@
 
 int config_read()
 {
-	obj_t *confobj=nes_settable(N, &N->g, "_CONFIG");
+	obj_t *confobj = nsp_settable(N, &N->g, "_CONFIG");
 	obj_t *cobj;
 
-	htnes_runscript(CONFIG_FILENAME);
+	htnsp_runscript(CONFIG_FILENAME);
 	/* fill in values for missing vars */
-	cobj=nes_getobj(N, confobj, "language");
-	if (cobj->val->type==NT_NULL) nes_setstr(N, confobj, "language", CONFIG_LANGUAGE, -1);
-	cobj=nes_getobj(N, confobj, "max_runtime");
-	if (cobj->val->type==NT_NULL) nes_setnum(N, confobj, "max_runtime",  CONFIG_MAX_RUNTIME);
-	cobj=nes_getobj(N, confobj, "max_postsize");
-	if (cobj->val->type==NT_NULL) nes_setnum(N, confobj, "max_postsize", CONFIG_MAX_POSTSIZE);
-	cobj=nes_getobj(N, confobj, "use_syslog");
+	cobj = nsp_getobj(N, confobj, "language");
+	if (cobj->val->type == NT_NULL) nsp_setstr(N, confobj, "language", CONFIG_LANGUAGE, -1);
+	cobj = nsp_getobj(N, confobj, "max_runtime");
+	if (cobj->val->type == NT_NULL) nsp_setnum(N, confobj, "max_runtime", CONFIG_MAX_RUNTIME);
+	cobj = nsp_getobj(N, confobj, "max_postsize");
+	if (cobj->val->type == NT_NULL) nsp_setnum(N, confobj, "max_postsize", CONFIG_MAX_POSTSIZE);
+	cobj = nsp_getobj(N, confobj, "use_syslog");
+#ifndef WIN32
 #ifdef CONFIG_USE_SYSLOG
-	if (cobj->val->type==NT_NULL) nes_setstr(N, confobj, "use_syslog", "y", -1);
+	if (cobj->val->type == NT_NULL) nsp_setstr(N, confobj, "use_syslog", "y", -1);
 #else
-	if (cobj->val->type==NT_NULL) nes_setstr(N, confobj, "use_syslog", "n", -1);
+	if (cobj->val->type == NT_NULL) nsp_setstr(N, confobj, "use_syslog", "n", -1);
+#endif
 #endif
 	return 0;
 }

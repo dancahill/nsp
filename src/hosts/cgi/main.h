@@ -1,6 +1,6 @@
 /*
-    nesla.cgi -- simple Nesla CGI host
-    Copyright (C) 2007-2009 Dan Cahill
+    nsp.cgi -- simple Nesla CGI host
+    Copyright (C) 2007-2015 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,15 +16,15 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "nesla/libnesla.h"
-#include "nesla/libcrypt.h"
-#include "nesla/libdl.h"
-#include "nesla/libext.h"
-#include "nesla/libmath.h"
+#include "nsp/nsplib.h"
+/*
+#include "libbase.h"
+#include "libcrypt.h"
+#include "libnet.h"
 #ifdef HAVE_REGEX
-#include "nesla/libregex.h"
+#include "libregex.h"
 #endif
-#include "nesla/libtcp.h"
+*/
 #include <ctype.h>
 #include <signal.h>
 #include <stdio.h>
@@ -50,7 +50,7 @@
 #endif
 #include "config.h"
 
-extern nes_state *N;
+extern nsp_state *N;
 
 /* cgi.c functions */
 int   printhex(const char *format, ...);
@@ -70,4 +70,4 @@ void  send_header(int cacheable, char *mime_type, int length, time_t mod);
 /* config.c functions */
 int   config_read(void);
 /* main.c functions */
-int   htnes_runscript(char *file);
+int   htnsp_runscript(char *file);

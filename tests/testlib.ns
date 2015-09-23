@@ -1,0 +1,1726 @@
+#!/usr/bin/nsp
+
+global testlib = {
+	function runtests() {
+		global stuff=true;
+		//include("testlib.ns");
+		global numtests=0;
+		global numerrors=0;
+	/*
+		local testlist = {
+			"types.ns";
+			"tables.ns";
+			"serial.ns";
+			"size.ns";
+			"scope.ns";
+			"string.ns";
+			"if.ns";
+			"function.ns";
+			"link.ns";
+			"cmp.ns";
+			"math.ns";
+			"loops.ns";
+			"switch.ns";
+			"zlink.ns";
+			"oo.ns";
+			"eval.ns";
+			"indexes.ns";
+			"try.ns";
+			"dl.ns";
+			"b64.ns";
+			"rot13.ns";
+			"xml.ns";
+	//		"regex.ns";
+			"crypto.ns";
+	//		"tcp.ns";
+	//		"ldap.ns";
+	//		"odbc.ns";
+			"_misc.ns";
+		}
+	*/
+		global expect=testlib.expect;
+
+		if (!quiet) print("        STARTING TESTS\n");
+		foreach (n,v in testlib) {
+			if (n=='expect' || n=='runtests') continue;
+			if (n=='_load' || n=='_regex') continue;
+			//printf("[%s][%s]\r\n", n, v.gettype());
+			try {
+				if (!quiet) printf("-- %s %s\n", n, "-"*(63-n.length()));
+				v();
+			} catch (ex) {
+				term=_ENV['TERM'];
+				print("-------------------------------------------------------------------\n");
+				print("\t",(term?"\e[00;31;40m":""),"UNHANDLED EXCEPTION -> (",ex.errno,") ",ex.description,(term?"\e[00m":""),n,"\n");
+				print("-------------------------------------------------------------------\n");
+				exit;
+			}
+			//if (numerrors>0) break;
+		}
+		print("-------------------------------------------------------------------\n");
+		if (_ENV['HOME']!=null) {
+			var f=_ENV['HOME']+"/test.ns";
+			if (typeof(file.stat(f))=='table') {
+				print("\trunning ", f, "\n");
+				include(f);
+				print("-------------------------------------------------------------------\n");
+			}
+		}
+		if (typeof(sqlquery)=='function') Q=sqlquery("SELECT * FROM nullsd_sessions");
+		if (typeof(dirlist)=='function') D=dirlist(_filepath);
+		x=quiet;
+		global quiet=false;
+		expect("tests passed/total", sprintf("%d/%d", numtests, numtests), sprintf("%d/%d", numtests-numerrors, numtests));
+		if (numerrors>1) numerrors--;
+		global quiet=x;
+		numtests--;
+		print("-------------------------------------------------------------------\n");
+		if (!quiet) print("        FINISHED TESTS       = "+runtime()+" seconds\n");
+		global decomped_script=null;
+	//	global _ARGS={};
+		global _ENV={};
+		if (typeof(_SERVER)!='table') {
+	//		print("global _GLOBALS = ",serialize(_GLOBALS),";\n");
+		}
+		//print(serialize(testlist));
+		if (string.sub(_ostype_, 0, 7)=="Windows" && typeof(_SERVER)!='table' && typeof(io.gets)=='function') {
+			print("\ndone - press enter\n");
+			io.gets();
+		}
+		return;
+	};
+	// _expect.ns
+	function expect(msg, a, b) {
+		var sp="                              ";
+		msg=msg.tostring();
+		a=a.tostring();
+		b=b.tostring();
+		if (_SERVER) {
+			md=sizeof(msg);
+			msg=string.replace(msg, '&', '&amp;');
+			md=sizeof(msg)-md;
+			colour_emph="<FONT COLOR='BLUE'>";
+			colour_good="<FONT COLOR='GREEN'>";
+			colour_fail="<FONT COLOR='RED'>";
+			colour_norm="</FONT>";
+		} else if (_ENV['TERM']) {
+			md=0;
+			colour_emph="\e[01;37;40m";
+			colour_good="\e[00;32;40m";
+			colour_fail="\e[00;31;40m";
+			colour_norm="\e[00m";
+		} else {
+			md=0;
+			colour_emph="";
+			colour_good="";
+			colour_fail="";
+			colour_norm="";
+		}
+		if (a==b) {
+			if (!quiet) {
+				print("        ", string.sub(msg+sp, 0, 20+md));
+				print(" = ",colour_emph,"",string.sub(b+sp, 0, 27),colour_norm," ");
+				print("[",colour_good,"  OK  ",colour_norm,"]\n");
+			}
+		} else {
+			print("        ", string.sub(msg+sp, 0, 20));
+			print(" = ",colour_emph,"",string.sub(b+sp, 0, 27),colour_norm," ");
+			print("[",colour_fail,"FAILED",colour_norm,"] expected [ ", a, " ]\n");
+			global numerrors++;
+		}
+		global numtests++;
+		io.flush();
+		return;
+	};
+	// _misc.ns
+	function misc() {
+	//print("including mime.ns",include("lib/_mime.ns"),"\r\n");
+	//print(serialize(mime_types));
+
+	/*
+		local s_table = {
+			toUpper = function (s) {
+				return string.toupper(s);
+			};
+			zz = function (s) {
+				return "zz";
+			};
+		};
+		local s="abcd";
+		zlink(s, s_table);
+
+		x=s_table.toUpper(s);
+		print(x,"\r\n");
+		print(x.zz(),"\r\n");
+
+	*/
+	//	x=printf("12[%s]34[0x%08x]56[%f]78[%s][%f][%d]\r\n", "asdf", (255<<8), 5.5);
+	//	print(x,"\r\n");
+	//	x=printf("12[%s]34[%d]56[%f]78", "asdf", 5.5, 5.5);
+	//	print(x,"\r\n");
+		x=sprintf("12[%s]34[%d]56[%f]78", "asdf", 5.5, 5.5);
+	//	print(x,"\r\n");
+		expect("sprintf()", "12[asdf]34[5]56[5.5]78", x);
+		return;
+	};
+	// b64.ns
+	function _b64() {
+		if (typeof(base64)!='table') {
+			print("SKIPPING BASE64 TESTS\n");
+			return;
+		}
+		local bx = { p="stuff:null", e="c3R1ZmY6bnVsbA==" };
+		local by = { p="null:stuff", e="bnVsbDpzdHVmZg==" };
+		expect("base64.decode(bx.e)", "stuff:null",       base64.decode(bx.e));
+		expect("base64.decode(by.e)", "null:stuff",       base64.decode(by.e));
+		expect("base64.encode(bx.p)", "c3R1ZmY6bnVsbA==", base64.encode(bx.p));
+		expect("base64.encode(by.p)", "bnVsbDpzdHVmZg==", base64.encode(by.p));
+	//	print("\n", base64.decode("UTogV2hhdCdzIHRoZSBkaWZmZXJlbmNlIGJldHdlZW4gYSBjb2NrZXIgc3BhbmllbCBhbmQgYSBwaXRidWxsIGh1bXBpbmcgeW91ciBsZWc/CkE6IFlvdSBsZXQgdGhlIHBpdGJ1bGwgZmluaXNoLg=="), "\n");
+		return;
+	};
+	// cmp.ns
+	_cmp = function () {
+		if (math.asin) {
+			local pi = math.asin(1)*2;
+		} else {
+			local pi = 3.1415926535897932384626433832795029;
+		}
+		expect("2 == 2",  true,  2==2);
+		expect("2 <= 2",  true,  2<=2);
+		expect("2 >= 2",  true,  2>=2);
+		expect("2 != 2",  false, 2!=2);
+		expect("2 < 2",   false, 2<2);
+		expect("2 > 2",   false, 2>2);
+		expect("42",      42,    (42));
+		expect("21",      21,    21);
+		expect("pi - pi", 0,     pi-pi);
+		expect("pi / pi", 1,     pi/pi);
+		expect("pi % pi", 0,     pi%pi);
+		expect("pi & pi", 3,     pi&pi);
+		expect("pi | pi", 3,     pi|pi);
+		expect("pi ^ pi", 0,     pi^pi);
+		expect("3 && 4",  true,  3&&4);
+		expect("3 || 4",  true,  3||4);
+
+	//	expect("null==false",   true,  null==false);
+		expect("null===false",  false, null===false);
+		expect("false===false", true,  false===false);
+		expect("1===1",         true,  1===1);
+		expect("1===false",     false, 1===false);
+		expect("1===true",      false, 1===true);
+
+		var x=0;   if (x==false) x=false; else x=true; expect("(x=0)",   false, x);
+	//	expect("(x=0)", false, 0==false?false:true );
+		var x=1;   if (x==false) x=false; else x=true; expect("(x=1)",   true,  x);
+		var x="";  if (x==false) x=false; else x=true; expect("(x='')",  false, x);
+		var x="x"; if (x==false) x=false; else x=true; expect("(x='x')", true,  x);
+
+		expect("x==null", false, x==null);
+		expect("y==null", true,  y==null);
+		expect("x!=null", true,  x!=null);
+		expect("y!=null", false, y!=null);
+
+		expect("42?1:0",              1,  42?1:0);
+		expect("42?0:1",              0,  42?0:1);
+		expect("true?1:0",            1,  true?1:0);
+		expect("false?0:1",           1,  false?0:1);
+		expect("true?1:true?2:3",     1,  true?1:true?2:3);
+		expect("false?1:false?2:3",   3,  false?1:false?2:3);
+		expect("true?1:(true?2:3)",   1,  true?1:(true?2:3));
+		expect("false?1:(false?2:3)", 3,  false?1:(false?2:3));
+		expect("true?(true?1:2):3",   1,  true?(true?1:2):3);
+		expect("false?(false?1:2):3", 3,  false?(false?1:2):3);
+		expect("true?(false?1:2):3",  2,  true?(false?1:2):3);
+		expect("false?(true?1:2):3",  3,  false?(true?1:2):3);
+
+		x=1;
+		expect("?:",              2,  string.tostring(x?(++x):(--x)));
+		x=0;
+		expect("?:",              -1,  string.tostring(x?(++x):(--x)));
+
+		expect("!true",  false, !true);
+		expect("!false", true,  !false);
+
+		x={ 'a', 'b' };
+		y=1?x[0]:x[1];
+		expect("?:", 'a', y);
+		y=0?x[0]:x[1];
+		expect("?:", 'b', y);
+
+
+		a=1;b=1;c=0;
+		if (--a && --b) c=1;
+	//	printf("[%d][%d][%d]\r\n", a, b, c);
+		expect("if (--a&&--b) c=1; b=1", 1,  b);
+		a=1;b=1;c=0;
+		if (--a || --b) c=1;
+	//	printf("[%d][%d][%d]\r\n", a, b, c);
+		expect("if (--a||--b) c=1; b=0", 0,  b);
+	//	throw "scene";
+
+		return;
+	};
+	// crypto.ns
+	_crypto = function () {
+	//	local key="hex:E76B2413958B00E193";
+	//	local key="hex:E76B2413958B00E1930000000000000000000000000000000000000000000000";
+		local key="hex:40507649a9581e95d503367fe3c90fa1439122d5a55a2218c97b5994b71df243";
+
+		if (typeof(crypto)!='table') {
+			if (!quiet) print("SKIPPING CRYPTO TESTS\n");
+			return;
+		}
+		filename=_filepath+'/'+_filename;
+		filestat=file.stat(filename);
+		if (typeof(file.md5)!='function') {
+			print("file.md5() missing\n");
+		} else {
+			expect("string.md5", "a9a47b7d0802b313924900ad1baa6eb0", string.md5("string.md5"));
+	/*
+			if (typeof(filestat)!='table') {
+				print("test file ", filename, " does not exist.\n");
+			} else {
+				print(file.md5(filename), " *",filename,"\n");
+				system("md5sum \""+filename+"\"");
+			}
+	*/
+		}
+		if (typeof(file.sha1)!='function') {
+			print("file.sha1() missing\n");
+		} else {
+			expect("string.sha1", "2973a33e464d6b792720e9242e8b521eaf37e19a", string.sha1("string.sha1"));
+	/*
+			if (typeof(filestat)!='table') {
+				print("test file ", filename, " does not exist.\n");
+			} else {
+				print(file.sha1(filename), " *",filename,"\n");
+				system("sha1sum \""+filename+"\"");
+			}
+	*/
+		}
+		if (_ostype_=="DOS/turboc") return;
+		if (typeof(crypto.aes_ecb_encrypt)=='function') {
+			x="crypto.aes_ecb_encrypt";
+			x=base64.encode(crypto.aes_ecb_encrypt(x, key));
+			x=crypto.aes_ecb_decrypt(base64.decode(x), key);
+			expect("crypto.aes_ecb_encrypt", "crypto.aes_ecb_encrypt", x);
+		}
+		if (typeof(crypto.aes_cbc_encrypt)=='function') {
+			/* an IV (Initialization Vector) is 16 bytes.
+			 * that means a 32 byte string of hex.  no more and no less.
+			 */
+			iv='a9a47b7d0802b313924900ad1baa6eb0';
+
+			x="crypto.aes_cbc_encrypt";
+			x=base64.encode(crypto.aes_cbc_encrypt(x, key));
+	//		print(x,"\n");
+			x=crypto.aes_cbc_decrypt(base64.decode(x), key);
+			expect("crypto.aes_cbc_encrypt", "crypto.aes_cbc_encrypt", x);
+
+			x="crypto.aes_cbc_encrypt"; // same as ^^^^^^
+			x=base64.encode(crypto.aes_cbc_encrypt(x, key), 128, "");
+	//		print(x,"\n");
+			x=crypto.aes_cbc_decrypt(base64.decode(x), key, 128, "");
+			expect("crypto.aes_cbc_encrypt", "crypto.aes_cbc_encrypt", x);
+
+			/* extra tests */
+			x="crypto.aes_cbc_encrypt";
+			x=base64.encode(crypto.aes_cbc_encrypt(x, key, 128, iv));
+	//		print(x,"\n");
+			x=crypto.aes_cbc_decrypt(base64.decode(x), key, 128, iv);
+			expect("crypto.aes_cbc_encrypt", "crypto.aes_cbc_encrypt", x);
+
+			x="crypto.aes_cbc_encrypt";
+			x=base64.encode(crypto.aes_cbc_encrypt(x, key, 192, iv));
+	//		print(x,"\n");
+			x=crypto.aes_cbc_decrypt(base64.decode(x), key, 192, iv);
+			expect("crypto.aes_cbc_encrypt", "crypto.aes_cbc_encrypt", x);
+
+			x="crypto.aes_cbc_encrypt";
+			x=base64.encode(crypto.aes_cbc_encrypt(x, key, 256, iv));
+	//		print(x,"\n");
+			x=crypto.aes_cbc_decrypt(base64.decode(x), key, 256, iv);
+			expect("crypto.aes_cbc_encrypt", "crypto.aes_cbc_encrypt", x);
+
+		}
+		if (typeof(crypto.aes_ecb_encrypt)!='function') {
+			print("crypto.aes_ecb_encrypt() missing\n");
+		} else {
+			if (typeof(filestat)!='table') {
+				print("test file ", filename, " does not exist.\n");
+			} else {
+				x=file.readall(filename);
+				mx=string.md5(x);
+	//			print("x=[",mx=string.md5(x),"]\n");
+				y=crypto.aes_ecb_encrypt(x, key);
+	//			print("y=[",string.md5(y),"]\n");
+				z=crypto.aes_ecb_decrypt(y, key);
+				mz=string.md5(z);
+	//			print("z=[",mz=string.md5(z),"]\n");
+				expect(mx, mz, mx);
+			}
+		}
+		if (typeof(crypto.aes_cbc_encrypt)!='function') {
+			print("crypto.aes_cbc_encrypt() missing\n");
+		} else {
+			if (typeof(filestat)!='table') {
+				print("test file ", filename, " does not exist.\n");
+			} else {
+				x=file.readall(filename);
+				mx=string.md5(x);
+	//			print("x=[",mx=string.md5(x),"]\n");
+				y=crypto.aes_cbc_encrypt(x, key);
+	//			print("y=[",string.md5(y),"]\n");
+				z=crypto.aes_cbc_decrypt(y, key);
+				mz=string.md5(z);
+	//			print("z=[",mz=string.md5(z),"]\n");
+				expect(mx, mz, mx);
+			}
+		}
+		return;
+	};
+	// dl.ns
+	_dl = function () {
+		if (typeof(dl.load)!='function') return;
+		if (typeof(dirlist)!='function') {
+			print("        dirlist doesn't exist\n");
+			return;
+		}
+		if (!quiet) print("        loading libs...\n");
+		io.flush();
+		foreach (f in dirlist(dl.path[0])) {
+			if (f.name=='.'||f.name=='..') continue;
+			x=string.split(f.name, ".");
+			if (x[1]!='so') continue;
+			if (string.sub(x[0], 0, 7)=='libnsp_') x[0]=string.sub(x[0], 7);
+			if (x[0]=='zip') {
+				if (!quiet) print("\tskipping zip\r\n");
+				continue;
+			}
+			expect(f.name, true, dl.load(x[0]));
+			if (dl.last_error) {
+				print("["+dl.last_error+"]\r\n");
+				dl.last_error="";
+			}
+		}
+		//expect("test", true, dl.load("test"));
+		//if (typeof(dltest)=='function') print("        ",dltest(),"\n");
+		return;
+	};
+	//if (_ostype_!='OpenBSD/gcc') testdl();
+	// eval.ns
+	_eval = function () {
+		if (typeof(eval)=='function') {
+			expect("eval(\"5*5\")",      25,    eval("5*5"));
+			expect("eval(5*42)",         210,   eval(5*42));
+			expect("eval(\"xx='abc'\")", 'abc', eval("xx='abc'"));
+			expect("eval(\"'def'\")",    'def', eval("'def'"));
+	//		print("[",xx,"]\n"); /* xx _should_ be 'abc' */
+
+			z=eval;
+			try {
+				x=z("'zzz'");
+			} catch (e) {
+				if (!quiet) print("this exception is unexceptional -> ",e.description,"\r\n");
+	//			print("        exception[",e.errno,"][",e.description,"]\n");
+			}
+			expect("z(\"'zzz'\")", false, x);
+			if (!quiet) {
+				x=eval("y=42");
+				print("x=[",x,"]\n");
+				print("y=[",y,"]\n");
+				/*
+				 * exec() is a kludge.  an ugly hack.  don't be shocked if it vanishes.
+				 * eval() _should_ be able to do this stuff...
+				 */
+				x=exec("y=42;print(y,'\n');");
+				print("x=[",x,"]\n");
+				print("y=[",y,"]\n");
+			}
+		}
+		return;
+	};
+	// function.ns
+	_functions = function () {
+		local function x() { return 1; }
+		expect("...", 1,  x());
+		x=function () { return 2; }
+		expect("...", 2,  x());
+
+		/* declare a lambda, execute it inline, and return the result */
+		x=function (y) { return y*2; }(21);
+		expect("...", 42, x);
+		return;
+	};
+	// if.ns
+	_if = function () {
+		local x=2;
+		local str="";
+
+		if (x==1) {
+			str=str+"test 1 (bad)";
+		} else if (x==2) {
+			str=str+"test 2 (good)";
+		} else {
+			str=str+"test 3 (bad)";
+		}
+		expect("simple 'if' test", "test 2 (good)", str);
+
+		x=0;
+		if (x==0) {
+		} else if (x==x++) {
+		} else if (x==x++) {
+		} else if (x==x++) {
+		}
+		# this actually returned 3 in 0.5.0
+		expect("simple 'if' test 2", 0, x);
+
+		return;
+	};
+	// index.ns
+	_indexing = function () {
+		var sp="                              ";
+
+		if (!quiet) print("        this is a sample of table indexes.\n\n");
+		for (i=0;i<sizeof(_GLOBALS);i++) {
+			local n=iname(_GLOBALS, i);
+			local t=typeof(_GLOBALS[n]);
+			if (t=='function') continue;
+			if (t=='table') continue;
+			//print("        ",string.sub(t+sp,0,10),string.sub(n+sp,0,13),_GLOBALS[n],"\n");
+			//print("        ",string.sub(t+sp,0,10),string.sub(n+sp,0,13),ival(_GLOBALS,i),"\n");
+		}
+		/* this will list all available string functions stored in table 'string' */
+	/*
+		for (i=0;;i++) {
+			local n=iname(string, i);
+			local t=typeof(string[n]);
+			if (t=='null') break;
+			print("        ", i, "\t", t, "\tstring.", n, "\n");
+		}
+	*/
+		return;
+	};
+	// ldap.ns
+	_ldap = function () {
+		if (typeof(ldap.search)!='function') {
+			if (!quiet) print("SKIPPING LDAP TESTS\n");
+			return;
+		}
+	//	L=ldap.search("localhost", 389, "o=gw.nulllogic.lan", "(cn=*)");
+		L=ldap.search("localhost", 389, "ou=users,ou=people,o=gw.nulllogic.lan", "(sn=Cahill)");
+		return;
+	};
+	// link.ns
+	_link = function () {
+		x=1;
+		y=&x;
+		expect("x=1",  1, x);
+		expect("y=&x", 1, y);
+		z=function (x) { return x=3; } (&x);
+		expect("...", 3, x);
+		expect("...", 3, y);
+		x=*y+1;
+		expect("x=*y+1", 4, x);
+		expect("...", 3, y);
+		return;
+	};
+	// load.ns
+	_load = function () {
+		include("/etc/nullsd/nullgs.conf");
+		global junk = { };
+		for (j=0;j<100;j++) {
+			junk[j] = { a=1, b=2, c=3, d="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" };
+			local x =
+				"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"+
+				"yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"+
+				"zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz";
+		}
+		global junk=0;
+		return;
+	};
+	// loops.ns
+	_loop = function () {
+		local n=10;
+
+		local x=""; while (n>5) { x=x+string.tostring(--n); } expect("while (n>5)", "98765", x);
+		local x=""; for (n=0;n<10;n++) { if (n==5) break; x=x+n.tostring(); }  expect("for (n=0;n<5;n++)", "01234", x);
+		local x=""; for (n=0;n<5;++n)  { x=x+n.tostring(); }  expect("for (n=0;n<5;++n)",  "01234",   x);
+		local x=""; for (n=0;n<5;n+=1) { x=x+n.tostring(); }  expect("for (n=0;n<5;n+=1)", "01234",   x);
+		local x=""; for (n=5;n>0;n--)  { x=x+n.tostring(); }  expect("for (n=5;n>0;n--)",  "54321",   x);
+		local x=""; for (n=5;n>0;--n)  { x=x+n.tostring(); }  expect("for (n=5;n>0;--n)",  "54321",   x);
+		local x=""; for (n=5;n>0;n-=1) { x=x+n.tostring(); }  expect("for (n=5;n>0;n-=1)", "54321",   x);
+		array = { a=1, b=2, c=3, d=4, e=5 };
+		local x=""; foreach (n in array) { x=x+n.tostring(); } expect("foreach (n in array)", "12345",   x);
+		local x=""; foreach (i,n in array) { n=array[i]=6-n; x=x+n.tostring(); } expect("foreach (n in array)", "54321",   x);
+		/* resetting array inside foreach used to segfault */
+		try {
+			//local x=""; foreach (n in array) { x=x+n.tostring(); array=0; } expect("foreach (n in array)", "5",   x);
+			local x=""; foreach (n in array) { x=x+n.tostring(); array=0; } expect("foreach (n in array)", "54321",   x);
+		} catch (e) {
+			print("this exception is unexceptional -> ",e.description,"\r\n");
+		}
+		expect("foreach...array=null", '0',   array.tostring());
+
+		// this test will catch the return of a bug with freeing tables returned by ival()
+	//	local n="";
+		for (i=0;i<sizeof(_GLOBALS);i++) {
+			nn=iname(_GLOBALS, i);
+			local t=typeof(vv);
+			//if (t=='function') continue;
+			//if (t=='table') continue;
+			//vv=ival(_GLOBALS, i);
+			vv=_GLOBALS[n];
+			//printf("\t%d %d\t%s%s%s\n", sizeof(_GLOBALS), i, string.sub(t+sp,0,10), string.sub(n+sp,0,13), v);
+			//io.flush();
+		}
+
+	//	for (i=0;i<sizeof(_GLOBALS);i++) {
+	//		local nn=iname(_GLOBALS, i);
+	//		local t=typeof(_GLOBALS[nn]);
+	//	}
+
+		return;
+	};
+	// math.ns
+	//#ifdef __USE_GNU
+	//# define M_El           2.7182818284590452353602874713526625L  /* e */
+	//# define M_LOG2El       1.4426950408889634073599246810018921L  /* log_2 e */
+	//# define M_LOG10El      0.4342944819032518276511289189166051L  /* log_10 e */
+	//# define M_LN2l         0.6931471805599453094172321214581766L  /* log_e 2 */
+	//# define M_LN10l        2.3025850929940456840179914546843642L  /* log_e 10 */
+	//# define M_PIl          3.1415926535897932384626433832795029L  /* pi */
+	//# define M_PI_2l        1.5707963267948966192313216916397514L  /* pi/2 */
+	//# define M_PI_4l        0.7853981633974483096156608458198757L  /* pi/4 */
+	//# define M_1_PIl        0.3183098861837906715377675267450287L  /* 1/pi */
+	//# define M_2_PIl        0.6366197723675813430755350534900574L  /* 2/pi */
+	//# define M_2_SQRTPIl    1.1283791670955125738961589031215452L  /* 2/sqrt(pi) */
+	//# define M_SQRT2l       1.4142135623730950488016887242096981L  /* sqrt(2) */
+	//# define M_SQRT1_2l     0.7071067811865475244008443621048490L  /* 1/sqrt(2) */
+	//#endif
+	_math = function () {
+		if (math.asin) {
+			local pi = math.asin(1)*2;
+		} else {
+			local pi = 3.1415926535897932384626433832795029;
+		}
+		local n=0;
+		local x=0;
+
+		#operator precedence
+		x = 4 + 5 * 3;
+		expect("4+5*3", 19, x);
+		x=12 % 5 * 2;
+		expect("12%5*2", 4, x);
+		x = (4 + 5) * 3;
+		expect("(4+5)*3", 27, x);
+
+		x = 5*3+2-1*0;
+		expect("5*3+2-1*0", 17, x);
+
+		x = 25 - (2 * (10 + (8 / 2)));
+		expect("25-(2*(10+(8/2)))", -3, x);
+
+		expect("1+2*4",   9,  1+2*4);
+		expect("(1+2)*4", 12, (1+2)*4);
+		expect("1+(2*4)", 9,  1+(2*4));
+
+		n=42; expect("n=42",       42,      n);
+		n+=5; expect("n+=5",       47,      n);
+		n-=2; expect("n-=2, n+5",  50,      n+5);
+		      expect("      n+5",  50,      (n+5));
+		n*=3; expect("n*=3",       135,     (n));
+		n/=4; expect("n/=4",       33.75,   (n));
+		n=42; expect("n=42, n--",  "42 41", sprintf("%d %d", n--, n));
+		n=42; expect("n=42, n++",  "42 43", sprintf("%d %d", n++, n));
+		n=42; expect("n=42, --n",  "41 41", sprintf("%d %d", --n, n));
+		n=42; expect("n=42, ++n",  "43 43", sprintf("%d %d", ++n, n));
+
+		expect("(n++)",              43,         (n++));
+		expect("(n--)",              44,         (n--));
+		expect("(n)",                43,         (n));
+		expect("3-1.5",              1.5,        (3-1.5));
+		expect("-4+1.5",             -2.5,       (-4+1.5));
+		expect("-1.5",               -1.5,       -1.5);
+		expect("math.abs(-4.2)",     4.2,        math.abs(-4.2));
+		expect("math.ceil(2.1)",     3,          math.ceil(2.1));
+		expect("math.floor(2.1)",    2,          math.floor(2.1));
+		expect("pi*(2+(1+1))",       "12.56637", pi*(2+(1+1)));
+		if (typeof(math.sqrt)=='function') expect("math.sqrt(2)",       "1.414213", math.sqrt(2));
+		expect("(pi*(4+(4-1+2)))/9", 3.141592,   (pi*(4+(4-1+2)))/9);
+		if (!quiet) print("          3.141593, actually, but rounding doesn't work\n");
+		if (!quiet) {
+			print("        math.rand()         = ", math.rand());
+			for (i=0;i<4;i++) print(", ", math.rand());
+			print("\n");
+			print("        math.rand(10)       = ", math.rand(10));
+			for (i=0;i<11;i++) print(", ", math.rand(10));
+			print("\n");
+		}
+
+	//	print("\nexpect a divided by zero warning and a null return val\n");
+		expect("1/0",                'null',     string.tostring(1/0));
+		return;
+	};
+	// oo.ns
+	_oo = function () {
+		local function str1() {
+			local class str {
+				_constructor = function (val) { this.value = val.tostring(); };
+				_destructor  = function () { this.value = ""; };
+				size  = function () { return sizeof(/*this.*/value); };
+				lower = function () { return string.tolower(this.value); };
+				upper = function () { return string.toupper(this.value); };
+				get   = function () { return this.value; };
+				set   = function (val) { return this.value=val.tostring(); };
+			};
+			local function dump(obj) {
+				var sp="                              ";
+				print("        ",sizeof(obj)," members\r\n");
+				for (i=0;i<sizeof(obj);i++) {
+					local n=iname(obj, i);
+					local t=typeof(obj[n]);
+					print("        ",string.sub(t+sp,0,10),string.sub(n+sp,0,13),obj[n],"\n");
+				}
+				return;
+			};
+			if (!quiet) print("\tuser-defined class and methods\r\n");
+			x=new str("AbC");
+			// dump(x);
+			expect("x.size()", 3, x.size()); // will print 3
+			x.set("aBcDeF");
+			expect("x.size()", 6, x.size()); // will print 6
+			expect("x.lower()",  "abcdef", x.lower()); // will print abcdef
+			expect("x.upper()",  "ABCDEF", x.upper()); // will print ABCDEF
+			expect("x.value.toupper()", "ABCDEF", x.value.toupper()); // will print ABCDEF using the base string method
+			delete x;
+			expect("typeof(x)", null.tostring(), typeof(x));
+			expect("x.gettype(x)", null.tostring(), x.gettype());
+		};
+		local function str2() {
+			if (!quiet) print("\tusing methods for base types\r\n");
+			x="aBcDeF";
+			expect("x=\"aBcDeF\"", "aBcDeF", x="aBcDeF");
+			expect("x.length()",   6,        x.length());
+			expect("x.tolower()",  "abcdef", x.tolower());
+			expect("x.toupper()",  "ABCDEF", x.toupper());
+		};
+		local function str3() {
+			local function noclass() {
+				this.x=42;
+				this.px=function () { if (!quiet) printf("[x.x=%d]\r\n", this.x); };
+			}
+			x=new noclass();
+			x.px();
+		};
+		str1();
+		str2();
+		str3();
+
+		return;
+	};
+	// regex.ns
+	_regex = function () {
+		if (_ostype_=="DOS/turboc") return;
+		if (typeof(regex)!='table') {
+			print("SKIPPING REGEX TESTS\n");
+			return;
+		}
+	#	print("REGEX TEST\n\n");
+	/*
+		x=regex.match("\\((.*), (.*)\\)", "(a, b)");
+		print("match x=",x,"\n");
+		x=regex.match("\\((.*), (.*)\\)", "(a  b)");
+		print("match x=",x,"\n");
+
+	//	\((.*), (.*)\)	(a, b)	y	(\2, \1)	(b, a)
+		x=regex.replace("\\((.*), (.*)\\)", "(\\2, \\1)", "(a, b)");
+		print("replace x=",x,"\n");
+
+		x=regex.replace("(bc+d$|ef*g.|h?i(j|k))", "&-\\1-\\2", "reffgz");
+		print("replace x=",x,"\n");
+
+		x=regex.replace("(.*) is (.*)", "[&]\\1 was \\2", "This is a test.");
+		print("replace x=",x,"\n");
+	*/
+	//	p=file.readall(_filepath+'/_regex.txt');
+		p="abc	abc	y	&	abc
+	abc	xbc	n	-	-
+	abc	axc	n	-	-
+	abc	abx	n	-	-
+	abc	xabcy	y	&	abc
+	abc	ababc	y	&	abc
+	ab*c	abc	y	&	abc
+	ab*bc	abc	y	&	abc
+	ab*bc	abbc	y	&	abbc
+	ab*bc	abbbbc	y	&	abbbbc
+	ab+bc	abbc	y	&	abbc
+	ab+bc	abc	n	-	-
+	ab+bc	abq	n	-	-
+	ab+bc	abbbbc	y	&	abbbbc
+	ab?bc	abbc	y	&	abbc
+	ab?bc	abc	y	&	abc
+	ab?bc	abbbbc	n	-	-
+	ab?c	abc	y	&	abc
+	^abc$	abc	y	&	abc
+	^abc$	abcc	n	-	-
+	^abc	abcc	y	&	abc
+	^abc$	aabc	n	-	-
+	abc$	aabc	y	&	abc
+	^	abc	y	&	
+	$	abc	y	&	
+	a.c	abc	y	&	abc
+	a.c	axc	y	&	axc
+	a.*c	axyzc	y	&	axyzc
+	a.*c	axyzd	n	-	-
+	a[bc]d	abc	n	-	-
+	a[bc]d	abd	y	&	abd
+	a[b-d]e	abd	n	-	-
+	a[b-d]e	ace	y	&	ace
+	a[b-d]	aac	y	&	ac
+	a[-b]	a-	y	&	a-
+	a[b-]	a-	y	&	a-
+	[k]	ab	n	-	-
+	a[b-a]	-	c	-	-
+	a[]b	-	c	-	-
+	a[	-	c	-	-
+	a]	a]	y	&	a]
+	a[]]b	a]b	y	&	a]b
+	a[^bc]d	aed	y	&	aed
+	a[^bc]d	abd	n	-	-
+	a[^-b]c	adc	y	&	adc
+	a[^-b]c	a-c	n	-	-
+	a[^]b]c	a]c	n	-	-
+	a[^]b]c	adc	y	&	adc
+	ab|cd	abc	y	&	ab
+	ab|cd	abcd	y	&	ab
+	()ef	def	y	&-\\1	ef-
+	()*	-	c	-	-
+	*a	-	c	-	-
+	^*	-	c	-	-
+	$*	-	c	-	-
+	(*)b	-	c	-	-
+	$b	b	n	-	-
+	a\\	-	c	-	-
+	a\\(b	a(b	y	&-\\1	a(b-
+	a\\(*b	ab	y	&	ab
+	a\\(*b	a((b	y	&	a((b
+	a\\\\b	a\\b	y	&	a\\b
+	abc)	-	c	-	-
+	(abc	-	c	-	-
+	((a))	abc	y	&-\\1-\\2	a-a-a
+	(a)b(c)	abc	y	&-\\1-\\2	abc-a-c
+	a+b+c	aabbabc	y	&	abc
+	a**	-	c	-	-
+	a*?	-	c	-	-
+	(a*)*	-	c	-	-
+	(a*)+	-	c	-	-
+	(a|)*	-	c	-	-
+	(a*|b)*	-	c	-	-
+	(a+|b)*	ab	y	&-\\1	ab-b
+	(a+|b)+	ab	y	&-\\1	ab-b
+	(a+|b)?	ab	y	&-\\1	a-a
+	[^ab]*	cde	y	&	cde
+	(^)*	-	c	-	-
+	(ab|)*	-	c	-	-
+	)(	-	c	-	-
+		abc	y	&	
+	abc		n	-	-
+	a*		y	&	
+	abcd	abcd	y	&-\\&-\\\\&	abcd-&-\\abcd
+	a(bc)d	abcd	y	\\1-\\\\1-\\\\\\1	bc-\\1-\\bc
+	([abc])*d	abbbcd	y	&-\\1	abbbcd-c
+	([abc])*bcd	abcd	y	&-\\1	abcd-a
+	a|b|c|d|e	e	y	&	e
+	(a|b|c|d|e)f	ef	y	&-\\1	ef-e
+	((a*|b))*	-	c	-	-
+	abcd*efg	abcdefg	y	&	abcdefg
+	ab*	xabyabbbz	y	&	ab
+	ab*	xayabbbz	y	&	a
+	(ab|cd)e	abcde	y	&-\\1	cde-cd
+	[abhgefdc]ij	hij	y	&	hij
+	^(ab|cd)e	abcde	n	x\\1y	xy
+	(abc|)ef	abcdef	y	&-\\1	ef-
+	(a|b)c*d	abcd	y	&-\\1	bcd-b
+	(ab|ab*)bc	abc	y	&-\\1	abc-a
+	a([bc]*)c*	abc	y	&-\\1	abc-bc
+	a([bc]*)(c*d)	abcd	y	&-\\1-\\2	abcd-bc-d
+	a([bc]+)(c*d)	abcd	y	&-\\1-\\2	abcd-bc-d
+	a([bc]*)(c+d)	abcd	y	&-\\1-\\2	abcd-b-cd
+	a[bcd]*dcdcde	adcdcde	y	&	adcdcde
+	a[bcd]+dcdcde	adcdcde	n	-	-
+	(ab|a)b*c	abc	y	&-\\1	abc-ab
+	((a)(b)c)(d)	abcd	y	\\1-\\2-\\3-\\4	abc-a-b-d
+	[ -~]*	abc	y	&	abc
+	[ -~ -~]*	abc	y	&	abc
+	[ -~ -~ -~]*	abc	y	&	abc
+	[ -~ -~ -~ -~]*	abc	y	&	abc
+	[ -~ -~ -~ -~ -~]*	abc	y	&	abc
+	[ -~ -~ -~ -~ -~ -~]*	abc	y	&	abc
+	[ -~ -~ -~ -~ -~ -~ -~]*	abc	y	&	abc
+	[a-zA-Z_][a-zA-Z0-9_]*	alpha	y	&	alpha
+	^a(bc+|b[eh])g|.h$	abh	y	&-\\1	bh-
+	(bc+d$|ef*g.|h?i(j|k))	effgz	y	&-\\1-\\2	effgz-effgz-
+	(bc+d$|ef*g.|h?i(j|k))	ij	y	&-\\1-\\2	ij-ij-j
+	(bc+d$|ef*g.|h?i(j|k))	effg	n	-	-
+	(bc+d$|ef*g.|h?i(j|k))	bcdd	n	-	-
+	(bc+d$|ef*g.|h?i(j|k))	reffgz	y	&-\\1-\\2	effgz-effgz-
+	((((((((((a))))))))))	-	c	-	-
+	(((((((((a)))))))))	a	y	&	a
+	multiple words of text	uh-uh	n	-	-
+	multiple words	multiple words, yeah	y	&	multiple words
+	(.*)c(.*)	abcde	y	&-\\1-\\2	abcde-ab-de
+	\\((.*), (.*)\\)	(a, b)	y	(\\2, \\1)	(b, a)
+	";
+		if (typeof(p)!='string') { print("can't find _regex.txt\n"); return; }
+		p=string.split(p, '\n');
+		for (i=0;p[i]!=null;i++) {
+			if (i<100) { p[i]=null; continue; }
+			if (i==95) continue; // test 95 seems broken
+			if (sizeof(p[i])==0) break;
+			if (string.sub(p[i], sizeof(p[i])-1)=='\r') {
+				p[i]=string.sub(p[i], 0, sizeof(p[i])-1);
+			}
+			r=string.split(p[i], '\t');
+			if (r[2]=='c') {
+				continue;
+			} else if (r[2]=='n') {
+				x=regex.match(r[0], r[1]);
+				if (r[4]=='-') want=0; else want=r[4];
+				expect("regex.match   "+i.tostring(), want,       x);
+			} else if (r[2]=='y') {
+				x=regex.replace(r[0], r[3], r[1]);
+				expect("regex.replace "+i.tostring(), r[4],       x);
+			} else {
+				print("burp\n");
+			}
+		}
+		p=null;
+		return;
+	};
+	// rot13.ns
+	_rot13 = function () {
+		if (typeof(rot13)!='function') {
+			print("SKIPPING ROT13 TESTS\n");
+			return;
+		}
+		local rx = { p="123ABCKLMNOPXYZ", e="123NOPXYZABCKLM" };
+		local ry = { p="123abcklmnopxyz", e="123nopxyzabcklm" };
+		expect("rot13(rx.e)", "123ABCKLMNOPXYZ", rot13(rx.e));
+		expect("rot13(rx.p)", "123NOPXYZABCKLM", rot13(rx.p));
+		expect("rot13(ry.e)", "123abcklmnopxyz", rot13(ry.e));
+		expect("rot13(ry.p)", "123nopxyzabcklm", rot13(ry.p));
+	//	print(rot13("\nNakvrgl, a.: Gur svefg gvzr lbh pna'g qb vg n frpbaq gvzr.\nCnavp, a.  : Gur frpbaq gvzr lbh pna'g qb vg gur svefg gvzr.\n"));
+		return;
+	};
+	// scope.ns
+	_scope = function () {
+		local subf1 = function (p1, p2) {
+			local p3="b";
+			expect("testing subscope", "[5][x][b]",     "["+p1.tostring()+"]["+p2.tostring()+"]["+p3.tostring()+"]");
+			return;
+		}
+		local subf2 = function (p1, p2, p3) {
+			expect("testing subscope(t)", "[5][x][1][null]",     "["+p1.tostring()+"]["+p2.tostring()+"]["+p3.a.tostring()+"]["+p3.c.tostring()+"]");
+			return;
+		}
+		local subf3 = function (p1, p2, p3) {
+			expect("testing subscope(t)", "[5][x][null][2]",     "["+p1.tostring()+"]["+p2.tostring()+"]["+p3.a.tostring()+"]["+p3.c.tostring()+"]");
+			return;
+		}
+		function subf4(i) {
+			local ack = { aa=1, bb=2 };
+			return ack;
+		}
+		function subf5(i, s) {
+			s+="["+i+"]";
+			if (i<5) subf5(i+1, &s);
+			s+="["+i+"]";
+			return 42;
+		}
+		local p3="a";
+		local ack = { a=1, b = { c=2 } };
+
+		expect("testing scope",    "[null][null][a]",  "["+p1.tostring()+"]["+p2.tostring()+"]["+p3.tostring()+"]");
+		subf1(5, "x");
+		expect("testing scope",    "[null][null][a]",  "["+p1.tostring()+"]["+p2.tostring()+"]["+p3.tostring()+"]");
+		subf2(5, "x", ack);
+		subf3(5, "x", ack.b);
+		expect("testing scope",    "[null][null][a]",  "["+p1.tostring()+"]["+p2.tostring()+"]["+p3.tostring()+"]");
+		scopetab=subf4(0);
+		expect("testing scopetab", "[table][1][2]",    "["+typeof(scopetab)+"]["+scopetab.aa.tostring()+"]["+scopetab.bb.tostring()+"]");
+
+		s="";
+		i=subf5(0, &s);
+		expect("subf5(i, &s)", true,    s=="[0][1][2][3][4][5][5][4][3][2][1][0]");
+
+		expect("subtab=subf4(0)",  "(table)2",         "("+typeof(scopetab)+")"+scopetab.bb.tostring());
+		expect("i=subf5(0)",       "(number)42",       "("+typeof(i)+")"+i.tostring());
+
+		x=1;    expect("x=1",     1,     x.tostring());
+		x=null; expect("x=null", 'null', x.tostring());
+		x=1;    expect("x=1",     1,     x.tostring());
+		local  x=null; expect("x=null", 'null', x.tostring());
+		local  x=1;    expect("x=1",    1,      x.tostring());
+		local  x=null; expect("x=null", 'null', x.tostring());
+		/* a local null overrides a global val just like any other val would */
+		global x=1;    expect("x=1",    'null', x.tostring());
+		global x=null; expect("x=null", 'null', x.tostring());
+		local  x=1;    expect("x=1",    1,      x.tostring());
+
+
+
+		return;
+	};
+	// serial.ns
+	_serial = function () {
+		t1 = {
+			A = { c = "1", t = "2" },
+			B = { c = 3 }
+		};
+		t2=serialize(t1);
+		t2=string.replace(string.replace(string.replace(string.replace(t2,"\r",""),"\n",""),"\t","")," ","");
+		expect("", '{A={c="1",t="2"},B={c=3}}', t2);
+		t3=eval(t2);
+		t3['B']['c']=4;
+		t3=serialize(t3);
+		t3=string.replace(string.replace(string.replace(string.replace(t3,"\r",""),"\n",""),"\t","")," ","");
+		expect("", '{A={c="1",t="2"},B={c=4}}', t3);
+		return;
+	};
+	// size.ns
+	_size = function () {
+		//include("../samples/_cards.ns");
+		//expect("sizeof(CARDS)", 52, sizeof(CARDS));
+		global CARDS={};
+		expect("sizeof(CARDS)", 0, sizeof(CARDS));
+		global CARDS=null;
+		expect("sizeof(CARDS)", 0, sizeof(CARDS));
+		return;
+	};
+	// string.ns
+	_string = function () {
+		local x=string.cat(string.cat("Aa", "Bb"), "CcDd");
+		expect("x",                     "AaBbCcDd", x);
+		expect("string.sub(x,1,2)",     "aB",     string.sub(x, 1, 2));
+		expect("string.sub(x,4,1)",     "C",      string.sub(x, 4, 1));
+		expect("string.len(x)",         8,        string.len(x));
+		expect("string.cmp(x)",         -32,      string.cmp(x, "aabbccdd"));
+		expect("string.cmp(x)",         32,       string.cmp("aabbccdd", x));
+		expect("string.icmp(x)",        0,        string.icmp(x, "aabbccdd"));
+		expect("string.ncmp(x)",        -32,      string.ncmp(x, "aabb", 4));
+		expect("string.nicmp(x)",       0,        string.nicmp(x, "aabb", 4));
+		expect("string.sub(x)",         "is a",   string.sub("this is a test.", 5, 4));
+		expect("string.sub(x)",         "test",   string.sub("this is a test.", -5, 4));
+
+		expect("x='x'*8",               "xxxxxxxx", 'x'*8);
+		local x='yy';
+		expect("x='yy';x*=3",           "yyyyyy",   x*=3);
+
+		expect("'123'=='456'",          false,    '123'=='456');
+		expect("'123'>='456'",          false,    '123'>='456');
+		expect("'123'>'456'",           false,    '123'>'456');
+		expect("'123'=='123'",          true,     '123'=='123');
+		expect("'123'==123",            true,     '123'==123);
+		expect("123=='123'",            true,     123=='123');
+		expect("'123'!='456'",          true,     '123'!='456');
+		expect("'123'<='456'",          true,     '123'<='456');
+		expect("'123'<'456'",           true,     '123'<'456');
+		expect("'123'+'456'",           "123456", '123'+'456');
+	//	expect("'123\0456'",            "123\0456", '123\0456');
+		expect("123+'456'",             579,      123+'456');
+		expect("1+\"a\"+2+\"b\"+3",     6,        1+"a"+2+"b"+3);
+		expect("1+\"2\"+3+\"4\"+5",     15,       1+"2"+3+"4"+5);
+		expect("\"a\"+1+\"b\"+2+\"c\"", "a1b2c",  "a"+1+"b"+2+"c");
+		expect("tonumber('123')+1", 124,  tonumber('123')+1);
+		x=string.split("aa|bb|cc|dd", "|");
+		expect("string.split()",  "aa+bb+cc+dd+null", x[0]+'+'+x[1]+'+'+x[2]+'+'+x[3]+'+'+x[4].tostring());
+		x=string.split("aa|bb|cc|dd|", "|");
+		expect("string.split()",  "aa+bb+cc+dd+", x[0]+'+'+x[1]+'+'+x[2]+'+'+x[3]+'+'+x[4].tostring());
+		x=string.split("aaz|zbbz|zccz|zddz|z", "z|z");
+		expect("string.split()",  "aa+bb+cc+dd+", x[0]+'+'+x[1]+'+'+x[2]+'+'+x[3]+'+'+x[4].tostring());
+
+		var x="1|2|3|4|5";
+		expect("string.str()",  "1|2|3|4|5", x);
+		if ((x=string.str(x, "|"))!=null) x=string.sub(x, 1, 42);
+		expect("string.str()",  "2|3|4|5", x);
+		if ((x=string.str(x, "|"))!=null) x=string.sub(x, 1, 42);
+		expect("string.str()",  "3|4|5", x);
+		if ((x=string.str(x, "|"))!=null) x=string.sub(x, 1, 42);
+		expect("string.str()",  "4|5", x);
+		if ((x=string.str(x, "|"))!=null) x=string.sub(x, 1, 42);
+		expect("string.str()",  "5", x);
+		if ((x=string.str(x, "|"))!=null) x=string.sub(x, 1, 42);
+		expect("string.str()",  false, x);
+
+		expect("string.atoi('abc',0)",  97,         string.atoi("abc", 0));
+		expect("string.atoi('abc',1)",  98,         string.atoi("abc", 1));
+		expect("string.atoi('abc',2)",  99,         string.atoi("abc", 2));
+		expect("string.atoi('abc',3)",  -1,         string.atoi("abc", 3));
+		expect("string.itoa(97)",       'a',        string.itoa(97));
+		expect("split..join",           "ab.*.*cd", string.join(string.split("ab--cd", '-'), '.*'));
+
+		expect("string.replace",        "ab.*.*cd", string.replace("ab--cd", '-', '.*'));
+
+		x=@"verbatim\r\nstring";
+		if (!quiet) print(""+x+"\r\n");
+		if (!quiet) print(@"verbatim\r\nstring2"+"\r\n"+@";-)\r\n"+"\r\n");
+
+		dbffile=@"C:\D\E\" + "ASDF" + @"\F\G.DBF";
+		if (!quiet) print(""+dbffile+"\r\n");
+
+		local x=`pwd`;
+	//	expect("x=`yy`;x*=3",           "yyyyyy",   x*=3);
+		if (!quiet) print("[",x,"]");
+
+		return;
+	};
+	// switch.ns
+	_switch = function () {
+		local x=0;
+		local y=0;
+
+		switch ('asdf') {
+		case 'asd':
+			print("bad\r\n");
+			x=1;
+			break;
+		case 'asdf':
+			y++;
+			x=2;
+			break;
+		default:
+			print("bad\r\n");
+			x=3;
+			break;
+		}
+		expect("simple 'switch' test", 2, x);
+		switch (4/2) {
+		case 1:
+			print("bad\r\n");
+			x=1;
+			break;
+		case 2:
+			y++;
+			x=2;
+			break;
+		default:
+			print("bad\r\n");
+			x=3;
+			break;
+		}
+		expect("simple 'switch' test", 2, x);
+		switch (2) {
+		case 1:
+			print("bad\r\n");
+			x=1;
+			break;
+		case 2:
+			y++;
+			x=2;
+		default:
+			y++;
+			x=3;
+			break;
+		}
+		expect("simple 'switch' test", 3, x);
+		switch (2) {
+		default:
+			y++;
+			x=3;
+			break;
+		}
+		expect("simple 'switch' test", 3, x);
+		expect("'switch' sum", 5, y);
+		return;
+	};
+	// tables.ns
+	_tables = function () {
+		function subf() { return 69; }
+		local sub2 = function () { return { a=1, b=2 }; };
+		local x=1;
+		local ack = { a="x" };
+
+		//if (include("../samples/_cards.ns")==false) {
+		//	printf("can't include _cards.ns?\r\n");
+		//}
+		//expect("typeof(CARDS)",      "table",           typeof(CARDS));
+		if (typeof(CARDS)!='table') return;
+		expect("CARDS['1']['name']", "Ace of Diamonds", CARDS['1']['name']);
+		CARDS[1].name="aa";
+		expect("CARDS[1].name", "aa", CARDS[1].name);
+		expect("CARDS[x]['dealt']", "(null)null", "("+typeof(CARDS[x]['dealt'])+")"+CARDS[x]['dealt'].tostring());
+		CARDS[x]['dealt']=true;
+		expect("CARDS[x]['dealt']", "(boolean)true", "("+typeof(CARDS[x]['dealt'])+")"+CARDS[x]['dealt'].tostring());
+
+		tab = {
+			{ a1="x", b = pi, [12]=41, [1]=42, 43, 'blah', subf() },
+			{ "x", 'y', x = 41, 42, 43, 'blah', [5]=12, heh=";-)" }
+		};
+		// now add a subtable
+		tab['t'] = {
+			{ a2="x", b = pi, [12]=41, [1]=42, 43, 'blah', subf() },
+			{ "x", 'y', x = 41, 42, 43, 'blah', [5]=12, heh=";-)" }
+		};
+		// overwrite an existing subtable
+		tab['t'] = { [2] = { "x", 'y', x = 41, 42, 43, 'blah', [5]=12, heh=";-)" } };
+		// add another sub
+		tab['t'][3] = { "x", 'y', x = 41, 42, 43, 'blah', [5]=12, heh=";-)" };
+		//print(serialize(_GLOBALS));
+
+		a = { [0]=subf()-1, [1]=subf(), x=+1, y=2, z=-3 };
+		expect("a = { ... }", "68 69 1 2 -3", a[0].tostring()+' '+a[1].tostring()+' '+a['x'].tostring()+' '+a['y'].tostring()+' '+a['z'].tostring());
+
+		local status_table = {
+			['A'] = { c='1', t='2' };
+			['B'] = { c='3', t='4' };
+		};
+
+		/* this code failed after the malloc reductions */
+		row={ 1 };
+		expect("row={ 1 };", 'table', typeof(row));
+		if (typeof(row)!='table') x=1;
+		expect("(typeof(row))", 'table', typeof(row));
+		if (row!=null) x=1;
+		expect("(row!=null)", 'table', typeof(row));
+		x=(row={1});
+		expect("x=(row={1})", 'table', typeof(row));
+		if (row={1}) x=1;
+		expect("(row={1})", 'table', typeof(row));
+		if ((row={1})!=null) x=1;
+		expect("((row={1})!=null)", 'table', typeof(row));
+		while ((row={1})!=null) { break; }
+		expect("((row={1})!=null)", 'table', typeof(row));
+		i=0;
+		do {
+			if (row) x=serialize(row);
+			if (++i>2) break;
+		} while ((row={1})!=null);
+		while ((row={1})!=null) {
+			x=serialize(row);
+			break;
+		}
+		expect("((row={1})!=null)", 'table', typeof(row));
+
+		x=sub2();
+		expect("x=sub2()", '1', x['a'].tostring());
+
+		// all four are valid ways to declare a function inside a table
+		local t = {
+			function () {
+				return 'a';
+			};
+			[1] = function () {
+				return 'b';
+			};
+			function c() {
+				return 'c';
+			};
+			d = function () {
+				return 'd';
+			};
+		};
+		expect("a", 'a', t[0]());
+		expect("b", 'b', t[1]());
+		expect("c", 'c', t.c());
+		expect("d", 'd', t.d());
+		return;
+	};
+	// tcp.ns
+	_tcp = function () {
+		local test_tcpserv = function () {
+			/* requires _tcpserv.ns to be running */
+			sock=new net.tcp.socket("localhost", 1234, 0);
+			if (typeof(sock)!='sock4') {
+				print("can't connect to test server - try running _tcpserv.ns first\n");
+				return;
+			}
+			o=sock.write("ping\r\n");
+			print("\twrote ", o, " bytes\n");
+			i=sock.gets();
+			print("read: ", i, "\n");
+			sock.close();
+			io.flush();
+			return;
+		}
+		local test_http = function () {
+			if (!quiet) print("        trying http://nulllogic.ca:80/   - ");
+			sock=new net.tcp.socket();
+			sock.connect("nulllogic.ca", 80, false);
+			if (typeof(sock.socket)!='sock4') {
+				if (!quiet) print("can't connect to http server\n");
+				return;
+			}
+			o=sock.write("GET /nsp/version.php HTTP/1.0\r\n\r\n");
+			i=sock.gets();
+			x=string.str(i, " ");
+			p=string.sub(i, 0, sizeof(i)-sizeof(x));
+			c=string.sub(x, 1, sizeof(x));
+			x=string.str(c, " ");
+			c=string.sub(c, 0, sizeof(c)-sizeof(x));
+			x=string.sub(x, 1, sizeof(x));
+			printf("[%s][%s][%s]\n", p, c, x);
+			while (1) {
+				i=sock.gets();
+				if (i=="") break;
+			}
+			while (1) {
+				i=sock.read();
+				if (i=="") break;
+			}
+			//print(serialize(sock.info()));
+			sock.close();
+			io.flush();
+			return;
+		}
+		local test_https = function () {
+			if (!quiet) print("        trying https://nulllogic.ca:443/ - ");
+			sock=new net.tcp.socket();
+			sock.connect("nulllogic.ca", 443, true);
+			if (typeof(sock.socket)!='sock4') {
+				if (!quiet) print("can't connect to http server\n");
+				return;
+			}
+			o=sock.write("GET / HTTP/1.0\r\n\r\n");
+			i=sock.gets();
+			print("["+i+"]\n");
+			io.flush();
+			while (1) {
+				i=sock.gets();
+				if (typeof(i)!='string') break;
+				if (i=="") break;
+				i=string.join(string.split(i, "<"), "&lt;");
+			}
+			io.flush();
+			while (1) {
+				i=sock.read();
+				if (typeof(i)!='string') break;
+				if (sizeof(i)==0) break;
+				i=string.join(string.split(i, "<"), "&lt;");
+			}
+			//print(serialize(sock.info(sock)));
+			sock.close();
+			io.flush();
+			return;
+		}
+		local test_ftp = function () {
+			sock=net.tcp.open("localhost", 21, 0);
+			if (typeof(sock)!='sock4') {
+				print("can't connect to ftp server\n");
+				return;
+			}
+			i=net.tcp.gets(sock);
+			print("read: ", i, "\n");
+			o=net.tcp.write(sock, "USER anonymous\r\n");
+			i=net.tcp.gets(sock);
+			print("read: ", i, "\n");
+			o=net.tcp.write(sock, "PASS nobody@nowhere.com\r\n");
+			i=net.tcp.gets(sock);
+			print("read: ", i, "\n");
+			o=net.tcp.write(sock, "SYST\r\n");
+			i=net.tcp.gets(sock);
+			print("read: ", i, "\n");
+			o=net.tcp.write(sock, "FEAT\r\n");
+			while (1) {
+				i=net.tcp.gets(sock);
+				print("read: ", i, "\n");
+				if (string.sub(i, 0, 4)=="211 ") break;
+				if (string.cmp(i, "211")==0) break;
+			}
+			o=net.tcp.write(sock, "PWD\r\n");
+			i=net.tcp.gets(sock);
+			print("read: ", i, "\n");
+			o=net.tcp.write(sock, "TYPE A\r\n");
+			i=net.tcp.gets(sock);
+			print("read: ", i, "\n");
+			o=net.tcp.write(sock, "PASV\r\n");
+			i=net.tcp.gets(sock);
+			print("read: ", i, "\n");
+			i=string.split(i, "(");
+			y=string.split(i[1], ")");
+			addr=string.split(y[0], ",");
+			if (sizeof(addr)!=6) {
+				print("couldn't parse the host address\n");
+				print(serialize(addr));
+				print(sizeof(addr));
+			} else {
+				o=net.tcp.write(sock, "LIST\r\n");
+				sock2=net.tcp.open(addr[0]+'.'+addr[1]+'.'+addr[2]+'.'+addr[3], tonumber(addr[4])*256+tonumber(addr[5]), 0);
+				i=net.tcp.read(sock2);
+				print("read ", sizeof(i), " bytes of data:\n", i, "\n");
+				net.tcp.close(sock2);
+			}
+			while (1) {
+				i=net.tcp.gets(sock);
+				print("read: ", i, "\n");
+				if (string.sub(i, 0, 4)=="226 ") break;
+				if (string.cmp(i, "226")==0) break;
+			}
+			o=net.tcp.write(sock, "REST 0\r\n");
+			i=net.tcp.gets(sock);
+			print("read: ", i, "\n");
+			o=net.tcp.write(sock, "QUIT\r\n");
+			i=net.tcp.gets(sock);
+			print("read: ", i, "\n");
+			net.tcp.close(sock);
+			io.flush();
+			return;
+		}
+		local test_pop3 = function () {
+			sock=net.tcp.open("localhost", 110, 0);
+			if (typeof(sock)!='sock4') {
+				print("can't connect to pop3 server\n");
+				return;
+			}
+			i=net.tcp.gets(sock);
+			print("read: ", i, "\n");
+			net.tcp.write(sock, "user null\r\n");
+			i=net.tcp.gets(sock);
+			print("read: ", i, "\n");
+			o=net.tcp.write(sock, "pass secret\r\n");
+			i=net.tcp.gets(sock);
+			print("read: ", i, "\n");
+			if (string.sub(i, 0, 3)=="+OK") {
+				o=net.tcp.write(sock, "list\r\n");
+				i=net.tcp.gets(sock);
+				print("read: ", i, "\n");
+			}
+			o=net.tcp.write(sock, "QUIT\r\n");
+			i=net.tcp.gets(sock);
+			print("read: ", i, "\n");
+			net.tcp.close(sock);
+			io.flush();
+			return;
+		}
+		local test_smtp = function () {
+			sock=net.tcp.open("localhost", 25, 0);
+			if (typeof(sock)!='sock4') {
+				print("can't connect to smtp server\n");
+				return;
+			}
+			i=net.tcp.gets(sock);
+			o=net.tcp.write(sock, "HELO <localhost>\r\n");
+			i=net.tcp.gets(sock);
+			print("read: ", i, "\n");
+			o=net.tcp.write(sock, "MAIL From: <nulllogic@localhost>\r\n");
+			i=net.tcp.gets(sock);
+			print("read: ", i, "\n");
+			o=net.tcp.write(sock, "RCPT To: <nulllogic@localhost>\r\n");
+			i=net.tcp.gets(sock);
+			print("read: ", i, "\n");
+			o=net.tcp.write(sock, "DATA\r\n");
+			i=net.tcp.gets(sock);
+			print("read: ", i, "\n");
+			o=net.tcp.write(sock, "From: Dan Cahill <nulllogic@localhost>\r\n");
+			o=net.tcp.write(sock, "To: Dan Cahill <nulllogic@localhost>\r\n");
+			o=net.tcp.write(sock, "Subject: Testing\r\n");
+			o=net.tcp.write(sock, "\r\n");
+			o=net.tcp.write(sock, "This is a test.\r\n");
+			o=net.tcp.write(sock, "\r\n.\r\n");
+			i=net.tcp.gets(sock);
+			print("read: ", i, "\n");
+			o=net.tcp.write(sock, "QUIT\r\n");
+			i=net.tcp.gets(sock);
+			print("read: ", i, "\n");
+			net.tcp.close(sock);
+			io.flush();
+			return;
+		}
+
+		if (typeof(net)!='table') {
+			if (!quiet) print("SKIPPING TCP TESTS\n");
+			return;
+		}
+		if (!quiet) print("        runtime = ", string.tostring(runtime(), 3), " seconds\n");
+		if (!quiet) if (net.tcp.have_ssl) print("        net.tcp.ssl_type = '",net.tcp.ssl_type,"'\n");
+		site_url = "http://nulllogic.ca/nsp/version.php";
+		if (!quiet) print("        sucking "+site_url+"\n");
+		hconn=new net.http.client(site_url);
+	//	print("[",typeof(hconn)," ",serialize(hconn),"]");
+		ht=hconn.send();
+	//	print("[",typeof(hconn)," ",serialize(hconn),"]");
+		delete hconn;
+	//	htconn=null;
+		expect("ht.status", "HTTP/1.1 200 OK", ht.status);
+		if (typeof(ht)=='table') {
+			status=string.split(ht.status, " ");
+			if (tonumber(status[1])==200) {
+				X=data.xml.read(ht.body);
+	//			expect("Latest Version", _version_, X['version'][0]['major'][0]['value']+'.'+X['version'][0]['minor'][0]['value']+'.'+X['version'][0]['point'][0]['value']);
+				expect("Latest Version", _version_, X.version.major.value+'.'+X.version.minor.value+'.'+X.version.point.value);
+	//			print("",ht.body,serialize(X),"\r\n");
+			}
+		}
+	//	print("[[[", ht.head, "]]]\n");
+	//	print("[[[", ht.body, "]]]\n");
+	//	print(serialize(ht));
+		if (typeof(net.tcp.socket)=='function') {
+	//		print("        runtime = ", string.tostring(runtime(), 3), " seconds\n");
+	//		test_tcpserv();
+			test_http();
+			if (net.tcp.have_ssl) test_https();
+	//		test_ftp();
+	//		test_pop3();
+	//		test_smtp();
+			if (!quiet) print("        runtime = ", string.tostring(runtime(), 3), " seconds\n");
+		}
+		return;
+	};
+	// tcpserv.ns
+	_tcpd = function () {
+		if (typeof(net.tcp)!='table') {
+			if (!quiet) print("SKIPPING TCPSERV TESTS\n");
+			return;
+		}
+		if (typeof(net.tcp.open)=='function') {
+			bsock=net.tcp.bind("localhost", 1234);
+			print("bsock=", typeof(bsock), "\n");
+			io.flush();
+			while (1) {
+				asock=net.tcp.accept(bsock);
+				if (typeof(asock)=='sock4') {
+					x=net.tcp.gets(asock);
+					print("client said: ", x, "\n");
+					if (x=="ping") {
+						net.tcp.write(asock, "pong\r\n");
+						print("i said: pong\n");
+					} else {
+						net.tcp.write(asock, "expected pong\r\n");
+						print("i said: expected pong\n");
+					}
+					io.flush();
+					net.tcp.close(asock);
+				}
+			}
+			net.tcp.close(bsock);
+		}
+
+		return;
+	};
+	// try.ns
+	_try = function () {
+		//print("        This block _will_ cause errors - That's the point.\n\n");
+		io.flush();
+		trylog="";
+		try {
+			try {
+				trylog+="outer try";
+				//print("        In outer try block...\n");
+				try {
+					trylog+="->inner try";
+					//print("        In inner try block...\n");
+					throw "Error 325 from inner try block";
+				} catch (e) {
+					trylog+="->inner catch";
+					//print("        Inner catch block caught "+e.description+"\n");
+					throw e.description + " re-thrown from inner catch block";
+				} finally {
+					trylog+="->inner finally";
+					//print("        In inner finally block...\n");
+				}
+			} catch (e) {
+				trylog+="->outer catch";
+				//print("        Outer catch block caught "+e.description+"\n");
+			} finally {
+				trylog+="->outer finally";
+				//print("        In outer finally block...\n");
+			}
+			//printf("        [%s]\n", trylog);
+			expect("try catch", "outer try->inner try->inner catch->inner finally->outer catch->outer finally", trylog);
+			//[outer try->inner try->inner catch->inner finally->outer catch->outer finally]
+		} catch (e) {
+			printf("        Exception: \"%s\"\n", e.description);
+		} finally {
+			//print("        finally...\n");
+		}
+		try {
+			x=string.split();
+		} catch (e) {
+			if (!quiet) printf("        Exception: \"%s\"\n", e.description);
+		}
+		try {
+			x=void();
+		} catch (e) {
+			if (!quiet) printf("        Exception: \"%s\"\n", e.description);
+		}
+		try {
+			a={};x=a.b[1+1].c();
+		} catch (e) {
+			if (!quiet) printf("        Exception: \"%s\"\n", e.description);
+		}
+		try {
+			a();
+		} catch (e) {
+			if (!quiet) printf("        Exception: \"%s\"\n", e.description);
+		}
+		try {
+			a.b();
+		} catch (e) {
+			if (!quiet) printf("        Exception: \"%s\"\n", e.description);
+		}
+		try {
+			a.b.c();
+		} catch (e) {
+			if (!quiet) printf("        Exception: \"%s\"\n", e.description);
+		}
+		io.flush();
+		return;
+	};
+	// types.ns
+	_types = function () {
+		local a=null;
+		local b=true;
+		local c=42;
+		local d="Guinness";
+		local e = { a=1, b=2, c=3 };
+
+		expect("typeof(a)", "(null)null",       "("+typeof(a)+")"+a.tostring());
+		expect("sizeof(a)", 0,                  sizeof(a));
+		expect("typeof(b)", "(boolean)true",    "("+typeof(b)+")"+b.tostring());
+		expect("sizeof(b)", 1,                  sizeof(b));
+		expect("typeof(c)", "(number)42",       "("+typeof(c)+")"+c.tostring());
+		expect("sizeof(c)", 1,                  sizeof(c));
+		expect("typeof(d)", "(string)Guinness", "("+typeof(d)+")"+d.tostring());
+		expect("sizeof(d)", 8,                  sizeof(d));
+		expect("typeof(e)", "(table)",          "("+typeof(e)+")"+e.tostring());
+		expect("sizeof(e)", 3,                  sizeof(e));
+		return;
+	};
+	// xml.ns
+	_xml = function () {
+		if (typeof(data.xml)!='table') {
+			if (!quiet) print("SKIPPING XML TESTS\n");
+			return;
+		}
+	#	print("XML TEST\n\n");
+		local xstr = {
+	"<?xml version='1.0'?>
+	<moldb>
+		<molecule>
+			<name>Alanine</name>
+			<symbol>ala</symbol>
+			<code>A</code>
+			<type>hydrophobic</type>
+		</molecule>
+		<molecule>
+			<name>Lysine</name>
+			<symbol>lys</symbol>
+			<code>K</code>
+			<type>charged</type>
+		</molecule>
+	</moldb>"
+	,
+	"<?xml version='1.0'?>
+	<!DOCTYPE chapter SYSTEM '/just/a/test.dtd' [
+	<!ENTITY plainEntity 'FOO entity'>
+	<!ENTITY systemEntity SYSTEM 'xmltest2.xml'>
+	]>
+	<chapter>
+	 <TITLE>Title &plainEntity;</TITLE>
+	 <para>
+	  <informaltable>
+	   <tgroup cols='3'>
+	    <tbody>
+	     <row><entry>a1</entry><entry morerows='1'>b1</entry><entry>c1</entry></row>
+	     <row><entry>a2</entry><entry>c2</entry></row>
+	     <row><entry>a3</entry><entry>b3</entry><entry>c3</entry></row>
+	    </tbody>
+	   </tgroup>
+	  </informaltable>
+	 </para>
+	 &systemEntity;
+	 <section id='about'>
+	  <title>About this Document</title>
+	  <para>
+	   <!-- this is a comment -->
+	   <?php echo 'Hi!  This is PHP version ' . phpversion(); ?>
+	  </para>
+	 </section>
+	</chapter>"
+	,
+	"<?xml version='1.0' encoding='ISO-8859-1'?>
+	<FileZilla>
+	<Sites>
+	<Folder Name='local'>
+	<Site Name='gw.nulllogic.lan' Host='gw.nulllogic.lan' Port='22' User='null' Account='' RemoteDir='' LocalDir='' Pass='000000000000'/>
+	<Site Name='lt.nulllogic.lan' Host='lt.nulllogic.lan' Port='22' User='null' Account='' RemoteDir='' LocalDir='' Pass='000000000000'/>
+	</Folder>
+	</Sites>
+	<Settings>
+	<Item name='Last Server Port' type='numeric'>22</Item>
+	<Item name='Last Server User' type='string'>null</Item>
+	<Item name='Last Server account' type='string'></Item>
+	<Item name='Last Server dont save pass' type='numeric'>0</Item>
+	<Item name='Last Server UTF8' type='numeric'>0</Item>
+	<Item name='Last server name' type='string'>lt.nulllogic.lan</Item>
+	<Item name='Last Server Pass' type='string'>000000000000</Item>
+	<Item name='Last Server Firewall Bypass' type='numeric'>0</Item>
+	<Item name='Last Server Path' type='string'>4098 0 4 home 4 null</Item>
+	<Item name='Last Server Type' type='numeric'>4098</Item>
+	<Item name='Last Server transfer mode' type='numeric'>0</Item>
+	<Item name='Last Server Timezone' type='numeric'>0</Item>
+	<Item name='Default Folder' type='string'/>
+	<Item name='Last Server Host' type='string'>lt.nulllogic.lan</Item>
+	</Settings>
+	<TransferQueue/>
+	<RecentServers/>
+	</FileZilla>"
+	,
+	"<DoDirectPaymentResponse xmlns='urn:ebay:api:PayPalAPI'>
+	<Timestamp xmlns='urn:ebay:apis:eBLBaseComponents'>2005-08-26T01:07:03Z</Timestamp>
+	<Ack xmlns='urn:ebay:apis:eBLBaseComponents'>Success</Ack>
+	<Version xmlns='urn:ebay:apis:eBLBaseComponents'>1.000000</Version>
+	<Build xmlns='urn:ebay:apis:eBLBaseComponents'>1.0006</Build>
+	<Amount xsi:type='cc:BasicAmountType' currencyID='USD'>489.56</Amount>
+	<AVSCode xsi:type='xs:string'>X</AVSCode>
+	<CVV2Code xsi:type='xs:string'>M</CVV2Code>
+	<TransactionID>33638616GW718753G</TransactionID>
+	</DoDirectPaymentResponse>"
+	};
+
+		X=data.xml.read(xstr[0], true);
+	//	expect("data.xml.read(...)", "Lysine", X['moldb'][0]['molecule'][1]['name'][0]['value']);
+		expect("data.xml.read(...)", "Lysine", X['moldb']['molecule'][1]['name']['value']);
+		X=data.xml.read(xstr[1], true);
+	//	expect("data.xml.read(...)", "a1", X['chapter'][0]['para'][0]['informaltable'][0]['tgroup'][0]['tbody'][0]['row'][0]['entry'][0]['value']);
+		expect("data.xml.read(...)", "a1", X['chapter']['para']['informaltable']['tgroup']['tbody']['row'][0]['entry'][0]['value']);
+		X=data.xml.read(xstr[2], true);
+	//	expect("data.xml.read(...)", "local", X['FileZilla'][0]['Sites'][0]['Folder'][0]['!attributes']['Name']);
+		expect("data.xml.read(...)", "local", X['FileZilla']['Sites']['Folder']['@attributes']['Name']);
+		X=data.xml.read(xstr[3], true);
+	//	expect("data.xml.read(...)", "33638616GW718753G", X['DoDirectPaymentResponse'][0]['TransactionID'][0]['value']);
+		expect("data.xml.read(...)", "33638616GW718753G", X['DoDirectPaymentResponse']['TransactionID']['value']);
+		return;
+	};
+	// zlink.ns
+	_zlink = function () {
+		local function f1() {
+			return 41;
+		}
+		local function f2() {
+			return 42;
+		}
+		local a={ a=1, b=2, f=f1 };
+		local b={};
+
+		zlink(b, a);
+		expect("a['a']", 1,      a['a']);
+		expect("b['a']", 1,      b['a']);
+		a['c']=3;
+		expect("a['c']", 3,      a['c']);
+		expect("b['c']", 3,      b['c']);
+		b['d']=10;
+		expect("a['d']", 'null', a['d'].tostring());
+		expect("b['d']", 10,     b['d']);
+		b['f']=f2;
+		expect("a.f()",  41,     a.f());
+		expect("b.f()",  42,     b.f());
+		b={};
+		expect("b['c']", 'null', b['c'].tostring());
+		zlink(b, a);
+		expect("b['c']", 3,      b['c']);
+		return;
+	};
+};
+
+if (stuff==null) print("run test1.ns\r\n");

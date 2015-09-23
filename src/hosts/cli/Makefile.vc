@@ -12,24 +12,24 @@ MAKE          = nmake.exe /C /S /Y /F
 RSC           = rc.exe
 RSC_PROJ      = /l 0x409 /fo"$(INTDIR)\nestray.res" /d "NDEBUG"
 
-BIN_CFLAGS    = /W3 /O2 /ML /I "../../../include" $(CFLAGS) /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /FD /c
-BIN_LDFLAGS   = /subsystem:console /pdb:none /machine:I386 /NODEFAULTLIB:libc /libpath:../../../lib/ libcmt.lib gdi32.lib shell32.lib user32.lib winmm.lib libnesla.lib $(LDFLAGS) \
-	libneslaext.lib libneslatcp.lib libneslawinapi.lib libneslazip.lib
+BIN_CFLAGS    = /W3 /O2 /MD /I "../../../include" $(CFLAGS) /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /FD /c
+BIN_LDFLAGS   = /subsystem:console /pdb:none /machine:I386 /libpath:../../../lib/ gdi32.lib shell32.lib user32.lib winmm.lib libnsp.lib $(LDFLAGS) \
+	libnsp_dl.lib libnsp_ext.lib libnsp_math.lib
 BIN_TARGETDIR = ..\..\..\bin
 
 #CFLAGS  = $(BIN_CFLAGS)
 OBJECTS = $(INTDIR)\main.obj
-TARGET  = $(BIN_TARGETDIR)\nesla.exe
+TARGET  = $(BIN_TARGETDIR)\nsp.exe
 
-all: _dirs _nesla
+all: _dirs _nsp
 
 _dirs:
 	@if not exist "$(BIN_TARGETDIR)" mkdir "$(BIN_TARGETDIR)"
 	@if not exist "$(OBJDIR)" mkdir "$(OBJDIR)"
 	@if not exist "$(INTDIR)" mkdir "$(INTDIR)"
 
-_nesla: $(OBJECTS)
-	$(RSC) $(RSC_PROJ) .\nesla.rc
+_nsp: $(OBJECTS)
+	$(RSC) $(RSC_PROJ) .\nsp.rc
 	$(LINK) $(BIN_LDFLAGS) /out:$(TARGET) "$(INTDIR)\nestray.res" $(OBJECTS)
 
 clean:

@@ -1,0 +1,61 @@
+.TH NSP 1 "2015/01/01"
+
+.SH NAME
+nsp \- NSP Script Processor
+
+.SH SYNOPSIS
+.B nsp
+[-b] [-d] [-s] [-e "\fIcode\fR"] [[-f] \fIscript\fR]
+
+.SH DESCRIPTION
+.B nsp
+is the stand-alone NSP Script Processor.
+It loads and executes NSP programs, either in source form or in precompiled
+binary form.
+.LP
+The given
+.I options
+(see below)
+are executed and then
+the NSP program in file
+.I script
+is loaded and executed.
+The given
+.I args
+are available to
+.I script
+as strings in a global table named
+.BR _ARGS .
+If these arguments contain spaces or other characters special to the shell,
+then they should be quoted.
+
+.SH OPTIONS
+.TP
+.B \-b
+bypass execution of \fIpreload.ns\fR.
+.TP
+.B \-d
+show debug output when executing \fIcode\fR or \fIfile\fR.
+.TP
+.B \-s
+show internal statistics (mostly about memory usage).
+.TP
+.BI \-e " code"
+execute statement \fIcode\fR.
+You need to quote \fIcode\fR if it contains spaces, quotes, or other characters
+special to the shell.  Depending on your shell, you will probably need to
+escape (with \\) special characters in \fIcode\fR.
+.TP
+.BI \-f " script"
+Execute file \fIscript\fR.
+.TP
+.B \-v
+show version information.
+
+.SH "SEE ALSO"
+.br
+.BI http://www.nulllogic.ca/nesla/
+
+.SH AUTHOR
+Dan Cahill
+.\" EOF

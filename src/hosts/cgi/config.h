@@ -1,6 +1,6 @@
 /*
-    nesla.cgi -- simple Nesla CGI host
-    Copyright (C) 2007-2009 Dan Cahill
+    nsp.cgi -- simple Nesla CGI host
+    Copyright (C) 2007-2015 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#define CONFIG_FILENAME     "neslacgi.conf"
+#define CONFIG_FILENAME     "nspcgi.conf"
 #define CONFIG_LANGUAGE     "en"
 #define CONFIG_MAX_POSTSIZE 33554432
 #define CONFIG_MAX_RUNTIME  30

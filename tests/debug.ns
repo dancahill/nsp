@@ -1,0 +1,7 @@
+print("This is a file with debug code\r\n");
+//dl.path={ @"N:\gw\nsp\lib\shared" };
+//rc=include(@"N:\gw\nsp\scripts\samples\http-proxy.ns");
+//if (rc==false) print("Include failed.\r\n");
+rc=include(@"N:\gw\nsp\scripts\samples\srcmap.ns");
+if (rc==false) print("Include failed.\r\n");
+print(serialize(decomped_script));
