@@ -75,8 +75,18 @@ int nspnet_register_all(nsp_state *N)
 #else
 	nsp_setbool(N, tobj2, "have_ssl", 0);
 #endif
+	nsp_setcfunc(N, tobj2, "accept", (NSP_CFUNC)libnsp_net_tcp_accept);
+	nsp_setcfunc(N, tobj2, "bind", (NSP_CFUNC)libnsp_net_tcp_bind);
+	nsp_setcfunc(N, tobj2, "close", (NSP_CFUNC)libnsp_net_tcp_close);
+	nsp_setcfunc(N, tobj2, "connect", (NSP_CFUNC)libnsp_net_tcp_connect);
+	nsp_setcfunc(N, tobj2, "gets", (NSP_CFUNC)libnsp_net_tcp_gets);
+	nsp_setcfunc(N, tobj2, "info", (NSP_CFUNC)libnsp_net_tcp_info);
+	nsp_setcfunc(N, tobj2, "read", (NSP_CFUNC)libnsp_net_tcp_read);
+	nsp_setcfunc(N, tobj2, "setsockopt", (NSP_CFUNC)libnsp_net_tcp_setsockopt);
 	nsp_setcfunc(N, tobj2, "socket", (NSP_CFUNC)libnsp_net_tcp_socket);
-
+	nsp_setcfunc(N, tobj2, "tlsaccept", (NSP_CFUNC)libnsp_net_tcp_tlsaccept);
+	nsp_setcfunc(N, tobj2, "tlsconnect", (NSP_CFUNC)libnsp_net_tcp_tlsconnect);
+	nsp_setcfunc(N, tobj2, "write", (NSP_CFUNC)libnsp_net_tcp_write);
 
 	tobj2 = nsp_settable(N, tobj, "tnef");
 	tobj2->val->attr |= NST_HIDDEN;

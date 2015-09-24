@@ -236,6 +236,8 @@ int tcp_recv(nsp_state *N, TCP_SOCKET *socket, char *buffer, int max, int flags)
 		//n_warn(N, __FN__, "[%s:%d] a %d", socket->RemoteAddr, socket->RemotePort, x2);
 		int ec = WSAGetLastError();
 		switch (ec) {
+		case 0:
+			return 0;
 		case WSAETIMEDOUT:
 			return 0;
 		default:
@@ -609,7 +611,7 @@ NSP_FUNCTION(libnsp_net_tcp_info)
 {
 #define __FN__ __FILE__ ":libnsp_net_tcp_info()"
 	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
-	//	obj_t *cobj1=nsp_getobj(N, &N->l, "1");
+	//obj_t *cobj1=nsp_getobj(N, &N->l, "1");
 	obj_t *cobj;
 	obj_t tobj;
 	TCP_SOCKET *sock;
@@ -668,19 +670,13 @@ NSP_FUNCTION(libnsp_net_tcp_accept)
 	nsp_setvaltype(N, &tobj, NT_TABLE);
 	cobj = nsp_settable(N, &tobj, "this");
 	cobj->val->attr &= ~NST_AUTOSORT;
-	//	cobj->val->attr|=NST_HIDDEN;
+	//cobj->val->attr|=NST_HIDDEN;
 	nsp_linkval(N, cobj, &tobj);
-	nsp_setcfunc(N, &tobj, "close", (NSP_CFUNC)libnsp_net_tcp_close);
-	nsp_setcfunc(N, &tobj, "read", (NSP_CFUNC)libnsp_net_tcp_read);
-	nsp_setcfunc(N, &tobj, "gets", (NSP_CFUNC)libnsp_net_tcp_gets);
-	nsp_setcfunc(N, &tobj, "write", (NSP_CFUNC)libnsp_net_tcp_write);
-	nsp_setcfunc(N, &tobj, "info", (NSP_CFUNC)libnsp_net_tcp_info);
-	nsp_setcfunc(N, &tobj, "setsockopt", (NSP_CFUNC)libnsp_net_tcp_setsockopt);
 	cobj = nsp_setcdata(N, &tobj, "socket", NULL, 0);
 	cobj->val->d.str = (void *)asock;
 	cobj->val->size = sizeof(TCP_SOCKET) + 1;
-	//	n_warn(N, __FN__, "tobj.val->refs = %d", tobj.val->refs);
-	//	tobj.val->refs--;
+	cobj = nsp_getobj(N, nsp_getobj(N, &N->g, "net"), "tcp");
+	if (nsp_istable(cobj)) nsp_zlink(N, &N->l, cobj);
 	nsp_linkval(N, &N->r, &tobj);
 	nsp_unlinkval(N, &tobj);
 	return 0;
@@ -751,8 +747,6 @@ NSP_FUNCTION(libnsp_net_tcp_bind)
 //	nsp_setcdata(N, &N->r, "", NULL, 0);
 //	N->r.val->d.str=(void *)bsock;
 //	N->r.val->size=sizeof(TCP_SOCKET)+1;
-	nsp_setcfunc(N, thisobj, "accept", (NSP_CFUNC)libnsp_net_tcp_accept);
-	nsp_setcfunc(N, thisobj, "close", (NSP_CFUNC)libnsp_net_tcp_close);
 	return 0;
 #undef __FN__
 }
@@ -788,14 +782,70 @@ NSP_FUNCTION(libnsp_net_tcp_connect)
 		// n_free(N, (void *)&sock, sizeof(TCP_SOCKET)+1);
 		return -1;
 	}
-	nsp_setcfunc(N, thisobj, "close", (NSP_CFUNC)libnsp_net_tcp_close);
-	nsp_setcfunc(N, thisobj, "read", (NSP_CFUNC)libnsp_net_tcp_read);
-	nsp_setcfunc(N, thisobj, "gets", (NSP_CFUNC)libnsp_net_tcp_gets);
-	nsp_setcfunc(N, thisobj, "write", (NSP_CFUNC)libnsp_net_tcp_write);
-	nsp_setcfunc(N, thisobj, "info", (NSP_CFUNC)libnsp_net_tcp_info);
-	nsp_setcfunc(N, thisobj, "setsockopt", (NSP_CFUNC)libnsp_net_tcp_setsockopt);
 	return 0;
 #undef __FN__
+}
+
+NSP_FUNCTION(libnsp_net_tcp_tlsaccept)
+{
+#define __FN__ __FILE__ ":libnsp_net_tcp_tlsaccept()"
+#ifdef HAVE_SSL
+	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
+	obj_t *tobj = nsp_getobj(N, &N->l, "1"); /* ssl opts */
+	obj_t *cobj;
+	TCP_SOCKET *sock;
+	int rc;
+	char *pc = NULL, *pk = NULL;
+
+	if (!nsp_istable(thisobj)) n_error(N, NE_SYNTAX, __FN__, "expected a table for 'this'");
+	cobj = nsp_getobj(N, thisobj, "socket");
+	if ((cobj->val->type != NT_CDATA) || (cobj->val->d.str == NULL) || (strcmp(cobj->val->d.str, "sock4") != 0))
+		n_error(N, NE_SYNTAX, __FN__, "expected a socket");
+	sock = (TCP_SOCKET *)cobj->val->d.str;
+
+
+	if (nsp_istable(tobj)) {
+		obj_t *cobj1 = nsp_getobj(N, tobj, "certfile");
+		obj_t *cobj2 = nsp_getobj(N, tobj, "keyfile");
+		if (cobj1->val->type == NT_STRING&&cobj2->val->type == NT_STRING&&cobj1->val->size > 0 && cobj2->val->size > 0) {
+			pc = cobj1->val->d.str;
+			pk = cobj2->val->d.str;
+		}
+	}
+	rc = _ssl_init(N, sock, 1, pc, pk);
+	_ssl_accept(N, sock, sock);
+	sock->use_ssl = 1;
+#else
+	n_warn(N, __FN__, "SSL is not available");
+#endif
+#undef __FN__
+	return 0;
+}
+
+NSP_FUNCTION(libnsp_net_tcp_tlsconnect)
+{
+#define __FN__ __FILE__ ":libnsp_net_tcp_tlsconnect()"
+#ifdef HAVE_SSL
+	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
+	obj_t *tobj = nsp_getobj(N, &N->l, "1"); /* ssl opts */
+	obj_t *cobj;
+	TCP_SOCKET *sock;
+	int rc;
+	//char *pc = NULL, *pk = NULL;
+
+	if (!nsp_istable(thisobj)) n_error(N, NE_SYNTAX, __FN__, "expected a table for 'this'");
+	cobj = nsp_getobj(N, thisobj, "socket");
+	if ((cobj->val->type != NT_CDATA) || (cobj->val->d.str == NULL) || (strcmp(cobj->val->d.str, "sock4") != 0))
+		n_error(N, NE_SYNTAX, __FN__, "expected a socket");
+	sock = (TCP_SOCKET *)cobj->val->d.str;
+
+	rc = _ssl_connect(N, sock);
+	sock->use_ssl = 1;
+#else
+	n_warn(N, __FN__, "SSL is not available");
+#endif
+#undef __FN__
+	return 0;
 }
 
 NSP_FUNCTION(libnsp_net_tcp_socket)
@@ -815,9 +865,8 @@ NSP_FUNCTION(libnsp_net_tcp_socket)
 	cobj = nsp_setcdata(N, thisobj, "socket", NULL, 0);
 	cobj->val->d.str = (void *)sock;
 	cobj->val->size = sizeof(TCP_SOCKET) + 1;
-	nsp_setcfunc(N, thisobj, "bind", (NSP_CFUNC)libnsp_net_tcp_bind);
-	// nsp_setcfunc(N, thisobj, "accept",  (NSP_CFUNC)libnsp_net_tcp_accept);
-	nsp_setcfunc(N, thisobj, "connect", (NSP_CFUNC)libnsp_net_tcp_connect);
+	cobj = nsp_getobj(N, nsp_getobj(N, &N->g, "net"), "tcp");
+	if (nsp_istable(cobj)) nsp_zlink(N, &N->l, cobj);
 	return 0;
 #undef __FN__
 }

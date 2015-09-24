@@ -48,8 +48,8 @@
     <TargetName>NSP.NET</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>../../bin\</OutDir>
-    <IntDir>../../obj/libnsp.net\</IntDir>
+    <OutDir>$(SolutionDir)bin\</OutDir>
+    <IntDir>$(SolutionDir)obj\libnsp.net\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <TargetName>NSP.NET</TargetName>
   </PropertyGroup>

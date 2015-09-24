@@ -1,0 +1,18 @@
+﻿# manual exceptions
+
+bin/
+include/nsp/config.h
+include/nsp/config-win.h
+int/
+lib/
+obj/
+src/config.mak
+src/config-win.mak
+src/config.ns
+src/config-win.ns
+*.exe
+*.dll
+*.lib
+*.o
+*.suo
+~AutoRecover.*.vcxproj

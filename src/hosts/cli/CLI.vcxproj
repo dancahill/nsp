@@ -45,8 +45,8 @@
     <TargetName>nsp</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>../../../bin\</OutDir>
-    <IntDir>../../../obj/cli\</IntDir>
+    <OutDir>$(SolutionDir)bin\</OutDir>
+    <IntDir>$(SolutionDir)obj\cli\</IntDir>
     <LinkIncremental />
     <TargetName>nsp</TargetName>
   </PropertyGroup>

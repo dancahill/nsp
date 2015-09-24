@@ -49,50 +49,6 @@ static void print_mbedtls_error(nsp_state *N, const char *name, int err)
 //	fflush((FILE *)ctx);
 //}
 
-//#include "mbedtls/certs.h"
-//#include "mbedtls/net.h"
-//#include "mbedtls/ctr_drbg.h"
-
-/*
- * Computing a safe DH-1024 prime takes ages, so it's faster
- * to use a precomputed value (provided below as an example).
- * Run the dh_genprime program to generate an acceptable P.
- */
- /*
- char *dhm_P =
- "B1D36BED209EFC365817CAAE55F4E5D7C67F84AC74343A1A546DF4BD7821C3BD48436476E02092ED85396EA953F44F1EDA389962A416242FDC798D2A12A86FED" \
- "655F4885D8BFCE85A866FB52D0BE97CFA780CFE42CD976A4ED1B199C5111096A0FD857B0D50F2BB003C023DA6597432F9EB47D437FF94998424370BB28EA7673";
- char *dhm_G = "4";
- //G = 04
- */
- /*
- char *dhm_P =
-     "E4004C1F94182000103D883A448B3F80" \
-     "2CE4B44A83301270002C20D0321CFD00" \
-     "11CCEF784C26A400F43DFB901BCA7538" \
-     "F2C6B176001CF5A0FD16D2C48B1D0C1C" \
-     "F6AC8E1DA6BCC3B4E1F96B0564965300" \
-     "FFA1D0B601EB2800F489AA512C4B248C" \
-     "01F76949A60BB7F00A40B1EAB64BDD48" \
-     "E8A700D60B7F1200FA8E77B0A979DABF";
-
- char *dhm_G = "4";
-
- */
- /*
-  * sorted by order of preference
-  */
-  /*
-  int my_preferred_ciphers[] = {
-	  SSL_EDH_RSA_AES_256_SHA,
-	  SSL_EDH_RSA_DES_168_SHA,
-	  SSL_RSA_AES_256_SHA,
-	  SSL_RSA_DES_168_SHA,
-	  SSL_RSA_RC4_128_SHA,
-	  SSL_RSA_RC4_128_MD5,
-	  0
-  };
-  */
 #endif
 
 int _ssl_init(nsp_state *N, TCP_SOCKET *sock, short srvmode, char *certfile, char *keyfile)
@@ -143,32 +99,14 @@ int _ssl_init(nsp_state *N, TCP_SOCKET *sock, short srvmode, char *certfile, cha
 		return -1;
 	}
 	mbedtls_ssl_conf_rng(&sock->conf, mbedtls_ctr_drbg_random, &sock->ctr_drbg);
-	if ((certfile == NULL) || (keyfile == NULL)) {
-		return 0;
-		//if ((rc = mbedtls_x509_crt_parse(&sock->srvcert, (unsigned char *)mbedtls_test_srv_crt, nc_strlen(mbedtls_test_srv_crt))) != 0) {
-		//	print_mbedtls_error(N, __FN__, rc);
-		//	return -1;
-		//}
-		//if ((rc = mbedtls_x509_crt_parse(&sock->srvcert, (unsigned char *)mbedtls_test_ca_crt, nc_strlen(mbedtls_test_ca_crt))) != 0) {
-		//	print_mbedtls_error(N, __FN__, rc);
-		//	return -1;
-		//}
-		//if ((rc = mbedtls_pk_parse_key(&sock->pubkey, (unsigned char *)mbedtls_test_srv_key, nc_strlen(mbedtls_test_srv_key), NULL, 0)) != 0) {
-		//	print_mbedtls_error(N, __FN__, rc);
-		//	return -1;
-		//}
+	if ((certfile == NULL) || (keyfile == NULL)) return 0;
+	if ((rc = mbedtls_x509_crt_parse_file(&sock->srvcert, certfile)) != 0) {
+		print_mbedtls_error(N, __FN__, rc);
+		return -1;
 	}
-	else {
-		if ((rc = mbedtls_x509_crt_parse_file(&sock->srvcert, certfile)) != 0) {
-			//n_warn(N, __FN__, "x509_read_crtfile returned %08x", rc);
-			print_mbedtls_error(N, __FN__, rc);
-			return -1;
-		}
-		if ((rc = mbedtls_pk_parse_keyfile(&sock->pubkey, keyfile, NULL)) != 0) {
-			//n_warn(N, __FN__, "x509_read_keyfile returned %08x", rc);
-			print_mbedtls_error(N, __FN__, rc);
-			return -1;
-		}
+	if ((rc = mbedtls_pk_parse_keyfile(&sock->pubkey, keyfile, NULL)) != 0) {
+		print_mbedtls_error(N, __FN__, rc);
+		return -1;
 	}
 	mbedtls_ssl_conf_ca_chain(&sock->conf, sock->srvcert.next, NULL);
 	if ((rc = mbedtls_ssl_conf_own_cert(&sock->conf, &sock->srvcert, &sock->pubkey)) != 0) {
@@ -179,13 +117,6 @@ int _ssl_init(nsp_state *N, TCP_SOCKET *sock, short srvmode, char *certfile, cha
 #endif
 #undef __FN__
 }
-
-//#include <errno.h>
-//#include <stdarg.h>
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <string.h>
-//#include <time.h>
 
 int _ssl_accept(nsp_state *N, TCP_SOCKET *bsock, TCP_SOCKET *asock)
 {
@@ -212,12 +143,7 @@ int _ssl_accept(nsp_state *N, TCP_SOCKET *bsock, TCP_SOCKET *asock)
 	//mbedtls_ssl_session_reset(&asock->ssl);
 	mbedtls_ssl_set_bio(&asock->ssl, &asock->net_context, mbedtls_net_send, mbedtls_net_recv, NULL);
 	if ((rc = mbedtls_ssl_handshake(&asock->ssl)) < 0) {
-		if (rc == MBEDTLS_ERR_SSL_WANT_READ || rc == MBEDTLS_ERR_SSL_WANT_WRITE) {
-			print_mbedtls_error(N, __FN__, rc);
-		}
-		else {
-			print_mbedtls_error(N, __FN__, rc);
-		}
+		print_mbedtls_error(N, __FN__, rc);
 	}
 	return rc;
 #endif
@@ -275,22 +201,15 @@ int _ssl_read(nsp_state *N, TCP_SOCKET *sock, void *buf, int max)
 	do {
 		rc = mbedtls_ssl_read(&sock->ssl, (void *)buf, max);
 	} while (rc == MBEDTLS_ERR_SSL_WANT_READ || rc == MBEDTLS_ERR_SSL_WANT_WRITE);
-
 	if (rc <= 0)
 	{
 		switch (rc) {
 		case MBEDTLS_ERR_SSL_TIMEOUT:
-			// printf(" timeout\n\n");
-			// goto reset;
 			return rc;
 		case MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY:
-			//printf(" connection was closed gracefully\n");
-			//ret = 0;
-			//goto close_notify;
 			return rc;
 		default:
 			//printf(" mbedtls_ssl_read returned -0x%x\n\n", -ret);
-			//goto reset;
 			//print_mbedtls_error(N, __FN__, rc);
 			return rc;
 		}
@@ -365,7 +284,6 @@ int _ssl_shutdown(nsp_state *N, TCP_SOCKET *sock)
 		mbedtls_x509_crt_free(&sock->srvcert);
 		mbedtls_pk_free(&sock->pubkey);
 		//rsa_free(&sock->pubkey);
-
 		mbedtls_ssl_free(&sock->ssl);
 		sock->use_ssl = 0;
 	}

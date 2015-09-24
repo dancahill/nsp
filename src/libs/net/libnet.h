@@ -156,7 +156,18 @@ NSP_CLASS(libnsp_net_pop3_client);
 /* smtp.c */
 NSP_CLASS(libnsp_net_smtp_client);
 /* tcp.c */
+NSP_FUNCTION(libnsp_net_tcp_accept);
+NSP_FUNCTION(libnsp_net_tcp_bind);
+NSP_FUNCTION(libnsp_net_tcp_close);
+NSP_FUNCTION(libnsp_net_tcp_connect);
+NSP_FUNCTION(libnsp_net_tcp_gets);
+NSP_FUNCTION(libnsp_net_tcp_info);
+NSP_FUNCTION(libnsp_net_tcp_read);
+NSP_FUNCTION(libnsp_net_tcp_setsockopt);
 NSP_FUNCTION(libnsp_net_tcp_socket);
+NSP_FUNCTION(libnsp_net_tcp_tlsaccept);
+NSP_FUNCTION(libnsp_net_tcp_tlsconnect);
+NSP_FUNCTION(libnsp_net_tcp_write);
 /* tnef.c */
 NSP_FUNCTION(libnsp_net_tnef_debug);
 
