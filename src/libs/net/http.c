@@ -35,7 +35,7 @@ NSP_CLASSMETHOD(libnsp_net_http_client_send)
 	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
 	obj_t *cobj;
 	TCP_SOCKET sock;
-	unsigned short use_ssl = 0;
+	unsigned short use_tls = 0;
 	unsigned short port;
 	char *host;
 	char *uri;
@@ -52,7 +52,7 @@ NSP_CLASSMETHOD(libnsp_net_http_client_send)
 	host = cobj->val->d.str;
 	if (!nsp_isnum((cobj = nsp_getobj(N, thisobj, "port")))) n_error(N, NE_SYNTAX, __FN__, "expected a number for port");
 	port = (unsigned short)cobj->val->d.num;
-	if (nsp_isbool((cobj = nsp_getobj(N, thisobj, "use_ssl")))) use_ssl = cobj->val->d.num ? 1 : 0;
+	if (nsp_isbool((cobj = nsp_getobj(N, thisobj, "use_tls")))) use_tls = cobj->val->d.num ? 1 : 0;
 
 	if (!nsp_isstr((cobj = nsp_getobj(N, thisobj, "uri")))) n_error(N, NE_SYNTAX, __FN__, "expected a string for uri");
 	uri = cobj->val->d.str;
@@ -63,7 +63,7 @@ NSP_CLASSMETHOD(libnsp_net_http_client_send)
 //	ctype=cobj->val->d.str;
 
 	nc_memset((char *)&sock, 0, sizeof(sock));
-	if ((rc = tcp_connect(N, &sock, host, port, use_ssl)) < 0) {
+	if ((rc = tcp_connect(N, &sock, host, port, use_tls)) < 0) {
 		nsp_setstr(N, &N->r, "", "tcp error", -1);
 		return -1;
 	}
@@ -159,7 +159,7 @@ NSP_CLASS(libnsp_net_http_client)
 
 	nsp_setcfunc(N, &N->l, "send", (NSP_CFUNC)libnsp_net_http_client_send);
 
-	nsp_setbool(N, &N->l, "use_ssl", 0);
+	nsp_setbool(N, &N->l, "use_tls", 0);
 	nsp_setstr(N, &N->l, "host", "localhost", 9);
 	nsp_setnum(N, &N->l, "port", port);
 	nsp_setstr(N, &N->l, "uri", "", 0);
@@ -176,13 +176,13 @@ NSP_CLASS(libnsp_net_http_client)
 	p1 = cobj->val->d.str;
 	if (strncasecmp(p1, "http://", 7) == 0) {
 		//		n_warn(N, __FN__, "protocol is http://");
-		nsp_setbool(N, &N->l, "use_ssl", 0);
+		nsp_setbool(N, &N->l, "use_tls", 0);
 		port = 80;
 		p1 += 7;
 	}
 	else if (strncasecmp(p1, "https://", 8) == 0) {
 		//		n_warn(N, __FN__, "protocol is https://");
-		nsp_setbool(N, &N->l, "use_ssl", 1);
+		nsp_setbool(N, &N->l, "use_tls", 1);
 		port = 443;
 		p1 += 8;
 	}

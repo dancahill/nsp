@@ -36,13 +36,16 @@
     <ClCompile Include="smtp.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ssl.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="tcp.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tnef.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="socket.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tls.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

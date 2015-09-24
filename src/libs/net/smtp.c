@@ -131,7 +131,7 @@ NSP_CLASSMETHOD(libnsp_net_smtp_send)
 	obj_t *cobj;
 	obj_t *aobj;
 	TCP_SOCKET sock;
-	unsigned short use_ssl = 0;
+	unsigned short use_tls = 0;
 	unsigned short port;
 	char *host;
 	char *from;
@@ -151,7 +151,7 @@ NSP_CLASSMETHOD(libnsp_net_smtp_send)
 	host = cobj->val->d.str;
 	if (!nsp_isnum((cobj = nsp_getobj(N, thisobj, "port")))) n_error(N, NE_SYNTAX, __FN__, "expected a number for port");
 	port = (unsigned short)cobj->val->d.num;
-	if (nsp_isbool((cobj = nsp_getobj(N, thisobj, "use_ssl")))) use_ssl = cobj->val->d.num ? 1 : 0;
+	if (nsp_isbool((cobj = nsp_getobj(N, thisobj, "use_tls")))) use_tls = cobj->val->d.num ? 1 : 0;
 	if (!nsp_isstr((cobj = nsp_getobj(N, thisobj, "from")))) n_error(N, NE_SYNTAX, __FN__, "expected a string for from");
 	from = cobj->val->d.str;
 	if (!nsp_isstr((cobj = nsp_getobj(N, thisobj, "rcpt")))) n_error(N, NE_SYNTAX, __FN__, "expected a string for rcpt");
@@ -167,7 +167,7 @@ NSP_CLASSMETHOD(libnsp_net_smtp_send)
 	aobj = nsp_getobj(N, thisobj, "attachments");
 
 	nc_memset((char *)&sock, 0, sizeof(sock));
-	if ((rc = tcp_connect(N, &sock, host, port, use_ssl)) < 0) {
+	if ((rc = tcp_connect(N, &sock, host, port, use_tls)) < 0) {
 		nsp_setbool(N, &N->r, "", 0);
 		smtp_lasterr(N, "tcp_connect error");
 		return 0;
@@ -261,7 +261,7 @@ NSP_CLASS(libnsp_net_smtp_client)
 	nsp_setcfunc(N, &N->l, "send", (NSP_CFUNC)libnsp_net_smtp_send);
 	nsp_setstr(N, &N->l, "host", "localhost", 9);
 	nsp_setnum(N, &N->l, "port", 25);
-	nsp_setbool(N, &N->l, "use_ssl", 0);
+	nsp_setbool(N, &N->l, "use_tls", 0);
 	nsp_setstr(N, &N->l, "from", "", 0);
 	nsp_setstr(N, &N->l, "rcpt", "", 0);
 	nsp_setnum(N, &N->l, "date", 0);

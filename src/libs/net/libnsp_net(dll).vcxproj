@@ -86,7 +86,8 @@
     <ClCompile Include="net.c" />
     <ClCompile Include="pop3.c" />
     <ClCompile Include="smtp.c" />
-    <ClCompile Include="ssl.c" />
+    <ClCompile Include="socket.c" />
+    <ClCompile Include="tls.c" />
     <ClCompile Include="tcp.c" />
     <ClCompile Include="tnef.c" />
   </ItemGroup>

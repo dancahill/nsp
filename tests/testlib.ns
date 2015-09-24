@@ -1432,7 +1432,7 @@ global testlib = {
 			return;
 		}
 		if (!quiet) print("        runtime = ", string.tostring(runtime(), 3), " seconds\n");
-		if (!quiet) if (net.tcp.have_ssl) print("        net.tcp.ssl_type = '",net.tcp.ssl_type,"'\n");
+		if (!quiet) if (net.tcp.have_tls) print("        net.tcp.tls_type = '",net.tcp.tls_type,"'\n");
 		site_url = "http://nulllogic.ca/nsp/version.php";
 		if (!quiet) print("        sucking "+site_url+"\n");
 		hconn=new net.http.client(site_url);
@@ -1458,7 +1458,7 @@ global testlib = {
 	//		print("        runtime = ", string.tostring(runtime(), 3), " seconds\n");
 	//		test_tcpserv();
 			test_http();
-			if (net.tcp.have_ssl) test_https();
+			if (net.tcp.have_tls) test_https();
 	//		test_ftp();
 	//		test_pop3();
 	//		test_smtp();

@@ -29,15 +29,15 @@ int nspnet_register_all(nsp_state *N)
 
 	tobj = nsp_settable(N, &N->g, "net");
 	tobj->val->attr |= NST_HIDDEN;
-#ifdef HAVE_SSL
-	nsp_setbool(N, tobj, "have_ssl", 1);
+#ifdef HAVE_TLS
+	nsp_setbool(N, tobj, "have_tls", 1);
 #if defined HAVE_OPENSSL
-	nsp_setstr(N, tobj, "ssl_type", "openssl", -1);
+	nsp_setstr(N, tobj, "tls_type", "openssl", -1);
 #elif defined HAVE_MBEDTLS
-	nsp_setstr(N, tobj, "ssl_type", "mbedtls", -1);
+	nsp_setstr(N, tobj, "tls_type", "mbedtls", -1);
 #endif
 #else
-	nsp_setbool(N, tobj, "have_ssl", 0);
+	nsp_setbool(N, tobj, "have_tls", 0);
 #endif
 #ifdef HAVE_DNS
 	tobj2 = nsp_settable(N, tobj, "dns");
@@ -65,15 +65,15 @@ int nspnet_register_all(nsp_state *N)
 	nsp_setcfunc(N, tobj2, "client", (NSP_CFUNC)libnsp_net_pop3_client);
 	tobj2 = nsp_settable(N, tobj, "tcp");
 	tobj2->val->attr |= NST_HIDDEN;
-#ifdef HAVE_SSL
-	nsp_setbool(N, tobj2, "have_ssl", 1);
+#ifdef HAVE_TLS
+	nsp_setbool(N, tobj2, "have_tls", 1);
 #if defined HAVE_OPENSSL
-	nsp_setstr(N, tobj2, "ssl_type", "openssl", -1);
+	nsp_setstr(N, tobj2, "tls_type", "openssl", -1);
 #elif defined HAVE_MBEDTLS
-	nsp_setstr(N, tobj2, "ssl_type", "mbedtls", -1);
+	nsp_setstr(N, tobj2, "tls_type", "mbedtls", -1);
 #endif
 #else
-	nsp_setbool(N, tobj2, "have_ssl", 0);
+	nsp_setbool(N, tobj2, "have_tls", 0);
 #endif
 	nsp_setcfunc(N, tobj2, "accept", (NSP_CFUNC)libnsp_net_tcp_accept);
 	nsp_setcfunc(N, tobj2, "bind", (NSP_CFUNC)libnsp_net_tcp_bind);

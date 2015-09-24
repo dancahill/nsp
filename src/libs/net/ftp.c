@@ -283,7 +283,7 @@ NSP_CLASSMETHOD(libnsp_net_ftp_ls)
 	/* send list */
 	tcp_fprintf(N, sock, "LIST\r\n");
 	nc_memset((char *)&sock2, 0, sizeof(sock2));
-	if ((rc = tcp_connect(N, &sock2, ipbuf, port, sock->use_ssl)) < 0) {
+	if ((rc = tcp_connect(N, &sock2, ipbuf, port, sock->use_tls)) < 0) {
 		nsp_setstr(N, &N->r, "", "tcp error", -1);
 		return -1;
 	}
@@ -471,7 +471,7 @@ NSP_CLASSMETHOD(libnsp_net_ftp_retr)
 	/* send retr */
 	tcp_fprintf(N, sock, "RETR %s\r\n", cobj1->val->d.str);
 	nc_memset((char *)&sock2, 0, sizeof(sock2));
-	if ((rc = tcp_connect(N, &sock2, ipbuf, port, sock->use_ssl)) < 0) {
+	if ((rc = tcp_connect(N, &sock2, ipbuf, port, sock->use_tls)) < 0) {
 		nsp_setstr(N, &N->r, "", "tcp error", -1);
 		return -1;
 	}
@@ -556,7 +556,7 @@ NSP_CLASSMETHOD(libnsp_net_ftp_stor)
 	/* send stor */
 	tcp_fprintf(N, sock, "STOR %s\r\n", cobj1->val->d.str);
 	nc_memset((char *)&sock2, 0, sizeof(sock2));
-	if ((rc = tcp_connect(N, &sock2, ipbuf, port, sock->use_ssl)) < 0) {
+	if ((rc = tcp_connect(N, &sock2, ipbuf, port, sock->use_tls)) < 0) {
 		nsp_setstr(N, &N->r, "", "tcp error", -1);
 		return -1;
 	}

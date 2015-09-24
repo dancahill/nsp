@@ -60,7 +60,7 @@ extern "C" {
 
 #if defined(HAVE_OPENSSL)
 #  include <openssl/ssl.h>
-#  define HAVE_SSL
+#  define HAVE_TLS
 #elif defined(HAVE_MBEDTLS)
 #  include "mbedtls/certs.h"
 #  include "mbedtls/ctr_drbg.h"
@@ -70,7 +70,7 @@ extern "C" {
 #  include "mbedtls/net.h"
 //#  include "mbedtls/havege.h"
 #  include "mbedtls/ctr_drbg.h"
-#  define HAVE_SSL
+#  define HAVE_TLS
 #endif
 
 void tcp_murder(nsp_state *N, obj_t *cobj);
@@ -85,11 +85,11 @@ typedef struct {
 	/* mbedtls dies a horrible and stupid death when using short ints.. */
 //	short int socket;
 	int socket;
-	short use_ssl;
+	short use_tls;
 #if defined(HAVE_OPENSSL)
 	SSL *ssl;
 	SSL_CTX *ssl_ctx;
-	SSL_METHOD *ssl_meth;
+	const SSL_METHOD *ssl_meth;
 #elif defined(HAVE_MBEDTLS)
 	mbedtls_ssl_context ssl;
 	mbedtls_ssl_config conf;
@@ -117,21 +117,21 @@ typedef struct {
 	char      recvbuf[MAX_TCP_READ_SIZE];
 } TCP_SOCKET;
 
-/* ssl.c functions */
-#ifdef HAVE_SSL
-int _ssl_init    (nsp_state *N, TCP_SOCKET *sock, short srvmode, char *certfile, char *keyfile);
-int _ssl_accept  (nsp_state *N, TCP_SOCKET *bsock, TCP_SOCKET *asock);
-int _ssl_connect (nsp_state *N, TCP_SOCKET *sock);
-int _ssl_read    (nsp_state *N, TCP_SOCKET *sock, void *buf, int max);
-int _ssl_write   (nsp_state *N, TCP_SOCKET *sock, const void *buf, int len);
-int _ssl_close   (nsp_state *N, TCP_SOCKET *sock);
-int _ssl_shutdown(nsp_state *N, TCP_SOCKET *sock);
+/* tls.c functions */
+#ifdef HAVE_TLS
+int _tls_init    (nsp_state *N, TCP_SOCKET *sock, short srvmode, char *certfile, char *keyfile, char *chainfile);
+int _tls_accept  (nsp_state *N, TCP_SOCKET *bsock, TCP_SOCKET *asock);
+int _tls_connect (nsp_state *N, TCP_SOCKET *sock);
+int _tls_read    (nsp_state *N, TCP_SOCKET *sock, void *buf, int max);
+int _tls_write   (nsp_state *N, TCP_SOCKET *sock, const void *buf, int len);
+int _tls_close   (nsp_state *N, TCP_SOCKET *sock);
+int _tls_shutdown(nsp_state *N, TCP_SOCKET *sock);
 #endif
 
 /* tcp.c functions */
 int tcp_bind   (nsp_state *N, char *ifname, unsigned short port);
 int tcp_accept (nsp_state *N, TCP_SOCKET *bsock, TCP_SOCKET *asock);
-int tcp_connect(nsp_state *N, TCP_SOCKET *socket, char *host, unsigned short port, short int use_ssl);
+int tcp_connect(nsp_state *N, TCP_SOCKET *socket, char *host, unsigned short port, short int use_tls);
 int tcp_fgets  (nsp_state *N, TCP_SOCKET *socket, char *buffer, int max);
 int tcp_fprintf(nsp_state *N, TCP_SOCKET *socket, const char *format, ...);
 int tcp_recv   (nsp_state *N, TCP_SOCKET *socket, char *buffer, int max, int flags);
@@ -155,7 +155,7 @@ NSP_FUNCTION(libnsp_net_mime_rfc2047_decode);
 NSP_CLASS(libnsp_net_pop3_client);
 /* smtp.c */
 NSP_CLASS(libnsp_net_smtp_client);
-/* tcp.c */
+/* socket.c */
 NSP_FUNCTION(libnsp_net_tcp_accept);
 NSP_FUNCTION(libnsp_net_tcp_bind);
 NSP_FUNCTION(libnsp_net_tcp_close);

@@ -35,7 +35,7 @@ NSP_CLASSMETHOD(libnsp_net_pop3_open)
 	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
 	obj_t *cobj;
 	TCP_SOCKET *sock;
-	unsigned short use_ssl = 0;
+	unsigned short use_tls = 0;
 	unsigned short port = 0;
 	char *host = NULL;
 	char *user = NULL;
@@ -80,7 +80,7 @@ NSP_CLASSMETHOD(libnsp_net_pop3_open)
 	else {
 		n_error(N, NE_SYNTAX, __FN__, "expected a string for password");
 	}
-	if (nsp_isbool((cobj = nsp_getobj(N, thisobj, "use_ssl")))) use_ssl = cobj->val->d.num ? 1 : 0;
+	if (nsp_isbool((cobj = nsp_getobj(N, thisobj, "use_tls")))) use_tls = cobj->val->d.num ? 1 : 0;
 	sock = n_alloc(N, sizeof(TCP_SOCKET) + 1, 1);
 	if (sock == NULL) {
 		n_warn(N, __FN__, "couldn't alloc %d bytes", sizeof(TCP_SOCKET) + 1);
@@ -88,7 +88,7 @@ NSP_CLASSMETHOD(libnsp_net_pop3_open)
 	}
 	nc_strncpy(sock->obj_type, "sock4", sizeof(sock->obj_type) - 1);
 	sock->obj_term = (NSP_CFREE)tcp_murder;
-	if ((rc = tcp_connect(N, sock, host, port, use_ssl)) < 0) {
+	if ((rc = tcp_connect(N, sock, host, port, use_tls)) < 0) {
 		n_free(N, (void *)&sock, sizeof(TCP_SOCKET) + 1);
 		n_error(N, NE_SYNTAX, __FN__, "cannot connect to %s:%d", host, port);
 		return -1;
@@ -525,7 +525,7 @@ NSP_CLASS(libnsp_net_pop3_client)
 	nsp_setbool(N, &N->l, "socket", 0);
 	nsp_setstr(N, &N->l, "host", "localhost", 9);
 	nsp_setnum(N, &N->l, "port", 110);
-	nsp_setbool(N, &N->l, "use_ssl", 0);
+	nsp_setbool(N, &N->l, "use_tls", 0);
 	nsp_setstr(N, &N->l, "username", "anonymous", 9);
 	nsp_setstr(N, &N->l, "password", "anonymous", 9);
 	return 0;
