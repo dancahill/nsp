@@ -112,7 +112,14 @@ int _tls_init(nsp_state *N, TCP_SOCKET *sock, short srvmode, char *certfile, cha
 		print_mbedtls_error(N, __FN__, rc);
 		return -1;
 	}
-	mbedtls_ssl_conf_ca_chain(&sock->conf, sock->srvcert.next, NULL);
+	if (chainfile != NULL && chainfile[0] != '\0') {
+		if ((rc = mbedtls_x509_crt_parse_file(&sock->chainfile, chainfile)) != 0) {
+			print_mbedtls_error(N, __FN__, rc);
+			return -1;
+		}
+		mbedtls_ssl_conf_ca_chain(&sock->conf, &sock->chainfile, NULL);
+	}
+	//mbedtls_ssl_conf_ca_chain(&sock->conf, sock->srvcert.next, NULL);
 	if ((rc = mbedtls_ssl_conf_own_cert(&sock->conf, &sock->srvcert, &sock->pubkey)) != 0) {
 		n_warn(N, __FN__, "mbedtls_ssl_conf_own_cert returned %08x", rc);
 		return -1;
@@ -179,7 +186,7 @@ int _tls_connect(nsp_state *N, TCP_SOCKET *sock)
 #elif defined HAVE_MBEDTLS
 	int rc;
 
-	_tls_init(N, sock, 0, NULL, NULL);
+	_tls_init(N, sock, 0, NULL, NULL, NULL);
 	sock->net_context.fd = sock->socket;
 	mbedtls_ssl_init(&sock->ssl);
 	if ((rc = mbedtls_ssl_setup(&sock->ssl, &sock->conf)) != 0) {
@@ -286,6 +293,7 @@ int _tls_shutdown(nsp_state *N, TCP_SOCKET *sock)
 	if (sock->use_tls) {
 		/* x509 and rsa for server sockets */
 		mbedtls_x509_crt_free(&sock->srvcert);
+		mbedtls_x509_crt_free(&sock->chainfile);
 		mbedtls_pk_free(&sock->pubkey);
 		//rsa_free(&sock->pubkey);
 		mbedtls_ssl_free(&sock->ssl);

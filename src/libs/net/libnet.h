@@ -99,6 +99,7 @@ typedef struct {
 	mbedtls_net_context net_context;//server_fd...
 	/* server stuff */
 	mbedtls_x509_crt srvcert;
+	mbedtls_x509_crt chainfile;
 	mbedtls_pk_context pubkey;
 	unsigned char session_table[sizeof(mbedtls_ssl_session)];
 #endif

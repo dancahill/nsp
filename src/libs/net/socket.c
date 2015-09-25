@@ -271,7 +271,7 @@ NSP_FUNCTION(libnsp_net_tcp_accept)
 	cobj->val->d.str = (void *)asock;
 	cobj->val->size = sizeof(TCP_SOCKET) + 1;
 	cobj = nsp_getobj(N, nsp_getobj(N, &N->g, "net"), "tcp");
-	if (nsp_istable(cobj)) nsp_zlink(N, &N->l, cobj);
+	if (nsp_istable(cobj)) nsp_zlink(N, &tobj, cobj);
 	nsp_linkval(N, &N->r, &tobj);
 	nsp_unlinkval(N, &tobj);
 	return 0;
