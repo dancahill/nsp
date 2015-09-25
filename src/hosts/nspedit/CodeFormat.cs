@@ -8,7 +8,7 @@ namespace NSPEdit
 {
 	class CodeFormat
 	{
-		private string[] flist = new string[] { "exit", "throw", "finally", "catch", "try", "default", "case", "switch", "while", "do", "foreach", "for", "else", "if", "var", "local", "global", "function", "class", "new", "delete", "return", "continue", "break", "in" };
+		private string[] flist = new string[] { "exit", "throw", "finally", "catch", "try", "default", "case", "switch", "while", "do", "foreach", "for", "else", "if", "var", "local", "global", "function", "class", "new", "delete", "return", "continue", "break", "in", "namespace" };
 		private string[] rlist = new string[] { "true", "false", "null", "this" };
 		private static string RTFHeader =
 			@"{\rtf1\ansi\ansicpg1252\deff0{\fonttbl{\f0\fnil\fcharset0 Courier New;}}" + "\r\n" +

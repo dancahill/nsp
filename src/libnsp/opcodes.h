@@ -74,31 +74,32 @@
 #define	OP_KRET		209 /* 0xD3 */
 #define	OP_KDELETE	208 /* 0xD2 */
 #define	OP_KNEW		207 /* 0xD1 */
-#define	OP_KCLASS	206 /* 0xD0 */
-#define	OP_KFUNC	205 /* 0xCF */
-#define	OP_KGLOB	204 /* 0xCE */
-#define	OP_KLOCAL	203 /* 0xCD */
-#define	OP_KVAR		202 /* 0xCC */
-#define	OP_KIF		201 /* 0xCB */
-#define	OP_KELSE	200 /* 0xCA */
-#define	OP_KFOR		199 /* 0xC9 */
-#define	OP_KFOREACH	198 /* 0xC8 */
-#define	OP_KDO		197 /* 0xC7 */
-#define	OP_KWHILE	196 /* 0xC6 */
-#define	OP_KSWITCH	195 /* 0xC5 */
-#define	OP_KCASE	194 /* 0xC4 */
-#define	OP_KDEFAULT	193 /* 0xC3 */
-#define	OP_KTRY		192 /* 0xC2 */
-#define	OP_KCATCH	191 /* 0xC1 */
-#define	OP_KFINALLY	190 /* 0xC0 */
-#define	OP_KTHROW	189 /* 0xBF */
-#define	OP_KEXIT	188 /* 0xBE */
+#define	OP_KNAMESPACE   206
+#define	OP_KCLASS	205 /* 0xD0 */
+#define	OP_KFUNC	204 /* 0xCF */
+#define	OP_KGLOB	203 /* 0xCE */
+#define	OP_KLOCAL	202 /* 0xCD */
+#define	OP_KVAR		201 /* 0xCC */
+#define	OP_KIF		200 /* 0xCB */
+#define	OP_KELSE	199 /* 0xCA */
+#define	OP_KFOR		198 /* 0xC9 */
+#define	OP_KFOREACH	197 /* 0xC8 */
+#define	OP_KDO		196 /* 0xC7 */
+#define	OP_KWHILE	195 /* 0xC6 */
+#define	OP_KSWITCH	194 /* 0xC5 */
+#define	OP_KCASE	193 /* 0xC4 */
+#define	OP_KDEFAULT	192 /* 0xC3 */
+#define	OP_KTRY		191 /* 0xC2 */
+#define	OP_KCATCH	190 /* 0xC1 */
+#define	OP_KFINALLY	189 /* 0xC0 */
+#define	OP_KTHROW	188 /* 0xBF */
+#define	OP_KEXIT	187 /* 0xBE */
 
-#define OP_LINENUM	187 /* 0xBD */
-#define OP_LABEL	186 /* 0xBC */
-#define OP_STRDATA	185 /* 0xBB */
-#define OP_ESTRDATA	184 /* 0xBB */
-#define OP_NUMDATA	183 /* 0xBA */
+#define OP_LINENUM	186 /* 0xBD */
+#define OP_LABEL	185 /* 0xBC */
+#define OP_STRDATA	184 /* 0xBB */
+#define OP_ESTRDATA	183 /* 0xBB */
+#define OP_NUMDATA	182 /* 0xBA */
 
 #define OP_ISPUNC(o)	(o>=OP_PHASH&&o<=OP_POBRACE)
 #define OP_ISMATH(o)	(o>=OP_MQUESTION&&o<=OP_MEQ)

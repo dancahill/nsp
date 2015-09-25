@@ -346,6 +346,28 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 			case OP_KLOCAL:
 			case OP_KVAR:     n_readvar(N, &N->l, NULL); goto endstmt;
 			case OP_KGLOB:    n_readvar(N, &N->g, NULL); goto endstmt;
+			case OP_KNAMESPACE: {
+				char namebuf[MAX_OBJNAMELEN + 1];
+				obj_t *cobj, *tobj = &N->g;
+
+				do {
+					namebuf[0] = '\0';
+					n_expect(N, __FN__, OP_LABEL);
+					n_getlabel(N, namebuf);
+					cobj = nsp_getobj(N, tobj, namebuf);
+					if (!nsp_istable(cobj) != NT_TABLE) {
+						cobj = nsp_settable(N, tobj, namebuf);
+					}
+					tobj = cobj;
+					if (n_peekop(N) != OP_PDOT) break;
+					N->readptr++;
+				} while (1);
+				n_expect(N, __FN__, OP_POBRACE);
+				n_readtable(N, tobj);
+				n_expect(N, __FN__, OP_PCBRACE);
+				N->readptr++;
+				goto endstmt;
+			}
 			case OP_KIF:      n_if(N);      if (N->ret) goto end; else goto endstmt;
 			case OP_KFOR:     n_for(N);     if (N->ret) goto end; else goto endstmt;
 			case OP_KFOREACH: n_foreach(N); if (N->ret) goto end; else goto endstmt;
