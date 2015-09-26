@@ -60,6 +60,11 @@
 			this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
 			this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
 			this.tabControl1 = new System.Windows.Forms.TabControl();
+			this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.aboutNSPEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.nSPHomepageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+			this.nSPSyntaxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.menuStrip1.SuspendLayout();
 			this.toolStrip1.SuspendLayout();
 			this.statusStrip1.SuspendLayout();
@@ -70,10 +75,11 @@
 			this.menuStrip1.Dock = System.Windows.Forms.DockStyle.None;
 			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
-            this.scriptToolStripMenuItem});
+            this.scriptToolStripMenuItem,
+            this.helpToolStripMenuItem});
 			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip1.Name = "menuStrip1";
-			this.menuStrip1.Size = new System.Drawing.Size(94, 24);
+			this.menuStrip1.Size = new System.Drawing.Size(138, 24);
 			this.menuStrip1.TabIndex = 3;
 			this.menuStrip1.Text = "menuStrip1";
 			// 
@@ -178,7 +184,7 @@
 			// 
 			this.runToolStripMenuItem.Name = "runToolStripMenuItem";
 			this.runToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-			this.runToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
+			this.runToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.runToolStripMenuItem.Text = "Run";
 			this.runToolStripMenuItem.Click += new System.EventHandler(this.runToolStripMenuItem_Click);
 			// 
@@ -292,7 +298,7 @@
 			this.pasteToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("pasteToolStripButton.Image")));
 			this.pasteToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.pasteToolStripButton.Name = "pasteToolStripButton";
-			this.pasteToolStripButton.Size = new System.Drawing.Size(23, 20);
+			this.pasteToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.pasteToolStripButton.Text = "&Paste";
 			// 
 			// toolStripSeparator1
@@ -306,7 +312,7 @@
 			this.helpToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("helpToolStripButton.Image")));
 			this.helpToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.helpToolStripButton.Name = "helpToolStripButton";
-			this.helpToolStripButton.Size = new System.Drawing.Size(23, 20);
+			this.helpToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.helpToolStripButton.Text = "He&lp";
 			this.helpToolStripButton.Click += new System.EventHandler(this.helpToolStripButton_Click);
 			// 
@@ -349,6 +355,43 @@
 			this.tabControl1.Size = new System.Drawing.Size(784, 683);
 			this.tabControl1.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
 			this.tabControl1.TabIndex = 6;
+			// 
+			// helpToolStripMenuItem
+			// 
+			this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.nSPHomepageToolStripMenuItem,
+            this.nSPSyntaxToolStripMenuItem,
+            this.toolStripSeparator5,
+            this.aboutNSPEditorToolStripMenuItem});
+			this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+			this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+			this.helpToolStripMenuItem.Text = "Help";
+			// 
+			// aboutNSPEditorToolStripMenuItem
+			// 
+			this.aboutNSPEditorToolStripMenuItem.Name = "aboutNSPEditorToolStripMenuItem";
+			this.aboutNSPEditorToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+			this.aboutNSPEditorToolStripMenuItem.Text = "About NSP Editor";
+			this.aboutNSPEditorToolStripMenuItem.Click += new System.EventHandler(this.aboutNSPEditorToolStripMenuItem_Click);
+			// 
+			// nSPHomepageToolStripMenuItem
+			// 
+			this.nSPHomepageToolStripMenuItem.Name = "nSPHomepageToolStripMenuItem";
+			this.nSPHomepageToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+			this.nSPHomepageToolStripMenuItem.Text = "NSP Online";
+			this.nSPHomepageToolStripMenuItem.Click += new System.EventHandler(this.nSPHomepageToolStripMenuItem_Click);
+			// 
+			// toolStripSeparator5
+			// 
+			this.toolStripSeparator5.Name = "toolStripSeparator5";
+			this.toolStripSeparator5.Size = new System.Drawing.Size(163, 6);
+			// 
+			// nSPSyntaxToolStripMenuItem
+			// 
+			this.nSPSyntaxToolStripMenuItem.Name = "nSPSyntaxToolStripMenuItem";
+			this.nSPSyntaxToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+			this.nSPSyntaxToolStripMenuItem.Text = "NSP Syntax";
+			this.nSPSyntaxToolStripMenuItem.Click += new System.EventHandler(this.nSPSyntaxToolStripMenuItem_Click);
 			// 
 			// NSPEditForm
 			// 
@@ -407,5 +450,10 @@
 		private System.Windows.Forms.TabControl tabControl1;
 		private System.Windows.Forms.ToolStripMenuItem newTabToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem closeTabToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem aboutNSPEditorToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem nSPHomepageToolStripMenuItem;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+		private System.Windows.Forms.ToolStripMenuItem nSPSyntaxToolStripMenuItem;
 	}
 }

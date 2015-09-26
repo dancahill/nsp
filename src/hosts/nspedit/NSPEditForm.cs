@@ -8,20 +8,11 @@ namespace NSPEdit
 {
 	public partial class NSPEditForm : Form
 	{
-		// sample code at https://msdn.microsoft.com/en-us/library/aa970779%28v=vs.110%29.aspx
-		// useful youtube video https://www.youtube.com/watch?v=Lh5q5oqRleQ
-		// another useful video https://www.youtube.com/watch?v=emmAnZP-uB4
-
-		//public string filetoread = "";
 		public string loadfile = "";
-		ComboBox CB;
-		List<string> autoCompleteList = new List<string>();
-		//		string[] flist = new string[] { "gettype", "istr", "length" };
-
+		List<string> autoCompleteList;
+		AutoCompleteBox CB;
 		public RichCodeBox richCodeBox1;
 		public RichTextBox richTextBox2;
-
-		//public System.Timers.Timer aTimer;
 		public Timer aTimer;
 
 		public NSPEditForm()
@@ -35,9 +26,9 @@ namespace NSPEdit
 			aTimer = new Timer();
 			aTimer.Tick += ATimer_Tick;
 			aTimer.Interval = 200;
-			//aTimer.AutoReset = false;
 			aTimer.Enabled = false;
 
+			autoCompleteList = new List<string>();
 			autoCompleteList.Add("gettype");
 			autoCompleteList.Add("istr");
 			autoCompleteList.Add("length");
@@ -48,12 +39,10 @@ namespace NSPEdit
 			autoCompleteList.Add("tostring");
 			autoCompleteList.Add("tolower");
 			autoCompleteList.Add("toupper");
-			//autoCompleteList.Add("thisisamuchlongernamethantherest");
 			tabControl1.SelectedIndexChanged += TabControl1_SelectedIndexChanged;
 			tabControl1.DrawItem += TabControl1_DrawItem;
 			tabControl1.MouseClick += TabControl1_MouseClick;
 			newTabPage();
-			//richCodeBox1.load
 			richCodeBox1.LoadScript(loadfile);
 			this.ActiveControl = this.richCodeBox1;
 		}
@@ -124,59 +113,10 @@ namespace NSPEdit
 				richTextBox2 = (RichTextBox)splitContainer1.Panel2.Controls["richTextBox2"];
 			this.Text = string.Format("NSP Editor - [{0}]", Path.GetFileName(tabControl1.SelectedTab.Tag.ToString()));
 			richCodeBox1.Focus();
-		}
+			CB = (AutoCompleteBox)splitContainer1.Panel1.Controls["AutoCompleteBox"];
+                }
 
-		void CB_KeyPress(object sender, KeyPressEventArgs e)
-		{
-			if (Char.IsControl(e.KeyChar))
-			{
-			}
-			else if (Char.IsLetterOrDigit(e.KeyChar))
-			{
-			}
-			else
-			{
-				if (CB.SelectedIndex < 0) CB.SelectedIndex = 0;
-				richCodeBox1.SelectedText = CB.Text;
-				richCodeBox1.SelectedText = e.KeyChar.ToString();
-				CB.Visible = false;
-				richCodeBox1.Focus();
-				if (e.KeyChar == '.')
-				{
-					KeyPressEventArgs x = new KeyPressEventArgs('.');
-					richCodeBox1_KeyPress(null, x);
-				}
-			}
-		}
-
-		void CB_TextChanged(object sender, EventArgs e)
-		{
-			if (CB.Text != "") CB.Items[0] = CB.Text;
-		}
-
-		void CB_KeyDown(object sender, KeyEventArgs e)
-		{
-			if (e.KeyCode == Keys.Enter)
-			{
-				if (CB.SelectedIndex < 0) CB.SelectedIndex = 0;
-				richCodeBox1.SelectedText = CB.Text;
-				CB.Visible = false;
-				richCodeBox1.Focus();
-			}
-			else if (e.KeyCode == Keys.Escape)
-			{
-				CB.Text = "";
-				CB.Visible = false;
-				richCodeBox1.Focus();
-			}
-		}
-
-		void CB_LostFocus(object sender, EventArgs e)
-		{
-			CB.Visible = false;
-		}
-
-		void richCodeBox1_KeyPress(object sender, KeyPressEventArgs e)
+		public void richCodeBox1_KeyPress(object sender, KeyPressEventArgs e)
 		{
 			if (e.KeyChar == '.')
 			{
@@ -390,20 +330,8 @@ namespace NSPEdit
 			richTextBox2.Font = new Font("Courier New", 10, FontStyle.Regular);
 			richTextBox2.Text = "";
 
-			CB = new ComboBox();
-			CB.DropDownStyle = ComboBoxStyle.DropDown;
-			CB.AutoCompleteSource = AutoCompleteSource.ListItems;
-			CB.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-			CB.FlatStyle = FlatStyle.Flat;
-			CB.Font = new Font("Courier New", 10, FontStyle.Regular);
-			CB.ForeColor = Color.DarkCyan;
-			CB.BackColor = Color.FromArgb(0xCC, 0xFF, 0xFF);
-			CB.Sorted = false;
-			CB.Visible = false;
-			CB.LostFocus += CB_LostFocus;
-			CB.KeyDown += CB_KeyDown;
-			CB.KeyPress += CB_KeyPress;
-			CB.TextChanged += CB_TextChanged;
+			if (CB != null) CB.Visible = false;
+			CB = new AutoCompleteBox(richCodeBox1);
 			splitContainer1.Panel1.Controls.Add(CB);
 
 			// splitContainer1
@@ -499,6 +427,22 @@ namespace NSPEdit
 		public void SetStatus(string Msg)
 		{
 			toolStripStatusLabel1.Text = Msg;
+		}
+
+		private void aboutNSPEditorToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+
+		}
+
+		private void nSPHomepageToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			System.Diagnostics.Process.Start("https://nulllogic.ca/");
+		}
+
+		private void nSPSyntaxToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+
+			System.Diagnostics.Process.Start("https://nulllogic.ca/nsp/syntax.html");
 		}
 	}
 }

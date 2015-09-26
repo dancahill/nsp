@@ -160,12 +160,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp.net", "src\libnsp.ne
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{738C82DC-85B0-4105-BF6B-38D70FF8DFE7}"
 	ProjectSection(SolutionItems) = preProject
-		tests\debug.ns = tests\debug.ns
 		tests\speed1.ns = tests\speed1.ns
 		tests\speed2.ns = tests\speed2.ns
 		tests\test1.ns = tests\test1.ns
 		tests\test1.nsp = tests\test1.nsp
-		tests\test1looped.ns = tests\test1looped.ns
 		tests\test2.ns = tests\test2.ns
 		tests\testlib.ns = tests\testlib.ns
 		tests\testlib2.ns = tests\testlib2.ns
@@ -306,7 +304,6 @@ Global
 		{87236F1F-EE08-4F25-91B2-B4B289FAA860}.Release|x86.ActiveCfg = Release|Win32
 		{51AFBBE1-5517-4F44-AD2A-9A28B22287F0}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{51AFBBE1-5517-4F44-AD2A-9A28B22287F0}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-		{51AFBBE1-5517-4F44-AD2A-9A28B22287F0}.Debug|Mixed Platforms.Build.0 = Debug|Win32
 		{51AFBBE1-5517-4F44-AD2A-9A28B22287F0}.Debug|Win32.ActiveCfg = Debug|Win32
 		{51AFBBE1-5517-4F44-AD2A-9A28B22287F0}.Debug|Win32.Build.0 = Debug|Win32
 		{51AFBBE1-5517-4F44-AD2A-9A28B22287F0}.Debug|x64.ActiveCfg = Debug|Win32

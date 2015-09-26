@@ -1,6 +1,6 @@
 #!/usr/bin/nsp
 
-global testlib = {
+namespace testlib {
 	function runtests() {
 		global stuff=true;
 		//include("testlib.ns");

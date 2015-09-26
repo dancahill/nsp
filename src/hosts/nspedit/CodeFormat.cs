@@ -29,21 +29,18 @@ namespace NSPEdit
 			CF.rtbtext = richTextBox1.Text + " ";
 			CF.rtblen = richTextBox1.TextLength;
 			CF.outformat = outputtype;
-			//string text = richTextBox1.Text;
-			int readptr = 0;
-			int endptr = CF.rtblen;
 
 			switch (CF.outformat)
 			{
 				case "HTML":
 					CF.output = "<pre>\r\n";
-					CF.AddColour(readptr, endptr);
+					CF.AddColour(0, CF.rtblen);
 					CF.output += "</pre>\r\n";
 					return CF.output;
 				case "RTF":
 					CF.sb = new StringBuilder();
 					CF.sb.Append(RTFHeader);
-					CF.AddColour(readptr, endptr);
+					CF.AddColour(0, CF.rtblen);
 					CF.sb.Append("\\par\r\n}\r\n");
 					return CF.sb.ToString();
 				default:
@@ -51,45 +48,19 @@ namespace NSPEdit
 			}
 		}
 
-		public static void AddColour(RichTextBox richTextBox1, int readptr, int endptr)
-		{
-			CodeFormat CF = new CodeFormat();
-			CF.outformat = "RTF";
-
-			CF.sb = new StringBuilder();
-			//CF.sb.Append(RTFHeader);
-			CF.sb.Append(@"{\rtf1 ");
-			CF.rtbtext = richTextBox1.Text + " ";
-			CF.rtblen = richTextBox1.TextLength;
-
-			CF.AddColour(readptr, endptr);
-
-			//		richTextBox1.ReadOnly = true;
-			//		richTextBox1.Select(readptr, endptr);
-
-			CF.sb.Append("}");
-
-			//richTextBox1.SelectionColor = color;
-			//richTextBox1.SelectionFont = new Font("Courier New", 10, style);
-			richTextBox1.Select(readptr, endptr);
-
-			//richTextBox1.SelectedRtf = sb.ToString();
-
-
-			//			richTextBox1.Select(richTextBox1.TextLength, 0); // Set caret to append
-			//richTextBox1.SelectedRtf = @"{\rtf1\ul underlined text\ul0}"; <- this works!
-			//			System.Diagnostics.Debug.WriteLine(string.Format("richTextBox1.SelectedRtf [{0}]", richTextBox1.SelectedRtf));
-			//			richTextBox1.SelectedRtf += @"{\rtf1 " + CF.sb.ToString() + "}";
-			// ^ Adds underlined text as expected.
-
-			//	richTextBox1.SelectedRtf += CF.sb.ToString();
-
-			richTextBox1.DeselectAll();
-			//		richTextBox1.DeselectAll();
-			//		richTextBox1.ReadOnly = false;
-
-
-		}
+		//public static void AddColour(RichTextBox richTextBox1, int readptr, int endptr)
+		//{
+		//	CodeFormat CF = new CodeFormat();
+		//	CF.outformat = "RTF";
+		//	CF.sb = new StringBuilder();
+		//	CF.sb.Append(@"{\rtf1 ");
+		//	CF.rtbtext = richTextBox1.Text + " ";
+		//	CF.rtblen = richTextBox1.TextLength;
+		//	CF.AddColour(readptr, endptr);
+		//	CF.sb.Append("}");
+		//	richTextBox1.Select(readptr, endptr);
+		//	richTextBox1.DeselectAll();
+		//}
 
 		private void AddColour(int _readptr, int _endptr)
 		{
@@ -122,16 +93,19 @@ namespace NSPEdit
 					else if (p == '/' && rtbtext[cur + 1] == '*')
 					{
 						int end = cur;
+						bool term = false;
 						while (end < eob)
 						{
 							if (rtbtext[end] == '*' && rtbtext[end + 1] == '/')
 							{
 								end += 2;
 								SetRangeFont(cur, end - cur, Color.Green, FontStyle.Italic);
+								term = true;
 								break;
 							}
 							end++;
 						}
+						if (!term) SetRangeFont(cur, end - cur, Color.Green, FontStyle.Italic);
 						cur = end;
 						//continue;
 					}
