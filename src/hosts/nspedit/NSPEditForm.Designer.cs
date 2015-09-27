@@ -43,6 +43,11 @@
 			this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.scriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.runToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.nSPHomepageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.nSPSyntaxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+			this.aboutNSPEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStrip1 = new System.Windows.Forms.ToolStrip();
 			this.newToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.openToolStripButton = new System.Windows.Forms.ToolStripButton();
@@ -60,11 +65,6 @@
 			this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
 			this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
 			this.tabControl1 = new System.Windows.Forms.TabControl();
-			this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.aboutNSPEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.nSPHomepageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
-			this.nSPSyntaxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.menuStrip1.SuspendLayout();
 			this.toolStrip1.SuspendLayout();
 			this.statusStrip1.SuspendLayout();
@@ -184,9 +184,46 @@
 			// 
 			this.runToolStripMenuItem.Name = "runToolStripMenuItem";
 			this.runToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-			this.runToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.runToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
 			this.runToolStripMenuItem.Text = "Run";
 			this.runToolStripMenuItem.Click += new System.EventHandler(this.runToolStripMenuItem_Click);
+			// 
+			// helpToolStripMenuItem
+			// 
+			this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.nSPHomepageToolStripMenuItem,
+            this.nSPSyntaxToolStripMenuItem,
+            this.toolStripSeparator5,
+            this.aboutNSPEditorToolStripMenuItem});
+			this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+			this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+			this.helpToolStripMenuItem.Text = "Help";
+			// 
+			// nSPHomepageToolStripMenuItem
+			// 
+			this.nSPHomepageToolStripMenuItem.Name = "nSPHomepageToolStripMenuItem";
+			this.nSPHomepageToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+			this.nSPHomepageToolStripMenuItem.Text = "NSP Online";
+			this.nSPHomepageToolStripMenuItem.Click += new System.EventHandler(this.nSPHomepageToolStripMenuItem_Click);
+			// 
+			// nSPSyntaxToolStripMenuItem
+			// 
+			this.nSPSyntaxToolStripMenuItem.Name = "nSPSyntaxToolStripMenuItem";
+			this.nSPSyntaxToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+			this.nSPSyntaxToolStripMenuItem.Text = "NSP Syntax";
+			this.nSPSyntaxToolStripMenuItem.Click += new System.EventHandler(this.nSPSyntaxToolStripMenuItem_Click);
+			// 
+			// toolStripSeparator5
+			// 
+			this.toolStripSeparator5.Name = "toolStripSeparator5";
+			this.toolStripSeparator5.Size = new System.Drawing.Size(163, 6);
+			// 
+			// aboutNSPEditorToolStripMenuItem
+			// 
+			this.aboutNSPEditorToolStripMenuItem.Name = "aboutNSPEditorToolStripMenuItem";
+			this.aboutNSPEditorToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+			this.aboutNSPEditorToolStripMenuItem.Text = "About NSP Editor";
+			this.aboutNSPEditorToolStripMenuItem.Click += new System.EventHandler(this.aboutNSPEditorToolStripMenuItem_Click);
 			// 
 			// toolStrip1
 			// 
@@ -356,43 +393,6 @@
 			this.tabControl1.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
 			this.tabControl1.TabIndex = 6;
 			// 
-			// helpToolStripMenuItem
-			// 
-			this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.nSPHomepageToolStripMenuItem,
-            this.nSPSyntaxToolStripMenuItem,
-            this.toolStripSeparator5,
-            this.aboutNSPEditorToolStripMenuItem});
-			this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-			this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
-			this.helpToolStripMenuItem.Text = "Help";
-			// 
-			// aboutNSPEditorToolStripMenuItem
-			// 
-			this.aboutNSPEditorToolStripMenuItem.Name = "aboutNSPEditorToolStripMenuItem";
-			this.aboutNSPEditorToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
-			this.aboutNSPEditorToolStripMenuItem.Text = "About NSP Editor";
-			this.aboutNSPEditorToolStripMenuItem.Click += new System.EventHandler(this.aboutNSPEditorToolStripMenuItem_Click);
-			// 
-			// nSPHomepageToolStripMenuItem
-			// 
-			this.nSPHomepageToolStripMenuItem.Name = "nSPHomepageToolStripMenuItem";
-			this.nSPHomepageToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
-			this.nSPHomepageToolStripMenuItem.Text = "NSP Online";
-			this.nSPHomepageToolStripMenuItem.Click += new System.EventHandler(this.nSPHomepageToolStripMenuItem_Click);
-			// 
-			// toolStripSeparator5
-			// 
-			this.toolStripSeparator5.Name = "toolStripSeparator5";
-			this.toolStripSeparator5.Size = new System.Drawing.Size(163, 6);
-			// 
-			// nSPSyntaxToolStripMenuItem
-			// 
-			this.nSPSyntaxToolStripMenuItem.Name = "nSPSyntaxToolStripMenuItem";
-			this.nSPSyntaxToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
-			this.nSPSyntaxToolStripMenuItem.Text = "NSP Syntax";
-			this.nSPSyntaxToolStripMenuItem.Click += new System.EventHandler(this.nSPSyntaxToolStripMenuItem_Click);
-			// 
 			// NSPEditForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -402,7 +402,9 @@
 			this.Controls.Add(this.menuStrip1);
 			this.Controls.Add(this.statusStrip1);
 			this.Controls.Add(this.toolStrip1);
+			this.DataBindings.Add(new System.Windows.Forms.Binding("Location", global::NSPEdit.Properties.Settings.Default, "WindowLocation", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.Location = global::NSPEdit.Properties.Settings.Default.WindowLocation;
 			this.MainMenuStrip = this.menuStrip1;
 			this.Name = "NSPEditForm";
 			this.Text = "NSP Editor";

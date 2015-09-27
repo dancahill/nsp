@@ -14,15 +14,21 @@ namespace NSPEdit
 		public RichCodeBox richCodeBox1;
 		public RichTextBox richTextBox2;
 		public Timer aTimer;
+		int OutputHeight = 150;
 
 		public NSPEditForm()
 		{
 			InitializeComponent();
-			this.Load += Form_Load;
+			this.Load += NSPEditForm_Load;
+			this.FormClosing += NSPEditForm_FormClosing;
 		}
 
-		void Form_Load(object sender, EventArgs e)
+		private void NSPEditForm_Load(object sender, EventArgs e)
 		{
+			this.DesktopBounds = new Rectangle(Properties.Settings.Default.WindowLocation, Properties.Settings.Default.WindowSize);
+			this.WindowState = (FormWindowState)Enum.Parse(typeof(FormWindowState), Properties.Settings.Default.WindowState);
+			this.OutputHeight = Properties.Settings.Default.OutputHeight;
+
 			aTimer = new Timer();
 			aTimer.Tick += ATimer_Tick;
 			aTimer.Interval = 200;
@@ -45,6 +51,16 @@ namespace NSPEdit
 			newTabPage();
 			richCodeBox1.LoadScript(loadfile);
 			this.ActiveControl = this.richCodeBox1;
+		}
+
+		private void NSPEditForm_FormClosing(object sender, FormClosingEventArgs e)
+		{
+			Rectangle bounds = this.WindowState != FormWindowState.Normal ? this.RestoreBounds : this.DesktopBounds;
+			Properties.Settings.Default.WindowLocation = bounds.Location;
+			Properties.Settings.Default.WindowSize = bounds.Size;
+			Properties.Settings.Default.WindowState = Enum.GetName(typeof(FormWindowState), this.WindowState);
+			Properties.Settings.Default.OutputHeight = this.OutputHeight;
+			Properties.Settings.Default.Save();
 		}
 
 		private void TabControl1_DrawItem(object sender, DrawItemEventArgs e)
@@ -114,7 +130,7 @@ namespace NSPEdit
 			this.Text = string.Format("NSP Editor - [{0}]", Path.GetFileName(tabControl1.SelectedTab.Tag.ToString()));
 			richCodeBox1.Focus();
 			CB = (AutoCompleteBox)splitContainer1.Panel1.Controls["AutoCompleteBox"];
-                }
+		}
 
 		public void richCodeBox1_KeyPress(object sender, KeyPressEventArgs e)
 		{
@@ -344,27 +360,23 @@ namespace NSPEdit
 			splitContainer1.FixedPanel = FixedPanel.Panel2;
 			//splitContainer1.Size = new System.Drawing.Size(795, 443);
 			//splitContainer1.SplitterDistance = 364;
-			splitContainer1.Panel2MinSize = 150;
 			//splitContainer1.TabIndex = 2;
 			splitContainer1.TabStop = false;
+			splitContainer1.Panel2MinSize = 0;
 
 			// tabPage1
 			tabPage1.Name = "TabPage " + (tabControl1.TabCount + 1).ToString();
-			//tabPage1.Text = "Untitled " + (tabControl1.TabCount + 1).ToString();
 			tabPage1.Text = "";
 			tabPage1.Tag = "Untitled";
+			tabPage1.ToolTipText = tabPage1.Tag.ToString();
 			tabPage1.Controls.Add(splitContainer1);
 			tabPage1.Location = new Point(4, 22);
-			//			tabPage1.Name = "tabPage1";
 			tabPage1.Padding = new Padding(0);
-			//			tabPage1.Size = new System.Drawing.Size(801, 449);
+			//tabPage1.Size = new System.Drawing.Size(801, 449);
 			//tabPage1.TabIndex = 0;
 			tabPage1.TabStop = false;
 			tabPage1.UseVisualStyleBackColor = true;
 
-			tabPage1.ToolTipText = tabPage1.Tag.ToString();
-
-			//tabControl1.TabPages.Add(tabPage1);
 			tabControl1.Controls.Add(tabPage1);
 			tabControl1.SelectedTab = tabPage1;
 			tabControl1.ShowToolTips = true;
@@ -375,11 +387,21 @@ namespace NSPEdit
 			//splitContainer1.ResumeLayout(false);
 			//tabPage1.ResumeLayout(false);
 
+			int p2height = splitContainer1.Height - this.OutputHeight;
+			if (p2height < 0) p2height = 0;
+			if (p2height > splitContainer1.Height) p2height = splitContainer1.Height;
+			splitContainer1.SplitterDistance = p2height;
+			splitContainer1.Panel2.SizeChanged += Panel2_SizeChanged;
+
 			TabControl1_SelectedIndexChanged(null, null);
 			richCodeBox1.LoadScript("");
-			splitContainer1.Panel2MinSize = 50;
-
 			//tabControl1.ResumeLayout();
+		}
+
+		private void Panel2_SizeChanged(object sender, EventArgs e)
+		{
+			SplitterPanel sp = (SplitterPanel)sender;
+			OutputHeight = sp.Height;
 		}
 
 		private void closeTabToolStripMenuItem_Click(object sender, EventArgs e)
