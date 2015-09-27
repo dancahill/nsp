@@ -80,6 +80,7 @@
   <ItemGroup>
     <ClInclude Include="aes_api.h" />
     <ClInclude Include="aes_core.h" />
+    <ClInclude Include="crypto.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aes_api.c" />

@@ -17,7 +17,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nsp/nsplib.h"
-#include "libbase.h"
+#include "base.h"
 #include <stdlib.h>
 
 static void sort_byname(nsp_state *N, obj_t *tobj, int recurse, int order)

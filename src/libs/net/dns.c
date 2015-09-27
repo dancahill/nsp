@@ -17,7 +17,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nsp/nsplib.h"
-#include "libnet.h"
+#include "net.h"
 
 #ifdef HAVE_DNS
 
@@ -26,10 +26,10 @@
 #include <stdlib.h>
 #include <windns.h>
 #define snprintf _snprintf
-/*
+
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "dnsapi.lib")
-*/
+
 #else
 #include <stdlib.h>
 #include <string.h>
@@ -111,6 +111,19 @@ static int dns_lookup(nsp_state *N, obj_t *tobj, const char *domain)
 			nsp_setnum(N, stobj, "pref", pDnsCur->Data.MX.wPreference);
 			nsp_setstr(N, stobj, "host", pDnsCur->Data.MX.pNameExchange, -1);
 			if (N->debug) n_warn(N, __FN__, "MX [%s]", pDnsCur->Data.MX.pNameExchange);
+			break;
+		}
+		case DNS_TYPE_TEXT: {
+			unsigned int i;
+			obj_t *cobj;
+
+			nsp_setstr(N, stobj, "type", "TEXT", -1);
+			nsp_setstr(N, stobj, "name", pDnsCur->pName, -1);
+			cobj = nsp_setstr(N, stobj, "text", NULL, 0);
+			for (i = 0; i < pDnsCur->Data.TXT.dwStringCount; i++) {
+				if (i > 0) nsp_strcat(N, cobj, "\r\n", -1);
+				nsp_strcat(N, cobj, pDnsCur->Data.TXT.pStringArray[i], strlen(pDnsCur->Data.TXT.pStringArray[i]));
+			}
 			break;
 		}
 		default: {

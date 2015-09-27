@@ -17,7 +17,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nsp/nsplib.h"
-#include "libcrypto.h"
+#include "crypto.h"
 #include <fcntl.h>
 #include <string.h>
 #include <sys/stat.h>

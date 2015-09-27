@@ -18,7 +18,7 @@
 */
 
 #include "nsp/nsplib.h"
-#include "libcrypto.h"
+#include "crypto.h"
 
 #if defined HAVE_OPENSSL
 

@@ -20,7 +20,7 @@
 
 #ifdef HAVE_FBSQL
 
-#include "libfbsql.h"
+#include "fbsql.h"
 #include <stdio.h>
 #include <string.h>
 

@@ -48,7 +48,7 @@ static PGSQL_CONN *getconn(nsp_state *N)
 	return conn;
 }
 
-#include "libpgsql.h"
+#include "pgsql.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

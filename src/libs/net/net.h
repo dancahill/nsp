@@ -23,6 +23,10 @@
 #include "nsp/config.h"
 #endif
 
+#if defined(CONFIG_HAVE_DNS) && !defined(HAVE_DNS)
+#define HAVE_DNS
+#endif
+
 #if defined(CONFIG_HAVE_MBEDTLS)
 #undef CONFIG_HAVE_OPENSSL
 #undef HAVE_OPENSSL

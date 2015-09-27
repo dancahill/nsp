@@ -17,7 +17,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nsp/nsplib.h"
-#include "libdata.h"
+#include "data.h"
 
 int nspdata_register_all(nsp_state *N)
 {
