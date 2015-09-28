@@ -118,13 +118,11 @@ NSP_FUNCTION(libnsp_net_socket_close)
 {
 #define __FN__ __FILE__ ":libnsp_net_socket_close()"
 	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
 	obj_t *cobj;
 	TCP_SOCKET *sock;
 
 	if (!nsp_istable(thisobj) || nsp_isnull(nsp_getobj(N, thisobj, "_socket"))) {
 		thisobj = nsp_getobj(N, &N->l, "1");
-		cobj1 = nsp_getobj(N, &N->l, "2");
 	}
 	if (!nsp_istable(thisobj))
 		n_error(N, NE_SYNTAX, __FN__, "expected a socket");

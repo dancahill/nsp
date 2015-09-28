@@ -9,6 +9,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NSPEdit", "src\hosts\nspedi
 		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp.net", "src\libnsp.net\libnsp.net.vcxproj", "{F1626418-51AB-4DD7-89FF-83EAC92AF387}"
+	ProjectSection(ProjectDependencies) = postProject
+		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp", "src\libnsp\libnsp.vcxproj", "{52F99E4B-EA7D-470C-B66F-685C3B40626A}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CLI", "src\hosts\cli\CLI.vcxproj", "{02EBD4F5-67F2-4664-9637-ED43375B2FED}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NTray", "src\hosts\ntray\ntray.vcxproj", "{715673E5-8603-4390-BD77-4C5277BB6C18}"
@@ -31,24 +38,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{EE2EC5
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Static", "Static", "{55F18DF0-9EA7-4E1F-A3AD-69E60F57122D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp", "src\libnsp\libnsp.vcxproj", "{52F99E4B-EA7D-470C-B66F-685C3B40626A}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp_base(dll)", "src\libs\base\libnsp_base(dll).vcxproj", "{D08F308C-C0C5-4F88-89F4-A435959F8E43}"
-	ProjectSection(ProjectDependencies) = postProject
-		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp_base", "src\libs\base\libnsp_base.vcxproj", "{7C9274C0-25BE-422F-8F3E-29FBEDE1B823}"
-	ProjectSection(ProjectDependencies) = postProject
-		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp_net", "src\libs\net\libnsp_net.vcxproj", "{87236F1F-EE08-4F25-91B2-B4B289FAA860}"
-	ProjectSection(ProjectDependencies) = postProject
-		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp_net(dll)", "src\libs\net\libnsp_net(dll).vcxproj", "{51AFBBE1-5517-4F44-AD2A-9A28B22287F0}"
 	ProjectSection(ProjectDependencies) = postProject
 		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
 	EndProjectSection
@@ -78,6 +68,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp_mysql(dll)", "src\li
 		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp_net(dll)", "src\libs\net\libnsp_net(dll).vcxproj", "{51AFBBE1-5517-4F44-AD2A-9A28B22287F0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
+	EndProjectSection
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp_odbc(dll)", "src\libs\odbc\libnsp_odbc(dll).vcxproj", "{F32E799E-DB47-41F0-B395-C0443C1235FC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
@@ -93,7 +88,17 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp_ssh2(dll)", "src\lib
 		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp_sqlite(dll)", "src\libs\sqlite\libnsp_sqlite(dll).vcxproj", "{85544B83-3006-4820-98AD-6639122BA24D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
+	EndProjectSection
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp_wingdi(dll)", "src\libs\wingdi\libnsp_wingdi(dll).vcxproj", "{866CE305-CF86-44EE-AC85-6E782C7C069E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp_base", "src\libs\base\libnsp_base.vcxproj", "{7C9274C0-25BE-422F-8F3E-29FBEDE1B823}"
 	ProjectSection(ProjectDependencies) = postProject
 		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
 	EndProjectSection
@@ -123,6 +128,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp_mysql", "src\libs\my
 		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp_net", "src\libs\net\libnsp_net.vcxproj", "{87236F1F-EE08-4F25-91B2-B4B289FAA860}"
+	ProjectSection(ProjectDependencies) = postProject
+		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
+	EndProjectSection
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp_odbc", "src\libs\odbc\libnsp_odbc.vcxproj", "{7C399B64-1087-4313-BA67-3E2C2B81B9BD}"
 	ProjectSection(ProjectDependencies) = postProject
 		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
@@ -138,22 +148,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp_ssh2", "src\libs\ssh
 		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp_sqlite(dll)", "src\libs\sqlite\libnsp_sqlite(dll).vcxproj", "{85544B83-3006-4820-98AD-6639122BA24D}"
-	ProjectSection(ProjectDependencies) = postProject
-		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp_sqlite", "src\libs\sqlite\libnsp_sqlite.vcxproj", "{CBCF04D4-31AC-47A9-B325-8367E435F2AE}"
 	ProjectSection(ProjectDependencies) = postProject
 		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp_wingdi", "src\libs\wingdi\libnsp_wingdi.vcxproj", "{07998E9E-C6BD-4B81-B0C6-C12FDF6DD9F1}"
-	ProjectSection(ProjectDependencies) = postProject
-		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp.net", "src\libnsp.net\libnsp.net.vcxproj", "{F1626418-51AB-4DD7-89FF-83EAC92AF387}"
 	ProjectSection(ProjectDependencies) = postProject
 		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
 	EndProjectSection

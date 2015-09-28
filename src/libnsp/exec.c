@@ -104,6 +104,7 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 	val_t *olobj;
 	unsigned short ftype, i;
 	int e;
+	short noscopechange = 0;
 
 	DEBUG_IN();
 	settrace();
@@ -113,7 +114,20 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 	}
 	oldfunc = N->func;
 	N->func = fobj->name;
-	if (ftype == NT_CFUNC && (NSP_CFUNC)(fobj->val->d.cfunc) == (NSP_CFUNC)nl_include) N->func = noname;
+	if (ftype == NT_CFUNC && (NSP_CFUNC)(fobj->val->d.cfunc) == (NSP_CFUNC)nl_include) {
+		N->func = noname;
+		noscopechange = 1;
+
+
+
+
+
+
+
+
+
+
+	}
 	listobj.val = n_newval(N, NT_TABLE);
 	/* disable autosort or 'this' will be hard to find... */
 	listobj.val->attr &= ~NST_AUTOSORT;
@@ -157,8 +171,43 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 		}
 	}
 	N->readptr++;
+
+	if (noscopechange) {
+		/*
+		 * this is a bad hack to fix the issue with include() creating its own local context (it should not).
+		 */
+		obj_t *cobj1 = nsp_getobj(N, &listobj, "1");
+		uchar *p;
+		int n = 0;
+
+		if (!nsp_isnull(cobj1)) {
+			p = N->readptr;
+
+			savjmp = N->savjmp;
+			N->savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
+			if ((e = setjmp(*N->savjmp)) == 0) {
+				n = nsp_execfile(N, (char *)cobj1->val->d.str);
+			}
+			n_free(N, (void *)&N->savjmp, sizeof(jmp_buf));
+			N->savjmp = savjmp;
+
+			N->readptr = p;
+		}
+		nsp_setbool(N, &N->r, "", n ? 0 : 1);
+		nsp_unlinkval(N, &listobj);
+		if (n < 0) n_error(N, NE_SYNTAX, __FN__, "failed to include '%s'", cobj1->val->d.str);
+
+		if (N->ret) N->ret = 0;
+		N->func = oldfunc;
+		if (e && N->savjmp != NULL) longjmp(*N->savjmp, 1);
+		DEBUG_OUT();
+		return &N->r;
+	}
+
 	olobj = N->l.val; N->l.val = listobj.val; listobj.val = NULL;
 	nsp_unlinkval(N, &N->r);
+
+
 	if (ftype == NT_CFUNC) {
 		/* exec the native function */
 		savjmp = N->savjmp;
@@ -818,7 +867,7 @@ nsp_state *nsp_newstate()
 	cobj = nsp_setstr(new_N, &new_N->g, "_version_", NSP_VERSION, -1);
 	cobj = nsp_setstr(new_N, &new_N->g, "_ostype_", _OSTYPE_, -1);
 	return new_N;
-}
+	}
 
 void nsp_freestate(nsp_state *N)
 {
