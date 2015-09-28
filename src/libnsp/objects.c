@@ -345,7 +345,7 @@ void nsp_unlinkval(nsp_state *N, obj_t *cobj)
 				cobj->val->d.table.f->val = NULL;
 			}
 		}
-		if (--cobj->val->refs < 1) {
+		if (cobj->val != NULL && --cobj->val->refs < 1) {
 			n_freeval(N, cobj);
 			if (!(cobj->val->attr&NST_STACKVAL)) {
 				n_free(N, (void *)&cobj->val, sizeof(val_t));

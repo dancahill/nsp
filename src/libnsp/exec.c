@@ -72,20 +72,38 @@
 #endif
 #define _OSTYPE_ _OS_"/"_COMPILER_
 
+static obj_t *append_var(nsp_state *N, obj_t *tobj, char *name)
+{
+	obj_t *cobj;
+
+	if (tobj->val->d.table.f == NULL) {
+		cobj = tobj->val->d.table.f = (obj_t *)n_alloc(N, sizeof(obj_t), 0);
+		cobj->prev = NULL;
+		cobj->next = NULL;
+	}
+	else {
+		cobj = tobj->val->d.table.l;
+		cobj->next = (obj_t *)n_alloc(N, sizeof(obj_t), 0);
+		cobj->next->prev = cobj;
+		cobj->next->next = NULL;
+		cobj = cobj->next;
+	}
+	tobj->val->d.table.l = cobj;
+	if (name != NULL) n_setname(N, cobj, name);
+	cobj->val = NULL;
+	return cobj;
+}
+
 obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 {
 #define __FN__ __FILE__ ":n_execfunction()"
-	uchar *oldbptr;
-	uchar *oldrptr;
-	uchar *oldbend;
+	static char *noname = "";
 	char *oldfunc;
 	jmp_buf *savjmp;
 	obj_t listobj, *cobj;
 	val_t *olobj;
 	unsigned short ftype, i;
 	int e;
-	short int hasparen = 0;
-	static char *noname = "";
 
 	DEBUG_IN();
 	settrace();
@@ -95,63 +113,36 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 	}
 	oldfunc = N->func;
 	N->func = fobj->name;
-
 	if (ftype == NT_CFUNC && (NSP_CFUNC)(fobj->val->d.cfunc) == (NSP_CFUNC)nl_include) N->func = noname;
-
-
-	//	N->func = fobj->name;
-	//	if (isnewobject) {
-	if (n_peekop(N) == OP_POPAREN) hasparen = 1;
-	//	} else {
-	//		n_expect(N, __FN__, OP_POPAREN);
-	//		hasparen = 1;
-	//	}
 	listobj.val = n_newval(N, NT_TABLE);
 	/* disable autosort or 'this' will be hard to find... */
 	listobj.val->attr &= ~NST_AUTOSORT;
 	/* set this */
-	cobj = listobj.val->d.table.f = (obj_t *)n_alloc(N, sizeof(obj_t), 0);
-	cobj->prev = NULL;
-	cobj->next = NULL;
-	cobj->val = NULL;
-	n_setname(N, cobj, "this");
 	if (isnewobject) {
-		if (ftype == NT_CFUNC) {
-			nsp_linkval(N, cobj, &listobj);
+		cobj = append_var(N, &listobj, "this");
+		if (pobj != NULL) {
+			nsp_linkval(N, cobj, pobj);
 		}
 		else {
-			if (pobj != NULL) {
-				nsp_linkval(N, cobj, pobj);
-			}
-			else {
-				nsp_linkval(N, cobj, &listobj);
-			}
+			nsp_linkval(N, cobj, &listobj);
 		}
+		if (cobj->val) cobj->val->attr |= NST_HIDDEN;
 	}
 	else if (pobj) {
+		cobj = append_var(N, &listobj, "this");
 		nsp_linkval(N, cobj, pobj);
+		if (cobj->val) cobj->val->attr |= NST_HIDDEN;
 	}
-	if (cobj->val) cobj->val->attr |= NST_HIDDEN;
 	/* set fn name */
-	cobj->next = (obj_t *)n_alloc(N, sizeof(obj_t), 0);
-	cobj->next->prev = cobj;
-	cobj->next->next = NULL;
-	cobj = cobj->next;
-	n_setname(N, cobj, "0");
-	cobj->val = NULL;
+	cobj = append_var(N, &listobj, "0");
 	nsp_setstr(N, cobj, "0", fobj->name, -1);
 	/* set args */
-	if (hasparen) {
+	if (n_peekop(N) == OP_POPAREN) {
 		for (i = 1;; i++) {
 			N->readptr = n_seekop(N, N->readptr, 0);
-			//		N->readptr++;
 			if (n_peekop(N) == OP_PCPAREN) break;
-			cobj->next = (obj_t *)n_alloc(N, sizeof(obj_t), 0);
-			cobj->next->prev = cobj;
-			cobj->next->next = NULL;
-			cobj = cobj->next;
+			cobj = append_var(N, &listobj, NULL);
 			n_setnamei(N, cobj, i);
-			cobj->val = NULL;
 			if (n_peekop(N) == OP_MAND) {
 				N->readptr++;
 				n_expect(N, __FN__, OP_LABEL);
@@ -165,15 +156,11 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 			break;
 		}
 	}
-	listobj.val->d.table.l = cobj;
 	N->readptr++;
 	olobj = N->l.val; N->l.val = listobj.val; listobj.val = NULL;
-	/* if (N->debug) n_warn(N, __FN__, "%s()", fobj->name); */
-	oldbptr = N->blockptr;
-	oldrptr = N->readptr;
-	oldbend = N->blockend;
 	nsp_unlinkval(N, &N->r);
 	if (ftype == NT_CFUNC) {
+		/* exec the native function */
 		savjmp = N->savjmp;
 		N->savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
 		if ((e = setjmp(*N->savjmp)) == 0) {
@@ -183,19 +170,23 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 		N->savjmp = savjmp;
 	}
 	else {
-		char namebuf[MAX_OBJNAMELEN + 1];
+		char filenamebuf[MAX_OBJNAMELEN + 1];
 		char *oldfname;
+		uchar *oldbptr;
+		uchar *oldrptr;
+		uchar *oldbend;
 
+		oldbptr = N->blockptr;
+		oldrptr = N->readptr;
+		oldbend = N->blockend;
 		N->blockptr = (uchar *)fobj->val->d.str;
 		N->readptr = (uchar *)fobj->val->d.str;
 		N->blockend = (uchar *)fobj->val->d.str + fobj->val->size;
-
+		/* get the name of the source file */
 		n_expect(N, __FN__, OP_LABEL);
-		namebuf[0] = 0;
-		n_getlabel(N, namebuf);
-		//n_warn(N, __FN__, "a 0x%08x '%s'[%s]", N->file, N->file, namebuf);
-
-
+		filenamebuf[0] = 0;
+		n_getlabel(N, filenamebuf);
+		/* get the arg names */
 		n_expect(N, __FN__, OP_POPAREN);
 		for (i = 1;; i++) {
 			N->readptr = n_seekop(N, N->readptr, 0);
@@ -207,11 +198,9 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 			break;
 		}
 		n_expect(N, __FN__, OP_POBRACE);
-
+		/* save state and exec the script function */
 		oldfname = N->file;
-		N->file = namebuf;
-		//n_warn(N, __FN__, "b 0x%08x '%s'[%s]", N->file, N->file, namebuf);
-
+		N->file = filenamebuf;
 		savjmp = N->savjmp;
 		N->savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
 		if ((e = setjmp(*N->savjmp)) == 0) {
@@ -219,19 +208,15 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 		}
 		n_free(N, (void *)&N->savjmp, sizeof(jmp_buf));
 		N->savjmp = savjmp;
-
-		//n_warn(N, __FN__, "c 0x%08x '%s'[%s]", N->file, N->file, namebuf);
-
 		N->file = oldfname;
+		N->blockptr = oldbptr;
+		N->readptr = oldrptr;
+		N->blockend = oldbend;
 	}
-	if (isnewobject) {
-		nsp_linkval(N, &N->r, &N->l);
-	}
+	//nsp_unlinkval(N, nsp_getobj(N, &listobj, "this"));
+	if (isnewobject) nsp_linkval(N, &N->r, &N->l);
 	nsp_unlinkval(N, &N->l);
 	N->l.val = olobj;
-	N->blockptr = oldbptr;
-	N->readptr = oldrptr;
-	N->blockend = oldbend;
 	if (N->ret) N->ret = 0;
 	N->func = oldfunc;
 
@@ -242,12 +227,11 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 }
 
 /* base class method hack */
-obj_t *n_execbasemethod(nsp_state *N, char *name, obj_t *pobj, uchar isnewobject)
+obj_t *n_execbasemethod(nsp_state *N, char *name, obj_t *pobj)
 {
 #define __FN__ __FILE__ ":n_execbasemethod()"
 	obj_t *nobj;
 	obj_t tobj;
-
 	jmp_buf *savjmp;
 	int e;
 
@@ -255,7 +239,6 @@ obj_t *n_execbasemethod(nsp_state *N, char *name, obj_t *pobj, uchar isnewobject
 	nc_memset((void *)&tobj, 0, sizeof(obj_t));
 	nsp_setcfunc(N, &tobj, "base_method", (NSP_CFUNC)nl_base_method);
 	nc_strncpy(tobj.name, name, MAX_OBJNAMELEN);
-
 	savjmp = N->savjmp;
 	N->savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
 	if ((e = setjmp(*N->savjmp)) == 0) {
@@ -266,18 +249,51 @@ obj_t *n_execbasemethod(nsp_state *N, char *name, obj_t *pobj, uchar isnewobject
 	}
 	n_free(N, (void *)&N->savjmp, sizeof(jmp_buf));
 	N->savjmp = savjmp;
-
 	nsp_unlinkval(N, &tobj);
-
 	if (e) {
 		char errbuf[sizeof(N->errbuf)];
 		nc_strncpy(errbuf, N->errbuf, sizeof(N->errbuf) - 1);
 		n_error(N, NE_SYNTAX, NULL, "%s", errbuf);
 	}
-
 	return nobj;
 #undef __FN__
 }
+
+void n_execconstrutor(nsp_state *N, obj_t *cobj, obj_t *pobj)
+{
+#define __FN__ __FILE__ ":n_execconstrutor()"
+	obj_t *xobj;
+
+	nsp_setvaltype(N, cobj, NT_TABLE);
+	nsp_zlink(N, cobj, pobj);
+	xobj = nsp_getobj(N, cobj, pobj->name);
+	if (!nsp_isnull(xobj)) {
+		n_execfunction(N, xobj, cobj, 1);
+	}
+	else {
+		xobj = nsp_getobj(N, cobj, "_constructor");
+		if (!nsp_isnull(xobj)) {
+			n_execfunction(N, xobj, cobj, 1);
+		}
+		else if (n_peekop(N) == OP_POPAREN) {
+			N->readptr += readi2((N->readptr + 1)) + 3;
+			n_expect(N, __FN__, OP_PCPAREN);
+			N->readptr++;
+		}
+	}
+#undef __FN__
+}
+
+void n_execdestrutor(nsp_state *N, obj_t *cobj, char *cname)
+{
+#define __FN__ __FILE__ ":n_execdestrutor()"
+	obj_t *xobj;
+
+	xobj = nsp_getobj(N, cobj, "_destructor");
+	if (!nsp_isnull(xobj)) n_execfunction(N, xobj, cobj, 0);
+#undef __FN__
+}
+
 
 /*
  * the following functions are public API functions
@@ -418,14 +434,9 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 				n_expect(N, __FN__, OP_LABEL);
 				cobj = nsp_getobj(N, NULL, n_getlabel(N, NULL));
 
+				n_execdestrutor(N, cobj, cobj->name);
 
-				obj_t *xobj = nsp_getobj(N, cobj, "_destructor");
-				if (!nsp_isnull(xobj)) n_execfunction(N, xobj, cobj, 0);
-
-
-				//				n_warn(N, __FN__, "delete '%s' %d", cobj->name, cobj->val->type);
 				nsp_linkval(N, cobj, NULL);
-				//				nsp_unlinkval(N, cobj);
 				goto endstmt;
 			default:
 				n_warn(N, __FN__, "? %d %s", op, n_getsym(N, op));
@@ -435,8 +446,8 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 			char namebuf[MAX_OBJNAMELEN + 1];
 			obj_t *pobj = NULL;
 			unsigned short z;
-			uchar *p = N->readptr;
-			uchar *e;
+			//uchar *p = N->readptr;
+			//uchar *e;
 
 			if (n_peekop(N) != OP_LABEL) n_error(N, NE_SYNTAX, __FN__, "expected a label [%d][%s]", *N->readptr, n_getsym(N, *N->readptr));
 			tobj = &N->l;
@@ -454,31 +465,18 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 			ctype = nsp_typeof(cobj);
 			if (n_peekop(N) == OP_POPAREN) {
 				if (ctype == NT_NFUNC || ctype == NT_CFUNC) {
-					//n_expect(N, __FN__, OP_POPAREN);
 					n_execfunction(N, cobj, pobj, 0);
 					if (n_peekop(N) == OP_PDOT) goto x;
 					goto endstmt;
 				}
 				else {
-					char errbuf[80];
-
-					//					{
-					/* base class method hack */
-					//						obj_t tobj;
-					//						nc_memset((void *)&tobj, 0, sizeof(obj_t));
-					//						nsp_setcfunc(N, &tobj, "base_method", (NSP_CFUNC)nl_base_method);
-					//						nc_strncpy(tobj.name, namebuf, MAX_OBJNAMELEN);
-					//						n_expect(N, __FN__, OP_POPAREN);
-					//						n_execfunction(N, &tobj, pobj, 0);
-					//						nsp_unlinkval(N, &tobj);
-					n_execbasemethod(N, namebuf, pobj, 0);
+					n_execbasemethod(N, namebuf, pobj);
 					if (n_peekop(N) == OP_PDOT) goto x;
 					goto endstmt;
-					//					}
-					e = N->readptr - 1;
-					nc_memset(errbuf, 0, sizeof(errbuf));
-					n_decompile(N, p, e, errbuf, sizeof(errbuf) - 1);
-					n_error(N, NE_SYNTAX, __FN__, "'%s' is not a function", errbuf);
+					//e = N->readptr - 1;
+					//nc_memset(errbuf, 0, sizeof(errbuf));
+					//n_decompile(N, p, e, errbuf, sizeof(errbuf) - 1);
+					//n_error(N, NE_SYNTAX, __FN__, "'%s' is not a function", errbuf);
 				}
 			}
 			if (ctype == NT_NULL) {

@@ -288,18 +288,12 @@ obj_t *n_readvar(nsp_state *N, obj_t *tobj, obj_t *cobj)
 	sanetest();
 	if (op == OP_KCLASS) {
 		N->readptr++;
-		//		n_expect(N, __FN__ "1", OP_LABEL);
-		//		nsp_settable(N, cobj, n_getlabel(N, NULL));
-		//		n_expect(N, __FN__ "1", OP_POBRACE);
-		//		n_evalobj(N, cobj, 0);
-
 		n_expect(N, __FN__ "1", OP_LABEL);
 		cobj = nsp_settable(N, tobj, n_getlabel(N, NULL));
 		n_expect(N, __FN__ "1", OP_POBRACE);
 		n_readtable(N, cobj);
 		n_expect(N, __FN__, OP_PCBRACE);
 		N->readptr++;
-
 		DEBUG_OUT();
 		return cobj;
 	}
@@ -477,7 +471,7 @@ static void n_evalobj(nsp_state *N, obj_t *cobj, uchar isnewobject)
 		return;
 	}
 	else if (n_peekop(N) == OP_ESTRDATA) {
-		//		n_getexstring(N, cobj);
+		//n_getexstring(N, cobj);
 		n_getstring(N, cobj);
 		return;
 	}
@@ -487,7 +481,6 @@ static void n_evalobj(nsp_state *N, obj_t *cobj, uchar isnewobject)
 	}
 	else if (n_peekop(N) == OP_LABEL) {
 		uchar *p = N->readptr;
-		uchar *e;
 		char *l = n_getlabel(N, NULL);
 		obj_t *nobj = nsp_getobj(N, NULL, l);
 		obj_t *pobj = NULL;
@@ -502,52 +495,20 @@ static void n_evalobj(nsp_state *N, obj_t *cobj, uchar isnewobject)
 		switch (*N->readptr) {
 		case OP_POPAREN:
 			if (nobj->val->type == NT_NFUNC || nobj->val->type == NT_CFUNC) {
-				//n_expect(N, __FN__, OP_POPAREN);
 				nobj = n_execfunction(N, nobj, isnewobject ? NULL : pobj, isnewobject);
 				if (n_peekop(N) == OP_PDOT) goto x;
 				isnewobject = 0;
 				break;
 			}
-			else if (nobj->val->type == NT_TABLE && isnewobject) {
-				nsp_setvaltype(N, cobj, NT_TABLE);
-				nsp_zlink(N, cobj, nobj);
-				obj_t *xobj = nsp_getobj(N, cobj, nobj->name);
-				if (!nsp_isnull(xobj)) {
-					nobj = n_execfunction(N, xobj, cobj, isnewobject);
-				}
-				else {
-					xobj = nsp_getobj(N, cobj, "_constructor");
-					if (!nsp_isnull(xobj)) {
-						nobj = n_execfunction(N, xobj, cobj, isnewobject);
-					}
-					else if (n_peekop(N) == OP_POPAREN) {
-						N->readptr += readi2((N->readptr + 1)) + 3;
-						n_expect(N, __FN__, OP_PCPAREN);
-						N->readptr++;
-					}
-				}
+			else if (nsp_istable(nobj) && isnewobject) {
+				n_execconstrutor(N, cobj, nobj);
 				isnewobject = 0;
 				return;
 			}
 			else {
-				char errbuf[80];
-
-				///* base class method hack */
-				//obj_t tobj;
-				//nc_memset((void *)&tobj, 0, sizeof(obj_t));
-				//nsp_setcfunc(N, &tobj, "base_method", (NSP_CFUNC)nl_base_method);
-				//nc_strncpy(tobj.name, namebuf, MAX_OBJNAMELEN);
-				//n_expect(N, __FN__, OP_POPAREN);
-				//nobj = n_execfunction(N, &tobj, pobj, 0);
-				//nsp_unlinkval(N, &tobj);
-				nobj = n_execbasemethod(N, namebuf, pobj, 0);
+				nobj = n_execbasemethod(N, namebuf, pobj);
 				if (n_peekop(N) == OP_PDOT) goto x;
 				break;
-				//				}
-				e = N->readptr - 1;
-				nc_memset(errbuf, 0, sizeof(errbuf));
-				n_decompile(N, p, e, errbuf, sizeof(errbuf) - 1);
-				n_error(N, NE_SYNTAX, __FN__, "'%s' is not a function", errbuf);
 			}
 		case OP_MADDEQ:
 		case OP_MSUBEQ:
@@ -574,23 +535,7 @@ static void n_evalobj(nsp_state *N, obj_t *cobj, uchar isnewobject)
 		case NT_STRING: if (nobj != cobj) n_copyval(N, cobj, nobj); break;
 		case NT_TABLE: {
 			if (isnewobject) {
-				nsp_setvaltype(N, cobj, NT_TABLE);
-				nsp_zlink(N, cobj, nobj);
-				obj_t *xobj = nsp_getobj(N, cobj, nobj->name);
-				if (!nsp_isnull(xobj)) {
-					n_execfunction(N, xobj, cobj, isnewobject);
-				}
-				else {
-					xobj = nsp_getobj(N, cobj, "_constructor");
-					if (!nsp_isnull(xobj)) {
-						n_execfunction(N, xobj, cobj, isnewobject);
-					}
-					else if (n_peekop(N) == OP_POPAREN) {
-						N->readptr += readi2((N->readptr + 1)) + 3;
-						n_expect(N, __FN__, OP_PCPAREN);
-						N->readptr++;
-					}
-				}
+				n_execconstrutor(N, cobj, nobj);
 			}
 			else {
 				nsp_linkval(N, cobj, nobj); break;

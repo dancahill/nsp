@@ -38,6 +38,7 @@ int nspnet_register_all(nsp_state *N)
 #endif
 #else
 	nsp_setbool(N, tobj, "have_tls", 0);
+	nsp_setstr(N, tobj, "tls_type", "none", -1);
 #endif
 #ifdef HAVE_DNS
 	tobj2 = nsp_settable(N, tobj, "dns");
@@ -63,35 +64,26 @@ int nspnet_register_all(nsp_state *N)
 	tobj2 = nsp_settable(N, tobj, "pop3");
 	tobj2->val->attr |= NST_HIDDEN;
 	nsp_setcfunc(N, tobj2, "client", (NSP_CFUNC)libnsp_net_pop3_client);
-	tobj2 = nsp_settable(N, tobj, "tcp");
+
+	tobj2 = nsp_settable(N, tobj, "socket");
 	tobj2->val->attr |= NST_HIDDEN;
-#ifdef HAVE_TLS
-	nsp_setbool(N, tobj2, "have_tls", 1);
-#if defined HAVE_OPENSSL
-	nsp_setstr(N, tobj2, "tls_type", "openssl", -1);
-#elif defined HAVE_MBEDTLS
-	nsp_setstr(N, tobj2, "tls_type", "mbedtls", -1);
-#endif
-#else
-	nsp_setbool(N, tobj2, "have_tls", 0);
-#endif
-	nsp_setcfunc(N, tobj2, "accept", (NSP_CFUNC)libnsp_net_tcp_accept);
-	nsp_setcfunc(N, tobj2, "bind", (NSP_CFUNC)libnsp_net_tcp_bind);
-	nsp_setcfunc(N, tobj2, "close", (NSP_CFUNC)libnsp_net_tcp_close);
-	nsp_setcfunc(N, tobj2, "connect", (NSP_CFUNC)libnsp_net_tcp_connect);
-	nsp_setcfunc(N, tobj2, "gets", (NSP_CFUNC)libnsp_net_tcp_gets);
-	nsp_setcfunc(N, tobj2, "info", (NSP_CFUNC)libnsp_net_tcp_info);
-	nsp_setcfunc(N, tobj2, "read", (NSP_CFUNC)libnsp_net_tcp_read);
-	nsp_setcfunc(N, tobj2, "setsockopt", (NSP_CFUNC)libnsp_net_tcp_setsockopt);
-	nsp_setcfunc(N, tobj2, "socket", (NSP_CFUNC)libnsp_net_tcp_socket);
-	nsp_setcfunc(N, tobj2, "tlsaccept", (NSP_CFUNC)libnsp_net_tcp_tlsaccept);
-	nsp_setcfunc(N, tobj2, "tlsconnect", (NSP_CFUNC)libnsp_net_tcp_tlsconnect);
-	nsp_setcfunc(N, tobj2, "write", (NSP_CFUNC)libnsp_net_tcp_write);
+	nsp_setcfunc(N, tobj2, "accept",     (NSP_CFUNC)libnsp_net_socket_accept);
+	nsp_setcfunc(N, tobj2, "bind",       (NSP_CFUNC)libnsp_net_socket_bind);
+	nsp_setcfunc(N, tobj2, "close",      (NSP_CFUNC)libnsp_net_socket_close);
+	nsp_setcfunc(N, tobj2, "connect",    (NSP_CFUNC)libnsp_net_socket_connect);
+	nsp_setcfunc(N, tobj2, "gets",       (NSP_CFUNC)libnsp_net_socket_gets);
+	nsp_setcfunc(N, tobj2, "gettype",    (NSP_CFUNC)libnsp_net_socket_gettype);
+	nsp_setcfunc(N, tobj2, "info",       (NSP_CFUNC)libnsp_net_socket_info);
+	nsp_setcfunc(N, tobj2, "read",       (NSP_CFUNC)libnsp_net_socket_read);
+	nsp_setcfunc(N, tobj2, "setsockopt", (NSP_CFUNC)libnsp_net_socket_setsockopt);
+	nsp_setcfunc(N, tobj2, "socket",     (NSP_CFUNC)libnsp_net_socket_socket);
+	nsp_setcfunc(N, tobj2, "tlsaccept",  (NSP_CFUNC)libnsp_net_socket_tlsaccept);
+	nsp_setcfunc(N, tobj2, "tlsconnect", (NSP_CFUNC)libnsp_net_socket_tlsconnect);
+	nsp_setcfunc(N, tobj2, "write",      (NSP_CFUNC)libnsp_net_socket_write);
 
 	tobj2 = nsp_settable(N, tobj, "tnef");
 	tobj2->val->attr |= NST_HIDDEN;
 	nsp_setcfunc(N, tobj2, "debug", (NSP_CFUNC)libnsp_net_tnef_debug);
-
 
 	return 0;
 }

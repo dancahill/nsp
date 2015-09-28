@@ -4,5 +4,6 @@
     <LocalDebuggerCommand>$(SolutionDir)bin\NSPEdit.exe</LocalDebuggerCommand>
     <LocalDebuggerCommandArguments>-f N:\work\tests\test.ns</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerDebuggerType>Mixed</LocalDebuggerDebuggerType>
   </PropertyGroup>
 </Project>

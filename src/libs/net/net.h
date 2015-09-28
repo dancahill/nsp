@@ -57,6 +57,11 @@ extern "C" {
 #  endif
 #endif
 
+#ifdef WIN32
+#else
+#include <sys/socket.h>
+#endif
+
 #ifdef HAVE_MBEDTLS
 /* uncomment this to prioritize mbedtls over openssl */
 /* #undef HAVE_OPENSSL */
@@ -161,18 +166,19 @@ NSP_CLASS(libnsp_net_pop3_client);
 /* smtp.c */
 NSP_CLASS(libnsp_net_smtp_client);
 /* socket.c */
-NSP_FUNCTION(libnsp_net_tcp_accept);
-NSP_FUNCTION(libnsp_net_tcp_bind);
-NSP_FUNCTION(libnsp_net_tcp_close);
-NSP_FUNCTION(libnsp_net_tcp_connect);
-NSP_FUNCTION(libnsp_net_tcp_gets);
-NSP_FUNCTION(libnsp_net_tcp_info);
-NSP_FUNCTION(libnsp_net_tcp_read);
-NSP_FUNCTION(libnsp_net_tcp_setsockopt);
-NSP_FUNCTION(libnsp_net_tcp_socket);
-NSP_FUNCTION(libnsp_net_tcp_tlsaccept);
-NSP_FUNCTION(libnsp_net_tcp_tlsconnect);
-NSP_FUNCTION(libnsp_net_tcp_write);
+NSP_FUNCTION(libnsp_net_socket_accept);
+NSP_FUNCTION(libnsp_net_socket_bind);
+NSP_FUNCTION(libnsp_net_socket_close);
+NSP_FUNCTION(libnsp_net_socket_connect);
+NSP_FUNCTION(libnsp_net_socket_gets);
+NSP_FUNCTION(libnsp_net_socket_gettype);
+NSP_FUNCTION(libnsp_net_socket_info);
+NSP_FUNCTION(libnsp_net_socket_read);
+NSP_FUNCTION(libnsp_net_socket_setsockopt);
+NSP_FUNCTION(libnsp_net_socket_socket);
+NSP_FUNCTION(libnsp_net_socket_tlsaccept);
+NSP_FUNCTION(libnsp_net_socket_tlsconnect);
+NSP_FUNCTION(libnsp_net_socket_write);
 /* tnef.c */
 NSP_FUNCTION(libnsp_net_tnef_debug);
 

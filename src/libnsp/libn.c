@@ -148,6 +148,7 @@ NSP_FUNCTION(nl_flush)
 {
 #define __FN__ __FILE__ ":nl_flush()"
 	obj_t *cobj;
+	int rc;
 
 	if (N == NULL || N->outbuflen == 0) return 0;
 	cobj = &N->g;
@@ -165,8 +166,11 @@ NSP_FUNCTION(nl_flush)
 flush:
 	if (N->outbuflen == 0) return 0;
 	N->outbuf[N->outbuflen] = '\0';
-	if (write(STDOUT_FILENO, N->outbuf, N->outbuflen) != N->outbuflen) {
-		n_warn(N, __FN__, "write() wrote less bytes than expected");
+	if ((rc = write(STDOUT_FILENO, N->outbuf, N->outbuflen)) != N->outbuflen) {
+#if defined(WIN32) && defined(_DEBUG)
+		_RPT1(_CRT_WARN, "nl_flush write() wrote less bytes than expected\r\n", "");
+#endif
+		N->outbuflen = 0;
 	}
 	N->outbuflen = 0;
 	/* do NOT touch &N->r */

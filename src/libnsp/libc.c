@@ -309,7 +309,7 @@ void n_warn(nsp_state *N, const char *fname, const char *format, ...)
 	va_end(ap);
 
 #if defined(WIN32) && defined(_DEBUG)
-	_RPT1(_CRT_WARN, "NSP Warning: %s : line %d, [%s]", p, N->line_num, N->outbuf + N->outbuflen);
+	_RPT1(_CRT_WARN, "NSP Warning: %s : line %d, [%s]\r\n", p, N->line_num, N->outbuf + N->outbuflen);
 #endif
 	N->outbuflen += len;
 
