@@ -22,8 +22,133 @@
 #ifdef HAVE_THREADS
 
 /*
-* this is the function that terminates orphans
-*/
+ * this is the function that terminates orphans
+ */
+void mutex_murder(nsp_state *N, obj_t *cobj)
+{
+#define __FN__ __FILE__ ":mutex_murder()"
+	OS_MUTEX *mutex;
+
+	n_warn(N, __FN__, "reaper is claiming another lost soul");
+	if (cobj->val->type != NT_CDATA || cobj->val->d.str == NULL || nc_strcmp(cobj->val->d.str, "mutex") != 0)
+		n_error(N, NE_SYNTAX, __FN__, "expected a mutex");
+	mutex = (OS_MUTEX *)cobj->val->d.str;
+	//do any checks for mutex status here...
+	//DeleteCriticalSection(A)
+	//pthread_mutex_destroy(A)
+	n_free(N, (void *)&cobj->val->d.str, sizeof(OS_MUTEX) + 1);
+	cobj->val->size = 0;
+	return;
+#undef __FN__
+}
+
+NSP_FUNCTION(libnsp_base_thread_mutex_mutex)
+{
+#define __FN__ __FILE__ ":libnsp_base_thread_mutex_mutex()"
+	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
+	obj_t *cobj;
+	OS_MUTEX *mutex;
+
+	if (!nsp_istable(thisobj)) n_error(N, NE_SYNTAX, __FN__, "expected a table for 'this'");
+	if ((mutex = n_alloc(N, sizeof(OS_MUTEX) + 1, 1)) == NULL) {
+		n_warn(N, __FN__, "couldn't alloc %d bytes", sizeof(OS_MUTEX) + 1);
+		return -1;
+	}
+	nc_strncpy(mutex->obj_type, "mutex", sizeof(mutex->obj_type) - 1);
+	mutex->obj_term = (NSP_CFREE)mutex_murder;
+	cobj = nsp_setcdata(N, thisobj, "_mutex", NULL, 0);
+	cobj->val->d.str = (void *)mutex;
+	cobj->val->size = sizeof(OS_MUTEX) + 1;
+#ifdef WIN32
+	InitializeCriticalSection(&mutex->mutex);
+#else
+	pthread_mutex_init(&mutex->mutex, NULL);
+#endif
+	return 0;
+#undef __FN__
+}
+
+NSP_FUNCTION(libnsp_base_thread_mutex_lock)
+{
+#define __FN__ __FILE__ ":libnsp_base_thread_mutex_lock()"
+	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
+	obj_t *cobj;
+	OS_MUTEX *mutex;
+
+	if (!nsp_istable(thisobj) || nsp_isnull(nsp_getobj(N, thisobj, "_mutex"))) {
+		thisobj = nsp_getobj(N, &N->l, "1");
+	}
+	if (!nsp_istable(thisobj))
+		n_error(N, NE_SYNTAX, __FN__, "expected a mutex");
+	cobj = nsp_getobj(N, thisobj, "_mutex");
+	if (cobj->val->type != NT_CDATA || cobj->val->d.str == NULL || nc_strcmp(cobj->val->d.str, "mutex") != 0)
+		n_error(N, NE_SYNTAX, __FN__, "expected a mutex");
+	mutex = (OS_MUTEX *)cobj->val->d.str;
+#ifdef WIN32
+	EnterCriticalSection(&mutex->mutex);
+#else
+	pthread_mutex_lock(&mutex->mutex);
+	//int pthread_mutex_timedlock(pthread_mutex_t *restrict mutex, const struct timespec *restrict abs_timeout);
+#endif
+	return 0;
+#undef __FN__
+}
+
+NSP_FUNCTION(libnsp_base_thread_mutex_unlock)
+{
+#define __FN__ __FILE__ ":libnsp_base_thread_mutex_unlock()"
+	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
+	obj_t *cobj;
+	OS_MUTEX *mutex;
+
+	if (!nsp_istable(thisobj) || nsp_isnull(nsp_getobj(N, thisobj, "_mutex"))) {
+		thisobj = nsp_getobj(N, &N->l, "1");
+	}
+	if (!nsp_istable(thisobj))
+		n_error(N, NE_SYNTAX, __FN__, "expected a mutex");
+	cobj = nsp_getobj(N, thisobj, "_mutex");
+	if (cobj->val->type != NT_CDATA || cobj->val->d.str == NULL || nc_strcmp(cobj->val->d.str, "mutex") != 0)
+		n_error(N, NE_SYNTAX, __FN__, "expected a mutex");
+	mutex = (OS_MUTEX *)cobj->val->d.str;
+#ifdef WIN32
+	LeaveCriticalSection(&mutex->mutex);
+#else
+	pthread_mutex_unlock(&mutex->mutex);
+#endif
+	return 0;
+#undef __FN__
+}
+
+
+NSP_FUNCTION(libnsp_base_thread_mutex_free)
+{
+#define __FN__ __FILE__ ":libnsp_base_thread_mutex_unlock()"
+	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
+	obj_t *cobj;
+	OS_MUTEX *mutex;
+
+	if (!nsp_istable(thisobj) || nsp_isnull(nsp_getobj(N, thisobj, "_mutex"))) {
+		thisobj = nsp_getobj(N, &N->l, "1");
+	}
+	if (!nsp_istable(thisobj))
+		n_error(N, NE_SYNTAX, __FN__, "expected a mutex");
+	cobj = nsp_getobj(N, thisobj, "_mutex");
+	if (cobj->val->type != NT_CDATA || cobj->val->d.str == NULL || nc_strcmp(cobj->val->d.str, "mutex") != 0)
+		n_error(N, NE_SYNTAX, __FN__, "expected a mutex");
+	mutex = (OS_MUTEX *)cobj->val->d.str;
+
+	n_free(N, (void *)&cobj->val->d.str, sizeof(OS_MUTEX) + 1);
+	cobj->val->size = 0;
+	cobj->val->d.num = 0;
+	cobj->val->type = NT_BOOLEAN;
+
+	return 0;
+#undef __FN__
+}
+
+/*
+ * this is the function that terminates orphans
+ */
 void thread_murder(nsp_state *N, obj_t *cobj)
 {
 #define __FN__ __FILE__ ":thread_murder()"
@@ -72,7 +197,6 @@ NSP_FUNCTION(libnsp_base_thread_thread)
 #undef __FN__
 }
 
-
 #ifdef WIN32
 static unsigned _stdcall thread_main(void *x)
 #else
@@ -82,6 +206,13 @@ static void *thread_main(void *x)
 	OS_THREAD *thread = x;
 	obj_t *thisobj;
 	obj_t *cobj;
+
+#ifdef WIN32
+	thread->id = GetCurrentThreadId();
+#else
+	thread->id = pthread_self();
+	pthread_detach(thread->id);
+#endif
 
 	thisobj = nsp_setbool(thread->N, &thread->N->l, "this", 0);
 	nsp_linkval(thread->N, thisobj, &thread->this);
@@ -98,7 +229,7 @@ err:
 	//if (N->err) printf("%s\r\n", N->errbuf);
 	nsp_freestate(thread->N);
 	//if (intstatus || N->allocs != N->frees) printstate(N, fn);
-//	nsp_endstate(thread->N);
+	nsp_endstate(thread->N);
 	thread->N = NULL;
 
 	nsp_state *PN = thread->parentN;

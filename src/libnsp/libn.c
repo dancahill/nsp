@@ -1320,7 +1320,7 @@ NSP_FUNCTION(nl_sleep)
 #if defined(__BORLANDC__)
 	sleep(n);
 #elif defined(WIN32)
-	Sleep(n * 1000.0);
+	Sleep((DWORD)(n * 1000.0));
 #else
 	usleep(n * 1000000.0);
 #endif

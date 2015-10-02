@@ -21,7 +21,7 @@
 
 int nspbase_register_all(nsp_state *N)
 {
-	obj_t *tobj;
+	obj_t *tobj, *tobj2;
 
 	tobj = nsp_settable(N, &N->g, "base64");
 	tobj->val->attr |= NST_HIDDEN;
@@ -68,6 +68,12 @@ int nspbase_register_all(nsp_state *N)
 	nsp_setcfunc(N, tobj, "thread", (NSP_CFUNC)libnsp_base_thread_thread);
 	nsp_setcfunc(N, tobj, "start",  (NSP_CFUNC)libnsp_base_thread_start);
 	nsp_setcfunc(N, tobj, "finish", (NSP_CFUNC)libnsp_base_thread_finish);
+	tobj2 = nsp_settable(N, tobj, "mutex");
+	tobj2->val->attr |= NST_HIDDEN;
+	nsp_setcfunc(N, tobj2, "mutex",  (NSP_CFUNC)libnsp_base_thread_mutex_mutex);
+	nsp_setcfunc(N, tobj2, "lock",   (NSP_CFUNC)libnsp_base_thread_mutex_lock);
+	nsp_setcfunc(N, tobj2, "unlock", (NSP_CFUNC)libnsp_base_thread_mutex_unlock);
+	nsp_setcfunc(N, tobj2, "free",   (NSP_CFUNC)libnsp_base_thread_mutex_free);
 #endif
 
 #ifdef WIN32

@@ -23,12 +23,6 @@
 #include "nsp/config.h"
 #endif
 
-#ifdef WIN32
-#include <process.h>
-#else
-#include <pthread.h>
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -38,6 +32,25 @@ extern "C" {
 #endif
 
 #ifdef HAVE_THREADS
+
+#ifdef WIN32
+#include <process.h>
+#else
+#include <pthread.h>
+#endif
+
+typedef struct {
+	/* standard header info for CDATA object */
+	char      obj_type[16]; /* tell us all about yourself in 15 characters or less */
+	NSP_CFREE obj_term;     /* now tell us how to kill you */
+				/* now begin the stuff that's mutex-specific */
+#ifdef WIN32
+	CRITICAL_SECTION mutex;
+#else
+	pthread_mutex_t mutex;
+#endif
+} OS_MUTEX;
+
 typedef struct {
 	/* standard header info for CDATA object */
 	char      obj_type[16]; /* tell us all about yourself in 15 characters or less */
@@ -53,15 +66,6 @@ typedef struct {
 	nsp_state *N;
 	nsp_state *parentN;
 	obj_t this;
-	//int socket;
-	//short use_tls;
-	//char LocalAddr[16];
-	//int  LocalPort;
-	//char RemoteAddr[16];
-	//int  RemotePort;
-	//unsigned int bytes_in;
-	//unsigned int bytes_out;
-	//short int want_close;
 } OS_THREAD;
 #endif
 
@@ -95,6 +99,10 @@ NSP_FUNCTION(libnsp_base_sort_byname);
 NSP_FUNCTION(libnsp_base_sort_bykey);
 /* thread.c */
 #ifdef HAVE_THREADS
+NSP_FUNCTION(libnsp_base_thread_mutex_mutex);
+NSP_FUNCTION(libnsp_base_thread_mutex_lock);
+NSP_FUNCTION(libnsp_base_thread_mutex_unlock);
+NSP_FUNCTION(libnsp_base_thread_mutex_free);
 NSP_FUNCTION(libnsp_base_thread_finish);
 NSP_FUNCTION(libnsp_base_thread_kill);
 NSP_FUNCTION(libnsp_base_thread_start);
