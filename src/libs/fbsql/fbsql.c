@@ -17,6 +17,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nsp/nsplib.h"
+#include "fbsql.h"
 
 #ifdef HAVE_FBSQL
 
@@ -29,7 +30,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <ctype.h>
-#include <ibase.h>
+#include <firebird/ibase.h>
 
 #ifdef WIN32
 #define snprintf _snprintf
@@ -222,7 +223,7 @@ static int rows_affected(nsp_state *N, FBSQL_CONN *conn)
 	for (ptr = string + 3; *ptr != isc_info_end; ) {
 		x++;
 		count_type = *ptr++;
-		l = isc_vax_integer(ptr, 2);
+		l = (short)isc_vax_integer(ptr, 2);
 		ptr += 2;
 		count = isc_vax_integer(ptr, l);
 		ptr += l;
@@ -322,7 +323,7 @@ static void store_field(nsp_state *N, FBSQL_CONN *conn, XSQLVAR ISC_FAR *var, ob
 			sprintf(buf, "%*" ISC_INT64_FORMAT "d%0*d", field_width, (ISC_INT64)value, dscale, 0);
 		}
 		else {
-//			sprintf(buf, "%" ISC_INT64_FORMAT "d", (ISC_INT64)value);
+			//sprintf(buf, "%" ISC_INT64_FORMAT "d", (ISC_INT64)value);
 			nsp_setnum(N, tobj, var->aliasname, (ISC_INT64)value);
 			return;
 		}
@@ -368,7 +369,7 @@ static void store_field(nsp_state *N, FBSQL_CONN *conn, XSQLVAR ISC_FAR *var, ob
 		return;
 	case SQL_BLOB: {
 		ISC_QUAD        blob_id = *(ISC_QUAD ISC_FAR *)var->sqldata;
-		isc_blob_handle blob_handle = NULL;
+		isc_blob_handle blob_handle = 0;
 		short           blob_seg_len;
 		char            blob_segment[256];
 		long            blob_stat;

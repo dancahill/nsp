@@ -17,6 +17,20 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#if defined(WIN32)
+#include "nsp/config-win.h"
+#else
+#include "nsp/config.h"
+#endif
+
+#if defined(CONFIG_HAVE_FBSQL) && !defined(HAVE_FBSQL)
+#define HAVE_FBSQL
+#endif
+
 #ifdef HAVE_FBSQL
+#if defined(WIN32)
+#pragma comment(lib, "fbclient_ms.lib")
+#pragma comment(lib, "ib_util_ms.lib")
+#endif
 int nspfbsql_register_all(nsp_state *N);
 #endif /* HAVE_FBSQL */

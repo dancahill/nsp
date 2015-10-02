@@ -192,7 +192,7 @@ function dotests() {
 			config_ne2+="\thave_dns=true";
 			config.have_dns=true;
 		}
-		if (testsub("FBSQL", "-lfbclient", "#include <ibase.h>\nint main() { return 0; }\n")) {
+		if (testsub("FBSQL", "-lfbclient", "#include <firebird/ibase.h>\nint main() { return 0; }\n")) {
 			config_mak+="CFLAGS  += -DHAVE_FBSQL\n";
 			if (build_fat) config_mak+="LDFLAGS += -lnsp_fbsql -lfbclient\n\n";
 			config_nsp+="CFLAGS  += \" -DHAVE_FBSQL\";\n";
@@ -335,7 +335,7 @@ function dotests() {
 			config_ne2+="\thave_dns=true";
 			config.have_dns=true;
 		}
-		if (testsub("FBSQL", "", "#include <ibase.h>\nint main() { return 0; }\n")) {
+		if (testsub("FBSQL", "", "#include <firebird/ibase.h>\nint main() { return 0; }\n")) {
 			config_mak+="CFLAGS  = $(CFLAGS) -DHAVE_FBSQL\nLDFLAGS = $(LDFLAGS) libnsp_fbsql.lib fbclient_ms.lib ib_util_ms.lib\n\n";
 			config_nsp+="CFLAGS  += \" -DHAVE_FBSQL\";\nLDFLAGS += \" libnsp_fbsql.lib fbclient_ms.lib ib_util_ms.lib\";\n\n";
 			if (config_inc++) config_ne2+=",\n";
