@@ -42,6 +42,9 @@
     <ClCompile Include="regex.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="thread.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base.h">

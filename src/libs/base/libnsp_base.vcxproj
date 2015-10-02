@@ -76,6 +76,7 @@
     <ClCompile Include="regex.c" />
     <ClCompile Include="rot13.c" />
     <ClCompile Include="sort.c" />
+    <ClCompile Include="thread.c" />
     <ClCompile Include="winapi.c" />
   </ItemGroup>
   <ItemGroup>

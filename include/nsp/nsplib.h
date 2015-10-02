@@ -64,8 +64,8 @@ void     n_decompile(nsp_state *N, uchar *start, uchar *end, char *errbuf, unsig
 /* exec.c */
 obj_t   *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject);
 obj_t   *n_execbasemethod(nsp_state *N, char *name, obj_t *pobj);
-void     n_execconstrutor(nsp_state *N, obj_t *cobj, obj_t *pobj);
-void     n_execdestrutor(nsp_state *N, obj_t *cobj, char *cname);
+void     n_execconstructor(nsp_state *N, obj_t *cobj, obj_t *pobj);
+void     n_execdestructor(nsp_state *N, obj_t *cobj, char *cname);
 /* libc.c */
 #define  nc_isdigit(c)  (c>='0'&&c<='9')
 #define  nc_isalpha(c)  ((c>='A'&&c<='Z')||(c>='a'&&c<='z'))

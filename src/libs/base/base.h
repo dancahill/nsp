@@ -21,11 +21,37 @@
 extern "C" {
 #endif
 
-#ifdef HAVE_PIPE
-NSP_FUNCTION(libnsp_base_pipe_open);
-NSP_FUNCTION(libnsp_base_pipe_read);
-NSP_FUNCTION(libnsp_base_pipe_write);
-NSP_FUNCTION(libnsp_base_pipe_close);
+#ifdef WIN32
+#define HAVE_THREADS
+#include <process.h>
+#endif
+
+#ifdef HAVE_THREADS
+typedef struct {
+	/* standard header info for CDATA object */
+	char      obj_type[16]; /* tell us all about yourself in 15 characters or less */
+	NSP_CFREE obj_term;     /* now tell us how to kill you */
+				/* now begin the stuff that's thread-specific */
+#ifdef WIN32
+	HANDLE handle;
+	unsigned int id;
+#else
+	pthread_t handle;
+	pthread_t id;
+#endif
+	nsp_state *N;
+	nsp_state *parentN;
+	obj_t this;
+	//int socket;
+	//short use_tls;
+	//char LocalAddr[16];
+	//int  LocalPort;
+	//char RemoteAddr[16];
+	//int  RemotePort;
+	//unsigned int bytes_in;
+	//unsigned int bytes_out;
+	//short int want_close;
+} OS_THREAD;
 #endif
 
 /* base64.c */
@@ -41,6 +67,13 @@ NSP_FUNCTION(libnsp_base_file_rename);
 NSP_FUNCTION(libnsp_base_file_stat);
 NSP_FUNCTION(libnsp_base_file_unlink);
 NSP_FUNCTION(libnsp_base_file_writeall);
+/* pipe.c */
+#ifdef HAVE_PIPE
+NSP_FUNCTION(libnsp_base_pipe_open);
+NSP_FUNCTION(libnsp_base_pipe_read);
+NSP_FUNCTION(libnsp_base_pipe_write);
+NSP_FUNCTION(libnsp_base_pipe_close);
+#endif
 /* regex.c */
 NSP_FUNCTION(libnsp_regex_match);
 NSP_FUNCTION(libnsp_regex_replace);
@@ -49,6 +82,11 @@ NSP_FUNCTION(libnsp_base_rot13);
 /* sort.c */
 NSP_FUNCTION(libnsp_base_sort_byname);
 NSP_FUNCTION(libnsp_base_sort_bykey);
+/* thread.c */
+NSP_FUNCTION(libnsp_base_thread_finish);
+NSP_FUNCTION(libnsp_base_thread_kill);
+NSP_FUNCTION(libnsp_base_thread_start);
+NSP_FUNCTION(libnsp_base_thread_thread);
 /* winapi.c */
 #ifdef WIN32
 NSP_FUNCTION(libnsp_winapi_beep);

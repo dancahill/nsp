@@ -198,7 +198,8 @@ namespace NSPEdit
 
 		private void WriteBuffer(string outstr)
 		{
-			this.richTextBox2.Text += outstr;
+			//this.richTextBox2.Text += outstr;
+			Invoke(new Action(() => this.richTextBox2.AppendText(outstr)));
 			Application.DoEvents();
 		}
 

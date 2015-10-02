@@ -501,7 +501,7 @@ static void n_evalobj(nsp_state *N, obj_t *cobj, uchar isnewobject)
 				break;
 			}
 			else if (nsp_istable(nobj) && isnewobject) {
-				n_execconstrutor(N, cobj, nobj);
+				n_execconstructor(N, cobj, nobj);
 				isnewobject = 0;
 				return;
 			}
@@ -535,7 +535,7 @@ static void n_evalobj(nsp_state *N, obj_t *cobj, uchar isnewobject)
 		case NT_STRING: if (nobj != cobj) n_copyval(N, cobj, nobj); break;
 		case NT_TABLE: {
 			if (isnewobject) {
-				n_execconstrutor(N, cobj, nobj);
+				n_execconstructor(N, cobj, nobj);
 			}
 			else {
 				nsp_linkval(N, cobj, nobj); break;

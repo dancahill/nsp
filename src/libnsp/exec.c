@@ -117,16 +117,6 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 	if (ftype == NT_CFUNC && (NSP_CFUNC)(fobj->val->d.cfunc) == (NSP_CFUNC)nl_include) {
 		N->func = noname;
 		noscopechange = 1;
-
-
-
-
-
-
-
-
-
-
 	}
 	listobj.val = n_newval(N, NT_TABLE);
 	/* disable autosort or 'this' will be hard to find... */
@@ -180,6 +170,7 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 		uchar *p;
 		int n = 0;
 
+		e = 0;
 		if (!nsp_isnull(cobj1)) {
 			p = N->readptr;
 
@@ -308,7 +299,7 @@ obj_t *n_execbasemethod(nsp_state *N, char *name, obj_t *pobj)
 #undef __FN__
 }
 
-void n_execconstrutor(nsp_state *N, obj_t *cobj, obj_t *pobj)
+void n_execconstructor(nsp_state *N, obj_t *cobj, obj_t *pobj)
 {
 #define __FN__ __FILE__ ":n_execconstrutor()"
 	obj_t *xobj;
@@ -333,7 +324,7 @@ void n_execconstrutor(nsp_state *N, obj_t *cobj, obj_t *pobj)
 #undef __FN__
 }
 
-void n_execdestrutor(nsp_state *N, obj_t *cobj, char *cname)
+void n_execdestructor(nsp_state *N, obj_t *cobj, char *cname)
 {
 #define __FN__ __FILE__ ":n_execdestrutor()"
 	obj_t *xobj;
@@ -482,9 +473,7 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 			case OP_KDELETE:
 				n_expect(N, __FN__, OP_LABEL);
 				cobj = nsp_getobj(N, NULL, n_getlabel(N, NULL));
-
-				n_execdestrutor(N, cobj, cobj->name);
-
+				n_execdestructor(N, cobj, cobj->name);
 				nsp_linkval(N, cobj, NULL);
 				goto endstmt;
 			default:

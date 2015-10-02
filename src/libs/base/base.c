@@ -62,6 +62,14 @@ int nspbase_register_all(nsp_state *N)
 	nsp_setcfunc(N, tobj, "byname", (NSP_CFUNC)libnsp_base_sort_byname);
 	nsp_setcfunc(N, tobj, "bykey", (NSP_CFUNC)libnsp_base_sort_bykey);
 
+#ifdef HAVE_THREADS
+	tobj = nsp_settable(N, &N->g, "thread");
+	tobj->val->attr |= NST_HIDDEN;
+	nsp_setcfunc(N, tobj, "thread", (NSP_CFUNC)libnsp_base_thread_thread);
+	nsp_setcfunc(N, tobj, "start",  (NSP_CFUNC)libnsp_base_thread_start);
+	nsp_setcfunc(N, tobj, "finish", (NSP_CFUNC)libnsp_base_thread_finish);
+#endif
+
 #ifdef WIN32
 	tobj = nsp_settable(N, &N->g, "win");
 	tobj->val->attr |= NST_HIDDEN;
