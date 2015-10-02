@@ -17,13 +17,24 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#if defined(WIN32)
+#include "nsp/config-win.h"
+#else
+#include "nsp/config.h"
+#endif
+
+#ifdef WIN32
+#include <process.h>
+#else
+#include <pthread.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#ifdef WIN32
+#if defined(CONFIG_HAVE_THREADS) && !defined(HAVE_THREADS)
 #define HAVE_THREADS
-#include <process.h>
 #endif
 
 #ifdef HAVE_THREADS
@@ -83,10 +94,12 @@ NSP_FUNCTION(libnsp_base_rot13);
 NSP_FUNCTION(libnsp_base_sort_byname);
 NSP_FUNCTION(libnsp_base_sort_bykey);
 /* thread.c */
+#ifdef HAVE_THREADS
 NSP_FUNCTION(libnsp_base_thread_finish);
 NSP_FUNCTION(libnsp_base_thread_kill);
 NSP_FUNCTION(libnsp_base_thread_start);
 NSP_FUNCTION(libnsp_base_thread_thread);
+#endif
 /* winapi.c */
 #ifdef WIN32
 NSP_FUNCTION(libnsp_winapi_beep);

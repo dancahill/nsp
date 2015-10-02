@@ -30,7 +30,7 @@ void thread_murder(nsp_state *N, obj_t *cobj)
 	OS_THREAD *thread;
 
 	n_warn(N, __FN__, "reaper is claiming another lost soul");
-	if (cobj->val->type != NT_CDATA || cobj->val->d.str == NULL || strcmp(cobj->val->d.str, "thread") != 0)
+	if (cobj->val->type != NT_CDATA || cobj->val->d.str == NULL || nc_strcmp(cobj->val->d.str, "thread") != 0)
 		n_error(N, NE_SYNTAX, __FN__, "expected a thread");
 	thread = (OS_THREAD *)cobj->val->d.str;
 	//do any checks for thread status here...
@@ -129,8 +129,13 @@ NSP_FUNCTION(libnsp_base_thread_start)
 
 	nsp_linkval(N, &thread->this, thisobj);
 
+
+#ifdef WIN32
 	unsigned long int id;
 	thread->handle = (HANDLE)_beginthreadex(NULL, 0, thread_main, thread, 0, &id);
+#else
+	pthread_create(&thread->handle, NULL, thread_main, thread);
+#endif
 
 	return 0;
 #undef __FN__

@@ -114,7 +114,7 @@ function build_lib(CC, TNAME, OBJECTS, OTYPE, INTDIR) {
 			LIBS="/libpath:"+LIBDIR+" gdi32.lib shell32.lib user32.lib winmm.lib libnsp.lib";
 //			LIBS=" /libpath:"+LIBDIR+" gdi32.lib shell32.lib user32.lib winmm.lib libnsp.lib";
 			if (TNAME=='libnsp_fbsql') {
-				if (config.have_fbsql==true) LIBS+=" fbclient_ms.lib";
+				if (config.have_fbsql==true) LIBS+=" fbclient_ms.lib ib_util_ms.lib";
 			} else if (TNAME=='libnsp_net') {
 				if (config.have_dns==true) LIBS+=" dnsapi.lib";
 				if (config.have_mbedtls==true) LIBS+=" mbedtls.lib";
@@ -146,7 +146,13 @@ function build_lib(CC, TNAME, OBJECTS, OTYPE, INTDIR) {
 			}
 		}
 		if (OTYPE=='shared') {
-			if (TNAME=='libnsp_crypto') {
+			if (TNAME=='libnsp_base') {
+				if (config.have_pthread) {
+					liblist+=" -pthread";
+				} else if (config.have_lpthread) {
+					liblist+=" -lpthread";
+				}
+			} else if (TNAME=='libnsp_crypto') {
 				if (config.have_openssl==true) liblist+=" -lcrypto -lssl";
 			} else if (TNAME=='libnsp_fbsql') {
 				if (config.have_fbsql==true) liblist+=" -lfbclient";

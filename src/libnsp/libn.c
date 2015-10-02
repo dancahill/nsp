@@ -1313,16 +1313,16 @@ NSP_FUNCTION(nl_sleep)
 {
 #define __FN__ __FILE__ ":nl_sleep()"
 	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	int n = 1;
+	double n = 1;
 
 	settrace();
-	if (cobj1->val->type == NT_NUMBER) n = (int)cobj1->val->d.num;
+	if (cobj1->val->type == NT_NUMBER) n = cobj1->val->d.num;
 #if defined(__BORLANDC__)
 	sleep(n);
 #elif defined(WIN32)
-	Sleep(n * 1000);
+	Sleep(n * 1000.0);
 #else
-	sleep(n);
+	usleep(n * 1000000.0);
 #endif
 	nsp_setnum(N, &N->r, "", 0);
 	return 0;

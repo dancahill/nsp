@@ -153,6 +153,29 @@ function dotests() {
 			config_mak+="CFLAGS  += -pipe\n\n";
 			config_nsp+="CFLAGS  += \" -pipe\";\n\n";
 		}
+
+
+		if (testsub("-pthread", "-pthread", "#include <pthread.h>\r\nint main() { return 0; }\n")) {
+		//	config_mak+="CFLAGS  += -pthread\n\n";
+		//	config_nsp+="CFLAGS  += \" -pthread\";\n\n";
+			if (config_inc++) config_ne2+=",\n";
+			config_ne2+="\thave_pthread=true";
+			if (config_inc++) config_ne2+=",\n";
+			config_ne2+="\thave_threads=true";
+			config.have_pthread=true;
+			config.have_threads=true;
+		} else if (testsub("-lpthread", "-lpthread", "#include <pthread.h>\r\nint main() { return 0; }\n")) {
+		//	config_mak+="CFLAGS  += -lpthread\n\n";
+		//	config_nsp+="CFLAGS  += \" -lpthread\";\n\n";
+			if (config_inc++) config_ne2+=",\n";
+			config_ne2+="\thave_lpthread=true";
+			if (config_inc++) config_ne2+=",\n";
+			config_ne2+="\thave_threads=true";
+			config.have_lpthread=true;
+			config.have_threads=true;
+		}
+
+
 		if (testsub("-fPIC", "-fPIC", "int main() { return 0; }\n")) {
 			config_mak+="DLFLAGS = -fPIC -DPIC\n\n";
 			config_nsp+="global DLFLAGS = \"-fPIC -DPIC \";\n\n";
@@ -397,6 +420,10 @@ function dotests() {
 			config_ne2+="\thave_sqlite=true";
 			config.have_sqlite=true;
 		}
+
+		if (config_inc++) config_ne2+=",\n";
+		config_ne2+="\thave_threads=true";
+		config.have_threads=true;
 	}
 	config_ne2+=" \n};\n";
 
@@ -417,6 +444,7 @@ function dotests() {
 	config_h+=sprintf("%s#define CONFIG_HAVE_REGEX 1\r\n",   config.have_regex   ?"":"// ");
 	config_h+=sprintf("%s#define CONFIG_HAVE_SQLITE 1\r\n",  config.have_sqlite  ?"":"// ");
 	config_h+=sprintf("%s#define CONFIG_HAVE_SSH2 1\r\n",    config.have_ssh2    ?"":"// ");
+	config_h+=sprintf("%s#define CONFIG_HAVE_THREADS 1\r\n", config.have_threads ?"":"// ");
 	config_h+=sprintf("%s#define CONFIG_HAVE_ZLIB 1\r\n",    config.have_zlib    ?"":"// ");
 	config_h+=sprintf("%s#define CONFIG_MISSING_SOCKLEN 1\r\n", config.missing_socklen ?"":"// ");
 
