@@ -1128,6 +1128,19 @@ NSP_FUNCTION(nl_sqltime)
 	char timebuf[32];
 
 	settrace();
+	if (nsp_istable(cobj1)) {
+		int yy = (int)nsp_getnum(N, cobj1, "tm_year");
+		int mm = (int)nsp_getnum(N, cobj1, "tm_mon");
+		int dd = (int)nsp_getnum(N, cobj1, "tm_mday");
+		int h = (int)nsp_getnum(N, cobj1, "tm_hour");
+		int m = (int)nsp_getnum(N, cobj1, "tm_min");
+		int s = (int)nsp_getnum(N, cobj1, "tm_sec");
+
+		if (yy) mm++;
+		snprintf(timebuf, sizeof(timebuf), "%04d-%02d-%02d %02d:%02d:%02d", yy, mm, dd, h, m, s);
+		nsp_setstr(N, &N->r, "", timebuf, -1);
+		return 0;
+	}
 	if (cobj1->val->type == NT_NUMBER) {
 		ttime.tv_sec = (long)cobj1->val->d.num;
 	}
@@ -1141,7 +1154,7 @@ NSP_FUNCTION(nl_sqltime)
 	else if (nc_strcmp(fname, "sqltime") == 0) {
 		strftime(timebuf, sizeof(timebuf) - 1, "%H:%M:%S", localtime(&t));
 	}
-	else if (nc_strcmp(fname, "sqldatetime") == 0) {
+	else {
 		//strftime(timebuf, sizeof(timebuf) - 1, "%Y-%m-%d %H:%M:%S", localtime((time_t *)&ttime.tv_sec)); <- this crashes in VS now because tv_sec is expected to be LONG
 		strftime(timebuf, sizeof(timebuf) - 1, "%Y-%m-%d %H:%M:%S", localtime(&t));
 	}
