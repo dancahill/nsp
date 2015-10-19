@@ -690,6 +690,10 @@ nsp_state *nsp_newstate()
 			{ "zlink", (NSP_CFUNC)nl_zlink },
 			{ NULL, NULL }
 	};
+	FUNCTION list_debug[] = {
+		{ "break", (NSP_CFUNC)nl_break },
+		{ NULL, NULL }
+	};
 	FUNCTION list_dl[] = {
 			{ "load", (NSP_CFUNC)nl_dl_load },
 			//{ "loadlib", (NSP_CFUNC)nl_dl_load },// deprecated
@@ -796,6 +800,12 @@ nsp_state *nsp_newstate()
 
 	for (i = 0; list[i].fn_name != NULL; i++) {
 		nsp_setcfunc(new_N, &new_N->g, list[i].fn_name, list[i].fn_ptr);
+	}
+
+	cobj = nsp_settable(new_N, &new_N->g, "debug");
+	cobj->val->attr |= NST_HIDDEN;
+	for (i = 0; list_debug[i].fn_name != NULL; i++) {
+		nsp_setcfunc(new_N, cobj, list_debug[i].fn_name, list_debug[i].fn_ptr);
 	}
 
 	cobj = nsp_settable(new_N, &new_N->g, "dl");

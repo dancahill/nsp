@@ -122,8 +122,8 @@ typedef struct {
 	unsigned int bytes_out;
 	short int want_close;
 	/* TCP INPUT BUFFER */
-	short int recvbufsize;
-	short int recvbufoffset;
+	int recvbufsize;
+	int recvbufoffset;
 	char      recvbuf[MAX_TCP_READ_SIZE];
 } TCP_SOCKET;
 

@@ -233,6 +233,20 @@ NSP_FUNCTION(nl_write)
 #undef __FN__
 }
 
+/* debug */
+NSP_FUNCTION(nl_break)
+{
+#define __FN__ __FILE__ ":nl_break()"
+#if defined(WIN32) && defined(_DEBUG)
+	__debugbreak();
+	//DebugBreak();
+#else
+	__builtin_trap();
+#endif
+	return 0;
+#undef __FN__
+}
+
 /*
  * dl
  */

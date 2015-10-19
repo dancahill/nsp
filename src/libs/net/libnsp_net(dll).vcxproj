@@ -64,6 +64,10 @@
       <OutputFile>$(OutDir)libnsp_net.dll</OutputFile>
       <ImageHasSafeExceptionHandlers />
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -77,6 +81,10 @@
     <Link>
       <OutputFile>$(OutDir)libnsp_net.dll</OutputFile>
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="dns.c" />

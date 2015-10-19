@@ -104,6 +104,7 @@ num_t    n_aton(nsp_state *N, const char *str);
 /* char    *n_itoa         (nsp_state *N, char *str, int num, short base); */
 char    *n_ntoa(nsp_state *N, char *str, num_t num, short base, unsigned short dec);
 /* libn.c */
+NSP_FUNCTION(nl_break);
 NSP_FUNCTION(nl_flush);
 NSP_FUNCTION(nl_print);
 NSP_FUNCTION(nl_write);
