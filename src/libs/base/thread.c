@@ -228,7 +228,7 @@ static void *thread_main(void *x)
 		n_error(thread->N, NE_SYNTAX, "", "expected a thread");
 
 	p = thread->N->readptr;
-	thread->N->readptr = "";
+	thread->N->readptr = (uchar *)"";
 	n_execfunction(thread->N, fobj, thisobj, 0);
 	thread->N->readptr = p;
 

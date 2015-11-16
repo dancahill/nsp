@@ -173,24 +173,34 @@ NSP_CLASSMETHOD(libnsp_net_smtp_send)
 		return 0;
 	}
 
-	rc = tcp_fgets(N, &sock, tmpbuf, sizeof(tmpbuf) - 1);
+	do {
+		rc = tcp_fgets(N, &sock, tmpbuf, sizeof(tmpbuf) - 1);
+	} while (rc > 0 && tmpbuf[3] != ' ' && tmpbuf[3] != '\0');
 	if (nc_strncmp(tmpbuf, "220", 3) != 0) goto err;
 
 	tcp_fprintf(N, &sock, "HELO <%s>\r\n", sock.LocalAddr);
-	rc = tcp_fgets(N, &sock, tmpbuf, sizeof(tmpbuf) - 1);
-	if (nc_strncmp(tmpbuf, "250", 3) != 0) goto err;
+	do {
+		rc = tcp_fgets(N, &sock, tmpbuf, sizeof(tmpbuf) - 1);
+	} while (rc > 0 && tmpbuf[3] != ' ' && tmpbuf[3] != '\0');
+	if (rc < 0 || nc_strncmp(tmpbuf, "250", 3) != 0) goto err;
 
 	tcp_fprintf(N, &sock, "MAIL FROM: <%s>\r\n", from);
-	rc = tcp_fgets(N, &sock, tmpbuf, sizeof(tmpbuf) - 1);
-	if (nc_strncmp(tmpbuf, "250", 3) != 0) goto err;
+	do {
+		rc = tcp_fgets(N, &sock, tmpbuf, sizeof(tmpbuf) - 1);
+	} while (rc > 0 && tmpbuf[3] != ' ' && tmpbuf[3] != '\0');
+	if (rc < 0 || nc_strncmp(tmpbuf, "250", 3) != 0) goto err;
 
 	tcp_fprintf(N, &sock, "RCPT TO: <%s>\r\n", rcpt);
-	rc = tcp_fgets(N, &sock, tmpbuf, sizeof(tmpbuf) - 1);
-	if (nc_strncmp(tmpbuf, "250", 3) != 0) goto err;
+	do {
+		rc = tcp_fgets(N, &sock, tmpbuf, sizeof(tmpbuf) - 1);
+	} while (rc > 0 && tmpbuf[3] != ' ' && tmpbuf[3] != '\0');
+	if (rc < 0 || nc_strncmp(tmpbuf, "250", 3) != 0) goto err;
 
 	tcp_fprintf(N, &sock, "DATA\r\n");
-	rc = tcp_fgets(N, &sock, tmpbuf, sizeof(tmpbuf) - 1);
-	if (nc_strncmp(tmpbuf, "354", 3) != 0) goto err;
+	do {
+		rc = tcp_fgets(N, &sock, tmpbuf, sizeof(tmpbuf) - 1);
+	} while (rc > 0 && tmpbuf[3] != ' ' && tmpbuf[3] != '\0');
+	if (rc < 0 || nc_strncmp(tmpbuf, "354", 3) != 0) goto err;
 	tcp_fprintf(N, &sock, "From: %s\r\n", from);
 	tcp_fprintf(N, &sock, "To: %s\r\n", rcpt);
 
