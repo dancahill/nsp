@@ -135,7 +135,8 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 	else if (pobj) {
 		cobj = append_var(N, &listobj, "this");
 		nsp_linkval(N, cobj, pobj);
-		if (cobj->val) cobj->val->attr |= NST_HIDDEN;
+		// hiding this here causes serialize to not print regular table items
+		//if (cobj->val) cobj->val->attr |= NST_HIDDEN;
 	}
 	/* set fn name */
 	cobj = append_var(N, &listobj, "0");
