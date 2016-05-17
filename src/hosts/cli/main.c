@@ -209,6 +209,9 @@ static void preppath(nsp_state *N, char *name)
 	}
 	nsp_setstr(N, &N->g, "_filename", p, -1);
 	nsp_setstr(N, &N->g, "_filepath", buf, -1);
+#if defined(WIN32) && defined(_DEBUG)
+	nsp_setbool(N, &N->g, "_debug", 1);
+#endif
 	return;
 }
 

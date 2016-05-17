@@ -153,9 +153,10 @@ static char *mime_read_head(nsp_state *N, obj_t *tobj, char *inptr)
 			if (*inptr == '\n') inptr++;
 		}
 		else if (*inptr == ' ' || *inptr == '\t') {
+			while (*inptr == ' ' || *inptr == '\t') inptr++;
 			p = inptr;
 			while (*inptr&&*inptr != '\r'&&*inptr != '\n') inptr++;
-			if (cobj) nsp_strcat(N, cobj, "\r\n", 2);
+			if (cobj) nsp_strcat(N, cobj, " ", 1);
 			if (cobj) nsp_strcat(N, cobj, p, inptr - p);
 			if (*inptr == '\r') inptr++;
 			if (*inptr == '\n') inptr++;
@@ -184,7 +185,7 @@ static char *mime_read_head(nsp_state *N, obj_t *tobj, char *inptr)
 			}
 			else {
 				p2 = p1;
-				while (*p2&&*p2 != ';'&&!isspace(*p2)) p2++;
+				while (*p2&&*p2 != ';' && !isspace(*p2)) p2++;
 			}
 			ctobj = nsp_setstr(N, tobj, "boundary", p1, p2 - p1);
 		}
