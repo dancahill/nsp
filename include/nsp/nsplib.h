@@ -111,6 +111,7 @@ NSP_FUNCTION(nl_write);
 NSP_FUNCTION(nl_dl_load);
 NSP_FUNCTION(nl_filemkdir);
 NSP_FUNCTION(nl_filechdir);
+NSP_FUNCTION(nl_fileexists);
 NSP_FUNCTION(nl_filereadall);
 NSP_FUNCTION(nl_filerename);
 NSP_FUNCTION(nl_filestat);

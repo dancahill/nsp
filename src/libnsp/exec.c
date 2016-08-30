@@ -703,6 +703,7 @@ nsp_state *nsp_newstate()
 	FUNCTION list_file[] = {
 			{ "append", (NSP_CFUNC)nl_filewriteall },
 			{ "chdir", (NSP_CFUNC)nl_filechdir },
+			{ "exists", (NSP_CFUNC)nl_fileexists },
 			{ "mkdir", (NSP_CFUNC)nl_filemkdir },
 			{ "readall", (NSP_CFUNC)nl_filereadall },
 			{ "rename", (NSP_CFUNC)nl_filerename },

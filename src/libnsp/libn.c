@@ -388,6 +388,31 @@ NSP_FUNCTION(nl_filechdir)
 #undef __FN__
 }
 
+NSP_FUNCTION(nl_fileexists)
+{
+#define __FN__ __FILE__ ":nl_fileexists()"
+	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	struct stat sb;
+	int rc;
+	char *file;
+
+	settrace();
+	n_expect_argtype(N, NT_STRING, 1, cobj1, 0);
+	file = cobj1->val->d.str;
+#if defined(WIN32) || defined(__TURBOC__)
+	rc = stat(file, &sb);
+#else
+	rc = lstat(file, &sb);
+#endif
+	if (rc != 0) {
+		nsp_setbool(N, &N->r, "", 0);
+		return 0;
+	}
+	nsp_setbool(N, &N->r, "", 1);
+	return 0;
+#undef __FN__
+}
+
 NSP_FUNCTION(nl_filemkdir)
 {
 #define __FN__ __FILE__ ":nl_filemkdir()"
