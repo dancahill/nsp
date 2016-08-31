@@ -1,0 +1,61 @@
+// output nsp namespace to an xml file
+
+namespace nsprint {
+	name="NSPNameSpace";
+	outputfilename="NSPNameSpace.xml";
+	output="";
+
+	function out(s) {
+		nsprint.output+=s;
+	};
+
+	function printdepth(table, depth) {
+		padding="\t"*depth;
+		foreach (n,v in table) {
+			if (depth==1) {
+				if (n=="decomped_script" || n=="nsprint") continue;
+			}
+			t=v.gettype();
+			d="";
+			if (t=="table") {
+				nsprint.out(sprintf("%s<%s type=\"%s\" description=\"%s\">\r\n", padding, n, t, d));
+				if (n=="_GLOBALS" && depth==1) {
+					//printf("skipping globals\r\n");
+				} else {
+					nsprint.printdepth(v, depth+1);
+				}
+				nsprint.out(sprintf("%s</%s>\r\n", padding, n));
+			} else {
+				if (n.istr("(X86)")!=null || n=="0") {
+					continue;
+				}
+				nsprint.out(sprintf("%s<%s type=\"%s\" description=\"%s\" />\r\n", padding, n, t, d));
+			}
+		}
+	}
+}
+
+if (_ostype_=="Windows/msvc" && _debug) dl.path = { @"N:\work\nsp\lib\shared" };
+dl.load("base");
+dl.load("net");
+
+foreach (d in dl.path) {
+	printf("lib dir=%s\r\n", d);
+	foreach (n,v in base.dirlist(d)) {
+		if (n.istr(".dll")!=null) {
+			printf(" lib=%s\r\n", n);
+		}
+	}
+}
+
+nsprint.out("<?xml version=\"1.0\" encoding=\"utf-8\" ?>\r\n<"+nsprint.name+">\r\n");
+nsprint.printdepth(_GLOBALS, 1);
+nsprint.out("</"+nsprint.name+">\r\n");
+//printf(output);
+if (file.exists(nsprint.outputfilename)) {
+	printf("file %s already exists\r\n", nsprint.outputfilename);
+	//printf(nsprint.output);
+} else {
+	file.writeall(nsprint.outputfilename, nsprint.output);
+	printf("file %s saved\r\n", nsprint.outputfilename);
+}

@@ -3,6 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Xml;
 
 namespace NSPEdit
 {
@@ -23,6 +24,48 @@ namespace NSPEdit
 			this.FormClosing += NSPEditForm_FormClosing;
 		}
 
+		private void fillautocomplete(string parentnamespace)
+		{
+			Action<string> addtolist = (x) =>
+			{
+				if (!autoCompleteList.Contains(x)) autoCompleteList.Add(x);
+			};
+			Func<string, string, bool> parseresult = (filename, ns) =>
+			{
+				if (!File.Exists(filename)) return false;
+				XmlDocument doc = new XmlDocument();
+				doc.Load(filename);
+				XmlNode NSPNameSpace = doc.DocumentElement.SelectSingleNode("/NSPNameSpace");
+				XmlNode x = (ns == "") ? NSPNameSpace : NSPNameSpace.SelectSingleNode(ns);
+				if (x != null)
+				{
+					foreach (XmlNode xnode in x.ChildNodes)
+					{
+						string type = xnode.Attributes["type"].Value;
+						string desc = xnode.Attributes["description"].Value;
+						//Program.MainForm.AppendOutput(string.Format("name='{0}', type='{1}', desc='{2}'\r\n", xnode.Name, type, desc));
+						addtolist(xnode.Name);
+					}
+					if (autoCompleteList.Count != 0) return true;
+				}
+				return false;
+			};
+			autoCompleteList = new List<string>();
+			if (parentnamespace != "")
+			{
+				string childnamespace = parentnamespace.Replace(".", "/");
+				if (childnamespace.StartsWith("_GLOBALS")) childnamespace = childnamespace.Substring(8, childnamespace.Length - 8);
+				if (childnamespace.StartsWith("/")) childnamespace = childnamespace.Substring(1, childnamespace.Length - 1);
+				if (childnamespace.EndsWith("/")) childnamespace = childnamespace.Substring(0, childnamespace.Length - 1);
+				parseresult(Path.GetDirectoryName(Application.ExecutablePath) + @"\NSPNameSpace.xml", childnamespace);
+				parseresult(Directory.GetCurrentDirectory() + @"\NSPNameSpace.xml", childnamespace);
+			}
+			addtolist("gettype");
+			addtolist("length");
+			addtolist("tostring");
+			autoCompleteList.Sort();
+		}
+
 		private void NSPEditForm_Load(object sender, EventArgs e)
 		{
 			this.DesktopBounds = new Rectangle(Properties.Settings.Default.WindowLocation, Properties.Settings.Default.WindowSize);
@@ -34,17 +77,10 @@ namespace NSPEdit
 			aTimer.Interval = 200;
 			aTimer.Enabled = false;
 
-			autoCompleteList = new List<string>();
-			autoCompleteList.Add("gettype");
-			autoCompleteList.Add("istr");
-			autoCompleteList.Add("length");
-			autoCompleteList.Add("replace");
-			autoCompleteList.Add("split");
-			autoCompleteList.Add("str");
-			autoCompleteList.Add("substring");
-			autoCompleteList.Add("tostring");
-			autoCompleteList.Add("tolower");
-			autoCompleteList.Add("toupper");
+
+			fillautocomplete("");
+
+
 			tabControl1.SelectedIndexChanged += TabControl1_SelectedIndexChanged;
 			tabControl1.DrawItem += TabControl1_DrawItem;
 			tabControl1.MouseClick += TabControl1_MouseClick;
@@ -140,6 +176,41 @@ namespace NSPEdit
 				CB.Items.Clear();
 				CB.Items.Add("");
 				int maxchar = 0;
+
+
+				toolStripStatusLabel2.Text = "Line: " + (richCodeBox1.GetLineFromCharIndex(richCodeBox1.SelectionStart) + 1).ToString();
+
+
+				int lineIndex = richCodeBox1.GetLineFromCharIndex(richCodeBox1.SelectionStart);
+				string lineText = richCodeBox1.Lines[lineIndex];
+				//Program.MainForm.AppendOutput(string.Format("line='{0}' '{1}'\r\n", richCodeBox1.GetLineFromCharIndex(richCodeBox1.SelectionStart) + 1, lineText));
+				int x = richCodeBox1.GetFirstCharIndexOfCurrentLine();
+				int y = richCodeBox1.SelectionStart;
+				string subline = richCodeBox1.Text.Substring(x, y - x);
+				//Program.MainForm.AppendOutput(string.Format("subline='{0}'\r\n", subline));
+				string sub = "";
+				for (int cur = 0; cur < subline.Length; cur++)
+				{
+					char p = subline[cur];
+
+					if (sub == "" && (p == '_' || p == '$' || char.IsLetter(p)))
+					{
+						sub += p;
+					}
+					else if (p != '_' && !char.IsLetterOrDigit(p) && p != '.')
+					{
+						sub = "";
+					}
+					else
+					{
+						sub += p;
+					}
+				}
+				if (sub.EndsWith(".")) sub = sub.Substring(0, sub.Length - 1);
+				//Program.MainForm.AppendOutput(string.Format("sub='{0}'\r\n", sub));
+				fillautocomplete(sub);
+
+
 				foreach (String s in autoCompleteList)
 				{
 					CB.Items.Add(s);
@@ -421,7 +492,7 @@ namespace NSPEdit
 
 		public void AppendOutput(string OutString)
 		{
-			richTextBox2.Text += OutString;
+			if (richTextBox2 != null) richTextBox2.Text += OutString;
 			Application.DoEvents();
 		}
 

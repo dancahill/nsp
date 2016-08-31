@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<NSPNameSpace>
+	<_ENV type="table" description="">
+		<ADMSXMLBINDIR type="string" description="" />
+		<ALLUSERSPROFILE type="string" description="" />
+		<APPDATA type="string" description="" />
+		<ASCOBINDIR type="string" description="" />
+		<COMMONPROGRAMFILES type="string" description="" />
+		<COMMONPROGRAMW6432 type="string" description="" />
+		<COMPUTERNAME type="string" description="" />
+		<COMSPEC type="string" description="" />
+		<ENABLE_XAML_DIAGNOSTICS_SOURCE_INFO type="string" description="" />
+		<FPS_BROWSER_APP_PROFILE_STRING type="string" description="" />
+		<FPS_BROWSER_USER_PROFILE_STRING type="string" description="" />
+		<FP_NO_HOST_CHECK type="string" description="" />
+		<FREEHDL type="string" description="" />
+		<GTK_BASEPATH type="string" description="" />
+		<HOME type="string" description="" />
+		<HOMEDRIVE type="string" description="" />
+		<HOMEPATH type="string" description="" />
+		<LOCALAPPDATA type="string" description="" />
+		<LOGONSERVER type="string" description="" />
+		<MINGWDIR type="string" description="" />
+		<MSBUILDLOADMICROSOFTTARGETSREADONLY type="string" description="" />
+		<NUMBER_OF_PROCESSORS type="string" description="" />
+		<OCTAVEBINDIR type="string" description="" />
+		<OPENSSL_CONF type="string" description="" />
+		<OS type="string" description="" />
+		<PATH type="string" description="" />
+		<PATHEXT type="string" description="" />
+		<PKGDEFAPPLICATIONCONFIGFILE type="string" description="" />
+		<PROCESSOR_ARCHITECTURE type="string" description="" />
+		<PROCESSOR_ARCHITEW6432 type="string" description="" />
+		<PROCESSOR_IDENTIFIER type="string" description="" />
+		<PROCESSOR_LEVEL type="string" description="" />
+		<PROCESSOR_REVISION type="string" description="" />
+		<PROGRAMDATA type="string" description="" />
+		<PROGRAMFILES type="string" description="" />
+		<PROGRAMW6432 type="string" description="" />
+		<PSMODULEPATH type="string" description="" />
+		<PUBLIC type="string" description="" />
+		<QUCSDIR type="string" description="" />
+		<SESSIONNAME type="string" description="" />
+		<SYSTEMDRIVE type="string" description="" />
+		<SYSTEMROOT type="string" description="" />
+		<TEMP type="string" description="" />
+		<TMP type="string" description="" />
+		<USERDOMAIN type="string" description="" />
+		<USERDOMAIN_ROAMINGPROFILE type="string" description="" />
+		<USERNAME type="string" description="" />
+		<USERPROFILE type="string" description="" />
+		<VISUALSTUDIODIR type="string" description="" />
+		<VISUALSTUDIOEDITION type="string" description="" />
+		<VISUALSTUDIOVERSION type="string" description="" />
+		<VS110COMNTOOLS type="string" description="" />
+		<VS120COMNTOOLS type="string" description="" />
+		<VS140COMNTOOLS type="string" description="" />
+		<VSIDE type="string" description="" />
+		<VSLANG type="string" description="" />
+		<VSSDK140INSTALL type="string" description="" />
+		<WINDIR type="string" description="" />
+		<XTC_IDE type="string" description="" />
+		<_PTVS_PID type="string" description="" />
+	</_ENV>
+	<_GLOBALS type="table" description="">
+	</_GLOBALS>
+	<_debug type="boolean" description="" />
+	<_filename type="string" description="" />
+	<_filepath type="string" description="" />
+	<_ostype_ type="string" description="" />
+	<_version_ type="string" description="" />
+	<base64 type="table" description="">
+		<decode type="function" description="" />
+		<encode type="function" description="" />
+	</base64>
+	<copy type="function" description="" />
+	<debug type="table" description="">
+		<break type="function" description="" />
+	</debug>
+	<dirlist type="function" description="" />
+	<dl type="table" description="">
+		<load type="function" description="" />
+		<path type="table" description="">
+		</path>
+	</dl>
+	<eval type="function" description="" />
+	<exec type="function" description="" />
+	<file type="table" description="">
+		<append type="function" description="" />
+		<chdir type="function" description="" />
+		<exists type="function" description="" />
+		<mkdir type="function" description="" />
+		<readall type="function" description="" />
+		<rename type="function" description="" />
+		<stat type="function" description="" />
+		<unlink type="function" description="" />
+		<writeall type="function" description="" />
+	</file>
+	<iname type="function" description="" />
+	<include type="function" description="" />
+	<io type="table" description="">
+		<print type="function" description="" />
+		<write type="function" description="" />
+		<flush type="function" description="" />
+	</io>
+	<ival type="function" description="" />
+	<math type="table" description="">
+		<abs type="function" description="" />
+		<ceil type="function" description="" />
+		<floor type="function" description="" />
+		<rand type="function" description="" />
+		<acos type="function" description="" />
+		<asin type="function" description="" />
+		<atan type="function" description="" />
+		<atan2 type="function" description="" />
+		<cos type="function" description="" />
+		<sin type="function" description="" />
+		<tan type="function" description="" />
+		<exp type="function" description="" />
+		<log type="function" description="" />
+		<log10 type="function" description="" />
+		<cosh type="function" description="" />
+		<sinh type="function" description="" />
+		<tanh type="function" description="" />
+		<sqrt type="function" description="" />
+	</math>
+	<net type="table" description="">
+		<have_tls type="boolean" description="" />
+		<tls_type type="string" description="" />
+		<dns type="table" description="">
+			<name2addr type="function" description="" />
+			<addr2name type="function" description="" />
+		</dns>
+		<ftp type="table" description="">
+			<client type="function" description="" />
+		</ftp>
+		<http type="table" description="">
+			<client type="function" description="" />
+		</http>
+		<mime type="table" description="">
+			<read type="function" description="" />
+			<write type="function" description="" />
+			<decode_qp type="function" description="" />
+			<decode_rfc2047 type="function" description="" />
+		</mime>
+		<smtp type="table" description="">
+			<client type="function" description="" />
+		</smtp>
+		<pop3 type="table" description="">
+			<client type="function" description="" />
+		</pop3>
+		<socket type="table" description="">
+			<accept type="function" description="" />
+			<bind type="function" description="" />
+			<close type="function" description="" />
+			<connect type="function" description="" />
+			<gets type="function" description="" />
+			<gettype type="function" description="" />
+			<info type="function" description="" />
+			<read type="function" description="" />
+			<setsockopt type="function" description="" />
+			<socket type="function" description="" />
+			<tlsaccept type="function" description="" />
+			<tlsconnect type="function" description="" />
+			<write type="function" description="" />
+		</socket>
+		<tnef type="table" description="">
+			<debug type="function" description="" />
+		</tnef>
+	</net>
+	<pipe type="table" description="">
+		<open type="function" description="" />
+		<read type="function" description="" />
+		<write type="function" description="" />
+		<close type="function" description="" />
+	</pipe>
+	<print type="function" description="" />
+	<printf type="function" description="" />
+	<regex type="table" description="">
+		<match type="function" description="" />
+		<replace type="function" description="" />
+	</regex>
+	<rot13 type="function" description="" />
+	<runtime type="function" description="" />
+	<serialize type="function" description="" />
+	<sizeof type="function" description="" />
+	<sleep type="function" description="" />
+	<sort type="table" description="">
+		<byname type="function" description="" />
+		<bykey type="function" description="" />
+	</sort>
+	<sprintf type="function" description="" />
+	<string type="table" description="">
+		<atoi type="function" description="" />
+		<itoa type="function" description="" />
+		<cat type="function" description="" />
+		<cmp type="function" description="" />
+		<icmp type="function" description="" />
+		<ncmp type="function" description="" />
+		<nicmp type="function" description="" />
+		<join type="function" description="" />
+		<len type="function" description="" />
+		<replace type="function" description="" />
+		<split type="function" description="" />
+		<str type="function" description="" />
+		<istr type="function" description="" />
+		<sub type="function" description="" />
+		<tostring type="function" description="" />
+		<tolower type="function" description="" />
+		<toupper type="function" description="" />
+	</string>
+	<system type="function" description="" />
+	<thread type="table" description="">
+		<thread type="function" description="" />
+		<start type="function" description="" />
+		<finish type="function" description="" />
+		<mutex type="table" description="">
+			<mutex type="function" description="" />
+			<lock type="function" description="" />
+			<unlock type="function" description="" />
+			<free type="function" description="" />
+		</mutex>
+	</thread>
+	<time type="table" description="">
+		<gmtime type="function" description="" />
+		<gettimeofday type="function" description="" />
+		<localtime type="function" description="" />
+		<sqldate type="function" description="" />
+		<sqltime type="function" description="" />
+		<sqldatetime type="function" description="" />
+		<sqltounix type="function" description="" />
+		<now type="function" description="" />
+	</time>
+	<tonumber type="function" description="" />
+	<typeof type="function" description="" />
+	<win type="table" description="">
+		<Beep type="function" description="" />
+		<CreateProcess type="function" description="" />
+		<MessageBox type="function" description="" />
+		<PlaySound type="function" description="" />
+		<ShellExecute type="function" description="" />
+	</win>
+	<write type="function" description="" />
+	<zlink type="function" description="" />
+</NSPNameSpace>
