@@ -24,45 +24,71 @@ namespace NSPEdit
 			this.FormClosing += NSPEditForm_FormClosing;
 		}
 
+		private string getlabel(RichCodeBox rcb, int charindex, bool readpastcursor)
+		{
+			if (rcb.Lines.Length == 0) return "";
+			int linenum = rcb.GetLineFromCharIndex(charindex);
+			int linestartindex = rcb.GetFirstCharIndexFromLine(linenum);
+			string lineText = rcb.Lines[linenum];
+			if (linestartindex >= charindex) return "";
+			string subline = rcb.Text.Substring(linestartindex, charindex - linestartindex);
+			string sub = "";
+			//Program.Log("line='{0}'\r\n", lineText);
+			//Program.Log("subline='{0}'\r\n", subline);
+			for (int cur = 0; cur < subline.Length; cur++)
+			{
+				char p = subline[cur];
+
+				if (sub == "" && (p == '_' || p == '$' || char.IsLetter(p)))
+				{
+					sub += p;
+				}
+				else if (p != '_' && !char.IsLetterOrDigit(p) && p != '.')
+				{
+					sub = "";
+				}
+				else
+				{
+					sub += p;
+				}
+			}
+			if (readpastcursor)
+			{
+				for (int cur = subline.Length; cur < lineText.Length; cur++)
+				{
+					char p = lineText[cur];
+
+					if (sub == "" && (p == '_' || p == '$' || char.IsLetter(p)))
+					{
+						sub += p;
+					}
+					//else if (p != '_' && !char.IsLetterOrDigit(p) && p != '.')
+					else if (p != '_' && !char.IsLetterOrDigit(p))
+					{
+						break;
+					}
+					else
+					{
+						sub += p;
+					}
+				}
+
+			}
+			if (sub.EndsWith(".")) sub = sub.Substring(0, sub.Length - 1);
+			//Program.MainForm.AppendOutput(string.Format("sub='{0}'\r\n", sub));
+			return sub;
+		}
+
 		private void fillautocomplete(string parentnamespace)
 		{
-			Action<string> addtolist = (x) =>
-			{
-				if (!autoCompleteList.Contains(x)) autoCompleteList.Add(x);
-			};
-			Func<string, string, bool> parseresult = (filename, ns) =>
-			{
-				if (!File.Exists(filename)) return false;
-				XmlDocument doc = new XmlDocument();
-				doc.Load(filename);
-				XmlNode NSPNameSpace = doc.DocumentElement.SelectSingleNode("/NSPNameSpace");
-				XmlNode x = (ns == "") ? NSPNameSpace : NSPNameSpace.SelectSingleNode(ns);
-				if (x != null)
-				{
-					foreach (XmlNode xnode in x.ChildNodes)
-					{
-						string type = xnode.Attributes["type"].Value;
-						string desc = xnode.Attributes["description"].Value;
-						//Program.MainForm.AppendOutput(string.Format("name='{0}', type='{1}', desc='{2}'\r\n", xnode.Name, type, desc));
-						addtolist(xnode.Name);
-					}
-					if (autoCompleteList.Count != 0) return true;
-				}
-				return false;
-			};
 			autoCompleteList = new List<string>();
-			if (parentnamespace != "")
+			foreach (XmlHelp.XmlHelpEntry entry in XmlHelp.getlist(parentnamespace))
 			{
-				string childnamespace = parentnamespace.Replace(".", "/");
-				if (childnamespace.StartsWith("_GLOBALS")) childnamespace = childnamespace.Substring(8, childnamespace.Length - 8);
-				if (childnamespace.StartsWith("/")) childnamespace = childnamespace.Substring(1, childnamespace.Length - 1);
-				if (childnamespace.EndsWith("/")) childnamespace = childnamespace.Substring(0, childnamespace.Length - 1);
-				parseresult(Path.GetDirectoryName(Application.ExecutablePath) + @"\NSPNameSpace.xml", childnamespace);
-				parseresult(Directory.GetCurrentDirectory() + @"\NSPNameSpace.xml", childnamespace);
+				if (!autoCompleteList.Contains(entry.name)) autoCompleteList.Add(entry.name);
 			}
-			addtolist("gettype");
-			addtolist("length");
-			addtolist("tostring");
+			if (!autoCompleteList.Contains("gettype")) autoCompleteList.Add("gettype");
+			if (!autoCompleteList.Contains("length")) autoCompleteList.Add("length");
+			if (!autoCompleteList.Contains("tostring")) autoCompleteList.Add("tostring");
 			autoCompleteList.Sort();
 		}
 
@@ -87,7 +113,81 @@ namespace NSPEdit
 			newTabPage();
 			richCodeBox1.LoadScript(loadfile);
 			this.ActiveControl = this.richCodeBox1;
+
+			//richCodeBox1.MouseEnter += RichCodeBox1_MouseEnter;
+			//richCodeBox1.MouseLeave += RichCodeBox1_MouseLeave;
+			richCodeBox1.MouseMove += RichCodeBox1_MouseMove;
 		}
+
+		private System.Windows.Forms.ToolTip toolTip1 = new System.Windows.Forms.ToolTip();
+		DateTime toolTip1_lastupdate = DateTime.Now;
+
+		private void RichCodeBox1_MouseMove(object sender, MouseEventArgs e)
+		{
+			RichCodeBox rtb = (sender as RichCodeBox);
+			if (DateTime.Now < toolTip1_lastupdate.AddMilliseconds(250)) return;
+			toolTip1_lastupdate = DateTime.Now;
+			//Cursor a = System.Windows.Forms.Cursor.Current;
+			Cursor a = this.Cursor;
+			//Cursor a = richCodeBox1.Cursor;
+			//if (a == Cursors.Hand)
+			{
+				//Point p = rtb.Location;
+				Point p = this.Location;
+				int charindex = rtb.GetCharIndexFromPosition(e.Location);
+				string name = getlabel(rtb, charindex, true);
+				XmlHelp.XmlHelpEntry xhelp = XmlHelp.findnode(name);
+				string t = name;
+				if (xhelp != null)
+				{
+					//t = xhelp.fullname;
+					t = string.Format("({0}) {1}", xhelp.type, xhelp.name);
+					if (xhelp.desc != "") t += string.Format("\r\nDescription: {0}", xhelp.desc);
+				}
+
+				// start ugly hack
+				int oldindex = richCodeBox1.SelectionStart;
+				rtb.Select(rtb.GetCharIndexFromPosition(e.Location), 0);
+				Color color = rtb.SelectionColor;
+				//t += string.Format("\r\nColor: {0}", rtb.SelectionColor);
+				//t += string.Format("\r\nFont: {0}", rtb.SelectionFont);
+				rtb.Select(oldindex, 0);
+				// end ugly hack
+
+				if (color == Color.Green) t = ""; // comment
+				else if (color == Color.Red) t = ""; // misc extra punctuation
+				else if (color == Color.Black) t = "";//keyword
+				else if (color == Color.DarkCyan) t += "";// string.Format("\r\nColor: {0}", color);
+				else if (color == Color.Maroon) t = ""; // punctuation
+				else if (color == Color.Blue && name != "true" && name != "false" && name != "null" && name != "this") t = "string data";
+				else if (color == Color.Navy) t = "numeric data";
+				//else
+				//{
+				//	t += string.Format("\r\nColor: {0}", color);
+				//}
+
+				if (t != "") toolTip1.Show(t, this, p.X + e.X, p.Y + e.Y + 32, 1000);
+			}
+		}
+
+		//private void RichCodeBox1_MouseEnter(object sender, EventArgs e)
+		//{
+		//	RichCodeBox rtb = (sender as RichCodeBox);
+		//	if (rtb != null)
+		//	{
+		//		getlabel(richCodeBox1.GetCharIndexFromPosition(e.Location));
+		//		this.toolTip1.Show("Hello!!!", rtb);
+		//	}
+		//}
+
+		//private void RichCodeBox1_MouseLeave(object sender, EventArgs e)
+		//{
+		//	RichCodeBox rtb = (sender as RichCodeBox);
+		//	if (rtb != null)
+		//	{
+		//		this.toolTip1.Hide(rtb);
+		//	}
+		//}
 
 		private void NSPEditForm_FormClosing(object sender, FormClosingEventArgs e)
 		{
@@ -177,39 +277,7 @@ namespace NSPEdit
 				CB.Items.Add("");
 				int maxchar = 0;
 
-
-				toolStripStatusLabel2.Text = "Line: " + (richCodeBox1.GetLineFromCharIndex(richCodeBox1.SelectionStart) + 1).ToString();
-
-
-				int lineIndex = richCodeBox1.GetLineFromCharIndex(richCodeBox1.SelectionStart);
-				string lineText = richCodeBox1.Lines[lineIndex];
-				//Program.MainForm.AppendOutput(string.Format("line='{0}' '{1}'\r\n", richCodeBox1.GetLineFromCharIndex(richCodeBox1.SelectionStart) + 1, lineText));
-				int x = richCodeBox1.GetFirstCharIndexOfCurrentLine();
-				int y = richCodeBox1.SelectionStart;
-				string subline = richCodeBox1.Text.Substring(x, y - x);
-				//Program.MainForm.AppendOutput(string.Format("subline='{0}'\r\n", subline));
-				string sub = "";
-				for (int cur = 0; cur < subline.Length; cur++)
-				{
-					char p = subline[cur];
-
-					if (sub == "" && (p == '_' || p == '$' || char.IsLetter(p)))
-					{
-						sub += p;
-					}
-					else if (p != '_' && !char.IsLetterOrDigit(p) && p != '.')
-					{
-						sub = "";
-					}
-					else
-					{
-						sub += p;
-					}
-				}
-				if (sub.EndsWith(".")) sub = sub.Substring(0, sub.Length - 1);
-				//Program.MainForm.AppendOutput(string.Format("sub='{0}'\r\n", sub));
-				fillautocomplete(sub);
-
+				fillautocomplete(getlabel(richCodeBox1, richCodeBox1.SelectionStart, false));
 
 				foreach (String s in autoCompleteList)
 				{
@@ -398,6 +466,9 @@ namespace NSPEdit
 			richCodeBox1.DragDrop += richCodeBox1_DragDrop;
 			richCodeBox1.KeyPress += richCodeBox1_KeyPress;
 			//richCodeBox1.KeyDown += richCodeBox1_KeyDown;
+
+			richCodeBox1.MouseMove += RichCodeBox1_MouseMove;
+
 
 			// richTextBox2
 			richTextBox2.AcceptsTab = true;

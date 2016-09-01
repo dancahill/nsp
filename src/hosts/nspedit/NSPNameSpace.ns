@@ -1,6 +1,12 @@
 // output nsp namespace to an xml file
 
 namespace nsprint {
+	namespacedescriptions = {
+		{ name="_ENV",     desc="table of environment variables"; };
+		{ name="_GLOBALS", desc="link to the global variables table (recursive)";      };
+		{ name="file",     desc="class of functions available for working with files"; };
+		{ name="string",   desc="class of functions available for string handling";    };
+	};
 	name="NSPNameSpace";
 	outputfilename="NSPNameSpace.xml";
 	output="";
@@ -9,7 +15,7 @@ namespace nsprint {
 		nsprint.output+=s;
 	};
 
-	function printdepth(table, depth) {
+	function printdepth(table, depth, pname) {
 		padding="\t"*depth;
 		foreach (n,v in table) {
 			if (depth==1) {
@@ -17,14 +23,39 @@ namespace nsprint {
 			}
 			t=v.gettype();
 			d="";
-			if (t=="table") {
-				nsprint.out(sprintf("%s<%s type=\"%s\" description=\"%s\">\r\n", padding, n, t, d));
-				if (n=="_GLOBALS" && depth==1) {
-					//printf("skipping globals\r\n");
-				} else {
-					nsprint.printdepth(v, depth+1);
+			ns=pname+(pname==""?"":".")+n;
+			if (t=="function") {
+				d=sprintf("%s()", ns);
+			} else if (t=="table") {
+				d=sprintf("%s {}", ns);
+			} else {
+				d=sprintf("%s", ns);
+			}
+			foreach (entry in namespacedescriptions) {
+				if (entry.name==n) {
+					d=d+" - "+entry.desc;
+					break;
 				}
-				nsprint.out(sprintf("%s</%s>\r\n", padding, n));
+			}
+//			switch(ns) {
+//			case "_ENV":     d+=" - table of environment variables"; break;
+ //			case "_GLOBALS": d+=" - link to the global variables table (recursive)"; break;
+//			case "string":   d+=" - class of functions available for string handling"; break;
+//			default: break;
+//			}
+			//printf("ns=%s\r\n", ns);
+			if (t=="table") {
+				if (n=="_GLOBALS" && depth==1) {
+					nsprint.out(sprintf("%s<%s type=\"%s\" description=\"%s\" />\r\n", padding, n, t, d));
+				} else {
+					nsprint.out(sprintf("%s<%s type=\"%s\" description=\"%s\">\r\n", padding, n, t, d));
+					if (n=="_GLOBALS" && depth==1) {
+						//printf("skipping globals\r\n");
+					} else {
+						nsprint.printdepth(v, depth+1, ns);
+					}
+					nsprint.out(sprintf("%s</%s>\r\n", padding, n));
+				}
 			} else {
 				if (n.istr("(X86)")!=null || n=="0") {
 					continue;
@@ -49,13 +80,14 @@ foreach (d in dl.path) {
 }
 
 nsprint.out("<?xml version=\"1.0\" encoding=\"utf-8\" ?>\r\n<"+nsprint.name+">\r\n");
-nsprint.printdepth(_GLOBALS, 1);
+nsprint.printdepth(_GLOBALS, 1, "");
 nsprint.out("</"+nsprint.name+">\r\n");
 //printf(output);
 if (file.exists(nsprint.outputfilename)) {
-	printf("file %s already exists\r\n", nsprint.outputfilename);
+	printf("file %s already exists - renaming\r\n", nsprint.outputfilename);
+	file.unlink(nsprint.outputfilename+".old");
+	file.rename(nsprint.outputfilename, nsprint.outputfilename+".old");
 	//printf(nsprint.output);
-} else {
-	file.writeall(nsprint.outputfilename, nsprint.output);
-	printf("file %s saved\r\n", nsprint.outputfilename);
 }
+file.writeall(nsprint.outputfilename, nsprint.output);
+printf("file %s saved\r\n", nsprint.outputfilename);

@@ -237,9 +237,11 @@ NSP_FUNCTION(nl_write)
 NSP_FUNCTION(nl_break)
 {
 #define __FN__ __FILE__ ":nl_break()"
-#if defined(WIN32) && defined(_DEBUG)
+#if defined(WIN32)
+#if defined(_DEBUG)
 	__debugbreak();
 	//DebugBreak();
+#endif
 #else
 	__builtin_trap();
 #endif
@@ -1617,6 +1619,10 @@ NSP_FUNCTION(nl_system)
 	if (cobj1->val->type == NT_STRING&&cobj1->val->d.str != NULL) {
 		nl_flush(N);
 		n = system(cobj1->val->d.str);
+#ifdef WEXITSTATUS
+		// *LINUX* This latter return status is in the format specified in wait(2).  Thus, the exit code of the command will be WEXITSTATUS(status).
+		n = WEXITSTATUS(n);
+#endif
 	}
 	nsp_setnum(N, &N->r, "", n);
 	return 0;

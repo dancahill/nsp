@@ -5,7 +5,7 @@ AppVerName=NullLogic NSP Script Parser 0.9.4
 
 AppName=NullLogic NSP Script Parser
 AppID={{8C6107AB-FCB7-42A5-BB18-F136497FDBEE}
-AppCopyright=Copyright 2015 Dan Cahill
+AppCopyright=Copyright 2016 Dan Cahill
 AppPublisher=NullLogic
 AppPublisherURL=https://nulllogic.ca/nsp/
 AppSupportURL=https://nulllogic.ca/nsp/
@@ -32,6 +32,7 @@ Source: ".\bin\nsp.exe";                    DestDir: "{app}"
 ;Source: ".\bin\nsp-cgi.exe";                DestDir: "{app}"
 Source: ".\bin\nsp.exe";                    DestDir: "{win}"
 Source: ".\bin\nspedit.exe";                DestDir: "{app}"
+Source: ".\bin\NSPNameSpace.xml";           DestDir: "{app}"
 Source: ".\bin\nsp.net.dll";                DestDir: "{app}"
 Source: ".\bin\ntray.exe";                  DestDir: "{app}"
 Source: ".\src\hosts\ntray\ntray.conf";     DestDir: "{app}"; DestName: "ntray.conf-sample"
