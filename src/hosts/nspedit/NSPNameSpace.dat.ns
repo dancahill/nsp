@@ -722,11 +722,11 @@
 		type = "function"
 	},
 	["thread"] = {
-		desc = "class of functions available for working with threads (experimental)",
+		desc = "class of functions for working with threads (experimental)",
 		type = "table"
 	},
 	["thread.thread"] = {
-		desc = "",
+		desc = "constructor for new threads",
 		params = "",
 		returns = "",
 		type = "function"
@@ -744,11 +744,11 @@
 		type = "function"
 	},
 	["thread.mutex"] = {
-		desc = "",
+		desc = "class of functions for working with thread mutexes (experimental)",
 		type = "table"
 	},
 	["thread.mutex.mutex"] = {
-		desc = "",
+		desc = "constructor for new thread mutexes",
 		params = "",
 		returns = "",
 		type = "function"
@@ -772,13 +772,13 @@
 		type = "function"
 	},
 	["time"] = {
-		desc = "",
+		desc = "functions for dealing with time",
 		type = "table"
 	},
 	["time.gmtime"] = {
-		desc = "",
-		params = "",
-		returns = "",
+		desc = "get detailed structure describing a given time in seconds (or now) since 1970-01-01",
+		params = "([number seconds])",
+		returns = "table describing requested time",
 		type = "function"
 	},
 	["time.gettimeofday"] = {
@@ -788,39 +788,39 @@
 		type = "function"
 	},
 	["time.localtime"] = {
-		desc = "",
-		params = "",
-		returns = "",
+		desc = "get detailed structure describing a given time in seconds (or now) since 1970-01-01",
+		params = "([number seconds])",
+		returns = "table describing requested time",
 		type = "function"
 	},
 	["time.sqldate"] = {
-		desc = "",
-		params = "",
-		returns = "",
+		desc = "output date as a string from time.gmtime data or seconds since 1970-01-01",
+		params = "([table time]||[number time])",
+		returns = "string representing requested time in yyyy-MM-dd format",
 		type = "function"
 	},
 	["time.sqltime"] = {
-		desc = "",
-		params = "",
-		returns = "",
+		desc = "output time as a string from time.gmtime data or seconds since 1970-01-01",
+		params = "([table time]||[number time])",
+		returns = "string representing requested time in HH:mm:ss format",
 		type = "function"
 	},
 	["time.sqldatetime"] = {
-		desc = "",
-		params = "",
-		returns = "",
+		desc = "output date and time as a string from time.gmtime data or seconds since 1970-01-01",
+		params = "([table time]||[number time])",
+		returns = "string representing requested time in yyyy-MM-dd HH:mm:ss format",
 		type = "function"
 	},
 	["time.sqltounix"] = {
-		desc = "",
-		params = "",
-		returns = "",
+		desc = "get unix time from sql formatted time",
+		params = "(string sqltime)",
+		returns = "number of seconds since 1970-01-01",
 		type = "function"
 	},
 	["time.now"] = {
-		desc = "",
-		params = "",
-		returns = "",
+		desc = "get seconds since 1970-01-01 (aka unix time)",
+		params = "none",
+		returns = "number of seconds from 1970-01-01 to now",
 		type = "function"
 	},
 	["tonumber"] = {
@@ -830,13 +830,13 @@
 		type = "function"
 	},
 	["typeof"] = {
-		desc = "",
-		params = "",
-		returns = "",
+		desc = "get the type of a variable",
+		params = "(object arg1)",
+		returns = "string with the name of the base object type",
 		type = "function"
 	},
 	["win"] = {
-		desc = "",
+		desc = "collection of functions for Windows UI",
 		type = "table"
 	},
 	["win.Beep"] = {
@@ -870,9 +870,9 @@
 		type = "function"
 	},
 	["write"] = {
-		desc = "",
-		params = "",
-		returns = "",
+		desc = "write a single unformatted string to console",
+		params = "(string arg1)",
+		returns = "number of bytes written",
 		type = "function"
 	},
 	["zlink"] = {

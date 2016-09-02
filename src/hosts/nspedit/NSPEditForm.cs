@@ -9,7 +9,7 @@ namespace NSPEdit
 	public partial class NSPEditForm : Form
 	{
 		public string loadfile = "";
-		List<string> autoCompleteList;
+		//List<string> autoCompleteList;
 		AutoCompleteBox CB;
 		public RichCodeBox richCodeBox1;
 		public RichTextBox richTextBox2;
@@ -17,81 +17,45 @@ namespace NSPEdit
 		int OutputHeight = 150;
 
 		public ToolTip toolTip1 = new ToolTip();
-		public DateTime toolTip1_lastupdate = DateTime.Now;
+		//public DateTime toolTip1_lastupdate = DateTime.Now;
+
+		public string FormatToolTip(ToolTip tt, string name, Color color)
+		{
+			XmlHelp.XmlHelpEntry xhelp = XmlHelp.findnode(name);
+			tt.ToolTipTitle = "";
+			string t = name;
+			if (xhelp != null)
+			{
+				tt.ToolTipTitle = string.Format("({0}) {1}", xhelp.type, xhelp.name);
+				t = "";
+				if (xhelp.desc != "") t = string.Format("{0}", xhelp.desc);
+				if (xhelp.parameters != "" || xhelp.returns != "")
+				{
+					if (xhelp.desc != "") t += "\r\n";
+					if (xhelp.parameters != "") t += string.Format("\r\nParameters: {0}", xhelp.parameters);
+					if (xhelp.returns != "") t += string.Format("\r\nReturns: {0}", xhelp.returns);
+				}
+				//tt.SetToolTip(, t);
+			}
+			if (color != Color.White)
+			{
+				if (color != Color.DarkCyan) toolTip1.ToolTipTitle = "";
+				if (color == Color.Green) t = ""; // comment
+				else if (color == Color.Red) t = ""; // misc extra punctuation
+				else if (color == Color.Black) t = "";//keyword
+				else if (color == Color.DarkCyan) t += "";// string.Format("\r\nColor: {0}", color);
+				else if (color == Color.Maroon) t = ""; // punctuation
+				else if (color == Color.Blue && name != "true" && name != "false" && name != "null" && name != "this") { t = "string data"; }
+				else if (color == Color.Navy) t = "numeric data";
+			}
+			return t;
+		}
 
 		public NSPEditForm()
 		{
 			InitializeComponent();
 			this.Load += NSPEditForm_Load;
 			this.FormClosing += NSPEditForm_FormClosing;
-		}
-
-		private string getlabel(RichCodeBox rcb, int charindex, bool readpastcursor)
-		{
-			if (rcb.Lines.Length == 0) return "";
-			int linenum = rcb.GetLineFromCharIndex(charindex);
-			int linestartindex = rcb.GetFirstCharIndexFromLine(linenum);
-			string lineText = rcb.Lines[linenum];
-			if (linestartindex >= charindex) return "";
-			string subline = rcb.Text.Substring(linestartindex, charindex - linestartindex);
-			string sub = "";
-			//Program.Log("line='{0}'\r\n", lineText);
-			//Program.Log("subline='{0}'\r\n", subline);
-			for (int cur = 0; cur < subline.Length; cur++)
-			{
-				char p = subline[cur];
-
-				if (sub == "" && (p == '_' || p == '$' || char.IsLetter(p)))
-				{
-					sub += p;
-				}
-				else if (p != '_' && !char.IsLetterOrDigit(p) && p != '.')
-				{
-					sub = "";
-				}
-				else
-				{
-					sub += p;
-				}
-			}
-			if (readpastcursor)
-			{
-				for (int cur = subline.Length; cur < lineText.Length; cur++)
-				{
-					char p = lineText[cur];
-
-					if (sub == "" && (p == '_' || p == '$' || char.IsLetter(p)))
-					{
-						sub += p;
-					}
-					//else if (p != '_' && !char.IsLetterOrDigit(p) && p != '.')
-					else if (p != '_' && !char.IsLetterOrDigit(p))
-					{
-						break;
-					}
-					else
-					{
-						sub += p;
-					}
-				}
-
-			}
-			if (sub.EndsWith(".")) sub = sub.Substring(0, sub.Length - 1);
-			//Program.MainForm.AppendOutput(string.Format("sub='{0}'\r\n", sub));
-			return sub;
-		}
-
-		private void fillautocomplete(string parentnamespace)
-		{
-			autoCompleteList = new List<string>();
-			foreach (XmlHelp.XmlHelpEntry entry in XmlHelp.getlist(parentnamespace))
-			{
-				if (!autoCompleteList.Contains(entry.name)) autoCompleteList.Add(entry.name);
-			}
-			if (!autoCompleteList.Contains("gettype")) autoCompleteList.Add("gettype");
-			if (!autoCompleteList.Contains("length")) autoCompleteList.Add("length");
-			if (!autoCompleteList.Contains("tostring")) autoCompleteList.Add("tostring");
-			autoCompleteList.Sort();
 		}
 
 		private void NSPEditForm_Load(object sender, EventArgs e)
@@ -105,9 +69,7 @@ namespace NSPEdit
 			aTimer.Interval = 200;
 			aTimer.Enabled = false;
 
-
-			fillautocomplete("");
-
+			//autoCompleteList = CB.fillautocomplete("");
 
 			tabControl1.SelectedIndexChanged += TabControl1_SelectedIndexChanged;
 			tabControl1.DrawItem += TabControl1_DrawItem;
@@ -125,92 +87,24 @@ namespace NSPEdit
 
 		private void RichCodeBox1_MouseMove(object sender, MouseEventArgs e)
 		{
-			RichCodeBox rtb = (sender as RichCodeBox);
-			if (DateTime.Now < toolTip1_lastupdate.AddMilliseconds(50)) return;
-			toolTip1_lastupdate = DateTime.Now;
-			//Cursor a = System.Windows.Forms.Cursor.Current;
-			//			Cursor a = this.Cursor;
-			//Cursor a = richCodeBox1.Cursor;
-			//if (a == Cursors.Hand)
-			{
-				//Point p = rtb.Location;
-				Point p = this.Location;
-
-				if (oldp.X == e.X && oldp.Y == e.Y) return;
-				oldp.X = e.X;
-				oldp.Y = e.Y;
-
-				int charindex = rtb.GetCharIndexFromPosition(e.Location);
-				string name = getlabel(rtb, charindex, true);
-				XmlHelp.XmlHelpEntry xhelp = XmlHelp.findnode(name);
-
-				toolTip1.ToolTipTitle = "";
-				string t = name;
-				if (xhelp != null)
-				{
-					//t = xhelp.fullname;
-					toolTip1.ToolTipTitle = string.Format("({0}) {1}", xhelp.type, xhelp.name);
-					t = "";
-					if (xhelp.desc != "") t = string.Format("{0}", xhelp.desc);
-					if (xhelp.parameters != "" || xhelp.returns != "")
-					{
-						if (xhelp.desc != "") t += "\r\n";
-						if (xhelp.parameters != "") t += string.Format("\r\nParameters: {0}", xhelp.parameters);
-						if (xhelp.returns != "") t += string.Format("\r\nReturns: {0}", xhelp.returns);
-					}
-				}
-
-				// start ugly hack
-				RichTextBox rtbx = new RichTextBox();
-				rtbx.Rtf = rtb.Rtf;
-				int oldindex = richCodeBox1.SelectionStart;
-				rtbx.Select(rtb.GetCharIndexFromPosition(e.Location), 0);
-				Color color = rtbx.SelectionColor;
-				//t += string.Format("\r\nColor: {0}", rtb.SelectionColor);
-				//t += string.Format("\r\nFont: {0}", rtb.SelectionFont);
-				//rtb.Select(oldindex, 0);
-				// end ugly hack
-
-				if (color != Color.DarkCyan) toolTip1.ToolTipTitle = "";
-
-
-				if (color == Color.Green) t = ""; // comment
-				else if (color == Color.Red) t = ""; // misc extra punctuation
-				else if (color == Color.Black) t = "";//keyword
-				else if (color == Color.DarkCyan) t += "";// string.Format("\r\nColor: {0}", color);
-				else if (color == Color.Maroon) t = ""; // punctuation
-				else if (color == Color.Blue && name != "true" && name != "false" && name != "null" && name != "this") { t = "string data"; }
-				else if (color == Color.Navy) t = "numeric data";
-				//else
-				//{
-				//	t += string.Format("\r\nColor: {0}", color);
-				//}
-				if (t != "")
-				{
-					toolTip1.Show(t, this, p.X + e.X, p.Y + e.Y + 32, 5000);
-				}
-				else toolTip1.Hide(this);
-			}
+			RichCodeBox rcb = (sender as RichCodeBox);
+			if (oldp.X == e.X && oldp.Y == e.Y) return;
+			oldp = new Point(e.X, e.Y);
+			int charindex = rcb.GetCharIndexFromPosition(e.Location);
+			// start ugly hack
+			RichTextBox rtbx = new RichTextBox();
+			rtbx.Rtf = rcb.Rtf;
+			int oldindex = rcb.SelectionStart;
+			rtbx.Select(charindex, 0);
+			Color color = rtbx.SelectionColor;
+			Font font = rtbx.SelectionFont;
+			rtbx.Dispose();
+			// end ugly hack
+			toolTip1.Hide(rcb);
+			//string name = rcb.getlabel(charindex, true);
+			string t = FormatToolTip(toolTip1, rcb.getlabel(charindex, true), color);
+			if (t != "") toolTip1.Show(t, rcb, e.X, e.Y + font.Height, 5000); //else toolTip1.Hide(rcb);
 		}
-
-		//private void RichCodeBox1_MouseEnter(object sender, EventArgs e)
-		//{
-		//	RichCodeBox rtb = (sender as RichCodeBox);
-		//	if (rtb != null)
-		//	{
-		//		getlabel(richCodeBox1.GetCharIndexFromPosition(e.Location));
-		//		this.toolTip1.Show("Hello!!!", rtb);
-		//	}
-		//}
-
-		//private void RichCodeBox1_MouseLeave(object sender, EventArgs e)
-		//{
-		//	RichCodeBox rtb = (sender as RichCodeBox);
-		//	if (rtb != null)
-		//	{
-		//		this.toolTip1.Hide(rtb);
-		//	}
-		//}
 
 		private void NSPEditForm_FormClosing(object sender, FormClosingEventArgs e)
 		{
@@ -295,35 +189,7 @@ namespace NSPEdit
 		{
 			if (e.KeyChar == '.')
 			{
-				CB.Text = "";
-				CB.Items.Clear();
-				CB.Items.Add("");
-				int maxchar = 0;
-
-				string label = getlabel(richCodeBox1, richCodeBox1.SelectionStart, false);
-				CB.nsnamespace = label;
-				fillautocomplete(label);
-
-				foreach (String s in autoCompleteList)
-				{
-					CB.Items.Add(s);
-					if (maxchar < s.Length) maxchar = s.Length;
-				}
-				CB.Visible = true;
-				Point cursorPt = richCodeBox1.GetPositionFromCharIndex(richCodeBox1.SelectionStart);
-				cursorPt.X += (int)richCodeBox1.Font.SizeInPoints;
-				cursorPt.Y += richCodeBox1.Location.Y;
-				CB.Size = new System.Drawing.Size(100, 1);
-				CB.DropDownHeight = (richCodeBox1.Font.Height + 1) * 5;
-				//CB.MaxDropDownItems = 5;
-				CB.Width = (maxchar + 1) * (int)richCodeBox1.Font.SizeInPoints;
-				CB.Location = cursorPt;
-				CB.BringToFront();
-				// CB.DroppedDown = true;
-				CB.Show();
-				CB.Focus();
-				CB.DroppedDown = true;
-				CB.Text = "";
+				CB.MakeActive();
 			}
 		}
 

@@ -205,36 +205,36 @@ arg3 is implicitly the end of the string" params="(string str, number arg2[, num
 		<toupper type="function" desc="get uppercase version of string" params="(string str)" returns="string" />
 	</string>
 	<system type="function" desc="" params="" returns="" />
-	<thread type="table" desc="class of functions available for working with threads (experimental)">
-		<thread type="function" desc="" params="" returns="" />
+	<thread type="table" desc="class of functions for working with threads (experimental)">
+		<thread type="function" desc="constructor for new threads" params="" returns="" />
 		<start type="function" desc="" params="" returns="" />
 		<finish type="function" desc="" params="" returns="" />
-		<mutex type="table" desc="">
-			<mutex type="function" desc="" params="" returns="" />
+		<mutex type="table" desc="class of functions for working with thread mutexes (experimental)">
+			<mutex type="function" desc="constructor for new thread mutexes" params="" returns="" />
 			<lock type="function" desc="" params="" returns="" />
 			<unlock type="function" desc="" params="" returns="" />
 			<free type="function" desc="" params="" returns="" />
 		</mutex>
 	</thread>
-	<time type="table" desc="">
-		<gmtime type="function" desc="" params="" returns="" />
+	<time type="table" desc="functions for dealing with time">
+		<gmtime type="function" desc="get detailed structure describing a given time in seconds (or now) since 1970-01-01" params="([number seconds])" returns="table describing requested time" />
 		<gettimeofday type="function" desc="" params="" returns="" />
-		<localtime type="function" desc="" params="" returns="" />
-		<sqldate type="function" desc="" params="" returns="" />
-		<sqltime type="function" desc="" params="" returns="" />
-		<sqldatetime type="function" desc="" params="" returns="" />
-		<sqltounix type="function" desc="" params="" returns="" />
-		<now type="function" desc="" params="" returns="" />
+		<localtime type="function" desc="get detailed structure describing a given time in seconds (or now) since 1970-01-01" params="([number seconds])" returns="table describing requested time" />
+		<sqldate type="function" desc="output date as a string from time.gmtime data or seconds since 1970-01-01" params="([table time]||[number time])" returns="string representing requested time in yyyy-MM-dd format" />
+		<sqltime type="function" desc="output time as a string from time.gmtime data or seconds since 1970-01-01" params="([table time]||[number time])" returns="string representing requested time in HH:mm:ss format" />
+		<sqldatetime type="function" desc="output date and time as a string from time.gmtime data or seconds since 1970-01-01" params="([table time]||[number time])" returns="string representing requested time in yyyy-MM-dd HH:mm:ss format" />
+		<sqltounix type="function" desc="get unix time from sql formatted time" params="(string sqltime)" returns="number of seconds since 1970-01-01" />
+		<now type="function" desc="get seconds since 1970-01-01 (aka unix time)" params="none" returns="number of seconds from 1970-01-01 to now" />
 	</time>
 	<tonumber type="function" desc="" params="" returns="" />
-	<typeof type="function" desc="" params="" returns="" />
-	<win type="table" desc="">
+	<typeof type="function" desc="get the type of a variable" params="(object arg1)" returns="string with the name of the base object type" />
+	<win type="table" desc="collection of functions for Windows UI">
 		<Beep type="function" desc="" params="" returns="" />
 		<CreateProcess type="function" desc="" params="" returns="" />
 		<MessageBox type="function" desc="" params="" returns="" />
 		<PlaySound type="function" desc="" params="" returns="" />
 		<ShellExecute type="function" desc="" params="" returns="" />
 	</win>
-	<write type="function" desc="" params="" returns="" />
+	<write type="function" desc="write a single unformatted string to console" params="(string arg1)" returns="number of bytes written" />
 	<zlink type="function" desc="" params="" returns="" />
 </NSPNameSpace>

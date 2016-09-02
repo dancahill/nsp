@@ -19,7 +19,7 @@ namespace NSPEdit
 		}
 
 		private static string filename1 = Path.GetDirectoryName(Application.ExecutablePath) + @"\NSPNameSpace.xml";
-		private static string filename2 = Directory.GetCurrentDirectory() + @"\NSPNameSpace.xml", childnamespace;
+		private static string filename2 = Directory.GetCurrentDirectory() + @"\NSPNameSpace.xml";
 		private static XmlDocument xdoc1 = null;
 		private static XmlDocument xdoc2 = null;
 		private static DateTime lastload = DateTime.Now.AddMinutes(-1);

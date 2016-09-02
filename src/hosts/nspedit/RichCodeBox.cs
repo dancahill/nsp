@@ -319,5 +319,62 @@ namespace NSPEdit
 			public string RTF;
 			public int SelectionStart;
 		}
+
+
+		//public string getlabel(RichCodeBox rcb, int charindex, bool readpastcursor)
+		public string getlabel(int charindex, bool readpastcursor)
+		{
+			if (this.Lines.Length == 0) return "";
+			int linenum = this.GetLineFromCharIndex(charindex);
+			int linestartindex = this.GetFirstCharIndexFromLine(linenum);
+			string lineText = this.Lines[linenum];
+			if (linestartindex >= charindex) return "";
+			string subline = this.Text.Substring(linestartindex, charindex - linestartindex);
+			string sub = "";
+			//Program.Log("line='{0}'\r\n", lineText);
+			//Program.Log("subline='{0}'\r\n", subline);
+			for (int cur = 0; cur < subline.Length; cur++)
+			{
+				char p = subline[cur];
+
+				if (sub == "" && (p == '_' || p == '$' || char.IsLetter(p)))
+				{
+					sub += p;
+				}
+				else if (p != '_' && !char.IsLetterOrDigit(p) && p != '.')
+				{
+					sub = "";
+				}
+				else
+				{
+					sub += p;
+				}
+			}
+			if (readpastcursor)
+			{
+				for (int cur = subline.Length; cur < lineText.Length; cur++)
+				{
+					char p = lineText[cur];
+
+					if (sub == "" && (p == '_' || p == '$' || char.IsLetter(p)))
+					{
+						sub += p;
+					}
+					//else if (p != '_' && !char.IsLetterOrDigit(p) && p != '.')
+					else if (p != '_' && !char.IsLetterOrDigit(p))
+					{
+						break;
+					}
+					else
+					{
+						sub += p;
+					}
+				}
+
+			}
+			if (sub.EndsWith(".")) sub = sub.Substring(0, sub.Length - 1);
+			//Program.MainForm.AppendOutput(string.Format("sub='{0}'\r\n", sub));
+			return sub;
+		}
 	}
 }

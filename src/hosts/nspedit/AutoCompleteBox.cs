@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 namespace NSPEdit
@@ -20,7 +18,8 @@ namespace NSPEdit
 			//this.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
 			this.FlatStyle = FlatStyle.Flat;
 			this.Font = new Font("Courier New", 10, FontStyle.Regular);
-			this.ForeColor = Color.DarkCyan;
+			//this.ForeColor = Color.DarkCyan;
+			this.ForeColor = Color.Black;
 			this.BackColor = Color.FromArgb(0xCC, 0xFF, 0xFF);
 			this.Sorted = false;
 			this.Visible = false;
@@ -32,7 +31,7 @@ namespace NSPEdit
 		}
 		void CB_KeyPress(object sender, KeyPressEventArgs e)
 		{
-			if (Char.IsControl(e.KeyChar))
+			if (char.IsControl(e.KeyChar))
 			{
 			}
 			else if (Char.IsLetterOrDigit(e.KeyChar))
@@ -57,35 +56,26 @@ namespace NSPEdit
 		void CB_TextChanged(object sender, EventArgs e)
 		{
 			if (this.Text != "") this.Items[0] = this.Text;
-
-			//Program.Log("cb text='{0}'", this.Text);
-			ToolTip toolTip1 = Program.MainForm.toolTip1;
-			//toolTip1.Show(t, this, p.X + e.X, p.Y + e.Y + 32, 5000);
+			Program.MainForm.toolTip1.Hide(Program.MainForm.richCodeBox1);
 			string ns = nsnamespace + (nsnamespace == "" ? "" : ".") + this.Text;
-			XmlHelp.XmlHelpEntry xhelp = XmlHelp.findnode(ns);
-			toolTip1.ToolTipTitle = "";
-			string t = "";
-			if (xhelp != null)
-			{
-				toolTip1.ToolTipTitle = string.Format("({0}) {1}", xhelp.type, xhelp.name);
-				if (xhelp.desc != "") t = string.Format("{0}", xhelp.desc);
-				else t = xhelp.fullname;
-				if (xhelp.parameters != "" || xhelp.returns != "")
-				{
-					if (xhelp.desc != "") t += "\r\n";
-					if (xhelp.parameters != "") t += string.Format("\r\nParameters: {0}", xhelp.parameters);
-					if (xhelp.returns != "") t += string.Format("\r\nReturns: {0}", xhelp.returns);
-				}
-			}
+
+			// start ugly hack
+			//int charindex = richCodeBox1.SelectionStart;
+			RichTextBox rtbx = new RichTextBox();
+			rtbx.Rtf = richCodeBox1.Rtf;
+			//10:39:02 AM CB_TextChanged(): charindex - 0 = Color[Maroon]
+			//10:39:02 AM CB_TextChanged(): charindex - 1 = Color[DarkCyan]
+			rtbx.Select(richCodeBox1.SelectionStart - 1, 0);
+			Color color = rtbx.SelectionColor;
+			//Font font = rtbx.SelectionFont;
+			rtbx.Dispose();
+			// end ugly hack
+
+			string t = Program.MainForm.FormatToolTip(Program.MainForm.toolTip1, ns, color);
 			Point cursorPt = richCodeBox1.GetPositionFromCharIndex(richCodeBox1.SelectionStart);
 			cursorPt.X += (int)richCodeBox1.Font.SizeInPoints;
 			cursorPt.Y += richCodeBox1.Location.Y;
-			//Program.Log("this.Location.X={0} this.Location.Y={1}", this.Location.X, this.Location.Y);
-			//Program.Log("Program.MainForm.Location.X={0} Program.MainForm.Location.Y={1}", Program.MainForm.Location.X, Program.MainForm.Location.Y);
-			//Program.Log("Program.MainForm.richCodeBox1.Location.X={0} Program.MainForm.richCodeBox1.Location.Y={1}", Program.MainForm.richCodeBox1.Location.X, Program.MainForm.richCodeBox1.Location.Y);
-			//if (t != "") toolTip1.Show(t, Program.MainForm, this.Location.X + this.DropDownWidth + 20, this.Location.Y + 150, 5000);
-			if (t != "" && !ns.EndsWith(".")) toolTip1.Show(t, Program.MainForm.richCodeBox1, cursorPt.X + this.Width, cursorPt.Y, 5000);
-			else toolTip1.Hide(Program.MainForm.richCodeBox1);
+			if (t != "" && !ns.EndsWith(".")) Program.MainForm.toolTip1.Show(t, Program.MainForm.richCodeBox1, cursorPt.X + this.Width, cursorPt.Y, 5000);
 		}
 
 		void CB_KeyDown(object sender, KeyEventArgs e)
@@ -109,6 +99,72 @@ namespace NSPEdit
 		void CB_LostFocus(object sender, EventArgs e)
 		{
 			this.Visible = false;
+		}
+
+		public void MakeActive()
+		{
+			this.Text = "";
+			this.Items.Clear();
+			this.Items.Add("");
+			int maxchar = 0;
+
+
+			// start ugly hack
+			RichTextBox rtbx = new RichTextBox();
+			rtbx.Rtf = richCodeBox1.Rtf;
+			//10:39:02 AM CB_TextChanged(): charindex - 0 = Color[Maroon]
+			//10:39:02 AM CB_TextChanged(): charindex - 1 = Color[DarkCyan]
+			rtbx.Select(richCodeBox1.SelectionStart - 1, 0);
+			Color color = rtbx.SelectionColor;
+			//Font font = rtbx.SelectionFont;
+			rtbx.Dispose();
+			// end ugly hack
+			if (color != Color.DarkCyan)
+			{
+				//Program.Log("probably not a good place for autocomplete {0}", color);
+				return;
+			}
+
+
+			string label = richCodeBox1.getlabel(richCodeBox1.SelectionStart, false);
+			this.nsnamespace = label;
+
+			List<string> ACL = this.fillautocomplete(label);
+
+			foreach (string s in ACL)
+			{
+				this.Items.Add(s);
+				if (maxchar < s.Length) maxchar = s.Length;
+			}
+			this.Visible = true;
+			Point cursorPt = richCodeBox1.GetPositionFromCharIndex(richCodeBox1.SelectionStart);
+			cursorPt.X += (int)richCodeBox1.Font.SizeInPoints;
+			cursorPt.Y += richCodeBox1.Location.Y;
+			this.Size = new System.Drawing.Size(100, 1);
+			this.DropDownHeight = (richCodeBox1.Font.Height + 1) * 5;
+			//CB.MaxDropDownItems = 5;
+			this.Width = (maxchar + 1) * (int)richCodeBox1.Font.SizeInPoints;
+			this.Location = cursorPt;
+			this.BringToFront();
+			// CB.DroppedDown = true;
+			this.Show();
+			this.Focus();
+			this.DroppedDown = true;
+			this.Text = "";
+		}
+
+		public List<string> fillautocomplete(string parentnamespace)
+		{
+			List<string> ACL = new List<string>();
+			foreach (XmlHelp.XmlHelpEntry entry in XmlHelp.getlist(parentnamespace))
+			{
+				if (!ACL.Contains(entry.name)) ACL.Add(entry.name);
+			}
+			if (!ACL.Contains("gettype")) ACL.Add("gettype");
+			if (!ACL.Contains("length")) ACL.Add("length");
+			if (!ACL.Contains("tostring")) ACL.Add("tostring");
+			ACL.Sort();
+			return ACL;
 		}
 	}
 }
