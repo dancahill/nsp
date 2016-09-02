@@ -1,244 +1,240 @@
 <?xml version="1.0" encoding="utf-8" ?>
+<!--this file is auto-generated-->
 <NSPNameSpace>
-	<_ENV type="table" description="_ENV {} - table of environment variables">
-		<ADMSXMLBINDIR type="string" description="_ENV.ADMSXMLBINDIR" />
-		<ALLUSERSPROFILE type="string" description="_ENV.ALLUSERSPROFILE" />
-		<APPDATA type="string" description="_ENV.APPDATA" />
-		<ASCOBINDIR type="string" description="_ENV.ASCOBINDIR" />
-		<COMMONPROGRAMFILES type="string" description="_ENV.COMMONPROGRAMFILES" />
-		<COMMONPROGRAMW6432 type="string" description="_ENV.COMMONPROGRAMW6432" />
-		<COMPUTERNAME type="string" description="_ENV.COMPUTERNAME" />
-		<COMSPEC type="string" description="_ENV.COMSPEC" />
-		<ENABLE_XAML_DIAGNOSTICS_SOURCE_INFO type="string" description="_ENV.ENABLE_XAML_DIAGNOSTICS_SOURCE_INFO" />
-		<FPS_BROWSER_APP_PROFILE_STRING type="string" description="_ENV.FPS_BROWSER_APP_PROFILE_STRING" />
-		<FPS_BROWSER_USER_PROFILE_STRING type="string" description="_ENV.FPS_BROWSER_USER_PROFILE_STRING" />
-		<FP_NO_HOST_CHECK type="string" description="_ENV.FP_NO_HOST_CHECK" />
-		<FREEHDL type="string" description="_ENV.FREEHDL" />
-		<GTK_BASEPATH type="string" description="_ENV.GTK_BASEPATH" />
-		<HOME type="string" description="_ENV.HOME" />
-		<HOMEDRIVE type="string" description="_ENV.HOMEDRIVE" />
-		<HOMEPATH type="string" description="_ENV.HOMEPATH" />
-		<LOCALAPPDATA type="string" description="_ENV.LOCALAPPDATA" />
-		<LOGONSERVER type="string" description="_ENV.LOGONSERVER" />
-		<MINGWDIR type="string" description="_ENV.MINGWDIR" />
-		<MSBUILDLOADMICROSOFTTARGETSREADONLY type="string" description="_ENV.MSBUILDLOADMICROSOFTTARGETSREADONLY" />
-		<NUMBER_OF_PROCESSORS type="string" description="_ENV.NUMBER_OF_PROCESSORS" />
-		<OCTAVEBINDIR type="string" description="_ENV.OCTAVEBINDIR" />
-		<OPENSSL_CONF type="string" description="_ENV.OPENSSL_CONF" />
-		<OS type="string" description="_ENV.OS" />
-		<PATH type="string" description="_ENV.PATH" />
-		<PATHEXT type="string" description="_ENV.PATHEXT" />
-		<PKGDEFAPPLICATIONCONFIGFILE type="string" description="_ENV.PKGDEFAPPLICATIONCONFIGFILE" />
-		<PROCESSOR_ARCHITECTURE type="string" description="_ENV.PROCESSOR_ARCHITECTURE" />
-		<PROCESSOR_ARCHITEW6432 type="string" description="_ENV.PROCESSOR_ARCHITEW6432" />
-		<PROCESSOR_IDENTIFIER type="string" description="_ENV.PROCESSOR_IDENTIFIER" />
-		<PROCESSOR_LEVEL type="string" description="_ENV.PROCESSOR_LEVEL" />
-		<PROCESSOR_REVISION type="string" description="_ENV.PROCESSOR_REVISION" />
-		<PROGRAMDATA type="string" description="_ENV.PROGRAMDATA" />
-		<PROGRAMFILES type="string" description="_ENV.PROGRAMFILES" />
-		<PROGRAMW6432 type="string" description="_ENV.PROGRAMW6432" />
-		<PSMODULEPATH type="string" description="_ENV.PSMODULEPATH" />
-		<PUBLIC type="string" description="_ENV.PUBLIC" />
-		<QUCSDIR type="string" description="_ENV.QUCSDIR" />
-		<SESSIONNAME type="string" description="_ENV.SESSIONNAME" />
-		<SYSTEMDRIVE type="string" description="_ENV.SYSTEMDRIVE" />
-		<SYSTEMROOT type="string" description="_ENV.SYSTEMROOT" />
-		<TEMP type="string" description="_ENV.TEMP" />
-		<TMP type="string" description="_ENV.TMP" />
-		<USERDOMAIN type="string" description="_ENV.USERDOMAIN" />
-		<USERDOMAIN_ROAMINGPROFILE type="string" description="_ENV.USERDOMAIN_ROAMINGPROFILE" />
-		<USERNAME type="string" description="_ENV.USERNAME" />
-		<USERPROFILE type="string" description="_ENV.USERPROFILE" />
-		<VISUALSTUDIODIR type="string" description="_ENV.VISUALSTUDIODIR" />
-		<VISUALSTUDIOEDITION type="string" description="_ENV.VISUALSTUDIOEDITION" />
-		<VISUALSTUDIOVERSION type="string" description="_ENV.VISUALSTUDIOVERSION" />
-		<VS110COMNTOOLS type="string" description="_ENV.VS110COMNTOOLS" />
-		<VS120COMNTOOLS type="string" description="_ENV.VS120COMNTOOLS" />
-		<VS140COMNTOOLS type="string" description="_ENV.VS140COMNTOOLS" />
-		<VSIDE type="string" description="_ENV.VSIDE" />
-		<VSLANG type="string" description="_ENV.VSLANG" />
-		<VSSDK140INSTALL type="string" description="_ENV.VSSDK140INSTALL" />
-		<WINDIR type="string" description="_ENV.WINDIR" />
-		<XTC_IDE type="string" description="_ENV.XTC_IDE" />
-		<_PTVS_PID type="string" description="_ENV._PTVS_PID" />
+	<false type="boolean" desc="false (special variable)" />
+	<null type="null" desc="null (special variable)" />
+	<this type="table" desc="this (special variable)" />
+	<true type="boolean" desc="true (special variable)" />
+	<_ENV type="table" desc="table of environment variables">
+		<ADMSXMLBINDIR type="string" desc="_ENV.ADMSXMLBINDIR" />
+		<ALLUSERSPROFILE type="string" desc="_ENV.ALLUSERSPROFILE" />
+		<APPDATA type="string" desc="_ENV.APPDATA" />
+		<ASCOBINDIR type="string" desc="_ENV.ASCOBINDIR" />
+		<COMMONPROGRAMFILES type="string" desc="_ENV.COMMONPROGRAMFILES" />
+		<COMMONPROGRAMW6432 type="string" desc="_ENV.COMMONPROGRAMW6432" />
+		<COMPUTERNAME type="string" desc="_ENV.COMPUTERNAME" />
+		<COMSPEC type="string" desc="_ENV.COMSPEC" />
+		<FPS_BROWSER_APP_PROFILE_STRING type="string" desc="_ENV.FPS_BROWSER_APP_PROFILE_STRING" />
+		<FPS_BROWSER_USER_PROFILE_STRING type="string" desc="_ENV.FPS_BROWSER_USER_PROFILE_STRING" />
+		<FP_NO_HOST_CHECK type="string" desc="_ENV.FP_NO_HOST_CHECK" />
+		<FREEHDL type="string" desc="_ENV.FREEHDL" />
+		<GTK_BASEPATH type="string" desc="_ENV.GTK_BASEPATH" />
+		<HOME type="string" desc="_ENV.HOME" />
+		<HOMEDRIVE type="string" desc="_ENV.HOMEDRIVE" />
+		<HOMEPATH type="string" desc="_ENV.HOMEPATH" />
+		<LOCALAPPDATA type="string" desc="_ENV.LOCALAPPDATA" />
+		<LOGONSERVER type="string" desc="_ENV.LOGONSERVER" />
+		<MINGWDIR type="string" desc="_ENV.MINGWDIR" />
+		<NUMBER_OF_PROCESSORS type="string" desc="_ENV.NUMBER_OF_PROCESSORS" />
+		<OCTAVEBINDIR type="string" desc="_ENV.OCTAVEBINDIR" />
+		<OPENSSL_CONF type="string" desc="_ENV.OPENSSL_CONF" />
+		<OS type="string" desc="_ENV.OS" />
+		<PATH type="string" desc="_ENV.PATH" />
+		<PATHEXT type="string" desc="_ENV.PATHEXT" />
+		<PROCESSOR_ARCHITECTURE type="string" desc="_ENV.PROCESSOR_ARCHITECTURE" />
+		<PROCESSOR_ARCHITEW6432 type="string" desc="_ENV.PROCESSOR_ARCHITEW6432" />
+		<PROCESSOR_IDENTIFIER type="string" desc="_ENV.PROCESSOR_IDENTIFIER" />
+		<PROCESSOR_LEVEL type="string" desc="_ENV.PROCESSOR_LEVEL" />
+		<PROCESSOR_REVISION type="string" desc="_ENV.PROCESSOR_REVISION" />
+		<PROGRAMDATA type="string" desc="_ENV.PROGRAMDATA" />
+		<PROGRAMFILES type="string" desc="_ENV.PROGRAMFILES" />
+		<PROGRAMW6432 type="string" desc="_ENV.PROGRAMW6432" />
+		<PSMODULEPATH type="string" desc="_ENV.PSMODULEPATH" />
+		<PUBLIC type="string" desc="_ENV.PUBLIC" />
+		<QUCSDIR type="string" desc="_ENV.QUCSDIR" />
+		<SESSIONNAME type="string" desc="_ENV.SESSIONNAME" />
+		<SYSTEMDRIVE type="string" desc="_ENV.SYSTEMDRIVE" />
+		<SYSTEMROOT type="string" desc="_ENV.SYSTEMROOT" />
+		<TEMP type="string" desc="_ENV.TEMP" />
+		<TMP type="string" desc="_ENV.TMP" />
+		<USERDOMAIN type="string" desc="_ENV.USERDOMAIN" />
+		<USERDOMAIN_ROAMINGPROFILE type="string" desc="_ENV.USERDOMAIN_ROAMINGPROFILE" />
+		<USERNAME type="string" desc="_ENV.USERNAME" />
+		<USERPROFILE type="string" desc="_ENV.USERPROFILE" />
+		<VS110COMNTOOLS type="string" desc="_ENV.VS110COMNTOOLS" />
+		<VS120COMNTOOLS type="string" desc="_ENV.VS120COMNTOOLS" />
+		<VS140COMNTOOLS type="string" desc="_ENV.VS140COMNTOOLS" />
+		<VSSDK140INSTALL type="string" desc="_ENV.VSSDK140INSTALL" />
+		<WINDIR type="string" desc="_ENV.WINDIR" />
 	</_ENV>
-	<_GLOBALS type="table" description="_GLOBALS {} - link to the global variables table (recursive)" />
-	<_debug type="boolean" description="_debug" />
-	<_filename type="string" description="_filename" />
-	<_filepath type="string" description="_filepath" />
-	<_ostype_ type="string" description="_ostype_" />
-	<_version_ type="string" description="_version_" />
-	<base64 type="table" description="base64 {}">
-		<decode type="function" description="base64.decode()" />
-		<encode type="function" description="base64.encode()" />
+	<_GLOBALS type="table" desc="link to the global variables table (recursive)" />
+	<_filename type="string" desc="name of running script" />
+	<_filepath type="string" desc="path of running script" />
+	<_ostype_ type="string" desc="string describing the operating system" />
+	<_version_ type="string" desc="NSP version" />
+	<base64 type="table" desc="functions for working with base64 data">
+		<decode type="function" desc="returns decoded string of provided base64 data" params="" returns="" />
+		<encode type="function" desc="returns base64 encoded version of provided string" params="" returns="" />
 	</base64>
-	<copy type="function" description="copy()" />
-	<debug type="table" description="debug {}">
-		<break type="function" description="debug.break()" />
+	<copy type="function" desc="creates and returns a clone of var (including tables)" params="(object var)" returns="clone of var" />
+	<debug type="table" desc="misc debugging functions">
+		<break type="function" desc="break execution for debugging" params="none" returns="void" />
 	</debug>
-	<dirlist type="function" description="dirlist()" />
-	<dl type="table" description="dl {}">
-		<load type="function" description="dl.load()" />
-		<path type="table" description="dl.path {}">
+	<dirlist type="function" desc="returns a table of a specified directory's contents" params="" returns="" />
+	<dl type="table" desc="set of functions for loading dynamic libraries">
+		<load type="function" desc="load specified library" params="" returns="" />
+		<path type="table" desc="array of paths to search for libraries loaded by dl.load()">
 		</path>
 	</dl>
-	<eval type="function" description="eval()" />
-	<exec type="function" description="exec()" />
-	<file type="table" description="file {} - class of functions available for working with files">
-		<append type="function" description="file.append()" />
-		<chdir type="function" description="file.chdir()" />
-		<exists type="function" description="file.exists()" />
-		<mkdir type="function" description="file.mkdir()" />
-		<readall type="function" description="file.readall()" />
-		<rename type="function" description="file.rename()" />
-		<stat type="function" description="file.stat()" />
-		<unlink type="function" description="file.unlink()" />
-		<writeall type="function" description="file.writeall()" />
+	<eval type="function" desc="" params="" returns="" />
+	<exec type="function" desc="" params="" returns="" />
+	<file type="table" desc="collection of functions available for working with files">
+		<append type="function" desc="append string data to the specified file" params="" returns="" />
+		<chdir type="function" desc="change to specified directory" params="" returns="" />
+		<exists type="function" desc="used to check if a file or directory exists on disk" params="(string filename)" returns="true if filename exists, otherwise false" />
+		<mkdir type="function" desc="create a directory" params="" returns="" />
+		<readall type="function" desc="read the entire content of a file and return it as a string (binary-safe)" params="" returns="" />
+		<rename type="function" desc="rename a file on disk" params="" returns="" />
+		<stat type="function" desc="return a table describing the file" params="" returns="" />
+		<unlink type="function" desc="delete or 'unlink' a file/directory" params="" returns="" />
+		<writeall type="function" desc="write complete string to file, replacing any existing content of the file" params="" returns="" />
 	</file>
-	<iname type="function" description="iname()" />
-	<include type="function" description="include()" />
-	<io type="table" description="io {}">
-		<print type="function" description="io.print()" />
-		<write type="function" description="io.write()" />
-		<flush type="function" description="io.flush()" />
+	<iname type="function" desc="" params="" returns="" />
+	<include type="function" desc="load a script" params="" returns="" />
+	<io type="table" desc="input/output functions">
+		<print type="function" desc="print data to console - accepts one or more comma-separated parameters" params="" returns="" />
+		<write type="function" desc="write data to console" params="" returns="" />
+		<flush type="function" desc="flush any buffered data to console" params="" returns="" />
 	</io>
-	<ival type="function" description="ival()" />
-	<math type="table" description="math {}">
-		<abs type="function" description="math.abs()" />
-		<ceil type="function" description="math.ceil()" />
-		<floor type="function" description="math.floor()" />
-		<rand type="function" description="math.rand()" />
-		<acos type="function" description="math.acos()" />
-		<asin type="function" description="math.asin()" />
-		<atan type="function" description="math.atan()" />
-		<atan2 type="function" description="math.atan2()" />
-		<cos type="function" description="math.cos()" />
-		<sin type="function" description="math.sin()" />
-		<tan type="function" description="math.tan()" />
-		<exp type="function" description="math.exp()" />
-		<log type="function" description="math.log()" />
-		<log10 type="function" description="math.log10()" />
-		<cosh type="function" description="math.cosh()" />
-		<sinh type="function" description="math.sinh()" />
-		<tanh type="function" description="math.tanh()" />
-		<sqrt type="function" description="math.sqrt()" />
+	<ival type="function" desc="" params="" returns="" />
+	<math type="table" desc="math functions">
+		<abs type="function" desc="get absolute (positive) value of a number" params="" returns="" />
+		<ceil type="function" desc="round a number up to the nearest integer" params="" returns="" />
+		<floor type="function" desc="round a number down to the nearest integer" params="" returns="" />
+		<rand type="function" desc="return a random number in the requested range" params="" returns="" />
+		<acos type="function" desc="return the arc cosine of a value" params="" returns="" />
+		<asin type="function" desc="return the arc sine of a value" params="" returns="" />
+		<atan type="function" desc="return the arc tangent of a value" params="" returns="" />
+		<atan2 type="function" desc="calculates the principal value of the arc tangent of y/x, using the signs of the two arguments to determine the quadrant of the result." params="" returns="" />
+		<cos type="function" desc="returns the cosine of a value" params="" returns="" />
+		<sin type="function" desc="returns the sine of a value" params="" returns="" />
+		<tan type="function" desc="returns the tangent of a value" params="" returns="" />
+		<exp type="function" desc="returns the exponential value of a value" params="" returns="" />
+		<log type="function" desc="returns the logarithm of a value" params="" returns="" />
+		<log10 type="function" desc="returns the base 10 logarithm of a value" params="" returns="" />
+		<cosh type="function" desc="returns the hyperbolic cosine of a value" params="" returns="" />
+		<sinh type="function" desc="returns the hyperbolic sine of a value" params="" returns="" />
+		<tanh type="function" desc="returns the hyperbolic tangent of a value" params="" returns="" />
+		<sqrt type="function" desc="returns the square root of a value" params="" returns="" />
 	</math>
-	<net type="table" description="net {}">
-		<have_tls type="boolean" description="net.have_tls" />
-		<tls_type type="string" description="net.tls_type" />
-		<dns type="table" description="net.dns {}">
-			<name2addr type="function" description="net.dns.name2addr()" />
-			<addr2name type="function" description="net.dns.addr2name()" />
+	<net type="table" desc="collection of functions and classes available for working with network connections">
+		<have_tls type="boolean" desc="" />
+		<tls_type type="string" desc="" />
+		<dns type="table" desc="">
+			<name2addr type="function" desc="" params="" returns="" />
+			<addr2name type="function" desc="" params="" returns="" />
 		</dns>
-		<ftp type="table" description="net.ftp {}">
-			<client type="function" description="net.ftp.client()" />
+		<ftp type="table" desc="">
+			<client type="function" desc="" params="" returns="" />
 		</ftp>
-		<http type="table" description="net.http {}">
-			<client type="function" description="net.http.client()" />
+		<http type="table" desc="">
+			<client type="function" desc="" params="" returns="" />
 		</http>
-		<mime type="table" description="net.mime {}">
-			<read type="function" description="net.mime.read()" />
-			<write type="function" description="net.mime.write()" />
-			<decode_qp type="function" description="net.mime.decode_qp()" />
-			<decode_rfc2047 type="function" description="net.mime.decode_rfc2047()" />
+		<mime type="table" desc="">
+			<read type="function" desc="" params="" returns="" />
+			<write type="function" desc="" params="" returns="" />
+			<decode_qp type="function" desc="" params="" returns="" />
+			<decode_rfc2047 type="function" desc="" params="" returns="" />
 		</mime>
-		<smtp type="table" description="net.smtp {}">
-			<client type="function" description="net.smtp.client()" />
+		<smtp type="table" desc="">
+			<client type="function" desc="" params="" returns="" />
 		</smtp>
-		<pop3 type="table" description="net.pop3 {}">
-			<client type="function" description="net.pop3.client()" />
+		<pop3 type="table" desc="">
+			<client type="function" desc="" params="" returns="" />
 		</pop3>
-		<socket type="table" description="net.socket {}">
-			<accept type="function" description="net.socket.accept()" />
-			<bind type="function" description="net.socket.bind()" />
-			<close type="function" description="net.socket.close()" />
-			<connect type="function" description="net.socket.connect()" />
-			<gets type="function" description="net.socket.gets()" />
-			<gettype type="function" description="net.socket.gettype()" />
-			<info type="function" description="net.socket.info()" />
-			<read type="function" description="net.socket.read()" />
-			<setsockopt type="function" description="net.socket.setsockopt()" />
-			<socket type="function" description="net.socket.socket()" />
-			<tlsaccept type="function" description="net.socket.tlsaccept()" />
-			<tlsconnect type="function" description="net.socket.tlsconnect()" />
-			<write type="function" description="net.socket.write()" />
+		<socket type="table" desc="class of functions available for working with raw TCP/IP connections">
+			<accept type="function" desc="" params="" returns="" />
+			<bind type="function" desc="" params="" returns="" />
+			<close type="function" desc="" params="" returns="" />
+			<connect type="function" desc="" params="" returns="" />
+			<gets type="function" desc="" params="" returns="" />
+			<gettype type="function" desc="" params="" returns="" />
+			<info type="function" desc="" params="" returns="" />
+			<read type="function" desc="" params="" returns="" />
+			<setsockopt type="function" desc="" params="" returns="" />
+			<socket type="function" desc="" params="" returns="" />
+			<tlsaccept type="function" desc="" params="" returns="" />
+			<tlsconnect type="function" desc="" params="" returns="" />
+			<write type="function" desc="" params="" returns="" />
 		</socket>
-		<tnef type="table" description="net.tnef {}">
-			<debug type="function" description="net.tnef.debug()" />
+		<tnef type="table" desc="">
+			<debug type="function" desc="" params="" returns="" />
 		</tnef>
 	</net>
-	<pipe type="table" description="pipe {}">
-		<open type="function" description="pipe.open()" />
-		<read type="function" description="pipe.read()" />
-		<write type="function" description="pipe.write()" />
-		<close type="function" description="pipe.close()" />
+	<pipe type="table" desc="functions for creating and working with pipes">
+		<open type="function" desc="create a process with read/write io pipes" params="(string exe[, string arg1, string arg2])" returns="pipe-conn object" />
+		<read type="function" desc="reads data from an open pipe" params="(pipe-conn pipe)" returns="input data string" />
+		<write type="function" desc="writes data to an open pipe" params="(pipe-conn pipe, string data)" returns="number of bytes sent" />
+		<close type="function" desc="closes pipe-conn" params="(pipe-conn pipe)" returns="void" />
 	</pipe>
-	<print type="function" description="print()" />
-	<printf type="function" description="printf()" />
-	<regex type="table" description="regex {}">
-		<match type="function" description="regex.match()" />
-		<replace type="function" description="regex.replace()" />
+	<print type="function" desc="print one or more objects to console" params="([object])" returns="total length of output" />
+	<printf type="function" desc="print to console with formatting similar to the c function of the same name" params="(string format[, ...])" returns="total length of output string" />
+	<regex type="table" desc="">
+		<match type="function" desc="" params="" returns="" />
+		<replace type="function" desc="" params="" returns="" />
 	</regex>
-	<rot13 type="function" description="rot13()" />
-	<runtime type="function" description="runtime()" />
-	<serialize type="function" description="serialize()" />
-	<sizeof type="function" description="sizeof()" />
-	<sleep type="function" description="sleep()" />
-	<sort type="table" description="sort {}">
-		<byname type="function" description="sort.byname()" />
-		<bykey type="function" description="sort.bykey()" />
+	<rot13 type="function" desc="" params="" returns="" />
+	<runtime type="function" desc="" params="" returns="" />
+	<serialize type="function" desc="returns the contents of a table in string format (with subtable)" params="(object arg1)" returns="string representation of arg1" />
+	<sizeof type="function" desc="returns size of object" params="(object arg1)" returns="size of object based on type. for strings, it's the length of a string. for tables, it's the number of items in the table." />
+	<sleep type="function" desc="causes script to sleep for a number of milliseconds" params="(number milliseconds)" returns="void" />
+	<sort type="table" desc="">
+		<byname type="function" desc="" params="" returns="" />
+		<bykey type="function" desc="" params="" returns="" />
 	</sort>
-	<sprintf type="function" description="sprintf()" />
-	<string type="table" description="string {} - class of functions available for string handling">
-		<atoi type="function" description="string.atoi()" />
-		<itoa type="function" description="string.itoa()" />
-		<cat type="function" description="string.cat()" />
-		<cmp type="function" description="string.cmp()" />
-		<icmp type="function" description="string.icmp()" />
-		<ncmp type="function" description="string.ncmp()" />
-		<nicmp type="function" description="string.nicmp()" />
-		<join type="function" description="string.join()" />
-		<len type="function" description="string.len()" />
-		<replace type="function" description="string.replace()" />
-		<split type="function" description="string.split()" />
-		<str type="function" description="string.str()" />
-		<istr type="function" description="string.istr()" />
-		<sub type="function" description="string.sub()" />
-		<tostring type="function" description="string.tostring()" />
-		<tolower type="function" description="string.tolower()" />
-		<toupper type="function" description="string.toupper()" />
+	<sprintf type="function" desc="print to buffer with formatting similar to the c function of the same name" params="(string format[, ...])" returns="string with formatting applied" />
+	<string type="table" desc="class of functions available for working with strings">
+		<atoi type="function" desc="get numeric value of character in a string" params="(string arg1[, number offset])" returns="numeric value of character in arg1 at offset" />
+		<itoa type="function" desc="convert number to its ascii character equivalent" params="(number arg1)" returns="string ascii value of arg1" />
+		<cat type="function" desc="append one string to another" params="(string arg1, string arg2)" returns="string with arg1 and arg2 combined" />
+		<cmp type="function" desc="case sensitive string comparison" params="(string str1, string str2)" returns="number - 0 if matches, or index of first non-matching character" />
+		<icmp type="function" desc="case insensitive string" params="(string str1, string str2)" returns="number" />
+		<ncmp type="function" desc="case sensitive substring comparison up to len characters" params="(string str1, string str2, number len)" returns="number" />
+		<nicmp type="function" desc="case insensitive substring comparison up to len characters" params="(string str1, string str2, number len)" returns="number" />
+		<join type="function" desc="merge the table str into a single string separated by sep" params="(table str, string sep)" returns="table" />
+		<len type="function" desc="get length of string (binary safe)" params="(string str)" returns="number" />
+		<replace type="function" desc="replace occurences in of arg2 with arg3" params="(string arg1, string arg2, string arg3)" returns="string result of arg1 with arg2 replaced" />
+		<split type="function" desc="split a string into substring" params="(string str, string sep)" returns="table of substrings in str separated by sep" />
+		<str type="function" desc="case sensitive substring search" params="(string stack, string needle)" returns="string stack starting where needle was found, or null if not found" />
+		<istr type="function" desc="case insensitive substring search" params="(string stack, string needle)" returns="string stack starting where needle was found, or null if not found" />
+		<sub type="function" desc="get a substring of str, starting at arg2 and ending at arg3.
+if arg2 is negative it will be read as an index counting back from the end of the string.
+arg3 is implicitly the end of the string" params="(string str, number arg2[, number arg3])" returns="string starting at arg2 and ending at arg3" />
+		<tostring type="function" desc="generic method for objects to convert data to a string" params="(object arg1)" returns="string format of arg1" />
+		<tolower type="function" desc="get lowercase version of string" params="(string str)" returns="string" />
+		<toupper type="function" desc="get uppercase version of string" params="(string str)" returns="string" />
 	</string>
-	<system type="function" description="system()" />
-	<thread type="table" description="thread {}">
-		<thread type="function" description="thread.thread()" />
-		<start type="function" description="thread.start()" />
-		<finish type="function" description="thread.finish()" />
-		<mutex type="table" description="thread.mutex {}">
-			<mutex type="function" description="thread.mutex.mutex()" />
-			<lock type="function" description="thread.mutex.lock()" />
-			<unlock type="function" description="thread.mutex.unlock()" />
-			<free type="function" description="thread.mutex.free()" />
+	<system type="function" desc="" params="" returns="" />
+	<thread type="table" desc="class of functions available for working with threads (experimental)">
+		<thread type="function" desc="" params="" returns="" />
+		<start type="function" desc="" params="" returns="" />
+		<finish type="function" desc="" params="" returns="" />
+		<mutex type="table" desc="">
+			<mutex type="function" desc="" params="" returns="" />
+			<lock type="function" desc="" params="" returns="" />
+			<unlock type="function" desc="" params="" returns="" />
+			<free type="function" desc="" params="" returns="" />
 		</mutex>
 	</thread>
-	<time type="table" description="time {}">
-		<gmtime type="function" description="time.gmtime()" />
-		<gettimeofday type="function" description="time.gettimeofday()" />
-		<localtime type="function" description="time.localtime()" />
-		<sqldate type="function" description="time.sqldate()" />
-		<sqltime type="function" description="time.sqltime()" />
-		<sqldatetime type="function" description="time.sqldatetime()" />
-		<sqltounix type="function" description="time.sqltounix()" />
-		<now type="function" description="time.now()" />
+	<time type="table" desc="">
+		<gmtime type="function" desc="" params="" returns="" />
+		<gettimeofday type="function" desc="" params="" returns="" />
+		<localtime type="function" desc="" params="" returns="" />
+		<sqldate type="function" desc="" params="" returns="" />
+		<sqltime type="function" desc="" params="" returns="" />
+		<sqldatetime type="function" desc="" params="" returns="" />
+		<sqltounix type="function" desc="" params="" returns="" />
+		<now type="function" desc="" params="" returns="" />
 	</time>
-	<tonumber type="function" description="tonumber()" />
-	<typeof type="function" description="typeof()" />
-	<win type="table" description="win {}">
-		<Beep type="function" description="win.Beep()" />
-		<CreateProcess type="function" description="win.CreateProcess()" />
-		<MessageBox type="function" description="win.MessageBox()" />
-		<PlaySound type="function" description="win.PlaySound()" />
-		<ShellExecute type="function" description="win.ShellExecute()" />
+	<tonumber type="function" desc="" params="" returns="" />
+	<typeof type="function" desc="" params="" returns="" />
+	<win type="table" desc="">
+		<Beep type="function" desc="" params="" returns="" />
+		<CreateProcess type="function" desc="" params="" returns="" />
+		<MessageBox type="function" desc="" params="" returns="" />
+		<PlaySound type="function" desc="" params="" returns="" />
+		<ShellExecute type="function" desc="" params="" returns="" />
 	</win>
-	<write type="function" description="write()" />
-	<zlink type="function" description="zlink()" />
+	<write type="function" desc="" params="" returns="" />
+	<zlink type="function" desc="" params="" returns="" />
 </NSPNameSpace>

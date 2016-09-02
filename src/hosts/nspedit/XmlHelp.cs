@@ -14,21 +14,34 @@ namespace NSPEdit
 			public string name = "";
 			public string type = "";
 			public string desc = "";
+			public string parameters = "";
+			public string returns = "";
 		}
 
 		private static string filename1 = Path.GetDirectoryName(Application.ExecutablePath) + @"\NSPNameSpace.xml";
 		private static string filename2 = Directory.GetCurrentDirectory() + @"\NSPNameSpace.xml", childnamespace;
 		private static XmlDocument xdoc1 = null;
 		private static XmlDocument xdoc2 = null;
+		private static DateTime lastload = DateTime.Now.AddMinutes(-1);
 
 		private static void loadfiles()
 		{
+			if (DateTime.Now < lastload.AddMinutes(1)) return;
+			lastload = DateTime.Now;
 			if (xdoc1 == null)
 			{
 				if (File.Exists(filename1))
 				{
 					xdoc1 = new XmlDocument();
-					xdoc1.Load(filename1);
+					try
+					{
+						xdoc1.Load(filename1);
+					}
+					catch
+					{
+						xdoc1 = null;
+						//Program.Log("{0} failed to load", filename1);
+					}
 				}
 			}
 			if (xdoc2 == null)
@@ -36,7 +49,15 @@ namespace NSPEdit
 				if (File.Exists(filename2))
 				{
 					xdoc2 = new XmlDocument();
-					xdoc2.Load(filename1);
+					try
+					{
+						xdoc2.Load(filename2);
+					}
+					catch
+					{
+						xdoc2 = null;
+						//Program.Log("{0} failed to load", filename2);
+					}
 				}
 			}
 		}
@@ -73,7 +94,9 @@ namespace NSPEdit
 			if (xnode != null)
 			{
 				he.type = xnode.Attributes["type"] != null ? xnode.Attributes["type"].Value : "";
-				he.desc = xnode.Attributes["description"] != null ? xnode.Attributes["description"].Value : "";
+				he.desc = xnode.Attributes["desc"] != null ? xnode.Attributes["desc"].Value : "";
+				he.parameters = xnode.Attributes["params"] != null ? xnode.Attributes["params"].Value : "";
+				he.returns = xnode.Attributes["returns"] != null ? xnode.Attributes["returns"].Value : "";
 			}
 			return he;
 		}
@@ -99,7 +122,19 @@ namespace NSPEdit
 			{
 				if (!File.Exists(filename)) return false;
 				XmlDocument doc = new XmlDocument();
-				doc.Load(filename);
+
+
+				try
+				{
+					doc.Load(filename);
+				}
+				catch
+				{
+					doc = null;
+				}
+				if (doc == null) return false;
+
+
 				XmlNode NSPNameSpace = doc.DocumentElement.SelectSingleNode("/NSPNameSpace");
 				XmlNode x = (ns == "") ? NSPNameSpace : NSPNameSpace.SelectSingleNode(ns);
 				if (x != null)
@@ -115,9 +150,14 @@ namespace NSPEdit
 						he.name = xnode.Name;
 						//						if (xnode != null)
 						//						{
+						//he.type = xnode.Attributes["type"] != null ? xnode.Attributes["type"].Value : "";
+						//he.desc = xnode.Attributes["description"] != null ? xnode.Attributes["description"].Value : "";
+
 						he.type = xnode.Attributes["type"] != null ? xnode.Attributes["type"].Value : "";
-						he.desc = xnode.Attributes["description"] != null ? xnode.Attributes["description"].Value : "";
-						//						}
+						he.desc = xnode.Attributes["desc"] != null ? xnode.Attributes["desc"].Value : "";
+						he.parameters = xnode.Attributes["params"] != null ? xnode.Attributes["params"].Value : "";
+						he.returns = xnode.Attributes["returns"] != null ? xnode.Attributes["returns"].Value : "";
+						//		}
 						entries.Add(he);
 					}
 					if (entries.Count != 0) return true;
