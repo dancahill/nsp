@@ -77,6 +77,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="CodeFormat.cs" />
+    <Compile Include="CodeTip.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="XmlHelp.cs" />

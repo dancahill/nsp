@@ -16,40 +16,8 @@ namespace NSPEdit
 		public Timer aTimer;
 		int OutputHeight = 150;
 
-		public ToolTip toolTip1 = new ToolTip();
+		public CodeTip CodeTip1 = new CodeTip();
 		//public DateTime toolTip1_lastupdate = DateTime.Now;
-
-		public string FormatToolTip(ToolTip tt, string name, Color color)
-		{
-			XmlHelp.XmlHelpEntry xhelp = XmlHelp.findnode(name);
-			tt.ToolTipTitle = "";
-			string t = name;
-			if (xhelp != null)
-			{
-				tt.ToolTipTitle = string.Format("({0}) {1}", xhelp.type, xhelp.name);
-				t = "";
-				if (xhelp.desc != "") t = string.Format("{0}", xhelp.desc);
-				if (xhelp.parameters != "" || xhelp.returns != "")
-				{
-					if (xhelp.desc != "") t += "\r\n";
-					if (xhelp.parameters != "") t += string.Format("\r\nParameters: {0}", xhelp.parameters);
-					if (xhelp.returns != "") t += string.Format("\r\nReturns: {0}", xhelp.returns);
-				}
-				//tt.SetToolTip(, t);
-			}
-			if (color != Color.White)
-			{
-				if (color != Color.DarkCyan) toolTip1.ToolTipTitle = "";
-				if (color == Color.Green) t = ""; // comment
-				else if (color == Color.Red) t = ""; // misc extra punctuation
-				else if (color == Color.Black) t = "";//keyword
-				else if (color == Color.DarkCyan) t += "";// string.Format("\r\nColor: {0}", color);
-				else if (color == Color.Maroon) t = ""; // punctuation
-				else if (color == Color.Blue && name != "true" && name != "false" && name != "null" && name != "this") { t = "string data"; }
-				else if (color == Color.Navy) t = "numeric data";
-			}
-			return t;
-		}
 
 		public NSPEditForm()
 		{
@@ -100,14 +68,23 @@ namespace NSPEdit
 			Font font = rtbx.SelectionFont;
 			rtbx.Dispose();
 			// end ugly hack
-			toolTip1.Hide(rcb);
+			CodeTip1.Hide(rcb);
 			//string name = rcb.getlabel(charindex, true);
-			string t = FormatToolTip(toolTip1, rcb.getlabel(charindex, true), color);
-			if (t != "") toolTip1.Show(t, rcb, e.X, e.Y + font.Height, 5000); //else toolTip1.Hide(rcb);
+			string t = CodeTip1.FormatToolTip(rcb.getlabel(charindex, true), color);
+			if (t != "") CodeTip1.Show(t, rcb, e.X, e.Y + font.Height, 5000); //else toolTip1.Hide(rcb);
 		}
 
 		private void NSPEditForm_FormClosing(object sender, FormClosingEventArgs e)
 		{
+			if (richCodeBox1.LastSavedText != richCodeBox1.Text)
+			{
+				if (MessageBox.Show("richCodeBox1.LastSavedText != richCodeBox1.Text\nWould you like to save first?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+				{
+					e.Cancel = true;
+					return;
+				}
+			}
+
 			Rectangle bounds = this.WindowState != FormWindowState.Normal ? this.RestoreBounds : this.DesktopBounds;
 			Properties.Settings.Default.WindowLocation = bounds.Location;
 			Properties.Settings.Default.WindowSize = bounds.Size;
@@ -147,6 +124,17 @@ namespace NSPEdit
 				Rectangle closeButton = new Rectangle(r.Right - 15, r.Top + 4, 9, 7);
 				if (closeButton.Contains(e.Location))
 				{
+
+					RichCodeBox rcb = (RichCodeBox)((SplitContainer)tabControl1.TabPages[i].Controls["SplitContainer1"]).Panel1.Controls["RichCodeBox1"];
+					//string x = rcb.LastSavedText;
+					if (rcb.LastSavedText != rcb.Text)
+					{
+						if (MessageBox.Show("richCodeBox1.LastSavedText != richCodeBox1.Text\nWould you like to save first?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+						{
+							return;
+						}
+					}
+
 					//if (MessageBox.Show("Would you like to Close this Tab?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
 					//{
 					this.tabControl1.TabPages.RemoveAt(i);
@@ -254,6 +242,7 @@ namespace NSPEdit
 			{
 				StreamWriter sw = new StreamWriter(srcfile);
 				sw.Write(richCodeBox1.Text);
+				richCodeBox1.LastSavedText = richCodeBox1.Text;
 				sw.Close();
 				toolStripStatusLabel1.Text = "Saved " + srcfile;
 				SetScriptFileName(srcfile);

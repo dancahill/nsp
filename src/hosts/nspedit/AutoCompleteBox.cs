@@ -29,6 +29,7 @@ namespace NSPEdit
 			this.TextChanged += CB_TextChanged;
 			this.Name = "AutoCompleteBox";
 		}
+
 		void CB_KeyPress(object sender, KeyPressEventArgs e)
 		{
 			if (char.IsControl(e.KeyChar))
@@ -43,7 +44,7 @@ namespace NSPEdit
 				richCodeBox1.SelectedText = this.Text;
 				richCodeBox1.SelectedText = e.KeyChar.ToString();
 				this.Visible = false;
-				Program.MainForm.toolTip1.Hide(Program.MainForm.richCodeBox1);
+				Program.MainForm.CodeTip1.Hide(Program.MainForm.richCodeBox1);
 				richCodeBox1.Focus();
 				if (e.KeyChar == '.')
 				{
@@ -56,7 +57,7 @@ namespace NSPEdit
 		void CB_TextChanged(object sender, EventArgs e)
 		{
 			if (this.Text != "") this.Items[0] = this.Text;
-			Program.MainForm.toolTip1.Hide(Program.MainForm.richCodeBox1);
+			Program.MainForm.CodeTip1.Hide(Program.MainForm.richCodeBox1);
 			string ns = nsnamespace + (nsnamespace == "" ? "" : ".") + this.Text;
 
 			// start ugly hack
@@ -71,11 +72,11 @@ namespace NSPEdit
 			rtbx.Dispose();
 			// end ugly hack
 
-			string t = Program.MainForm.FormatToolTip(Program.MainForm.toolTip1, ns, color);
+			string t = Program.MainForm.CodeTip1.FormatToolTip(ns, color);
 			Point cursorPt = richCodeBox1.GetPositionFromCharIndex(richCodeBox1.SelectionStart);
 			cursorPt.X += (int)richCodeBox1.Font.SizeInPoints;
 			cursorPt.Y += richCodeBox1.Location.Y;
-			if (t != "" && !ns.EndsWith(".")) Program.MainForm.toolTip1.Show(t, Program.MainForm.richCodeBox1, cursorPt.X + this.Width, cursorPt.Y, 5000);
+			if (t != "" && !ns.EndsWith(".")) Program.MainForm.CodeTip1.Show(t, Program.MainForm.richCodeBox1, cursorPt.X + this.Width, cursorPt.Y, 5000);
 		}
 
 		void CB_KeyDown(object sender, KeyEventArgs e)
@@ -85,7 +86,7 @@ namespace NSPEdit
 				if (this.SelectedIndex < 0) this.SelectedIndex = 0;
 				richCodeBox1.SelectedText = this.Text;
 				this.Visible = false;
-				Program.MainForm.toolTip1.Hide(Program.MainForm.richCodeBox1);
+				Program.MainForm.CodeTip1.Hide(Program.MainForm.richCodeBox1);
 				richCodeBox1.Focus();
 			}
 			else if (e.KeyCode == Keys.Escape)
@@ -142,11 +143,9 @@ namespace NSPEdit
 			cursorPt.Y += richCodeBox1.Location.Y;
 			this.Size = new System.Drawing.Size(100, 1);
 			this.DropDownHeight = (richCodeBox1.Font.Height + 1) * 5;
-			//CB.MaxDropDownItems = 5;
 			this.Width = (maxchar + 1) * (int)richCodeBox1.Font.SizeInPoints;
 			this.Location = cursorPt;
 			this.BringToFront();
-			// CB.DroppedDown = true;
 			this.Show();
 			this.Focus();
 			this.DroppedDown = true;

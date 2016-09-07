@@ -158,7 +158,9 @@ namespace NSPEdit
 						he.parameters = xnode.Attributes["params"] != null ? xnode.Attributes["params"].Value : "";
 						he.returns = xnode.Attributes["returns"] != null ? xnode.Attributes["returns"].Value : "";
 						//		}
-						entries.Add(he);
+						bool found = false;
+						foreach (XmlHelpEntry entry in entries) if (entry.name == he.name) found = true;
+						if (!found) entries.Add(he);
 					}
 					if (entries.Count != 0) return true;
 				}

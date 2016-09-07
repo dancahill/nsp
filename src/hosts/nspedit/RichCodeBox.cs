@@ -39,6 +39,8 @@ namespace NSPEdit
 		Stack<UndoStep> undoList = new Stack<UndoStep>(100);
 		RichTextBox richTextBox2;
 
+		public string LastSavedText = "";
+
 		public RichCodeBox()
 		{
 			this.richTextBox2 = Program.MainForm.richTextBox2;
@@ -164,6 +166,7 @@ namespace NSPEdit
 				this.Select(0, 0);
 				this.SelectionTabs = new int[] { tabwidth * 1, tabwidth * 2, tabwidth * 3, tabwidth * 4, tabwidth * 5, tabwidth * 6 };
 				undoList.Push(new UndoStep { RTF = this.Rtf, SelectionStart = 0 });
+				this.LastSavedText = this.Text;
 			}
 			catch (Exception ex)
 			{
