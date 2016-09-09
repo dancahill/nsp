@@ -19,6 +19,8 @@ namespace NSPEdit
 		public CodeTip CodeTip1 = new CodeTip();
 		//public DateTime toolTip1_lastupdate = DateTime.Now;
 
+		SearchForm sf = new SearchForm();
+
 		public NSPEditForm()
 		{
 			InitializeComponent();
@@ -489,6 +491,18 @@ namespace NSPEdit
 		{
 
 			System.Diagnostics.Process.Start("https://nulllogic.ca/nsp/syntax.html");
+		}
+
+		private void findToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			sf.rcb = richCodeBox1;
+			sf.Show();
+		}
+
+		private void findNextToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			sf.rcb = richCodeBox1;
+			sf.buttonSearch_Click(null, null);
 		}
 	}
 }

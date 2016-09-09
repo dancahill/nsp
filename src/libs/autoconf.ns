@@ -61,11 +61,14 @@ function dotests() {
 	if (ostype=='windows') {
 		x1=file.stat(_filepath+"/../../include/nsp/config-win.h");
 		x2=file.stat(_filepath+"/../config-win.mak");
-		if (typeof(x1)!='table' || x1.size<1) {
-			printf("config-win.h does not exist or is empty\r\n");
-		} else if (typeof(x2)!='table' || x2.size<1) {
-			// one of the files is empty
-			printf("config-win.mak does not exist or is empty\r\n");
+		if (typeof(x1)!='table') {
+			printf("config-win.h does not exist\r\n");
+		} else if (x1.size<1) {
+			printf("config-win.h is empty\r\n");
+		} else if (typeof(x2)!='table') {
+			printf("config-win.mak does not exist\r\n");
+		} else if (x2.size<1) {
+			printf("config-win.mak is empty\r\n");
 		} else {
 			printf("config-win.h and config-win.mak exist - skipping reconf\r\n");
 			return;

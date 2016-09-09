@@ -14,25 +14,28 @@ namespace NSPEdit
 			public class Colour
 			{
 				public string CodeType = "";
-				public Color FormColour = Color.Black;
 				public string RTFColour = "";
-				public Colour(string CodeType, Color FormColour, string RTFColour)
+				public Color FormColour = Color.Black;
+				public FontStyle FontStyle = FontStyle.Regular;
+				public Colour(string CodeType, Color FormColour, FontStyle FontStyle, string RTFColour)
 				{
 					this.CodeType = CodeType;
 					this.FormColour = FormColour;
+					this.FontStyle = FontStyle;
 					this.RTFColour = RTFColour;
 				}
 			}
 			List<Colour> Colours = new List<Colour>();
 			public ColourScheme()
 			{
-				Colours.Add(new Colour("comment", Color.Green, @"\cf1"));
-				Colours.Add(new Colour("punctuation2", Color.Red, @"\cf2"));
-				Colours.Add(new Colour("keyword", Color.Black, @"\cf3"));
-				Colours.Add(new Colour("code", Color.DarkCyan, @"\cf4"));
-				Colours.Add(new Colour("punctuation", Color.Maroon, @"\cf5"));
-				Colours.Add(new Colour("string", Color.Blue, @"\cf6"));
-				Colours.Add(new Colour("number", Color.Navy, @"\cf7"));
+				Colours.Add(new Colour("comment", Color.Green, FontStyle.Italic, @"\cf1"));
+				Colours.Add(new Colour("punctuation2", Color.Red, FontStyle.Bold, @"\cf2"));
+				Colours.Add(new Colour("keyword", Color.Black, FontStyle.Bold, @"\cf3"));
+				Colours.Add(new Colour("code", Color.DarkCyan, FontStyle.Regular, @"\cf4"));
+				Colours.Add(new Colour("punctuation", Color.Maroon, FontStyle.Bold, @"\cf5"));
+				Colours.Add(new Colour("reserved", Color.Blue, FontStyle.Regular, @"\cf6"));
+				Colours.Add(new Colour("string", Color.Blue, FontStyle.Regular, @"\cf6"));
+				Colours.Add(new Colour("number", Color.Navy, FontStyle.Regular, @"\cf7"));
 			}
 			public Colour Get(string CodeType)
 			{
