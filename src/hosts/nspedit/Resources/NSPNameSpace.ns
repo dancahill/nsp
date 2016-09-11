@@ -9,18 +9,20 @@ namespace nsp {
 		output="";
 
 		function ns2xml() {
-			printf("init\r\n");
+			//printf("init\r\n");
 			// load libraries to fill namespace
 			if (_ostype_=="Windows/msvc" && _debug) dl.path = { @"N:\work\nsp\lib\shared" };
 			dl.load("base");
 			dl.load("net");
 			foreach (d in dl.path) {
 				printf("lib dir=%s\r\n", d);
+/*
 				foreach (n,v in base.dirlist(d)) {
 					if (n.istr(".dll")!=null) {
 						printf(" lib=%s\r\n", n);
 					}
 				}
+*/
 			}
 			// done loading libs
 			this.inputfilename=this.namespacename+".dat.ns";
@@ -97,7 +99,9 @@ namespace nsp {
 					}
 				}
 				if (t=="table") {
-					if ((n=="_GLOBALS" && depth==1) || v.length()==0) {
+					if ((depth==1 && n=="_GLOBALS") || v.length()==0) {
+						this.out(sprintf("%s<%s type=\"%s\" desc=\"%s\" />\r\n", padding, n, t, d));
+					} else if (depth==1 && (n=="_ARGS" || n=="_ENV")) {
 						this.out(sprintf("%s<%s type=\"%s\" desc=\"%s\" />\r\n", padding, n, t, d));
 					} else {
 						this.out(sprintf("%s<%s type=\"%s\" desc=\"%s\">\r\n", padding, n, t, d));

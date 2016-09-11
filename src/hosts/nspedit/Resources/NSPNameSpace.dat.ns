@@ -92,13 +92,13 @@
 		type = "table"
 	},
 	["eval"] = {
-		desc = "",
+		desc = "Evaluates a supplied expression.",
 		params = "",
 		returns = "",
 		type = "function"
 	},
 	["exec"] = {
-		desc = "",
+		desc = "Evaluates a supplied expression.",
 		params = "",
 		returns = "",
 		type = "function"
@@ -161,12 +161,6 @@
 		returns = "",
 		type = "function"
 	},
-	["iname"] = {
-		desc = "",
-		params = "",
-		returns = "",
-		type = "function"
-	},
 	["include"] = {
 		desc = "load a script",
 		params = "",
@@ -191,12 +185,6 @@
 	},
 	["io.flush"] = {
 		desc = "flush any buffered data to console",
-		params = "",
-		returns = "",
-		type = "function"
-	},
-	["ival"] = {
-		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
@@ -468,7 +456,7 @@
 		type = "function"
 	},
 	["net.socket.socket"] = {
-		desc = "",
+		desc = "constructor for objects of class net.socket",
 		params = "",
 		returns = "",
 		type = "function"
@@ -492,11 +480,11 @@
 		type = "function"
 	},
 	["net.tnef"] = {
-		desc = "",
+		desc = "functions available for working with 'Transport Neutral Encapsulation Format' MIME attachments",
 		type = "table"
 	},
 	["net.tnef.debug"] = {
-		desc = "",
+		desc = "test function for TNEF decoding",
 		params = "",
 		returns = "",
 		type = "function"
@@ -542,7 +530,7 @@
 		type = "function"
 	},
 	["regex"] = {
-		desc = "",
+		desc = "functions available for using regular expressions to work with strings",
 		type = "table"
 	},
 	["regex.match"] = {
@@ -558,13 +546,13 @@
 		type = "function"
 	},
 	["rot13"] = {
-		desc = "",
+		desc = "rotate characters in a string by 13 places",
 		params = "",
 		returns = "",
 		type = "function"
 	},
 	["runtime"] = {
-		desc = "",
+		desc = "get the number of seconds the script has been running",
 		params = "",
 		returns = "",
 		type = "function"
@@ -588,7 +576,7 @@
 		type = "function"
 	},
 	["sort"] = {
-		desc = "",
+		desc = "sort functions for tables",
 		type = "table"
 	},
 	["sort.byname"] = {
@@ -716,7 +704,41 @@
 		type = "function"
 	},
 	["system"] = {
-		desc = "",
+		desc = "execute a system function",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["table"] = {
+		desc = "class of functions for working with tables",
+		type = "table"
+	},
+	["table.iname"] = {
+		desc = "Returns the name of a table entry at a given index.",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["table.ival"] = {
+		desc = "Returns a pointer to the value of a table entry at a given index.",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["table.sortbyname"] = {
+		desc = "function for sorting table contents by name",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["table.sortbykey"] = {
+		desc = "function for sorting table by each item's subkey",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["table.zlink"] = {
+		desc = "link one table to another in an overlapping manner, i.e. class inheritance",
 		params = "",
 		returns = "",
 		type = "function"
@@ -732,13 +754,13 @@
 		type = "function"
 	},
 	["thread.start"] = {
-		desc = "",
+		desc = "begin execution of thread function 'this.fn'",
 		params = "",
 		returns = "",
 		type = "function"
 	},
 	["thread.finish"] = {
-		desc = "",
+		desc = "called by the thread to finish execution",
 		params = "",
 		returns = "",
 		type = "function"
@@ -754,19 +776,19 @@
 		type = "function"
 	},
 	["thread.mutex.lock"] = {
-		desc = "",
+		desc = "acquire a lock",
 		params = "",
 		returns = "",
 		type = "function"
 	},
 	["thread.mutex.unlock"] = {
-		desc = "",
+		desc = "release a lock",
 		params = "",
 		returns = "",
 		type = "function"
 	},
 	["thread.mutex.free"] = {
-		desc = "",
+		desc = "destroy the mutex",
 		params = "",
 		returns = "",
 		type = "function"
@@ -778,19 +800,19 @@
 	["time.gmtime"] = {
 		desc = "get detailed structure describing a given time in seconds (or now) since 1970-01-01",
 		params = "([number seconds])",
-		returns = "table describing requested time",
+		returns = "table describing requested time in format\r\n { tm_sec, tm_min, tm_hour, tm_mday, tm_mon, tm_year, tm_wday, tm_yday, tm_isdst }",
 		type = "function"
 	},
 	["time.gettimeofday"] = {
-		desc = "",
+		desc = "get seconds and milliseconds since 1970-01-01 (aka unix time)",
 		params = "",
-		returns = "",
+		returns = "table representing time in format { tv_sec, tv_usec }",
 		type = "function"
 	},
 	["time.localtime"] = {
 		desc = "get detailed structure describing a given time in seconds (or now) since 1970-01-01",
 		params = "([number seconds])",
-		returns = "table describing requested time",
+		returns = "table describing requested time in format\r\n { tm_sec, tm_min, tm_hour, tm_mday, tm_mon, tm_year, tm_wday, tm_yday, tm_isdst }",
 		type = "function"
 	},
 	["time.sqldate"] = {
@@ -824,7 +846,7 @@
 		type = "function"
 	},
 	["tonumber"] = {
-		desc = "",
+		desc = "convert a string to its numeric value",
 		params = "",
 		returns = "",
 		type = "function"
@@ -840,31 +862,31 @@
 		type = "table"
 	},
 	["win.Beep"] = {
-		desc = "",
+		desc = "beep at the requested frequency for the requested duratin (in milliseconds)",
 		params = "",
 		returns = "",
 		type = "function"
 	},
 	["win.CreateProcess"] = {
-		desc = "",
+		desc = "function to execute a program",
 		params = "",
 		returns = "",
 		type = "function"
 	},
 	["win.MessageBox"] = {
-		desc = "",
+		desc = "native windows function to display a messagebox",
 		params = "",
 		returns = "",
 		type = "function"
 	},
 	["win.PlaySound"] = {
-		desc = "",
+		desc = "plays a sound file",
 		params = "",
 		returns = "",
 		type = "function"
 	},
 	["win.ShellExecute"] = {
-		desc = "",
+		desc = "native windows function for opening a file with its associated application",
 		params = "",
 		returns = "",
 		type = "function"
@@ -873,12 +895,6 @@
 		desc = "write a single unformatted string to console",
 		params = "(string arg1)",
 		returns = "number of bytes written",
-		type = "function"
-	},
-	["zlink"] = {
-		desc = "",
-		params = "",
-		returns = "",
 		type = "function"
 	}
 }

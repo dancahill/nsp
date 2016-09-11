@@ -60,17 +60,9 @@ namespace NSPEdit
 			Program.MainForm.CodeTip1.Hide(Program.MainForm.richCodeBox1);
 			string ns = nsnamespace + (nsnamespace == "" ? "" : ".") + this.Text;
 
-			// start ugly hack
-			//int charindex = richCodeBox1.SelectionStart;
-			RichTextBox rtbx = new RichTextBox();
-			rtbx.Rtf = richCodeBox1.Rtf;
-			//10:39:02 AM CB_TextChanged(): charindex - 0 = Color[Maroon]
-			//10:39:02 AM CB_TextChanged(): charindex - 1 = Color[DarkCyan]
-			rtbx.Select(richCodeBox1.SelectionStart - 1, 0);
-			Color color = rtbx.SelectionColor;
-			//Font font = rtbx.SelectionFont;
-			rtbx.Dispose();
-			// end ugly hack
+			Color color;
+			Font font;
+			richCodeBox1.GetFontFromPosition(richCodeBox1.SelectionStart - 1, out color, out font);
 
 			string t = Program.MainForm.CodeTip1.FormatToolTip(ns, color);
 			Point cursorPt = richCodeBox1.GetPositionFromCharIndex(richCodeBox1.SelectionStart);
@@ -109,17 +101,10 @@ namespace NSPEdit
 			this.Items.Add("");
 			int maxchar = 0;
 
+			Color color;
+			Font font;
+			richCodeBox1.GetFontFromPosition(richCodeBox1.SelectionStart - 1, out color, out font);
 
-			// start ugly hack
-			RichTextBox rtbx = new RichTextBox();
-			rtbx.Rtf = richCodeBox1.Rtf;
-			//10:39:02 AM CB_TextChanged(): charindex - 0 = Color[Maroon]
-			//10:39:02 AM CB_TextChanged(): charindex - 1 = Color[DarkCyan]
-			rtbx.Select(richCodeBox1.SelectionStart - 1, 0);
-			Color color = rtbx.SelectionColor;
-			//Font font = rtbx.SelectionFont;
-			rtbx.Dispose();
-			// end ugly hack
 			if (color != Color.DarkCyan)
 			{
 				//Program.Log("probably not a good place for autocomplete {0}", color);

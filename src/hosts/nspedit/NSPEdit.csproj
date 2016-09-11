@@ -124,6 +124,9 @@
     <Compile Include="NSPEditForm.Designer.cs">
       <DependentUpon>NSPEditForm.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Resources\example1.ns" />
+    <None Include="Resources\NSPNameSpace.dat.ns" />
+    <None Include="Resources\NSPNameSpace.ns" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -165,9 +168,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="NSPEdit.ico" />
-    <Content Include="NSPNameSpace.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <EmbeddedResource Include="Resources\NSPNameSpace.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

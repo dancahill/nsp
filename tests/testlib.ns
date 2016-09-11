@@ -433,7 +433,7 @@ namespace testlib {
 				 * exec() is a kludge.  an ugly hack.  don't be shocked if it vanishes.
 				 * eval() _should_ be able to do this stuff...
 				 */
-				x=exec("y=42;print(y,'\n');");
+				x=eval("y=42;print(y,'\n');");
 				print("x=[",x,"]\n");
 				print("y=[",y,"]\n");
 			}
@@ -483,7 +483,7 @@ namespace testlib {
 
 		if (!quiet) print("        this is a sample of table indexes.\n\n");
 		for (i=0;i<sizeof(_GLOBALS);i++) {
-			local n=iname(_GLOBALS, i);
+			local n=table.iname(_GLOBALS, i);
 			local t=typeof(_GLOBALS[n]);
 			if (t=='function') continue;
 			if (t=='table') continue;
@@ -565,7 +565,7 @@ namespace testlib {
 		// this test will catch the return of a bug with freeing tables returned by ival()
 	//	local n="";
 		for (i=0;i<sizeof(_GLOBALS);i++) {
-			nn=iname(_GLOBALS, i);
+			nn=table.iname(_GLOBALS, i);
 			local t=typeof(vv);
 			//if (t=='function') continue;
 			//if (t=='table') continue;
@@ -1703,7 +1703,7 @@ namespace testlib {
 		local a={ a=1, b=2, f=f1 };
 		local b={};
 
-		zlink(b, a);
+		table.zlink(b, a);
 		expect("a['a']", 1,      a['a']);
 		expect("b['a']", 1,      b['a']);
 		a['c']=3;
@@ -1717,7 +1717,7 @@ namespace testlib {
 		expect("b.f()",  42,     b.f());
 		b={};
 		expect("b['c']", 'null', b['c'].tostring());
-		zlink(b, a);
+		table.zlink(b, a);
 		expect("b['c']", 3,      b['c']);
 		return;
 	};

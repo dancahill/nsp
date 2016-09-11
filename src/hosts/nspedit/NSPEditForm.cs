@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -19,7 +18,7 @@ namespace NSPEdit
 		public CodeTip CodeTip1 = new CodeTip();
 		//public DateTime toolTip1_lastupdate = DateTime.Now;
 
-		SearchForm sf = new SearchForm();
+		SearchForm sf;
 
 		public NSPEditForm()
 		{
@@ -51,6 +50,8 @@ namespace NSPEdit
 			//richCodeBox1.MouseEnter += RichCodeBox1_MouseEnter;
 			//richCodeBox1.MouseLeave += RichCodeBox1_MouseLeave;
 			richCodeBox1.MouseMove += RichCodeBox1_MouseMove;
+
+			sf = new SearchForm();
 		}
 
 		Point oldp = new Point();
@@ -58,20 +59,20 @@ namespace NSPEdit
 		private void RichCodeBox1_MouseMove(object sender, MouseEventArgs e)
 		{
 			RichCodeBox rcb = (sender as RichCodeBox);
+			if (e.Button != MouseButtons.None)
+			{
+				CodeTip1.Hide(rcb);
+				return;
+			}
 			if (oldp.X == e.X && oldp.Y == e.Y) return;
 			oldp = new Point(e.X, e.Y);
 			int charindex = rcb.GetCharIndexFromPosition(e.Location);
-			// start ugly hack
-			RichTextBox rtbx = new RichTextBox();
-			rtbx.Rtf = rcb.Rtf;
-			int oldindex = rcb.SelectionStart;
-			rtbx.Select(charindex, 0);
-			Color color = rtbx.SelectionColor;
-			Font font = rtbx.SelectionFont;
-			rtbx.Dispose();
-			// end ugly hack
+
+			Color color;
+			Font font;
+			rcb.GetFontFromPosition(charindex, out color, out font);
+
 			CodeTip1.Hide(rcb);
-			//string name = rcb.getlabel(charindex, true);
 			string t = CodeTip1.FormatToolTip(rcb.getlabel(charindex, true), color);
 			if (t != "") CodeTip1.Show(t, rcb, e.X, e.Y + font.Height, 5000); //else toolTip1.Hide(rcb);
 		}
@@ -137,11 +138,8 @@ namespace NSPEdit
 						}
 					}
 
-					//if (MessageBox.Show("Would you like to Close this Tab?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-					//{
 					this.tabControl1.TabPages.RemoveAt(i);
 					break;
-					//}
 				}
 			}
 			if (tabControl1.Controls.Count == 0)
@@ -479,7 +477,6 @@ namespace NSPEdit
 
 		private void aboutNSPEditorToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-
 		}
 
 		private void nSPHomepageToolStripMenuItem_Click(object sender, EventArgs e)
@@ -489,20 +486,29 @@ namespace NSPEdit
 
 		private void nSPSyntaxToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-
 			System.Diagnostics.Process.Start("https://nulllogic.ca/nsp/syntax.html");
 		}
 
 		private void findToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			sf.rcb = richCodeBox1;
+			sf.SetSearch(richCodeBox1.SelectedText);
 			sf.Show();
+			sf.Focus();
 		}
 
 		private void findNextToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			sf.rcb = richCodeBox1;
 			sf.buttonSearch_Click(null, null);
+		}
+
+		public RichCodeBox GetActiveCodeBox()
+		{
+			return this.richCodeBox1;
+		}
+
+		public RichTextBox GetActiveOutputBox()
+		{
+			return this.richTextBox2;
 		}
 	}
 }

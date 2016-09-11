@@ -14,6 +14,8 @@ namespace NSPEdit
 		[DllImport("user32.dll")]
 		private static extern int SendMessage(IntPtr hWnd, Int32 wMsg, Int32 wParam, Int32 lParam);
 		[DllImport("user32.dll")]
+		private static extern IntPtr SendMessage(IntPtr hWnd, Int32 wMsg, Int32 wParam, IntPtr lParam);
+		[DllImport("user32.dll")]
 		private static extern int SendMessage(IntPtr hWnd, Int32 wMsg, Int32 wParam, ref Point pt);
 
 		[DllImport("user32.dll", CharSet = CharSet.Auto)]
@@ -24,11 +26,23 @@ namespace NSPEdit
 		const int EM_GETSCROLLPOS = WM_USER + 221;
 		const int EM_SETSCROLLPOS = WM_USER + 222;
 
+
+
+
+
+		//		const int WM_USER = 0x400;
+		const int WM_SETREDRAW = 0x000B;
+		const int EM_GETEVENTMASK = WM_USER + 59;
+		const int EM_SETEVENTMASK = WM_USER + 69;
+		//		const int EM_GETSCROLLPOS = WM_USER + 221;
+		//		const int EM_SETSCROLLPOS = WM_USER + 222;
+
+
 		//private IntPtr Handle;
 
 		//private const int WM_USER = 0x0400;
-		private const int EM_SETEVENTMASK = (WM_USER + 69);
-		private const int WM_SETREDRAW = 0x0b;
+		//		private const int EM_SETEVENTMASK = (WM_USER + 69);
+		//		private const int WM_SETREDRAW = 0x0b;
 		//private IntPtr OldEventMask;
 
 		Point pt;
@@ -158,7 +172,8 @@ namespace NSPEdit
 				}
 				else
 				{
-					this.Text = "// New script\r\nprintf(\"Hello.\");\r\n";
+					//this.Text = "// New script\r\nprintf(\"Hello.\");\r\n";
+					this.Text = Program.GetResource("example1.ns");
 					this.BeginUpdate();
 					this.Rtf = CodeFormat.AddColour(this, "RTF");
 					this.EndUpdate();
@@ -378,6 +393,49 @@ namespace NSPEdit
 			if (sub.EndsWith(".")) sub = sub.Substring(0, sub.Length - 1);
 			//Program.MainForm.AppendOutput(string.Format("sub='{0}'\r\n", sub));
 			return sub;
+		}
+
+		public void GetFontFromPosition(int charindex, out Color color, out Font font)
+		{
+			//// start ugly hack
+			////RichTextBox rtbx = new RichTextBox();
+			////rtbx.Rtf = rcb.Rtf;
+			////int oldindex = rcb.SelectionStart;
+			////rtbx.Select(charindex, 0);
+			////Color color = rtbx.SelectionColor;
+			////Font font = rtbx.SelectionFont;
+			////rtbx.Dispose();
+
+			//int ss = rcb.SelectionStart;
+			//int sl = rcb.SelectionLength;
+			//Point p = rcb.AutoScrollOffset;
+			//rcb.Select(charindex, 0);
+			//Color color = rcb.SelectionColor;
+			//Font font = rcb.SelectionFont;
+			//rcb.Select(ss, sl);
+			//rcb.AutoScrollOffset = p;
+			//// end ugly hack
+
+			Point _ScrollPoint = new Point();
+			IntPtr _EventMask;
+
+			SendMessage(this.Handle, EM_GETSCROLLPOS, 0, ref _ScrollPoint);
+			SendMessage(this.Handle, WM_SETREDRAW, 0, IntPtr.Zero);
+			_EventMask = SendMessage(this.Handle, EM_GETEVENTMASK, 0, IntPtr.Zero);
+
+			int ss = SelectionStart;
+			int sl = SelectionLength;
+//			Point p = AutoScrollOffset;
+			Select(charindex, 0);
+			color = SelectionColor;
+			font = SelectionFont;
+			Select(ss, sl);
+			//AutoScrollOffset = p;
+
+			SendMessage(this.Handle, EM_SETSCROLLPOS, 0, ref _ScrollPoint);
+			SendMessage(this.Handle, EM_SETEVENTMASK, 0, _EventMask);
+			SendMessage(this.Handle, WM_SETREDRAW, 1, IntPtr.Zero);
+			//this.Invalidate();
 		}
 	}
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace NSPEdit
@@ -50,6 +52,21 @@ namespace NSPEdit
 				MainForm.richTextBox2.ScrollToCaret();
 			}
 			Application.DoEvents();
+		}
+
+		static public string GetResource(string name)
+		{
+			string fullname = string.Format("NSPEdit.Resources.{0}", name);
+			string x = "";
+			Assembly a = Assembly.GetExecutingAssembly();
+			//foreach (string resource in a.GetManifestResourceNames()) Program.Log("'{0}'", resource);
+			using (Stream stream = a.GetManifestResourceStream(fullname))
+			using (StreamReader reader = new StreamReader(stream))
+			{
+				x = reader.ReadToEnd();
+			}
+			//if (x == "") Program.Log("resource '{0}' not found", fullname);
+			return x;
 		}
 	}
 }

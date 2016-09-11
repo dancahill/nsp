@@ -673,22 +673,19 @@ nsp_state *nsp_newstate()
 	FUNCTION list[] = {
 			{ "copy", (NSP_CFUNC)nl_copy },
 			{ "eval", (NSP_CFUNC)nl_eval },
-			{ "exec", (NSP_CFUNC)nl_exec },
-			{ "serialize", (NSP_CFUNC)nl_serialize },
-			{ "iname", (NSP_CFUNC)nl_iname },
+			//{ "exec", (NSP_CFUNC)nl_exec },
 			{ "include", (NSP_CFUNC)nl_include },
-			{ "ival", (NSP_CFUNC)nl_ival },
 			{ "print", (NSP_CFUNC)nl_print },
 			{ "printf", (NSP_CFUNC)nl_printf },
-			{ "sprintf", (NSP_CFUNC)nl_printf },
 			{ "runtime", (NSP_CFUNC)nl_runtime },
+			{ "serialize", (NSP_CFUNC)nl_serialize },
 			{ "sizeof", (NSP_CFUNC)nl_sizeof },
 			{ "sleep", (NSP_CFUNC)nl_sleep },
+			{ "sprintf", (NSP_CFUNC)nl_printf },
 			{ "system", (NSP_CFUNC)nl_system },
 			{ "tonumber", (NSP_CFUNC)nl_tonumber },
 			{ "typeof", (NSP_CFUNC)nl_typeof },
 			{ "write", (NSP_CFUNC)nl_write },
-			{ "zlink", (NSP_CFUNC)nl_zlink },
 			{ NULL, NULL }
 	};
 	FUNCTION list_debug[] = {
@@ -760,6 +757,12 @@ nsp_state *nsp_newstate()
 			{ "tolower", (NSP_CFUNC)nl_strtolower },
 			{ "toupper", (NSP_CFUNC)nl_strtolower },
 			{ NULL, NULL }
+	};
+	FUNCTION list_table[] = {
+		{ "iname", (NSP_CFUNC)nl_iname },
+		{ "ival", (NSP_CFUNC)nl_ival },
+		{ "zlink", (NSP_CFUNC)nl_zlink },
+		{ NULL, NULL }
 	};
 	FUNCTION list_time[] = {
 			{ "gmtime", (NSP_CFUNC)nl_gmtime },
@@ -853,6 +856,11 @@ nsp_state *nsp_newstate()
 	cobj->val->attr |= NST_HIDDEN;
 	for (i = 0; list_string[i].fn_name != NULL; i++) {
 		nsp_setcfunc(new_N, cobj, list_string[i].fn_name, list_string[i].fn_ptr);
+	}
+	cobj = nsp_settable(new_N, &new_N->g, "table");
+	cobj->val->attr |= NST_HIDDEN;
+	for (i = 0; list_table[i].fn_name != NULL; i++) {
+		nsp_setcfunc(new_N, cobj, list_table[i].fn_name, list_table[i].fn_ptr);
 	}
 	cobj = nsp_settable(new_N, &new_N->g, "time");
 	cobj->val->attr |= NST_HIDDEN;

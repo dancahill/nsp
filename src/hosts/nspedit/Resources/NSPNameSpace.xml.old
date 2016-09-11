@@ -5,58 +5,7 @@
 	<null type="null" desc="null (special variable)" />
 	<this type="table" desc="this (special variable)" />
 	<true type="boolean" desc="true (special variable)" />
-	<_ENV type="table" desc="table of environment variables">
-		<ADMSXMLBINDIR type="string" desc="_ENV.ADMSXMLBINDIR" />
-		<ALLUSERSPROFILE type="string" desc="_ENV.ALLUSERSPROFILE" />
-		<APPDATA type="string" desc="_ENV.APPDATA" />
-		<ASCOBINDIR type="string" desc="_ENV.ASCOBINDIR" />
-		<COMMONPROGRAMFILES type="string" desc="_ENV.COMMONPROGRAMFILES" />
-		<COMMONPROGRAMW6432 type="string" desc="_ENV.COMMONPROGRAMW6432" />
-		<COMPUTERNAME type="string" desc="_ENV.COMPUTERNAME" />
-		<COMSPEC type="string" desc="_ENV.COMSPEC" />
-		<FPS_BROWSER_APP_PROFILE_STRING type="string" desc="_ENV.FPS_BROWSER_APP_PROFILE_STRING" />
-		<FPS_BROWSER_USER_PROFILE_STRING type="string" desc="_ENV.FPS_BROWSER_USER_PROFILE_STRING" />
-		<FP_NO_HOST_CHECK type="string" desc="_ENV.FP_NO_HOST_CHECK" />
-		<FREEHDL type="string" desc="_ENV.FREEHDL" />
-		<GTK_BASEPATH type="string" desc="_ENV.GTK_BASEPATH" />
-		<HOME type="string" desc="_ENV.HOME" />
-		<HOMEDRIVE type="string" desc="_ENV.HOMEDRIVE" />
-		<HOMEPATH type="string" desc="_ENV.HOMEPATH" />
-		<LOCALAPPDATA type="string" desc="_ENV.LOCALAPPDATA" />
-		<LOGONSERVER type="string" desc="_ENV.LOGONSERVER" />
-		<MINGWDIR type="string" desc="_ENV.MINGWDIR" />
-		<NUMBER_OF_PROCESSORS type="string" desc="_ENV.NUMBER_OF_PROCESSORS" />
-		<OCTAVEBINDIR type="string" desc="_ENV.OCTAVEBINDIR" />
-		<OPENSSL_CONF type="string" desc="_ENV.OPENSSL_CONF" />
-		<OS type="string" desc="_ENV.OS" />
-		<PATH type="string" desc="_ENV.PATH" />
-		<PATHEXT type="string" desc="_ENV.PATHEXT" />
-		<PROCESSOR_ARCHITECTURE type="string" desc="_ENV.PROCESSOR_ARCHITECTURE" />
-		<PROCESSOR_ARCHITEW6432 type="string" desc="_ENV.PROCESSOR_ARCHITEW6432" />
-		<PROCESSOR_IDENTIFIER type="string" desc="_ENV.PROCESSOR_IDENTIFIER" />
-		<PROCESSOR_LEVEL type="string" desc="_ENV.PROCESSOR_LEVEL" />
-		<PROCESSOR_REVISION type="string" desc="_ENV.PROCESSOR_REVISION" />
-		<PROGRAMDATA type="string" desc="_ENV.PROGRAMDATA" />
-		<PROGRAMFILES type="string" desc="_ENV.PROGRAMFILES" />
-		<PROGRAMW6432 type="string" desc="_ENV.PROGRAMW6432" />
-		<PSMODULEPATH type="string" desc="_ENV.PSMODULEPATH" />
-		<PUBLIC type="string" desc="_ENV.PUBLIC" />
-		<QUCSDIR type="string" desc="_ENV.QUCSDIR" />
-		<SESSIONNAME type="string" desc="_ENV.SESSIONNAME" />
-		<SYSTEMDRIVE type="string" desc="_ENV.SYSTEMDRIVE" />
-		<SYSTEMROOT type="string" desc="_ENV.SYSTEMROOT" />
-		<TEMP type="string" desc="_ENV.TEMP" />
-		<TMP type="string" desc="_ENV.TMP" />
-		<USERDOMAIN type="string" desc="_ENV.USERDOMAIN" />
-		<USERDOMAIN_ROAMINGPROFILE type="string" desc="_ENV.USERDOMAIN_ROAMINGPROFILE" />
-		<USERNAME type="string" desc="_ENV.USERNAME" />
-		<USERPROFILE type="string" desc="_ENV.USERPROFILE" />
-		<VS110COMNTOOLS type="string" desc="_ENV.VS110COMNTOOLS" />
-		<VS120COMNTOOLS type="string" desc="_ENV.VS120COMNTOOLS" />
-		<VS140COMNTOOLS type="string" desc="_ENV.VS140COMNTOOLS" />
-		<VSSDK140INSTALL type="string" desc="_ENV.VSSDK140INSTALL" />
-		<WINDIR type="string" desc="_ENV.WINDIR" />
-	</_ENV>
+	<_ENV type="table" desc="table of environment variables" />
 	<_GLOBALS type="table" desc="link to the global variables table (recursive)" />
 	<_filename type="string" desc="name of running script" />
 	<_filepath type="string" desc="path of running script" />
@@ -76,8 +25,7 @@
 		<path type="table" desc="array of paths to search for libraries loaded by dl.load()">
 		</path>
 	</dl>
-	<eval type="function" desc="" params="" returns="" />
-	<exec type="function" desc="" params="" returns="" />
+	<eval type="function" desc="Evaluates a supplied expression." params="" returns="" />
 	<file type="table" desc="collection of functions available for working with files">
 		<append type="function" desc="append string data to the specified file" params="" returns="" />
 		<chdir type="function" desc="change to specified directory" params="" returns="" />
@@ -89,14 +37,12 @@
 		<unlink type="function" desc="delete or 'unlink' a file/directory" params="" returns="" />
 		<writeall type="function" desc="write complete string to file, replacing any existing content of the file" params="" returns="" />
 	</file>
-	<iname type="function" desc="" params="" returns="" />
 	<include type="function" desc="load a script" params="" returns="" />
 	<io type="table" desc="input/output functions">
 		<print type="function" desc="print data to console - accepts one or more comma-separated parameters" params="" returns="" />
 		<write type="function" desc="write data to console" params="" returns="" />
 		<flush type="function" desc="flush any buffered data to console" params="" returns="" />
 	</io>
-	<ival type="function" desc="" params="" returns="" />
 	<math type="table" desc="math functions">
 		<abs type="function" desc="get absolute (positive) value of a number" params="" returns="" />
 		<ceil type="function" desc="round a number up to the nearest integer" params="" returns="" />
@@ -152,13 +98,13 @@
 			<info type="function" desc="" params="" returns="" />
 			<read type="function" desc="" params="" returns="" />
 			<setsockopt type="function" desc="" params="" returns="" />
-			<socket type="function" desc="" params="" returns="" />
+			<socket type="function" desc="constructor for objects of class net.socket" params="" returns="" />
 			<tlsaccept type="function" desc="" params="" returns="" />
 			<tlsconnect type="function" desc="" params="" returns="" />
 			<write type="function" desc="" params="" returns="" />
 		</socket>
-		<tnef type="table" desc="">
-			<debug type="function" desc="" params="" returns="" />
+		<tnef type="table" desc="functions available for working with 'Transport Neutral Encapsulation Format' MIME attachments">
+			<debug type="function" desc="test function for TNEF decoding" params="" returns="" />
 		</tnef>
 	</net>
 	<pipe type="table" desc="functions for creating and working with pipes">
@@ -169,19 +115,15 @@
 	</pipe>
 	<print type="function" desc="print one or more objects to console" params="([object])" returns="total length of output" />
 	<printf type="function" desc="print to console with formatting similar to the c function of the same name" params="(string format[, ...])" returns="total length of output string" />
-	<regex type="table" desc="">
+	<regex type="table" desc="functions available for using regular expressions to work with strings">
 		<match type="function" desc="" params="" returns="" />
 		<replace type="function" desc="" params="" returns="" />
 	</regex>
-	<rot13 type="function" desc="" params="" returns="" />
-	<runtime type="function" desc="" params="" returns="" />
+	<rot13 type="function" desc="rotate characters in a string by 13 places" params="" returns="" />
+	<runtime type="function" desc="get the number of seconds the script has been running" params="" returns="" />
 	<serialize type="function" desc="returns the contents of a table in string format (with subtable)" params="(object arg1)" returns="string representation of arg1" />
 	<sizeof type="function" desc="returns size of object" params="(object arg1)" returns="size of object based on type. for strings, it's the length of a string. for tables, it's the number of items in the table." />
 	<sleep type="function" desc="causes script to sleep for a number of milliseconds" params="(number milliseconds)" returns="void" />
-	<sort type="table" desc="">
-		<byname type="function" desc="" params="" returns="" />
-		<bykey type="function" desc="" params="" returns="" />
-	</sort>
 	<sprintf type="function" desc="print to buffer with formatting similar to the c function of the same name" params="(string format[, ...])" returns="string with formatting applied" />
 	<string type="table" desc="class of functions available for working with strings">
 		<atoi type="function" desc="get numeric value of character in a string" params="(string arg1[, number offset])" returns="numeric value of character in arg1 at offset" />
@@ -204,37 +146,45 @@ arg3 is implicitly the end of the string" params="(string str, number arg2[, num
 		<tolower type="function" desc="get lowercase version of string" params="(string str)" returns="string" />
 		<toupper type="function" desc="get uppercase version of string" params="(string str)" returns="string" />
 	</string>
-	<system type="function" desc="" params="" returns="" />
+	<system type="function" desc="execute a system function" params="" returns="" />
+	<table type="table" desc="class of functions for working with tables">
+		<iname type="function" desc="Returns the name of a table entry at a given index." params="" returns="" />
+		<ival type="function" desc="Returns a pointer to the value of a table entry at a given index." params="" returns="" />
+		<zlink type="function" desc="link one table to another in an overlapping manner, i.e. class inheritance" params="" returns="" />
+		<sortbyname type="function" desc="function for sorting table contents by name" params="" returns="" />
+		<sortbykey type="function" desc="function for sorting table by each item's subkey" params="" returns="" />
+	</table>
 	<thread type="table" desc="class of functions for working with threads (experimental)">
 		<thread type="function" desc="constructor for new threads" params="" returns="" />
 		<start type="function" desc="" params="" returns="" />
 		<finish type="function" desc="" params="" returns="" />
 		<mutex type="table" desc="class of functions for working with thread mutexes (experimental)">
 			<mutex type="function" desc="constructor for new thread mutexes" params="" returns="" />
-			<lock type="function" desc="" params="" returns="" />
-			<unlock type="function" desc="" params="" returns="" />
-			<free type="function" desc="" params="" returns="" />
+			<lock type="function" desc="acquire a lock" params="" returns="" />
+			<unlock type="function" desc="release a lock" params="" returns="" />
+			<free type="function" desc="destroy the mutex" params="" returns="" />
 		</mutex>
 	</thread>
 	<time type="table" desc="functions for dealing with time">
-		<gmtime type="function" desc="get detailed structure describing a given time in seconds (or now) since 1970-01-01" params="([number seconds])" returns="table describing requested time" />
-		<gettimeofday type="function" desc="" params="" returns="" />
-		<localtime type="function" desc="get detailed structure describing a given time in seconds (or now) since 1970-01-01" params="([number seconds])" returns="table describing requested time" />
+		<gmtime type="function" desc="get detailed structure describing a given time in seconds (or now) since 1970-01-01" params="([number seconds])" returns="table describing requested time in format
+ { tm_sec, tm_min, tm_hour, tm_mday, tm_mon, tm_year, tm_wday, tm_yday, tm_isdst }" />
+		<gettimeofday type="function" desc="get seconds and milliseconds since 1970-01-01 (aka unix time)" params="" returns="table representing time in format { tv_sec, tv_usec }" />
+		<localtime type="function" desc="get detailed structure describing a given time in seconds (or now) since 1970-01-01" params="([number seconds])" returns="table describing requested time in format
+ { tm_sec, tm_min, tm_hour, tm_mday, tm_mon, tm_year, tm_wday, tm_yday, tm_isdst }" />
 		<sqldate type="function" desc="output date as a string from time.gmtime data or seconds since 1970-01-01" params="([table time]||[number time])" returns="string representing requested time in yyyy-MM-dd format" />
 		<sqltime type="function" desc="output time as a string from time.gmtime data or seconds since 1970-01-01" params="([table time]||[number time])" returns="string representing requested time in HH:mm:ss format" />
 		<sqldatetime type="function" desc="output date and time as a string from time.gmtime data or seconds since 1970-01-01" params="([table time]||[number time])" returns="string representing requested time in yyyy-MM-dd HH:mm:ss format" />
 		<sqltounix type="function" desc="get unix time from sql formatted time" params="(string sqltime)" returns="number of seconds since 1970-01-01" />
 		<now type="function" desc="get seconds since 1970-01-01 (aka unix time)" params="none" returns="number of seconds from 1970-01-01 to now" />
 	</time>
-	<tonumber type="function" desc="" params="" returns="" />
+	<tonumber type="function" desc="convert a string to its numeric value" params="" returns="" />
 	<typeof type="function" desc="get the type of a variable" params="(object arg1)" returns="string with the name of the base object type" />
 	<win type="table" desc="collection of functions for Windows UI">
-		<Beep type="function" desc="" params="" returns="" />
-		<CreateProcess type="function" desc="" params="" returns="" />
-		<MessageBox type="function" desc="" params="" returns="" />
-		<PlaySound type="function" desc="" params="" returns="" />
-		<ShellExecute type="function" desc="" params="" returns="" />
+		<Beep type="function" desc="beep at the requested frequency for the requested duratin (in milliseconds)" params="" returns="" />
+		<CreateProcess type="function" desc="function to execute a program" params="" returns="" />
+		<MessageBox type="function" desc="native windows function to display a messagebox" params="" returns="" />
+		<PlaySound type="function" desc="plays a sound file" params="" returns="" />
+		<ShellExecute type="function" desc="native windows function for opening a file with its associated application" params="" returns="" />
 	</win>
 	<write type="function" desc="write a single unformatted string to console" params="(string arg1)" returns="number of bytes written" />
-	<zlink type="function" desc="" params="" returns="" />
 </NSPNameSpace>
