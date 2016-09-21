@@ -435,7 +435,7 @@ namespace NSPEdit
 			SendMessage(this.Handle, EM_SETSCROLLPOS, 0, ref _ScrollPoint);
 			SendMessage(this.Handle, EM_SETEVENTMASK, 0, _EventMask);
 			SendMessage(this.Handle, WM_SETREDRAW, 1, IntPtr.Zero);
-			//this.Invalidate();
+			this.Invalidate();
 		}
 	}
 }

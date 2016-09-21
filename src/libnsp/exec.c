@@ -165,14 +165,63 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 
 	if (noscopechange) {
 		/*
-		 * this is a bad hack to fix the issue with include() creating its own local context (it should not).
+		 * this is a bad hack to fix the issue with include() creating its own local context (IMHO, it should not).
 		 */
 		obj_t *cobj1 = nsp_getobj(N, &listobj, "1");
+		obj_t *cobj2 = nsp_getobj(N, &listobj, "2");
 		uchar *p;
 		int n = 0;
 
 		e = 0;
-		if (!nsp_isnull(cobj1)) {
+		if (nsp_isstr(cobj2)) {
+			//nsp_exec(N, (char *)cobj2->val->d.str);
+
+
+
+
+
+
+
+
+
+			uchar *p;
+			int psize;
+
+			uchar *oldbptr = N->blockptr;
+			uchar *oldbend = N->blockend;
+			uchar *oldrptr = N->readptr;
+			jmp_buf *savjmp;
+
+			n_decompose(N, NULL, (uchar *)cobj2->val->d.str, &p, &psize);
+			if (p) N->blockptr = p;
+			N->blockend = N->blockptr + readi4((N->blockptr + 8));
+			N->readptr = N->blockptr + readi4((N->blockptr + 12));
+
+			savjmp = N->savjmp;
+			N->savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
+			if (setjmp(*N->savjmp) == 0) {
+				nsp_linkval(N, &N->r, nsp_exec(N, (char *)N->readptr));
+			}
+			n_free(N, (void *)&N->savjmp, sizeof(jmp_buf));
+			N->savjmp = savjmp;
+
+			if (p) n_free(N, (void *)&p, psize);
+
+			N->blockptr = oldbptr;
+			N->blockend = oldbend;
+			N->readptr = oldrptr;
+
+
+
+
+
+
+
+
+
+
+		}
+		else if (nsp_isstr(cobj1)) {
 			p = N->readptr;
 
 			savjmp = N->savjmp;
@@ -673,7 +722,7 @@ nsp_state *nsp_newstate()
 	FUNCTION list[] = {
 			{ "copy", (NSP_CFUNC)nl_copy },
 			{ "eval", (NSP_CFUNC)nl_eval },
-			//{ "exec", (NSP_CFUNC)nl_exec },
+			{ "exec", (NSP_CFUNC)nl_exec },
 			{ "include", (NSP_CFUNC)nl_include },
 			{ "print", (NSP_CFUNC)nl_print },
 			{ "printf", (NSP_CFUNC)nl_printf },
@@ -746,6 +795,11 @@ nsp_state *nsp_newstate()
 			{ "icmp", (NSP_CFUNC)nl_strcmp },
 			{ "ncmp", (NSP_CFUNC)nl_strcmp },
 			{ "nicmp", (NSP_CFUNC)nl_strcmp },
+
+			{ "contains", (NSP_CFUNC)nl_strcontains },
+			{ "endswith", (NSP_CFUNC)nl_strcontains },
+			{ "startswith", (NSP_CFUNC)nl_strcontains },
+
 			{ "join", (NSP_CFUNC)nl_strjoin },
 			{ "len", (NSP_CFUNC)nl_strlen },
 			{ "replace", (NSP_CFUNC)nl_strrep },
@@ -876,7 +930,7 @@ nsp_state *nsp_newstate()
 	cobj = nsp_setstr(new_N, &new_N->g, "_version_", NSP_VERSION, -1);
 	cobj = nsp_setstr(new_N, &new_N->g, "_ostype_", _OSTYPE_, -1);
 	return new_N;
-	}
+}
 
 void nsp_freestate(nsp_state *N)
 {

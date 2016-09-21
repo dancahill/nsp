@@ -124,6 +124,7 @@ NSP_FUNCTION(nl_atoi);
 NSP_FUNCTION(nl_itoa);
 NSP_FUNCTION(nl_strcat);
 NSP_FUNCTION(nl_strcmp);
+NSP_FUNCTION(nl_strcontains);
 NSP_FUNCTION(nl_strjoin);
 NSP_FUNCTION(nl_strlen);
 NSP_FUNCTION(nl_strrep);
@@ -165,6 +166,7 @@ obj_t   *n_newiobj(nsp_state *N, int index);
 obj_t   *n_setname(nsp_state *N, obj_t *cobj, const char *name);
 obj_t   *n_setnamei(nsp_state *N, obj_t *cobj, unsigned long i);
 /* opcodes.c */
+short    n_iskeyword(nsp_state *N, char *name);
 short    n_getop(nsp_state *N, char *name);
 char    *n_getsym(nsp_state *N, short op);
 char    *n_gettype(nsp_state *N, short type);

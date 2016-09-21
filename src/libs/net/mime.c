@@ -119,8 +119,8 @@ static char *mime_read_head(nsp_state *N, obj_t *tobj, char *inptr)
 	while (1) {
 		p = namebuf;
 		while (*inptr && (isalnum(*inptr) || *inptr == '-' || *inptr == '_')) *p++ = tolower(*inptr++);
-		if (!*inptr) break;
 		*p = '\0';
+		if (!*inptr) break;
 		if (*inptr == ':') {
 			inptr++;
 			if (*inptr == ' ') inptr++;
@@ -161,14 +161,20 @@ static char *mime_read_head(nsp_state *N, obj_t *tobj, char *inptr)
 			if (*inptr == '\r') inptr++;
 			if (*inptr == '\n') inptr++;
 		}
+		else if (*inptr != '\r' && *inptr != '\n' && *inptr != '\0') {
+			//char *x = inptr;
+			while (*inptr != '\r' && *inptr != '\n' && *inptr != '\0') inptr++;
+			if (*inptr == '\r') inptr++;
+			if (*inptr == '\n') inptr++;
+			//nsp_setstr(N, &N->g, "mime_bug", x, inptr - x);
+			continue;
+		}
 		else {
 			break;
 		}
-
 		if (nc_strcmp(namebuf, "date") == 0) {
 			nsp_setnum(N, ctobj, "date_numeric", (num_t)time_wmgetdate(nsp_tostr(N, cobj)));
 		}
-
 	}
 	if (*inptr == '\r') inptr++;
 	if (*inptr == '\n') inptr++;
