@@ -26,6 +26,7 @@
 		</path>
 	</dl>
 	<eval type="function" desc="Evaluates a supplied expression." params="" returns="" />
+	<exec type="function" desc="Evaluates a supplied expression." params="" returns="" />
 	<file type="table" desc="collection of functions available for working with files">
 		<append type="function" desc="append string data to the specified file" params="" returns="" />
 		<chdir type="function" desc="change to specified directory" params="" returns="" />
@@ -123,7 +124,7 @@
 	<runtime type="function" desc="get the number of seconds the script has been running" params="" returns="" />
 	<serialize type="function" desc="returns the contents of a table in string format (with subtable)" params="(object arg1)" returns="string representation of arg1" />
 	<sizeof type="function" desc="returns size of object" params="(object arg1)" returns="size of object based on type. for strings, it's the length of a string. for tables, it's the number of items in the table." />
-	<sleep type="function" desc="causes script to sleep for a number of milliseconds" params="(number milliseconds)" returns="void" />
+	<sleep type="function" desc="causes script to sleep for a number of seconds (with millisecond precision)" params="(number seconds)" returns="void" />
 	<sprintf type="function" desc="print to buffer with formatting similar to the c function of the same name" params="(string format[, ...])" returns="string with formatting applied" />
 	<string type="table" desc="class of functions available for working with strings">
 		<atoi type="function" desc="get numeric value of character in a string" params="(string arg1[, number offset])" returns="numeric value of character in arg1 at offset" />
@@ -133,6 +134,9 @@
 		<icmp type="function" desc="case insensitive string" params="(string str1, string str2)" returns="number" />
 		<ncmp type="function" desc="case sensitive substring comparison up to len characters" params="(string str1, string str2, number len)" returns="number" />
 		<nicmp type="function" desc="case insensitive substring comparison up to len characters" params="(string str1, string str2, number len)" returns="number" />
+		<contains type="function" desc="case sensitive substring search" params="(string str1, string str2)" returns="true if str1 contains an instance of str2" />
+		<endswith type="function" desc="case sensitive substring search" params="(string str1, string str2)" returns="true if the end of str1 matches str2" />
+		<startswith type="function" desc="case sensitive substring search" params="(string str1, string str2)" returns="true if the start of str1 matches str2" />
 		<join type="function" desc="merge the table str into a single string separated by sep" params="(table str, string sep)" returns="table" />
 		<len type="function" desc="get length of string (binary safe)" params="(string str)" returns="number" />
 		<replace type="function" desc="replace occurences in of arg2 with arg3" params="(string arg1, string arg2, string arg3)" returns="string result of arg1 with arg2 replaced" />

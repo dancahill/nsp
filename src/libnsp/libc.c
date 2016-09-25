@@ -103,7 +103,7 @@ int nc_printf(nsp_state *N, const char *format, ...)
 	settrace();
 	if (N->outbuflen > OUTBUFLOWAT) nl_flush(N);
 	va_start(ap, format);
-	len = nc_vsnprintf(N, N->outbuf + N->outbuflen, MAX_OUTBUFLEN - N->outbuflen, format, ap);
+	len = nc_vsnprintf(N, N->outbuffer + N->outbuflen, N->outbufmax - N->outbuflen, format, ap);
 	N->outbuflen += len;
 	va_end(ap);
 	return len;
@@ -305,11 +305,11 @@ void n_warn(nsp_state *N, const char *fname, const char *format, ...)
 		nc_printf(N, "\r\n%s : line %d, ", p, N->line_num);
 	}
 	va_start(ap, format);
-	len = nc_vsnprintf(N, N->outbuf + N->outbuflen, MAX_OUTBUFLEN - N->outbuflen, format, ap);
+	len = nc_vsnprintf(N, N->outbuffer + N->outbuflen, N->outbufmax - N->outbuflen, format, ap);
 	va_end(ap);
 
 #if defined(WIN32) && defined(_DEBUG)
-	_RPT1(_CRT_WARN, "NSP Warning: %s : line %d, [%s]\r\n", p, N->line_num, N->outbuf + N->outbuflen);
+	_RPT1(_CRT_WARN, "NSP Warning: %s : line %d, [%s]\r\n", p, N->line_num, N->outbuffer + N->outbuflen);
 #endif
 	N->outbuflen += len;
 

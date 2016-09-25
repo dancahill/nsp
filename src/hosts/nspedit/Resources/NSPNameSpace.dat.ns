@@ -570,8 +570,8 @@
 		type = "function"
 	},
 	["sleep"] = {
-		desc = "causes script to sleep for a number of milliseconds",
-		params = "(number milliseconds)",
+		desc = "causes script to sleep for a number of seconds (with millisecond precision)",
+		params = "(number seconds)",
 		returns = "void",
 		type = "function"
 	},
@@ -625,6 +625,18 @@
 		returns = "number - 0 if matches, or index of first non-matching character",
 		type = "function"
 	},
+	["string.contains"] = {
+		desc = "case sensitive substring search",
+		params = "(string str1, string str2)",
+		returns = "true if str1 contains an instance of str2",
+		type = "function"
+	},
+	["string.endswith"] = {
+		desc = "case sensitive substring search",
+		params = "(string str1, string str2)",
+		returns = "true if the end of str1 matches str2",
+		type = "function"
+	},
 	["string.icmp"] = {
 		desc = "case insensitive string",
 		params = "(string str1, string str2)",
@@ -665,6 +677,12 @@
 		desc = "split a string into substring",
 		params = "(string str, string sep)",
 		returns = "table of substrings in str separated by sep",
+		type = "function"
+	},
+	["string.startswith"] = {
+		desc = "case sensitive substring search",
+		params = "(string str1, string str2)",
+		returns = "true if the start of str1 matches str2",
 		type = "function"
 	},
 	["string.str"] = {

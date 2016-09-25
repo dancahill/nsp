@@ -834,6 +834,9 @@ nsp_state *nsp_newstate()
 	short i;
 
 	new_N = (nsp_state *)n_alloc(NULL, sizeof(nsp_state), 1);
+	new_N->outbuflen = 0;
+	new_N->outbufmax = MAX_OUTBUFSIZE;
+	new_N->outbuffer = (char *)n_alloc(NULL, new_N->outbufmax + 1, 1);// add one byte for null termination
 	nc_gettimeofday(&new_N->ttime, NULL);
 	srand(new_N->ttime.tv_usec);
 	new_N->maxwarnings = 500;
@@ -960,6 +963,7 @@ nsp_state *nsp_endstate(nsp_state *N)
 	if (N != NULL) {
 		settrace();
 		nsp_freestate(N);
+		n_free(N, (void *)&N->outbuffer, N->outbufmax + 1);// one byte added for null termination
 		n_free(N, (void *)&N, sizeof(nsp_t));
 	}
 	return NULL;

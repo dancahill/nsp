@@ -173,8 +173,8 @@ NSP_FUNCTION(nl_flush)
 	}
 flush:
 	if (N->outbuflen == 0) return 0;
-	N->outbuf[N->outbuflen] = '\0';
-	if ((rc = write(STDOUT_FILENO, N->outbuf, N->outbuflen)) != N->outbuflen) {
+	N->outbuffer[N->outbuflen] = '\0';
+	if ((rc = write(STDOUT_FILENO, N->outbuffer, N->outbuflen)) != N->outbuflen) {
 #if defined(WIN32) && defined(_DEBUG)
 		_RPT1(_CRT_WARN, "nl_flush write() wrote less bytes than expected\r\n", "");
 #endif
@@ -204,9 +204,9 @@ static int writestr(nsp_state *N, obj_t *cobj)
 	}
 	for (i = 0; i < len; i++) {
 		if (N->outbuflen > OUTBUFLOWAT) nl_flush(N);
-		N->outbuf[N->outbuflen++] = p[i];
+		N->outbuffer[N->outbuflen++] = p[i];
 	}
-	N->outbuf[N->outbuflen] = '\0';
+	N->outbuffer[N->outbuflen] = '\0';
 	return len;
 #undef __FN__
 }

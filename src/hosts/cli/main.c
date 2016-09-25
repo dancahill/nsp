@@ -55,11 +55,11 @@ extern char **environ;
 static int flush(nsp_state *N)
 {
 	if (N == NULL || N->outbuflen == 0) return 0;
-	N->outbuf[N->outbuflen] = '\0';
+	N->outbuffer[N->outbuflen] = '\0';
 #if defined(WIN32) && defined(_DEBUG)
-	OutputDebugStringA(N->outbuf);
+	OutputDebugStringA(N->outbuffer);
 #endif
-	if (write(STDOUT_FILENO, N->outbuf, N->outbuflen) != N->outbuflen) {
+	if (write(STDOUT_FILENO, N->outbuffer, N->outbuflen) != N->outbuflen) {
 		printf("flush() error\r\n");
 	}
 	N->outbuflen = 0;

@@ -5,6 +5,7 @@
 	<null type="null" desc="null (special variable)" />
 	<this type="table" desc="this (special variable)" />
 	<true type="boolean" desc="true (special variable)" />
+	<_ARGS type="table" desc="_ARGS {}" />
 	<_ENV type="table" desc="table of environment variables" />
 	<_GLOBALS type="table" desc="link to the global variables table (recursive)" />
 	<_filename type="string" desc="name of running script" />
@@ -26,6 +27,7 @@
 		</path>
 	</dl>
 	<eval type="function" desc="Evaluates a supplied expression." params="" returns="" />
+	<exec type="function" desc="Evaluates a supplied expression." params="" returns="" />
 	<file type="table" desc="collection of functions available for working with files">
 		<append type="function" desc="append string data to the specified file" params="" returns="" />
 		<chdir type="function" desc="change to specified directory" params="" returns="" />
@@ -42,6 +44,7 @@
 		<print type="function" desc="print data to console - accepts one or more comma-separated parameters" params="" returns="" />
 		<write type="function" desc="write data to console" params="" returns="" />
 		<flush type="function" desc="flush any buffered data to console" params="" returns="" />
+		<gets type="function" desc="io.gets()" params="null" returns="null" />
 	</io>
 	<math type="table" desc="math functions">
 		<abs type="function" desc="get absolute (positive) value of a number" params="" returns="" />
@@ -123,7 +126,7 @@
 	<runtime type="function" desc="get the number of seconds the script has been running" params="" returns="" />
 	<serialize type="function" desc="returns the contents of a table in string format (with subtable)" params="(object arg1)" returns="string representation of arg1" />
 	<sizeof type="function" desc="returns size of object" params="(object arg1)" returns="size of object based on type. for strings, it's the length of a string. for tables, it's the number of items in the table." />
-	<sleep type="function" desc="causes script to sleep for a number of milliseconds" params="(number milliseconds)" returns="void" />
+	<sleep type="function" desc="causes script to sleep for a number of seconds (with millisecond precision)" params="(number seconds)" returns="void" />
 	<sprintf type="function" desc="print to buffer with formatting similar to the c function of the same name" params="(string format[, ...])" returns="string with formatting applied" />
 	<string type="table" desc="class of functions available for working with strings">
 		<atoi type="function" desc="get numeric value of character in a string" params="(string arg1[, number offset])" returns="numeric value of character in arg1 at offset" />
@@ -133,6 +136,9 @@
 		<icmp type="function" desc="case insensitive string" params="(string str1, string str2)" returns="number" />
 		<ncmp type="function" desc="case sensitive substring comparison up to len characters" params="(string str1, string str2, number len)" returns="number" />
 		<nicmp type="function" desc="case insensitive substring comparison up to len characters" params="(string str1, string str2, number len)" returns="number" />
+		<contains type="function" desc="case sensitive substring search" params="(string str1, string str2)" returns="true if str1 contains an instance of str2" />
+		<endswith type="function" desc="case sensitive substring search" params="(string str1, string str2)" returns="true if the end of str1 matches str2" />
+		<startswith type="function" desc="case sensitive substring search" params="(string str1, string str2)" returns="true if the start of str1 matches str2" />
 		<join type="function" desc="merge the table str into a single string separated by sep" params="(table str, string sep)" returns="table" />
 		<len type="function" desc="get length of string (binary safe)" params="(string str)" returns="number" />
 		<replace type="function" desc="replace occurences in of arg2 with arg3" params="(string arg1, string arg2, string arg3)" returns="string result of arg1 with arg2 replaced" />
@@ -156,8 +162,8 @@ arg3 is implicitly the end of the string" params="(string str, number arg2[, num
 	</table>
 	<thread type="table" desc="class of functions for working with threads (experimental)">
 		<thread type="function" desc="constructor for new threads" params="" returns="" />
-		<start type="function" desc="" params="" returns="" />
-		<finish type="function" desc="" params="" returns="" />
+		<start type="function" desc="begin execution of thread function 'this.fn'" params="" returns="" />
+		<finish type="function" desc="called by the thread to finish execution" params="" returns="" />
 		<mutex type="table" desc="class of functions for working with thread mutexes (experimental)">
 			<mutex type="function" desc="constructor for new thread mutexes" params="" returns="" />
 			<lock type="function" desc="acquire a lock" params="" returns="" />

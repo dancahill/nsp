@@ -1062,16 +1062,25 @@ namespace testlib {
 
 		expect("string.replace",        "ab.*.*cd", string.replace("ab--cd", '-', '.*'));
 
+		str="abcdef";
+		expect("s.contains(\"bcd\")",   true,  str.contains("bcd"));
+		expect("s.contains(\"bcc\")",   false, str.contains("bcc"));
+		expect("s.startswith(\"abc\")", true,  str.startswith("abc"));
+		expect("s.startswith(\"abb\")", false, str.startswith("abb"));
+		expect("s.endswith(\"def\")",   true,  str.endswith("def"));
+		expect("s.endswith(\"dee\")",   false, str.endswith("dee"));
+		expect("s.endswith(\"\")",      true,  str.endswith(""));
+
 		x=@"verbatim\r\nstring";
 		if (!quiet) print(""+x+"\r\n");
 		if (!quiet) print(@"verbatim\r\nstring2"+"\r\n"+@";-)\r\n"+"\r\n");
 
-		dbffile=@"C:\D\E\" + "ASDF" + @"\F\G.DBF";
-		if (!quiet) print(""+dbffile+"\r\n");
+		//dbffile=@"C:\D\E\" + "ASDF" + @"\F\G.DBF";
+		//if (!quiet) print(""+dbffile+"\r\n");
 
-		local x=`pwd`;
-	//	expect("x=`yy`;x*=3",           "yyyyyy",   x*=3);
-		if (!quiet) print("[",x,"]");
+		//local x=`pwd`;
+		//expect("x=`yy`;x*=3",           "yyyyyy",   x*=3);
+		//if (!quiet) print("[",x,"]");
 
 		return;
 	};
