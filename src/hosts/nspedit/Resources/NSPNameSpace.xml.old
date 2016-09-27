@@ -5,7 +5,6 @@
 	<null type="null" desc="null (special variable)" />
 	<this type="table" desc="this (special variable)" />
 	<true type="boolean" desc="true (special variable)" />
-	<_ARGS type="table" desc="_ARGS {}" />
 	<_ENV type="table" desc="table of environment variables" />
 	<_GLOBALS type="table" desc="link to the global variables table (recursive)" />
 	<_filename type="string" desc="name of running script" />
@@ -44,7 +43,6 @@
 		<print type="function" desc="print data to console - accepts one or more comma-separated parameters" params="" returns="" />
 		<write type="function" desc="write data to console" params="" returns="" />
 		<flush type="function" desc="flush any buffered data to console" params="" returns="" />
-		<gets type="function" desc="io.gets()" params="null" returns="null" />
 	</io>
 	<math type="table" desc="math functions">
 		<abs type="function" desc="get absolute (positive) value of a number" params="" returns="" />
@@ -67,30 +65,63 @@
 		<sqrt type="function" desc="returns the square root of a value" params="" returns="" />
 	</math>
 	<net type="table" desc="collection of functions and classes available for working with network connections">
-		<have_tls type="boolean" desc="" />
-		<tls_type type="string" desc="" />
-		<dns type="table" desc="">
+		<have_tls type="boolean" desc="value is true if TLS (Transport Layer Security, aka. SSL) is available" />
+		<tls_type type="string" desc="name of TLS library in use (if available)" />
+		<dns type="table" desc="functions for accessing DNS (Domain Name System) data">
 			<name2addr type="function" desc="" params="" returns="" />
 			<addr2name type="function" desc="" params="" returns="" />
 		</dns>
-		<ftp type="table" desc="">
-			<client type="function" desc="" params="" returns="" />
+		<ftp type="table" desc="FTP classes and functions">
+			<client type="table" desc="class of functions for accessing FTP servers">
+				<client type="function" desc="constructor for net.ftp.client class" params="" returns="" />
+				<open type="function" desc="method to open a connection to an FTP server" params="" returns="" />
+				<close type="function" desc="method to close an open connection to an FTP server" params="" returns="" />
+				<ls type="function" desc="method to list files in a remote directory" params="" returns="" />
+				<retr type="function" desc="method to download a file from a server" params="" returns="" />
+				<stor type="function" desc="method to upload a file to a server" params="" returns="" />
+			</client>
 		</ftp>
 		<http type="table" desc="">
-			<client type="function" desc="" params="" returns="" />
+			<client type="table" desc="">
+				<client type="function" desc="net.http.client.client()" params="null" returns="null" />
+				<send type="function" desc="net.http.client.send()" params="null" returns="null" />
+			</client>
 		</http>
 		<mime type="table" desc="">
 			<read type="function" desc="" params="" returns="" />
 			<write type="function" desc="" params="" returns="" />
-			<decode_qp type="function" desc="" params="" returns="" />
-			<decode_rfc2047 type="function" desc="" params="" returns="" />
+			<base64 type="table" desc="net.mime.base64 {}">
+				<decode type="function" desc="net.mime.base64.decode()" params="null" returns="null" />
+				<encode type="function" desc="net.mime.base64.encode()" params="null" returns="null" />
+			</base64>
+			<qp type="table" desc="net.mime.qp {}">
+				<decode type="function" desc="net.mime.qp.decode()" params="null" returns="null" />
+				<encode type="function" desc="net.mime.qp.encode()" params="null" returns="null" />
+			</qp>
+			<rfc2047 type="table" desc="net.mime.rfc2047 {}">
+				<decode type="function" desc="net.mime.rfc2047.decode()" params="null" returns="null" />
+			</rfc2047>
 		</mime>
-		<smtp type="table" desc="">
-			<client type="function" desc="" params="" returns="" />
-		</smtp>
 		<pop3 type="table" desc="">
-			<client type="function" desc="" params="" returns="" />
+			<client type="table" desc="">
+				<client type="function" desc="net.pop3.client.client()" params="null" returns="null" />
+				<open type="function" desc="net.pop3.client.open()" params="null" returns="null" />
+				<close type="function" desc="net.pop3.client.close()" params="null" returns="null" />
+				<stat type="function" desc="net.pop3.client.stat()" params="null" returns="null" />
+				<uidl type="function" desc="net.pop3.client.uidl()" params="null" returns="null" />
+				<top type="function" desc="net.pop3.client.top()" params="null" returns="null" />
+				<retr type="function" desc="net.pop3.client.retr()" params="null" returns="null" />
+				<dele type="function" desc="net.pop3.client.dele()" params="null" returns="null" />
+				<list type="function" desc="net.pop3.client.list()" params="null" returns="null" />
+			</client>
 		</pop3>
+		<smtp type="table" desc="">
+			<client type="table" desc="">
+				<client type="function" desc="net.smtp.client.client()" params="null" returns="null" />
+				<attach type="function" desc="net.smtp.client.attach()" params="null" returns="null" />
+				<send type="function" desc="net.smtp.client.send()" params="null" returns="null" />
+			</client>
+		</smtp>
 		<socket type="table" desc="class of functions available for working with raw TCP/IP connections">
 			<accept type="function" desc="" params="" returns="" />
 			<bind type="function" desc="" params="" returns="" />

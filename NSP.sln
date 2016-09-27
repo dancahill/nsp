@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp.net", "src\libnsp.net\libnsp.net.vcxproj", "{F1626418-51AB-4DD7-89FF-83EAC92AF387}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -189,6 +189,21 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Debug|Mixed Platforms.Deploy.0 = Debug|Win32
+		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Debug|Win32.Build.0 = Debug|Win32
+		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Debug|x64.ActiveCfg = Debug|Win32
+		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Debug|x86.ActiveCfg = Debug|Win32
+		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Release|Any CPU.ActiveCfg = Release|Win32
+		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Release|Win32.ActiveCfg = Release|Win32
+		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Release|Win32.Build.0 = Release|Win32
+		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Release|x64.ActiveCfg = Release|Win32
+		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Release|x86.ActiveCfg = Release|Win32
 		{CB319BD8-EC40-45E9-BF01-5CEE24B7F8F5}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{CB319BD8-EC40-45E9-BF01-5CEE24B7F8F5}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{CB319BD8-EC40-45E9-BF01-5CEE24B7F8F5}.Debug|Mixed Platforms.Build.0 = Debug|x86
@@ -205,21 +220,6 @@ Global
 		{CB319BD8-EC40-45E9-BF01-5CEE24B7F8F5}.Release|x64.ActiveCfg = Release|x86
 		{CB319BD8-EC40-45E9-BF01-5CEE24B7F8F5}.Release|x86.ActiveCfg = Release|x86
 		{CB319BD8-EC40-45E9-BF01-5CEE24B7F8F5}.Release|x86.Build.0 = Release|x86
-		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Debug|Mixed Platforms.Build.0 = Debug|Win32
-		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Debug|Mixed Platforms.Deploy.0 = Debug|Win32
-		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Debug|Win32.ActiveCfg = Debug|Win32
-		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Debug|Win32.Build.0 = Debug|Win32
-		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Debug|x64.ActiveCfg = Debug|Win32
-		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Debug|x86.ActiveCfg = Debug|Win32
-		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Release|Any CPU.ActiveCfg = Release|Win32
-		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Release|Mixed Platforms.Build.0 = Release|Win32
-		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Release|Win32.ActiveCfg = Release|Win32
-		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Release|Win32.Build.0 = Release|Win32
-		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Release|x64.ActiveCfg = Release|Win32
-		{F1626418-51AB-4DD7-89FF-83EAC92AF387}.Release|x86.ActiveCfg = Release|Win32
 		{52F99E4B-EA7D-470C-B66F-685C3B40626A}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{52F99E4B-EA7D-470C-B66F-685C3B40626A}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
 		{52F99E4B-EA7D-470C-B66F-685C3B40626A}.Debug|Mixed Platforms.Build.0 = Debug|Win32
@@ -585,8 +585,8 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{CB319BD8-EC40-45E9-BF01-5CEE24B7F8F5} = {E9522B42-2483-4387-B929-33062F799C90}
 		{F1626418-51AB-4DD7-89FF-83EAC92AF387} = {C9F6E591-8611-4526-A6C6-1935254B0653}
+		{CB319BD8-EC40-45E9-BF01-5CEE24B7F8F5} = {E9522B42-2483-4387-B929-33062F799C90}
 		{52F99E4B-EA7D-470C-B66F-685C3B40626A} = {C9F6E591-8611-4526-A6C6-1935254B0653}
 		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {E9522B42-2483-4387-B929-33062F799C90}
 		{715673E5-8603-4390-BD77-4C5277BB6C18} = {E9522B42-2483-4387-B929-33062F799C90}

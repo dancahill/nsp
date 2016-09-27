@@ -28,9 +28,9 @@ static void pop3_lasterr(nsp_state *N, char *msg)
 	return;
 }
 
-NSP_CLASSMETHOD(libnsp_net_pop3_open)
+NSP_CLASSMETHOD(libnsp_net_pop3_client_open)
 {
-#define __FN__ __FILE__ ":libnsp_net_pop3_open()"
+#define __FN__ __FILE__ ":libnsp_net_pop3_client_open()"
 	char iobuf[1024];
 	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
 	obj_t *cobj;
@@ -110,8 +110,7 @@ NSP_CLASSMETHOD(libnsp_net_pop3_open)
 		return -1;
 	}
 
-
-
+#ifdef HAVE_TLS
 	if (sock->use_tls == 0) {
 		/* send STLS */
 		tcp_fprintf(N, sock, "STLS\r\n");
@@ -131,8 +130,7 @@ NSP_CLASSMETHOD(libnsp_net_pop3_open)
 		rc = _tls_connect(N, sock);
 		sock->use_tls = 1;
 	}
-
-
+#endif
 
 	/* send username */
 	tcp_fprintf(N, sock, "USER %s\r\n", user);
@@ -176,9 +174,9 @@ NSP_CLASSMETHOD(libnsp_net_pop3_open)
 #undef __FN__
 }
 
-NSP_CLASSMETHOD(libnsp_net_pop3_close)
+NSP_CLASSMETHOD(libnsp_net_pop3_client_close)
 {
-#define __FN__ __FILE__ ":libnsp_net_pop3_close()"
+#define __FN__ __FILE__ ":libnsp_net_pop3_client_close()"
 	char iobuf[1024];
 	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
 	obj_t *cobj;
@@ -206,9 +204,9 @@ NSP_CLASSMETHOD(libnsp_net_pop3_close)
 #undef __FN__
 }
 
-NSP_CLASSMETHOD(libnsp_net_pop3_stat)
+NSP_CLASSMETHOD(libnsp_net_pop3_client_stat)
 {
-#define __FN__ __FILE__ ":libnsp_net_pop3_stat()"
+#define __FN__ __FILE__ ":libnsp_net_pop3_client_stat()"
 	char iobuf[1024];
 	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
 	obj_t *cobj;
@@ -250,9 +248,9 @@ NSP_CLASSMETHOD(libnsp_net_pop3_stat)
 #undef __FN__
 }
 
-NSP_CLASSMETHOD(libnsp_net_pop3_uidl)
+NSP_CLASSMETHOD(libnsp_net_pop3_client_uidl)
 {
-#define __FN__ __FILE__ ":libnsp_net_pop3_uidl()"
+#define __FN__ __FILE__ ":libnsp_net_pop3_client_uidl()"
 	char iobuf[1024];
 	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
 	obj_t *cobj;
@@ -320,9 +318,9 @@ NSP_CLASSMETHOD(libnsp_net_pop3_uidl)
 #undef __FN__
 }
 
-NSP_CLASSMETHOD(libnsp_net_pop3_top)
+NSP_CLASSMETHOD(libnsp_net_pop3_client_top)
 {
-#define __FN__ __FILE__ ":libnsp_net_pop3_top()"
+#define __FN__ __FILE__ ":libnsp_net_pop3_client_top()"
 	char iobuf[1024];
 	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
 	obj_t *cobj;
@@ -375,9 +373,9 @@ NSP_CLASSMETHOD(libnsp_net_pop3_top)
 #undef __FN__
 }
 
-NSP_CLASSMETHOD(libnsp_net_pop3_retr)
+NSP_CLASSMETHOD(libnsp_net_pop3_client_retr)
 {
-#define __FN__ __FILE__ ":libnsp_net_pop3_retr()"
+#define __FN__ __FILE__ ":libnsp_net_pop3_client_retr()"
 	char iobuf[1024];
 	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
 	obj_t *cobj;
@@ -426,9 +424,9 @@ NSP_CLASSMETHOD(libnsp_net_pop3_retr)
 #undef __FN__
 }
 
-NSP_CLASSMETHOD(libnsp_net_pop3_dele)
+NSP_CLASSMETHOD(libnsp_net_pop3_client_dele)
 {
-#define __FN__ __FILE__ ":libnsp_net_pop3_dele()"
+#define __FN__ __FILE__ ":libnsp_net_pop3_client_dele()"
 	char iobuf[1024];
 	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
 	obj_t *cobj;
@@ -465,9 +463,9 @@ NSP_CLASSMETHOD(libnsp_net_pop3_dele)
 #undef __FN__
 }
 
-NSP_CLASSMETHOD(libnsp_net_pop3_list)
+NSP_CLASSMETHOD(libnsp_net_pop3_client_list)
 {
-#define __FN__ __FILE__ ":libnsp_net_pop3_list()"
+#define __FN__ __FILE__ ":libnsp_net_pop3_client_list()"
 	char iobuf[1024];
 	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
 	obj_t *cobj;
@@ -536,20 +534,21 @@ NSP_CLASSMETHOD(libnsp_net_pop3_list)
 #undef __FN__
 }
 
-NSP_CLASS(libnsp_net_pop3_client)
+NSP_CLASSMETHOD(libnsp_net_pop3_client_client)
 {
-#define __FN__ __FILE__ ":libnsp_net_pop3_client()"
-	obj_t *cobj;
+#define __FN__ __FILE__ ":libnsp_net_pop3_client_client()"
+	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
+	//obj_t *cobj;
 
-	nsp_setbool(N, &N->l, "socket", 0);
-	nsp_setstr(N, &N->l, "host", "localhost", 9);
-	nsp_setnum(N, &N->l, "port", 110);
-	nsp_setbool(N, &N->l, "use_tls", 0);
-	nsp_setstr(N, &N->l, "username", "anonymous", 9);
-	nsp_setstr(N, &N->l, "password", "anonymous", 9);
-	cobj = nsp_getobj(N, nsp_getobj(N, nsp_getobj(N, &N->g, "net"), "pop3"), "client");
-	if (nsp_istable(cobj)) nsp_zlink(N, &N->l, cobj);
-	else n_warn(N, __FN__, "net.pop3.client not found");
+	nsp_setbool(N, thisobj, "socket", 0);
+	nsp_setstr(N, thisobj, "host", "localhost", 9);
+	nsp_setnum(N, thisobj, "port", 110);
+	nsp_setbool(N, thisobj, "use_tls", 0);
+	nsp_setstr(N, thisobj, "username", "anonymous", 9);
+	nsp_setstr(N, thisobj, "password", "anonymous", 9);
+	//cobj = nsp_getobj(N, nsp_getobj(N, nsp_getobj(N, &N->g, "net"), "pop3"), "client");
+	//if (nsp_istable(cobj)) nsp_zlink(N, &N->l, cobj);
+	//else n_warn(N, __FN__, "net.pop3.client not found");
 	return 0;
 #undef __FN__
 }

@@ -6,44 +6,12 @@ namespace testlib {
 		//include("testlib.ns");
 		global numtests=0;
 		global numerrors=0;
-	/*
-		local testlist = {
-			"types.ns";
-			"tables.ns";
-			"serial.ns";
-			"size.ns";
-			"scope.ns";
-			"string.ns";
-			"if.ns";
-			"function.ns";
-			"link.ns";
-			"cmp.ns";
-			"math.ns";
-			"loops.ns";
-			"switch.ns";
-			"zlink.ns";
-			"oo.ns";
-			"eval.ns";
-			"indexes.ns";
-			"try.ns";
-			"dl.ns";
-			"b64.ns";
-			"rot13.ns";
-			"xml.ns";
-	//		"regex.ns";
-			"crypto.ns";
-	//		"tcp.ns";
-	//		"ldap.ns";
-	//		"odbc.ns";
-			"_misc.ns";
-		}
-	*/
 		global expect=testlib.expect;
 
 		if (!quiet) print("        STARTING TESTS\n");
-		foreach (n,v in testlib) {
-			if (n=='expect' || n=='runtests') continue;
-			if (n=='_load' || n=='_regex') continue;
+		foreach (n,v in testlib.tests) {
+			//if (n=='expect' || n=='runtests') continue;
+			if (n=='load' || n=='regex') continue;
 			//printf("[%s][%s]\r\n", n, v.gettype());
 			try {
 				if (!quiet) printf("-- %s %s\n", n, "-"*(63-n.length()));
@@ -132,6 +100,9 @@ namespace testlib {
 		io.flush();
 		return;
 	};
+}
+
+namespace testlib.tests {
 	// _misc.ns
 	function misc() {
 	//print("including mime.ns",include("lib/_mime.ns"),"\r\n");
@@ -164,7 +135,7 @@ namespace testlib {
 		return;
 	};
 	// b64.ns
-	function _b64() {
+	function b64() {
 		if (typeof(base64)!='table') {
 			print("SKIPPING BASE64 TESTS\n");
 			return;
@@ -179,7 +150,7 @@ namespace testlib {
 		return;
 	};
 	// cmp.ns
-	_cmp = function () {
+	function cmp() {
 		if (math.asin) {
 			local pi = math.asin(1)*2;
 		} else {
@@ -261,7 +232,7 @@ namespace testlib {
 		return;
 	};
 	// crypto.ns
-	_crypto = function () {
+	function crypto() {
 	//	local key="hex:E76B2413958B00E193";
 	//	local key="hex:E76B2413958B00E1930000000000000000000000000000000000000000000000";
 		local key="hex:40507649a9581e95d503367fe3c90fa1439122d5a55a2218c97b5994b71df243";
@@ -380,7 +351,7 @@ namespace testlib {
 		return;
 	};
 	// dl.ns
-	_dl = function () {
+	function dl() {
 		if (typeof(dl.load)!='function') return;
 		if (typeof(dirlist)!='function') {
 			print("        dirlist doesn't exist\n");
@@ -409,7 +380,7 @@ namespace testlib {
 	};
 	//if (_ostype_!='OpenBSD/gcc') testdl();
 	// eval.ns
-	_eval = function () {
+	function eval() {
 		if (typeof(eval)=='function') {
 			expect("eval(\"5*5\")",      25,    eval("5*5"));
 			expect("eval(5*42)",         210,   eval(5*42));
@@ -441,7 +412,7 @@ namespace testlib {
 		return;
 	};
 	// function.ns
-	_functions = function () {
+	function functions() {
 		local function x() { return 1; }
 		expect("...", 1,  x());
 		x=function () { return 2; }
@@ -453,7 +424,7 @@ namespace testlib {
 		return;
 	};
 	// if.ns
-	_if = function () {
+	function ifelse() {
 		local x=2;
 		local str="";
 
@@ -478,7 +449,7 @@ namespace testlib {
 		return;
 	};
 	// index.ns
-	_indexing = function () {
+	function indexing() {
 		var sp="                              ";
 
 		if (!quiet) print("        this is a sample of table indexes.\n\n");
@@ -502,7 +473,7 @@ namespace testlib {
 		return;
 	};
 	// ldap.ns
-	_ldap = function () {
+	function ldap() {
 		if (typeof(ldap.search)!='function') {
 			if (!quiet) print("SKIPPING LDAP TESTS\n");
 			return;
@@ -512,7 +483,7 @@ namespace testlib {
 		return;
 	};
 	// link.ns
-	_link = function () {
+	function link() {
 		x=1;
 		y=&x;
 		expect("x=1",  1, x);
@@ -526,7 +497,7 @@ namespace testlib {
 		return;
 	};
 	// load.ns
-	_load = function () {
+	function load() {
 		include("/etc/nullsd/nullgs.conf");
 		global junk = { };
 		for (j=0;j<100;j++) {
@@ -540,7 +511,7 @@ namespace testlib {
 		return;
 	};
 	// loops.ns
-	_loop = function () {
+	function loop() {
 		local n=10;
 
 		local x=""; while (n>5) { x=x+string.tostring(--n); } expect("while (n>5)", "98765", x);
@@ -598,7 +569,7 @@ namespace testlib {
 	//# define M_SQRT2l       1.4142135623730950488016887242096981L  /* sqrt(2) */
 	//# define M_SQRT1_2l     0.7071067811865475244008443621048490L  /* 1/sqrt(2) */
 	//#endif
-	_math = function () {
+	function math() {
 		if (math.asin) {
 			local pi = math.asin(1)*2;
 		} else {
@@ -663,7 +634,7 @@ namespace testlib {
 		return;
 	};
 	// oo.ns
-	_oo = function () {
+	function oo() {
 		local function str1() {
 			local class str {
 				_constructor = function (val) { this.value = val.tostring(); };
@@ -720,7 +691,7 @@ namespace testlib {
 		return;
 	};
 	// regex.ns
-	_regex = function () {
+	function regex() {
 		if (_ostype_=="DOS/turboc") return;
 		if (typeof(regex)!='table') {
 			print("SKIPPING REGEX TESTS\n");
@@ -899,7 +870,7 @@ namespace testlib {
 		return;
 	};
 	// rot13.ns
-	_rot13 = function () {
+	function rot13() {
 		if (typeof(rot13)!='function') {
 			print("SKIPPING ROT13 TESTS\n");
 			return;
@@ -914,7 +885,7 @@ namespace testlib {
 		return;
 	};
 	// scope.ns
-	_scope = function () {
+	function scope() {
 		local subf1 = function (p1, p2) {
 			local p3="b";
 			expect("testing subscope", "[5][x][b]",     "["+p1.tostring()+"]["+p2.tostring()+"]["+p3.tostring()+"]");
@@ -973,7 +944,7 @@ namespace testlib {
 		return;
 	};
 	// serial.ns
-	_serial = function () {
+	function serial() {
 		t1 = {
 			A = { c = "1", t = "2" },
 			B = { c = 3 }
@@ -989,7 +960,7 @@ namespace testlib {
 		return;
 	};
 	// size.ns
-	_size = function () {
+	function size() {
 		//include("../samples/_cards.ns");
 		//expect("sizeof(CARDS)", 52, sizeof(CARDS));
 		global CARDS={};
@@ -999,7 +970,7 @@ namespace testlib {
 		return;
 	};
 	// string.ns
-	_string = function () {
+	function strings() {
 		local x=string.cat(string.cat("Aa", "Bb"), "CcDd");
 		expect("x",                     "AaBbCcDd", x);
 		expect("string.sub(x,1,2)",     "aB",     string.sub(x, 1, 2));
@@ -1085,7 +1056,7 @@ namespace testlib {
 		return;
 	};
 	// switch.ns
-	_switch = function () {
+	function switchcase() {
 		local x=0;
 		local y=0;
 
@@ -1144,7 +1115,7 @@ namespace testlib {
 		return;
 	};
 	// tables.ns
-	_tables = function () {
+	function tables() {
 		function subf() { return 69; }
 		local sub2 = function () { return { a=1, b=2 }; };
 		local x=1;
@@ -1236,7 +1207,7 @@ namespace testlib {
 		return;
 	};
 	// tcp.ns
-	_tcp = function () {
+	function tcp() {
 		local test_tcpserv = function () {
 			/* requires _tcpserv.ns to be running */
 			sock=new net.tcp.socket("localhost", 1234, 0);
@@ -1447,7 +1418,6 @@ namespace testlib {
 		hconn=new net.http.client(site_url);
 	//	print("[",typeof(hconn)," ",serialize(hconn),"]");
 		ht=hconn.send();
-	//	print("[",typeof(hconn)," ",serialize(hconn),"]");
 		delete hconn;
 	//	htconn=null;
 		expect("ht.status", "HTTP/1.1 200 OK", ht.status);
@@ -1476,7 +1446,7 @@ namespace testlib {
 		return;
 	};
 	// tcpserv.ns
-	_tcpd = function () {
+	function tcpd() {
 		if (typeof(net.tcp)!='table') {
 			if (!quiet) print("SKIPPING TCPSERV TESTS\n");
 			return;
@@ -1507,7 +1477,7 @@ namespace testlib {
 		return;
 	};
 	// try.ns
-	_try = function () {
+	function trycatch() {
 		//print("        This block _will_ cause errors - That's the point.\n\n");
 		io.flush();
 		trylog="";
@@ -1576,7 +1546,7 @@ namespace testlib {
 		return;
 	};
 	// types.ns
-	_types = function () {
+	function types() {
 		local a=null;
 		local b=true;
 		local c=42;
@@ -1596,7 +1566,7 @@ namespace testlib {
 		return;
 	};
 	// xml.ns
-	_xml = function () {
+	function xml() {
 		if (typeof(data.xml)!='table') {
 			if (!quiet) print("SKIPPING XML TESTS\n");
 			return;
@@ -1702,7 +1672,7 @@ namespace testlib {
 		return;
 	};
 	// zlink.ns
-	_zlink = function () {
+	function zlink() {
 		local function f1() {
 			return 41;
 		}
@@ -1729,15 +1699,6 @@ namespace testlib {
 		table.zlink(b, a);
 		expect("b['c']", 3,      b['c']);
 		return;
-	};
-
-	function _qp() {
-		x="a b = c d";
-		y=net.mime.qp.encode(x);
-		printf("[%s]=[%s]", x, y);
-		x="12345678901234567890123456789012345678901234567890123456789012345678901234567890";
-		y=net.mime.qp.encode(x);
-		printf("[%s]", y);
 	};
 };
 

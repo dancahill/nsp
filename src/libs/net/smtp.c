@@ -99,9 +99,9 @@ static void smtp_lasterr(nsp_state *N, char *msg)
 	return;
 }
 
-NSP_CLASSMETHOD(libnsp_net_smtp_attach)
+NSP_CLASSMETHOD(libnsp_net_smtp_client_attach)
 {
-#define __FN__ __FILE__ ":libnsp_net_smtp_attach()"
+#define __FN__ __FILE__ ":libnsp_net_smtp_client_attach()"
 	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
 	obj_t *cobj1 = nsp_getobj(N, &N->l, "1"); /* attachment name */
 	obj_t *cobj2 = nsp_getobj(N, &N->l, "2"); /* attachment */
@@ -123,9 +123,9 @@ NSP_CLASSMETHOD(libnsp_net_smtp_attach)
 #undef __FN__
 }
 
-NSP_CLASSMETHOD(libnsp_net_smtp_send)
+NSP_CLASSMETHOD(libnsp_net_smtp_client_send)
 {
-#define __FN__ __FILE__ ":libnsp_net_smtp_send()"
+#define __FN__ __FILE__ ":libnsp_net_smtp_client_send()"
 	char tmpbuf[1024];
 	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
 	obj_t *cobj;
@@ -264,20 +264,24 @@ quit:
 #undef __FN__
 }
 
-NSP_CLASS(libnsp_net_smtp_client)
+NSP_CLASSMETHOD(libnsp_net_smtp_client_client)
 {
-#define __FN__ __FILE__ ":libnsp_net_smtp_client()"
-	nsp_setcfunc(N, &N->l, "attach", (NSP_CFUNC)libnsp_net_smtp_attach);
-	nsp_setcfunc(N, &N->l, "send", (NSP_CFUNC)libnsp_net_smtp_send);
-	nsp_setstr(N, &N->l, "host", "localhost", 9);
-	nsp_setnum(N, &N->l, "port", 25);
-	nsp_setbool(N, &N->l, "use_tls", 0);
-	nsp_setstr(N, &N->l, "from", "", 0);
-	nsp_setstr(N, &N->l, "rcpt", "", 0);
-	nsp_setnum(N, &N->l, "date", 0);
-	nsp_setstr(N, &N->l, "subject", "(no subject)", 12);
-	nsp_setstr(N, &N->l, "contenttype", "text/plain", 10);
-	nsp_setstr(N, &N->l, "body", "", 0);
+#define __FN__ __FILE__ ":libnsp_net_smtp_client_client()"
+	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
+	//obj_t *cobj;
+
+	nsp_setstr(N, thisobj, "host", "localhost", 9);
+	nsp_setnum(N, thisobj, "port", 25);
+	nsp_setbool(N, thisobj, "use_tls", 0);
+	nsp_setstr(N, thisobj, "from", "", 0);
+	nsp_setstr(N, thisobj, "rcpt", "", 0);
+	nsp_setnum(N, thisobj, "date", 0);
+	nsp_setstr(N, thisobj, "subject", "(no subject)", 12);
+	nsp_setstr(N, thisobj, "contenttype", "text/plain", 10);
+	nsp_setstr(N, thisobj, "body", "", 0);
+	//cobj = nsp_getobj(N, nsp_getobj(N, nsp_getobj(N, &N->g, "net"), "smtp"), "client");
+	//if (nsp_istable(cobj)) nsp_zlink(N, &N->l, cobj);
+	//else n_warn(N, __FN__, "net.smtp.client not found");
 	return 0;
 #undef __FN__
 }

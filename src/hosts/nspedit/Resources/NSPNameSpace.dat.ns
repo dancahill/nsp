@@ -306,15 +306,15 @@
 		type = "table"
 	},
 	["net.have_tls"] = {
-		desc = "",
+		desc = "value is true if TLS (Transport Layer Security, aka. SSL) is available",
 		type = "boolean"
 	},
 	["net.tls_type"] = {
-		desc = "",
+		desc = "name of TLS library in use (if available)",
 		type = "string"
 	},
 	["net.dns"] = {
-		desc = "",
+		desc = "functions for accessing DNS (Domain Name System) data",
 		type = "table"
 	},
 	["net.dns.name2addr"] = {
@@ -330,11 +330,47 @@
 		type = "function"
 	},
 	["net.ftp"] = {
-		desc = "",
+		desc = "FTP classes and functions",
 		type = "table"
 	},
 	["net.ftp.client"] = {
-		desc = "",
+		desc = "class of functions for accessing FTP servers",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["net.ftp.client.client"] = {
+		desc = "constructor for net.ftp.client class",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["net.ftp.client.close"] = {
+		desc = "method to close an open connection to an FTP server",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["net.ftp.client.ls"] = {
+		desc = "method to list files in a remote directory",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["net.ftp.client.open"] = {
+		desc = "method to open a connection to an FTP server",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["net.ftp.client.retr"] = {
+		desc = "method to download a file from a server",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["net.ftp.client.stor"] = {
+		desc = "method to upload a file to a server",
 		params = "",
 		returns = "",
 		type = "function"
