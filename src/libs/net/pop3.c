@@ -24,7 +24,7 @@
 
 static void pop3_lasterr(nsp_state *N, char *msg)
 {
-	nsp_setstr(N, nsp_settable(N, nsp_settable(N, &N->g, "net"), "pop3"), "last_err", msg, -1);
+	nsp_setstr(N, nsp_getobj(N, &N->l, "this"), "last_err", msg, -1);
 	return;
 }
 
@@ -109,6 +109,31 @@ NSP_CLASSMETHOD(libnsp_net_pop3_open)
 		n_free(N, (void *)&sock, sizeof(TCP_SOCKET) + 1);
 		return -1;
 	}
+
+
+
+	if (sock->use_tls == 0) {
+		/* send STLS */
+		tcp_fprintf(N, sock, "STLS\r\n");
+		if ((rc = tcp_fgets(N, sock, iobuf, sizeof(iobuf) - 1)) < 0) {
+			tcp_close(N, sock, 1);
+			n_free(N, (void *)&sock, sizeof(TCP_SOCKET) + 1);
+			return -1;
+		}
+		striprn(iobuf);
+		//if (N->debug) { n_warn(N, __FN__, "got %s", iobuf); }
+		if (nc_strncmp(iobuf, "+OK", 3) != 0) {
+			pop3_lasterr(N, iobuf);
+			tcp_close(N, sock, 1);
+			n_free(N, (void *)&sock, sizeof(TCP_SOCKET) + 1);
+			return -1;
+		}
+		rc = _tls_connect(N, sock);
+		sock->use_tls = 1;
+	}
+
+
+
 	/* send username */
 	tcp_fprintf(N, sock, "USER %s\r\n", user);
 	//	do {
@@ -514,20 +539,17 @@ NSP_CLASSMETHOD(libnsp_net_pop3_list)
 NSP_CLASS(libnsp_net_pop3_client)
 {
 #define __FN__ __FILE__ ":libnsp_net_pop3_client()"
-	nsp_setcfunc(N, &N->l, "open", (NSP_CFUNC)libnsp_net_pop3_open);
-	nsp_setcfunc(N, &N->l, "close", (NSP_CFUNC)libnsp_net_pop3_close);
-	nsp_setcfunc(N, &N->l, "stat", (NSP_CFUNC)libnsp_net_pop3_stat);
-	nsp_setcfunc(N, &N->l, "uidl", (NSP_CFUNC)libnsp_net_pop3_uidl);
-	nsp_setcfunc(N, &N->l, "top", (NSP_CFUNC)libnsp_net_pop3_top);
-	nsp_setcfunc(N, &N->l, "retr", (NSP_CFUNC)libnsp_net_pop3_retr);
-	nsp_setcfunc(N, &N->l, "dele", (NSP_CFUNC)libnsp_net_pop3_dele);
-	nsp_setcfunc(N, &N->l, "list", (NSP_CFUNC)libnsp_net_pop3_list);
+	obj_t *cobj;
+
 	nsp_setbool(N, &N->l, "socket", 0);
 	nsp_setstr(N, &N->l, "host", "localhost", 9);
 	nsp_setnum(N, &N->l, "port", 110);
 	nsp_setbool(N, &N->l, "use_tls", 0);
 	nsp_setstr(N, &N->l, "username", "anonymous", 9);
 	nsp_setstr(N, &N->l, "password", "anonymous", 9);
+	cobj = nsp_getobj(N, nsp_getobj(N, nsp_getobj(N, &N->g, "net"), "pop3"), "client");
+	if (nsp_istable(cobj)) nsp_zlink(N, &N->l, cobj);
+	else n_warn(N, __FN__, "net.pop3.client not found");
 	return 0;
 #undef __FN__
 }

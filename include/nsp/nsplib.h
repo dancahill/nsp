@@ -193,7 +193,7 @@ void     n_storeval(nsp_state *N, obj_t *cobj);
 #define  n_peekop(N)     (*N->readptr!=OP_LINENUM?*N->readptr:n_skip_ws(N))
 #define  n_expect(N,f,o) if (n_peekop(N)!=o) _n_expect(N, f, o);
 
-int n_expect_argtype(nsp_state *N, unsigned short argn, unsigned short type, obj_t *obj, unsigned short allow_blank);
+int n_expect_argtype(nsp_state *N, unsigned short type, unsigned short argnum, obj_t *obj, unsigned short allow_blank);
 //#define  n_expect_argtype(N,a,t,o,ab) _n_expect_argtype(N, a, t, o, ab);
 
 #ifdef __cplusplus

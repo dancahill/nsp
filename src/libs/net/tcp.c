@@ -255,7 +255,7 @@ int tcp_recv(nsp_state *N, TCP_SOCKET *socket, char *buffer, int max, int flags)
 		socket->mtime = time(NULL);
 		socket->bytes_in += rc;
 	}
-	if (N->debug) n_warn(N, __FN__, "[%s:%d] %d bytes of data", socket->RemoteAddr, socket->RemotePort, rc);
+	//if (N->debug) n_warn(N, __FN__, "[%s:%d] %d bytes of data", socket->RemoteAddr, socket->RemotePort, rc);
 	return rc;
 #undef __FN__
 }

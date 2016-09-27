@@ -159,10 +159,21 @@ NSP_CLASS(libnsp_net_http_client);
 /* mime.c */
 NSP_FUNCTION(libnsp_net_mime_read);
 NSP_FUNCTION(libnsp_net_mime_write);
+NSP_FUNCTION(libnsp_net_mime_base64_decode);
+NSP_FUNCTION(libnsp_net_mime_base64_encode);
 NSP_FUNCTION(libnsp_net_mime_qp_decode);
+NSP_FUNCTION(libnsp_net_mime_qp_encode);
 NSP_FUNCTION(libnsp_net_mime_rfc2047_decode);
 /* pop3.c */
-NSP_CLASS(libnsp_net_pop3_client);
+NSP_CLASSMETHOD(libnsp_net_pop3_client);
+NSP_CLASSMETHOD(libnsp_net_pop3_open);
+NSP_CLASSMETHOD(libnsp_net_pop3_close);
+NSP_CLASSMETHOD(libnsp_net_pop3_stat);
+NSP_CLASSMETHOD(libnsp_net_pop3_uidl);
+NSP_CLASSMETHOD(libnsp_net_pop3_top);
+NSP_CLASSMETHOD(libnsp_net_pop3_retr);
+NSP_CLASSMETHOD(libnsp_net_pop3_dele);
+NSP_CLASSMETHOD(libnsp_net_pop3_list);
 /* smtp.c */
 NSP_CLASS(libnsp_net_smtp_client);
 /* socket.c */

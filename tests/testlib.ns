@@ -1730,6 +1730,15 @@ namespace testlib {
 		expect("b['c']", 3,      b['c']);
 		return;
 	};
+
+	function _qp() {
+		x="a b = c d";
+		y=net.mime.qp.encode(x);
+		printf("[%s]=[%s]", x, y);
+		x="12345678901234567890123456789012345678901234567890123456789012345678901234567890";
+		y=net.mime.qp.encode(x);
+		printf("[%s]", y);
+	};
 };
 
 if (stuff==null) print("run test1.ns\r\n");

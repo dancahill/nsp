@@ -882,8 +882,8 @@ NSP_FUNCTION(nl_strcontains)
 		cobj2 = cobj1;
 		cobj1 = thisobj;
 	}
-	n_expect_argtype(N, NT_STRING, 1, cobj1, 0);
-	n_expect_argtype(N, NT_STRING, 2, cobj2, 0);
+	n_expect_argtype(N, NT_STRING, 1, cobj1, 1);
+	n_expect_argtype(N, NT_STRING, 2, cobj2, 1);
 	if (cobj1->val->size < cobj2->val->size) {
 		nsp_setbool(N, &N->r, "", 0);
 		return 0;
