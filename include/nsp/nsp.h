@@ -34,6 +34,7 @@ struct timezone { int tz_minuteswest; int tz_dsttime; };
 struct timezone { int tz_minuteswest; int tz_dsttime; };
 #pragma warning(disable:4996)
 #define WIN32_LEAN_AND_MEAN
+#define _USE_32BIT_TIME_T
 /* always include winsock2 before windows */
 #include <winsock2.h>
 #include <windows.h>

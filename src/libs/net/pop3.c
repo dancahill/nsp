@@ -185,6 +185,10 @@ NSP_CLASSMETHOD(libnsp_net_pop3_client_close)
 
 	if (!nsp_istable(thisobj)) n_error(N, NE_SYNTAX, __FN__, "expected a table for 'this'");
 	cobj = nsp_getobj(N, thisobj, "socket");
+	if (nsp_isbool(cobj)) {
+		//n_warn(N, __FN__, "socket not connected");
+		return 0;
+	}
 	if ((cobj->val->type != NT_CDATA) || (cobj->val->d.str == NULL) || (nc_strcmp(cobj->val->d.str, "sock4") != 0))
 		n_error(N, NE_SYNTAX, __FN__, "expected a socket");
 	sock = (TCP_SOCKET *)cobj->val->d.str;
