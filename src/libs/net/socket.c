@@ -177,9 +177,10 @@ NSP_FUNCTION(libnsp_net_socket_connect)
 	if ((rc = tcp_connect(N, sock, cobj1->val->d.str, (unsigned short)cobj2->val->d.num, use_tls)) < 0) {
 		n_free(N, (void *)&cobj->val->d.str, sizeof(TCP_SOCKET) + 1);
 		cobj->val->size = 0;
-		nsp_setstr(N, &N->r, "", "tcp error", -1);
+		nsp_setbool(N, &N->r, "", 0);
 		return -1;
 	}
+	nsp_setbool(N, &N->r, "", 1);
 	return 0;
 #undef __FN__
 }
