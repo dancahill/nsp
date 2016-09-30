@@ -2,9 +2,30 @@
 using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
+using Microsoft.VisualBasic.ApplicationServices;
 
 namespace NSPEdit
 {
+	public class SingleInstanceController : WindowsFormsApplicationBase
+	{
+		public SingleInstanceController()
+		{
+			IsSingleInstance = true;
+			StartupNextInstance += this_StartupNextInstance;
+		}
+
+		void this_StartupNextInstance(object sender, StartupNextInstanceEventArgs e)
+		{
+			Program.MainForm.LoadFile(e.CommandLine[1]);
+		}
+
+		protected override void OnCreateMainForm()
+		{
+			Program.MainForm = new NSPEditForm();
+			MainForm = Program.MainForm;
+		}
+	}
+
 	static class Program
 	{
 		static public NSPEditForm MainForm;
@@ -12,33 +33,13 @@ namespace NSPEdit
 		/// The main entry point for the application.
 		/// </summary>
 		[STAThread]
-		static void Main(string[] args)
+		static void Main()
 		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			MainForm = new NSPEditForm();
-			if (args.Length > 0)
-			{
-				bool getfilename = false;
-				foreach (string arg in args)
-				{
-					if (getfilename)
-					{
-						getfilename = false;
-						MainForm.loadfile = arg;
-					}
-					if (arg == "-f")
-					{
-						getfilename = true;
-						continue;
-					}
-					else if (!arg.StartsWith("-") && MainForm.loadfile == "")
-					{
-						MainForm.loadfile = arg;
-					}
-				}
-			}
-			Application.Run(MainForm);
+			string[] args = Environment.GetCommandLineArgs();
+			SingleInstanceController controller = new SingleInstanceController();
+			controller.Run(args);
 		}
 
 		static public void Log(string format, params object[] list)

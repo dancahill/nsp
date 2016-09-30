@@ -7,7 +7,7 @@ namespace NSPEdit
 {
 	public partial class NSPEditForm : Form
 	{
-		public string loadfile = "";
+		//public string loadfile = "";
 		//List<string> autoCompleteList;
 		AutoCompleteBox CB;
 		public RichCodeBox richCodeBox1;
@@ -43,18 +43,68 @@ namespace NSPEdit
 			tabControl1.SelectedIndexChanged += TabControl1_SelectedIndexChanged;
 			tabControl1.DrawItem += TabControl1_DrawItem;
 			tabControl1.MouseClick += TabControl1_MouseClick;
-			newTabPage();
-			richCodeBox1.LoadScript(loadfile);
+
+
+
+
+
+			bool file_loaded = false;
+			string[] args = Environment.GetCommandLineArgs();
+
+			bool getfilename = false;
+			for (int i = 1; i < args.Length; i++)
+			{
+				string arg = args[i];
+				if (getfilename)
+				{
+					getfilename = false;
+					LoadFile(arg);
+					file_loaded = true;
+				}
+				else if (arg == "-f")
+				{
+					getfilename = true;
+					continue;
+				}
+				else if (!arg.StartsWith("-"))
+				{
+					LoadFile(arg);
+					file_loaded = true;
+				}
+			}
+
+			if (!file_loaded)
+			{
+				newTabPage();
+				richCodeBox1.LoadScript("");
+			}
+
 			this.ActiveControl = this.richCodeBox1;
 
 			//richCodeBox1.MouseEnter += RichCodeBox1_MouseEnter;
 			//richCodeBox1.MouseLeave += RichCodeBox1_MouseLeave;
-			richCodeBox1.MouseMove += RichCodeBox1_MouseMove;
+			//richCodeBox1.MouseMove += RichCodeBox1_MouseMove;
 
 			sf = new SearchForm();
 		}
 
 		Point oldp = new Point();
+
+		//protected override void OnLoad(EventArgs e)
+		//{
+		//	base.OnLoad(e);
+		//}
+
+		public void LoadFile(string name)
+		{
+			//MessageBox.Show(string.Format("name=[{0}]", name));
+			name = name.ToLower().Trim('"');
+			if (name.EndsWith(".ns") || name.EndsWith(".nsp"))
+			{
+				newTabPage();
+				richCodeBox1.LoadScript(name);
+			}
+		}
 
 		private void RichCodeBox1_MouseMove(object sender, MouseEventArgs e)
 		{
@@ -79,6 +129,7 @@ namespace NSPEdit
 
 		private void NSPEditForm_FormClosing(object sender, FormClosingEventArgs e)
 		{
+			if (richCodeBox1 == null) return;
 			if (richCodeBox1.LastSavedText != richCodeBox1.Text)
 			{
 				if (MessageBox.Show("richCodeBox1.LastSavedText != richCodeBox1.Text\nWould you like to save first?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)

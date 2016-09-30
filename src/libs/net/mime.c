@@ -105,18 +105,47 @@ static time_t time_wmgetdate(char *src)
 	return unixdate;
 }
 
+static void parseval(nsp_state *N, obj_t *cobj, obj_t *tobj, char *name)
+{
+	char *p1, *p2;
+
+	//cobj = nsp_getobj(N, ctobj, "content-type");
+	//parseval(N, cobj, cvobj, "boundary");
+
+	if (!nsp_isstr(cobj) || (cobj->val->size == 0)) return;
+	/* if ((p1=strcasestr(cobj->val->d.str, "boundary="))!=NULL) { */
+	if ((p1 = strstr(cobj->val->d.str, name)) != NULL) {
+		p1 += strlen(name);
+		if (*p1 != '=') return;
+		p1++;
+		if (*p1 == ' ') p1++;
+		if (*p1 == '\"') {
+			p1++;
+			p2 = p1;
+			while (*p2&&*p2 != '\"') p2++;
+		}
+		else {
+			p2 = p1;
+			while (*p2&&*p2 != ';' && !isspace(*p2)) p2++;
+		}
+		nsp_setstr(N, tobj, name, p1, p2 - p1);
+	}
+}
+
 static char *mime_read_head(nsp_state *N, obj_t *tobj, char *inptr)
 {
 	char namebuf[MAX_OBJNAMELEN + 1];
 	obj_t *cobj = NULL;
 	obj_t *iobj;
 	obj_t *ctobj = NULL;
+	obj_t *cvobj = NULL;
 	char *p;
 	char *p1, *p2;
 	unsigned int p2s;
 	int size;
 
 	ctobj = nsp_settable(N, tobj, "head");
+	cvobj = nsp_settable(N, tobj, "headvalues");
 	if (inptr == NULL) return NULL;
 	while (1) {
 		p = namebuf;
@@ -175,29 +204,35 @@ static char *mime_read_head(nsp_state *N, obj_t *tobj, char *inptr)
 			break;
 		}
 		if (nc_strcmp(namebuf, "date") == 0) {
-			nsp_setnum(N, ctobj, "date_numeric", (num_t)time_wmgetdate(nsp_tostr(N, cobj)));
+			nsp_setnum(N, cvobj, "date_numeric", (num_t)time_wmgetdate(nsp_tostr(N, cobj)));
 		}
 	}
 	if (*inptr == '\r') inptr++;
 	if (*inptr == '\n') inptr++;
-	cobj = nsp_getobj(N, ctobj, "content-type");
-	if (nsp_isstr(cobj) && (cobj->val->size > 0)) {
-		/* if ((p1=strcasestr(cobj->val->d.str, "boundary="))!=NULL) { */
-		if ((p1 = strstr(cobj->val->d.str, "boundary=")) != NULL) {
-			p1 += 9;
-			if (*p1 == ' ') p1++;
-			if (*p1 == '\"') {
-				p1++;
-				p2 = p1;
-				while (*p2&&*p2 != '\"') p2++;
+	parseval(N, nsp_getobj(N, ctobj, "content-type"), cvobj, "boundary");
+	parseval(N, nsp_getobj(N, ctobj, "content-type"), cvobj, "name");
+	parseval(N, nsp_getobj(N, ctobj, "content-disposition"), cvobj, "filename");
+
+
+
+	/*
+		if (nsp_isstr(cobj) && (cobj->val->size > 0)) {
+			if ((p1 = strstr(cobj->val->d.str, "boundary=")) != NULL) {
+				p1 += 9;
+				if (*p1 == ' ') p1++;
+				if (*p1 == '\"') {
+					p1++;
+					p2 = p1;
+					while (*p2&&*p2 != '\"') p2++;
+				}
+				else {
+					p2 = p1;
+					while (*p2&&*p2 != ';' && !isspace(*p2)) p2++;
+				}
+				nsp_setstr(N, cvobj, "boundary", p1, p2 - p1);
 			}
-			else {
-				p2 = p1;
-				while (*p2&&*p2 != ';' && !isspace(*p2)) p2++;
-			}
-			ctobj = nsp_setstr(N, tobj, "boundary", p1, p2 - p1);
 		}
-	}
+	*/
 	return inptr;
 }
 
@@ -238,7 +273,7 @@ static char *mime_read_body(nsp_state *N, obj_t *tobj, char *inptr, char *bounda
 		cobj = nsp_settable(NULL, ctobj, n_ntoa(N, name, i, 10, 0));
 		cobj->val->attr &= ~NST_AUTOSORT;
 		inptr = mime_read_head(N, cobj, inptr);
-		bobj = nsp_getobj(N, cobj, "boundary");
+		bobj = nsp_getobj(N, nsp_getobj(N, cobj, "headvalues"), "boundary");
 		b = nsp_isstr(bobj) && (bobj->val->size > 0) ? 1 : 0;
 		if (b) inptr = mime_read_body(N, cobj, inptr, bobj->val->d.str);
 		p = inptr;
@@ -288,7 +323,7 @@ NSP_FUNCTION(libnsp_net_mime_read)
 	tobj.val->attr &= ~NST_AUTOSORT;
 	if ((inptr = cobj1->val->d.str) != NULL) {
 		inptr = mime_read_head(N, &tobj, inptr);
-		cobj = nsp_getobj(N, &tobj, "boundary");
+		cobj = nsp_getobj(N, nsp_getobj(N, &tobj, "headvalues"), "boundary");
 		if (nsp_isstr(cobj) && (cobj->val->size > 0)) {
 			inptr = mime_read_body(N, &tobj, inptr, cobj->val->d.str);
 		}
