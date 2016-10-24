@@ -235,8 +235,8 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 			N->readptr = p;
 		}
 		nsp_setbool(N, &N->r, "", n ? 0 : 1);
+		if (n < 0) n_warn(N, __FN__, "failed to include '%s'", cobj1->val->d.str);
 		nsp_unlinkval(N, &listobj);
-		if (n < 0) n_error(N, NE_SYNTAX, __FN__, "failed to include '%s'", cobj1->val->d.str);
 
 		if (N->ret) N->ret = 0;
 		N->func = oldfunc;

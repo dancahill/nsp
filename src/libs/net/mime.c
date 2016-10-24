@@ -140,8 +140,8 @@ static char *mime_read_head(nsp_state *N, obj_t *tobj, char *inptr)
 	obj_t *ctobj = NULL;
 	obj_t *cvobj = NULL;
 	char *p;
-	char *p1, *p2;
-	unsigned int p2s;
+	char *p1;
+	unsigned int p1s;
 	int size;
 
 	ctobj = nsp_settable(N, tobj, "head");
@@ -159,14 +159,14 @@ static char *mime_read_head(nsp_state *N, obj_t *tobj, char *inptr)
 			while (*inptr&&*inptr != '\r'&&*inptr != '\n') inptr++;
 			cobj = nsp_getobj(N, ctobj, namebuf);
 			if (nsp_isstr(cobj)) {
-				p2s = cobj->val->size;
-				p2 = cobj->val->d.str;
+				p1s = cobj->val->size;
+				p1 = cobj->val->d.str;
 				cobj->val->size = 0;
 				cobj->val->d.str = NULL;
 				iobj = nsp_settable(N, cobj, namebuf);
 				cobj = nsp_setstr(N, iobj, "0", NULL, 0);
-				cobj->val->size = p2s;
-				cobj->val->d.str = p2;
+				cobj->val->size = p1s;
+				cobj->val->d.str = p1;
 				cobj = nsp_setstr(N, iobj, n_ntoa(N, namebuf, 1, 10, 0), p, inptr - p);
 			}
 			else if (nsp_istable(cobj)) {

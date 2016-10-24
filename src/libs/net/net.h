@@ -121,10 +121,11 @@ typedef struct {
 	unsigned int bytes_in;
 	unsigned int bytes_out;
 	short int want_close;
+	char errormsg[256];
 	/* TCP INPUT BUFFER */
 	int recvbufsize;
 	int recvbufoffset;
-	char      recvbuf[MAX_TCP_READ_SIZE];
+	char recvbuf[MAX_TCP_READ_SIZE];
 } TCP_SOCKET;
 
 /* tls.c functions */
@@ -139,7 +140,7 @@ int _tls_shutdown(nsp_state *N, TCP_SOCKET *sock);
 #endif
 
 /* tcp.c functions */
-int tcp_bind   (nsp_state *N, char *ifname, unsigned short port);
+int tcp_bind   (nsp_state *N, TCP_SOCKET *sock, char *ifname, unsigned short port);
 int tcp_accept (nsp_state *N, TCP_SOCKET *bsock, TCP_SOCKET *asock);
 int tcp_connect(nsp_state *N, TCP_SOCKET *socket, char *host, unsigned short port, short int use_tls);
 int tcp_fgets  (nsp_state *N, TCP_SOCKET *socket, char *buffer, int max);
