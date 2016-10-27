@@ -79,6 +79,7 @@ int nspnet_register_all(nsp_state *N)
 	tobj3 = nsp_settable(N, tobj2, "rfc2047");
 	tobj3->val->attr |= NST_HIDDEN;
 	nsp_setcfunc(N, tobj3, "decode", (NSP_CFUNC)libnsp_net_mime_rfc2047_decode);
+	nsp_setcfunc(N, tobj3, "encode", (NSP_CFUNC)libnsp_net_mime_rfc2047_encode);
 
 	tobj2 = nsp_settable(N, tobj, "pop3");
 	tobj2->val->attr |= NST_HIDDEN;

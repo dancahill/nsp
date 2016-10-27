@@ -171,6 +171,7 @@ NSP_FUNCTION(libnsp_net_mime_base64_encode);
 NSP_FUNCTION(libnsp_net_mime_qp_decode);
 NSP_FUNCTION(libnsp_net_mime_qp_encode);
 NSP_FUNCTION(libnsp_net_mime_rfc2047_decode);
+NSP_FUNCTION(libnsp_net_mime_rfc2047_encode);
 /* pop3.c */
 NSP_CLASSMETHOD(libnsp_net_pop3_client_client);
 NSP_CLASSMETHOD(libnsp_net_pop3_client_open);

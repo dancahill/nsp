@@ -254,7 +254,7 @@ helo:
 		tcp_fprintf(N, &sock, "\r\n");
 		tcp_fprintf(N, &sock, "This is MIME data.\r\n\r\n");
 		tcp_fprintf(N, &sock, "--%s\r\n", boundary);
-		tcp_fprintf(N, &sock, "Content-Type: %s; charset=iso-8859-1\r\n", ctype);
+		tcp_fprintf(N, &sock, "Content-Type: %s; charset=utf-8\r\n", ctype);
 		tcp_fprintf(N, &sock, "Content-Transfer-Encoding: 7bit\r\n\r\n");
 		tcp_send(N, &sock, body, blen, 0);
 		for (cobj = aobj->val->d.table.f;cobj;cobj = cobj->next) {
