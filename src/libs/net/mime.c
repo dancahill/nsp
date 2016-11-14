@@ -716,15 +716,9 @@ NSP_FUNCTION(libnsp_net_mime_rfc2047_decode)
 #undef __FN__
 }
 
-//Subject: =?UTF-8?Q?q_Tweeted:_=F0=9F=8E=B6_Check_out_ou?=
-// =?UTF-8?Q?r_brand_new_theme_song!_=F0=9F=8E=B6?=
-
 NSP_FUNCTION(libnsp_net_mime_rfc2047_encode)
 {
 #define __FN__ __FILE__ ":libnsp_net_mime_rfc2047_encode()"
-	//	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	//	nsp_setstr(N, &N->r, "", cobj1->val->d.str, -1, cobj1->val->size);
-
 	const char *hex = "0123456789ABCDEF";
 	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
 	obj_t *robj;
@@ -736,7 +730,6 @@ NSP_FUNCTION(libnsp_net_mime_rfc2047_encode)
 	int linelen = 0;
 	int maxlinelen = 76;
 
-	//	n_expect_argtype(N, NT_STRING, 1, cobj1, 0);
 	n_expect_argtype(N, NT_STRING, 1, cobj1, 1);
 	if (cobj1->val->size == 0) {
 		nsp_setstr(N, &N->r, "", NULL, 0);
@@ -768,12 +761,10 @@ NSP_FUNCTION(libnsp_net_mime_rfc2047_encode)
 	if ((dest = n_alloc(N, outlen + 1, 0)) == NULL) return 0;
 	dest[outlen] = '\0';
 	robj = nsp_setstr(N, &N->r, "", NULL, 0);
-	//	robj->val->size = outlen;
-	//	robj->val->d.str = dest;
 	di = 0;
 	linelen = 0;
 	// create output string
-	nsp_strcat(N, &N->r, "=?UTF-8?Q?", -1);
+	nsp_strcat(N, robj, "=?UTF-8?Q?", -1);
 	for (i = 0;i < cobj1->val->size;i++) {
 	breakline2:
 		if (linelen >= maxlinelen) {
@@ -795,8 +786,8 @@ NSP_FUNCTION(libnsp_net_mime_rfc2047_encode)
 			dest[di++] = cp[i];
 		}
 	}
-	nsp_strcat(N, &N->r, dest, outlen);
-	nsp_strcat(N, &N->r, "?=", -1);
+	nsp_strcat(N, robj, dest, outlen);
+	nsp_strcat(N, robj, "?=", -1);
 	n_free(N, (void *)&dest, outlen + 1);
 	return 0;
 #undef __FN__

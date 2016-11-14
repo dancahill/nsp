@@ -30,6 +30,7 @@
 #include <direct.h>
 #include <io.h>
 #elif !defined( __TURBOC__)
+#include <signal.h>
 #include <unistd.h>
 #endif
 
@@ -251,7 +252,8 @@ NSP_FUNCTION(nl_break)
 	//DebugBreak();
 #endif
 #else
-	__builtin_trap();
+	//__builtin_trap();
+	raise(SIGINT);
 #endif
 	return 0;
 #undef __FN__
