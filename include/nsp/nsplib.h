@@ -132,6 +132,7 @@ NSP_FUNCTION(nl_strsplit);
 NSP_FUNCTION(nl_strstr);
 NSP_FUNCTION(nl_strsub);
 NSP_FUNCTION(nl_strtolower);
+NSP_FUNCTION(nl_strtrim);
 NSP_FUNCTION(nl_sqltime);
 NSP_FUNCTION(nl_sqltounix);
 NSP_FUNCTION(nl_time);

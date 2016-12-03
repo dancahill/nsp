@@ -1220,6 +1220,39 @@ NSP_FUNCTION(nl_strtolower)
 #undef __FN__
 }
 
+NSP_FUNCTION(nl_strtrim)
+{
+#define __FN__ __FILE__ ":nl_strtrim()"
+	obj_t *basetype = nsp_getobj(N, &N->l, "basetype");
+	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
+	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	//	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
+	char *fname = nsp_getstr(N, &N->l, "0");
+	char *p;
+	int plen;
+
+	settrace();
+	if (!nsp_isnull(basetype)) {
+		cobj1 = thisobj;
+	}
+	n_expect_argtype(N, NT_STRING, 1, cobj1, 1);
+	if (cobj1->val->size < 1) {
+		nsp_setstr(N, &N->r, "", NULL, 0);
+		return 0;
+	}
+	p = cobj1->val->d.str;
+	plen = cobj1->val->size;
+	if (nc_strcmp(fname, "trim") == 0 || nc_strcmp(fname, "trimstart") == 0) {
+		while (nc_isspace(p[0])) { p++; plen--; }
+	}
+	if (nc_strcmp(fname, "trim") == 0 || nc_strcmp(fname, "trimend") == 0) {
+		while (nc_isspace(p[plen - 1])) { plen--; }
+	}
+	nsp_setstr(N, &N->r, "", p, plen);
+	return 0;
+#undef __FN__
+}
+
 NSP_FUNCTION(nl_sqltime)
 {
 #define __FN__ __FILE__ ":nl_sqltime()"
@@ -1487,7 +1520,7 @@ NSP_FUNCTION(nl_eval)
 	}
 	return 0;
 #undef __FN__
-}
+	}
 
 NSP_FUNCTION(nl_exec)
 {
@@ -1689,7 +1722,7 @@ NSP_FUNCTION(nl_system)
 #ifdef WEXITSTATUS
 		n = WEXITSTATUS(n);
 #endif
-}
+	}
 	nsp_setnum(N, &N->r, "", n);
 	return 0;
 #undef __FN__

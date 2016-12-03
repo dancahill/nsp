@@ -31,6 +31,7 @@ Root: HKCR; Subkey: "NSP Script\shell\edit\command"; ValueType: string; ValueNam
 Source: ".\bin\nsp.exe";                    DestDir: "{app}"
 ;Source: ".\bin\nsp-cgi.exe";                DestDir: "{app}"
 Source: ".\bin\nsp.exe";                    DestDir: "{win}"
+Source: ".\bin\nsp-cgi.exe";                DestDir: "{app}"
 Source: ".\bin\nspedit.exe";                DestDir: "{app}"
 Source: ".\bin\nsp.net.dll";                DestDir: "{app}"
 Source: ".\bin\ntray.exe";                  DestDir: "{app}"

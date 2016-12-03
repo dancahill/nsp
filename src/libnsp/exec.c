@@ -810,6 +810,11 @@ nsp_state *nsp_newstate()
 			{ "tostring", (NSP_CFUNC)nl_tostring },
 			{ "tolower", (NSP_CFUNC)nl_strtolower },
 			{ "toupper", (NSP_CFUNC)nl_strtolower },
+
+			{ "trim", (NSP_CFUNC)nl_strtrim},
+			{ "trimstart", (NSP_CFUNC)nl_strtrim },
+			{ "trimend", (NSP_CFUNC)nl_strtrim },
+
 			{ NULL, NULL }
 	};
 	FUNCTION list_table[] = {

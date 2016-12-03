@@ -1280,13 +1280,13 @@ NSP_FUNCTION(libnsp_regex_match)
 
 	n_expect_argtype(N, NT_STRING, 1, cobj1, 1);
 	n_expect_argtype(N, NT_STRING, 2, cobj2, 1);
-	p1 = cobj1->val->d.str == NULL ? "" : cobj1->val->d.str;
+	p1 = cobj1->val->d.str ? cobj1->val->d.str : "";
 	p2 = cobj2->val->d.str ? cobj2->val->d.str : "";
-	if ((r = _regcomp(N, p1)) == NULL) {
-		n_warn(N, "regex.match", "regcomp failure in '%s'", p1);
+	if ((r = _regcomp(N, p2)) == NULL) {
+		n_warn(N, "regex.match", "regcomp failure in '%s'", p2);
 	}
 	else {
-		rc = _regexec(N, r, p2);
+		rc = _regexec(N, r, p1);
 		free((char *)r);
 	}
 	nsp_setnum(N, &N->r, "", rc);
@@ -1309,16 +1309,16 @@ NSP_FUNCTION(libnsp_regex_replace)
 	n_expect_argtype(N, NT_STRING, 1, cobj1, 1);
 	n_expect_argtype(N, NT_STRING, 2, cobj2, 1);
 	n_expect_argtype(N, NT_STRING, 3, cobj3, 1);
-	if (cobj1->val->d.str == NULL) p1 = ""; else p1 = cobj1->val->d.str;
-	if (cobj2->val->d.str == NULL) p2 = ""; else p2 = cobj2->val->d.str;
-	if (cobj3->val->d.str == NULL) p3 = ""; else p3 = cobj3->val->d.str;
-	if ((r = _regcomp(N, p1)) == NULL) {
-		n_warn(N, "regex.replace", "regcomp failure in '%s'", p1);
+	p1 = cobj1->val->d.str ? cobj1->val->d.str : "";
+	p2 = cobj2->val->d.str ? cobj2->val->d.str : "";
+	p3 = cobj3->val->d.str ? cobj3->val->d.str : "";
+	if ((r = _regcomp(N, p2)) == NULL) {
+		n_warn(N, "regex.replace", "regcomp failure in '%s'", p2);
 		nsp_setnum(N, &N->r, "", -1);
 		return 0;
 	}
 	else {
-		if (_regexec(N, r, p2)) {
+		if (_regexec(N, r, p1)) {
 			char dbuf[BUFSIZE];
 
 			dbuf[0] = 0;
@@ -1326,8 +1326,8 @@ NSP_FUNCTION(libnsp_regex_replace)
 			nsp_setstr(N, &N->r, "", dbuf, -1);
 		}
 		else {
-			n_warn(N, "regex.replace", "regexec failure in `%s'", p1);
-			nsp_setstr(N, &N->r, "", p2, cobj2->val->size);
+			n_warn(N, "regex.replace", "regexec failure in `%s'", p2);
+			nsp_setstr(N, &N->r, "", p1, cobj2->val->size);
 		}
 		free((char *)r);
 	}
