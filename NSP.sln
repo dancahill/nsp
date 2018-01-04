@@ -175,6 +175,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configs", "Configs", "{2C55
 		include\nsp\config.h = include\nsp\config.h
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NTray.NET", "src\hosts\ntray.net\NTray.NET.csproj", "{2E8E5624-7378-4BA8-95B1-BE633AAF006E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -580,6 +582,26 @@ Global
 		{07998E9E-C6BD-4B81-B0C6-C12FDF6DD9F1}.Release|Win32.Build.0 = Release|Win32
 		{07998E9E-C6BD-4B81-B0C6-C12FDF6DD9F1}.Release|x64.ActiveCfg = Release|Win32
 		{07998E9E-C6BD-4B81-B0C6-C12FDF6DD9F1}.Release|x86.ActiveCfg = Release|Win32
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E}.Debug|Win32.Build.0 = Debug|Any CPU
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E}.Debug|x64.Build.0 = Debug|Any CPU
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E}.Debug|x86.Build.0 = Debug|Any CPU
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E}.Release|Win32.ActiveCfg = Release|Any CPU
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E}.Release|Win32.Build.0 = Release|Any CPU
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E}.Release|x64.ActiveCfg = Release|Any CPU
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E}.Release|x64.Build.0 = Release|Any CPU
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E}.Release|x86.ActiveCfg = Release|Any CPU
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -618,5 +640,6 @@ Global
 		{E5794E0B-3DA8-49F3-9948-142007EFCEB1} = {55F18DF0-9EA7-4E1F-A3AD-69E60F57122D}
 		{CBCF04D4-31AC-47A9-B325-8367E435F2AE} = {55F18DF0-9EA7-4E1F-A3AD-69E60F57122D}
 		{07998E9E-C6BD-4B81-B0C6-C12FDF6DD9F1} = {55F18DF0-9EA7-4E1F-A3AD-69E60F57122D}
+		{2E8E5624-7378-4BA8-95B1-BE633AAF006E} = {E9522B42-2483-4387-B929-33062F799C90}
 	EndGlobalSection
 EndGlobal
