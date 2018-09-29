@@ -1709,7 +1709,7 @@ NSP_FUNCTION(nl_sizeof)
 	case NT_CFUNC: size = 1; break;
 	case NT_TABLE:
 		for (cobj1 = cobj1->val->d.table.f; cobj1; cobj1 = cobj1->next) {
-			if (cobj1->val->attr&NST_SYSTEM) { size--; continue; }
+			if (cobj1->val && cobj1->val->attr&NST_SYSTEM) { size--; continue; }
 			if (!nsp_isnull(cobj1)) size++;
 		}
 		break;
@@ -1839,6 +1839,37 @@ NSP_FUNCTION(nl_printf)
 #undef __FN__
 }
 
+NSP_FUNCTION(nl_append)
+{
+#define __FN__ __FILE__ ":nl_append()"
+	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
+	obj_t *basetype = nsp_getobj(N, &N->l, "basetype");
+	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
+	obj_t *nobj;
+	//int size = 0;
+
+	// this function is bad, but working well enough for testing ns code
+	settrace();
+	if (!nsp_isnull(basetype)) {
+		cobj2 = cobj1;
+		cobj1 = thisobj;
+	}
+	if (!nsp_istable(cobj1)) {
+		n_error(N, NE_SYNTAX, __FN__, "can't append to a non-table");
+	}
+	if (!nsp_isstr(cobj2)) {
+		n_error(N, NE_SYNTAX, __FN__, "can't append non-string");
+	}
+	nobj = nsp_appendobj(N, cobj1, "0");
+	if (nobj->prev != NULL) {
+		n_setnamei(N, nobj, atoi(nobj->prev->name)+1);
+	}
+	nsp_setstr(N, nobj, "", cobj2->val->d.str, cobj2->val->size);
+	return 0;
+#undef __FN__
+}
+
 NSP_FUNCTION(nl_zlink)
 {
 #define __FN__ __FILE__ ":nl_zlink()"
@@ -1890,6 +1921,9 @@ NSP_CLASSMETHOD(nl_base_method)
 		}
 		else if (nc_strcmp(fname, "inherit") == 0) {
 			return nl_zlink(N);
+		}
+		else if (nc_strcmp(fname, "append") == 0) {
+			return nl_append(N);
 		}
 	}
 	if (nc_strcmp(fname, "tostr") == 0 || nc_strcmp(fname, "tostring") == 0) {

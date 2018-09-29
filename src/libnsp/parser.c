@@ -81,12 +81,12 @@ num_t n_getnumber(nsp_state *N)
 	settrace();
 	N->readptr += 3 + N->readptr[1];
 	while (nc_isdigit(*s)) {
-		rval = rval*rbase + (*s++ - '0');
+		rval = rval * rbase + (*s++ - '0');
 	}
 	if (*s != '.') return rval;
 	s++;
 	while (nc_isdigit(*s)) {
-		rval = rval + rdot*(*s++ - '0');
+		rval = rval + rdot * (*s++ - '0');
 		rdot *= 0.1;
 	}
 	/* if (N->debug) n_warn(N, __FN__, "[%f]", rval); */
@@ -259,7 +259,7 @@ void n_readtable(nsp_state *N, obj_t *tobj)
 			n_expect(N, __FN__, OP_PCBRACE);
 			N->readptr++;
 		}
-		else if (*N->readptr != OP_PCOMMA&&*N->readptr != OP_PSEMICOL&&*N->readptr != OP_PCBRACE) {
+		else if (*N->readptr != OP_PCOMMA && *N->readptr != OP_PSEMICOL && *N->readptr != OP_PCBRACE) {
 			cobj = nsp_getobj(N, tobj, namebuf);
 			if (nsp_isnull(cobj)) cobj = nsp_setnum(N, tobj, namebuf, 0);
 			n_storeval(N, cobj);
@@ -318,7 +318,7 @@ obj_t *n_readvar(nsp_state *N, obj_t *tobj, obj_t *cobj)
 	}
 	while (cobj->val->type == NT_TABLE) {
 		tobj = cobj;
-		if (*N->readptr != OP_POBRACKET&&*N->readptr != OP_PDOT) break;
+		if (*N->readptr != OP_POBRACKET && *N->readptr != OP_PDOT) break;
 		cobj = n_readindex(N, tobj, namebuf, &z);
 		nameptr = namebuf;
 	}

@@ -72,28 +72,6 @@
 #endif
 #define _OSTYPE_ _OS_"/"_COMPILER_
 
-static obj_t *append_var(nsp_state *N, obj_t *tobj, char *name)
-{
-	obj_t *cobj;
-
-	if (tobj->val->d.table.f == NULL) {
-		cobj = tobj->val->d.table.f = (obj_t *)n_alloc(N, sizeof(obj_t), 0);
-		cobj->prev = NULL;
-		cobj->next = NULL;
-	}
-	else {
-		cobj = tobj->val->d.table.l;
-		cobj->next = (obj_t *)n_alloc(N, sizeof(obj_t), 0);
-		cobj->next->prev = cobj;
-		cobj->next->next = NULL;
-		cobj = cobj->next;
-	}
-	tobj->val->d.table.l = cobj;
-	if (name != NULL) n_setname(N, cobj, name);
-	cobj->val = NULL;
-	return cobj;
-}
-
 obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 {
 #define __FN__ __FILE__ ":n_execfunction()"
@@ -123,7 +101,7 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 	listobj.val->attr &= ~NST_AUTOSORT;
 	/* set this */
 	if (isnewobject) {
-		cobj = append_var(N, &listobj, "this");
+		cobj = nsp_appendobj(N, &listobj, "this");
 		if (pobj != NULL) {
 			nsp_linkval(N, cobj, pobj);
 		}
@@ -133,20 +111,20 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 		if (cobj->val) cobj->val->attr |= NST_HIDDEN;
 	}
 	else if (pobj) {
-		cobj = append_var(N, &listobj, "this");
+		cobj = nsp_appendobj(N, &listobj, "this");
 		nsp_linkval(N, cobj, pobj);
 		// hiding this here causes serialize to not print regular table items
 		//if (cobj->val) cobj->val->attr |= NST_HIDDEN;
 	}
 	/* set fn name */
-	cobj = append_var(N, &listobj, "0");
+	cobj = nsp_appendobj(N, &listobj, "0");
 	nsp_setstr(N, cobj, "0", fobj->name, -1);
 	/* set args */
 	if (n_peekop(N) == OP_POPAREN) {
 		for (i = 1;; i++) {
 			N->readptr = n_seekop(N, N->readptr, 0);
 			if (n_peekop(N) == OP_PCPAREN) break;
-			cobj = append_var(N, &listobj, NULL);
+			cobj = nsp_appendobj(N, &listobj, NULL);
 			n_setnamei(N, cobj, i);
 			if (n_peekop(N) == OP_MAND) {
 				N->readptr++;

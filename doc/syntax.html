@@ -2017,6 +2017,7 @@ obj_t     *nsp_getobj_ex(nsp_state *N, obj_t *tobj, char *oname, unsigned short 
 obj_t     *nsp_getobj(nsp_state *N, obj_t *tobj, char *oname);
 obj_t     *nsp_getiobj(nsp_state *N, obj_t *tobj, unsigned long oindex);
 obj_t     *nsp_setobj(nsp_state *N, obj_t *tobj, char *oname, unsigned short otype, NSP_CFUNC _fptr, num_t _num, char *_str, size_t _slen);
+obj_t     *nsp_appendobj(nsp_state *N, obj_t *tobj, char *name);
 void       nsp_strcat(nsp_state *N, obj_t *cobj, char *str, long len);
 void       nsp_strmul(nsp_state *N, obj_t *cobj, unsigned long n);
 short      nsp_tobool(nsp_state *N, obj_t *cobj);
