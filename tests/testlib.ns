@@ -173,6 +173,11 @@ namespace testlib.tests {
 		expect("3 && 4",  true,  3&&4);
 		expect("3 || 4",  true,  3||4);
 
+		expect("tonumber()", 42,    tonumber("42"));
+		expect("tonumber()", 42.1,  tonumber("42.1"));
+		expect("tonumber()", -42,   tonumber("-42"));
+		expect("tonumber()", -42.1, tonumber("-42.1"));
+
 	//	expect("null==false",   true,  null==false);
 		expect("null===false",  false, null===false);
 		expect("false===false", true,  false===false);

@@ -16,3 +16,4 @@ src/config-win.ns
 *.o
 *.suo
 ~AutoRecover.*.vcxproj
+/.vs/NSP/v15

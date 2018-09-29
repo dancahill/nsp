@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2015 Dan Cahill
+    Copyright (C) 2007-2018 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -824,14 +824,13 @@ nsp_state *nsp_newstate()
 		{ NULL, NULL }
 	};
 	FUNCTION list_time[] = {
-			{ "gmtime", (NSP_CFUNC)nl_gmtime },
+			{ "asctime", (NSP_CFUNC)nl_asctime },
 			{ "gettimeofday", (NSP_CFUNC)nl_gettimeofday },
+			{ "gmtime", (NSP_CFUNC)nl_gmtime },
 			{ "localtime", (NSP_CFUNC)nl_gmtime },
-			{ "sqldate", (NSP_CFUNC)nl_sqltime },
-			{ "sqltime", (NSP_CFUNC)nl_sqltime },
-			{ "sqldatetime", (NSP_CFUNC)nl_sqltime },
-			{ "sqltounix", (NSP_CFUNC)nl_sqltounix },
+			{ "mktime", (NSP_CFUNC)nl_mktime },
 			{ "now", (NSP_CFUNC)nl_time },
+			{ "sqltime", (NSP_CFUNC)nl_asctime },
 			{ NULL, NULL }
 	};
 	nsp_state *new_N;

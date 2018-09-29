@@ -16,20 +16,25 @@ namespace NTray_NET
 		}
 
 		private NotifyIcon trayIcon;
-		private ContextMenu trayMenu;
+		public static ContextMenu trayMenu;
 
 		public SysTrayApp()
 		{
 			try
 			{
 				trayMenu = new ContextMenu();
-				trayMenu.MenuItems.Add("Test Script", TestScript);
-				trayMenu.MenuItems.Add("Exit", OnExit);
 				trayIcon = new NotifyIcon();
 				trayIcon.Text = "NTray.NET\nPowered by wishful thinking";
 				trayIcon.Icon = new Icon(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("NTray.NET.NTray.NET.ico"));
 				trayIcon.ContextMenu = trayMenu;
 				trayIcon.Visible = true;
+				trayIcon.MouseDoubleClick += TrayIcon_MouseDoubleClick;
+				CSScripter c = new CSScripter();
+				c.ScriptLoad();
+
+				trayIcon.ContextMenu = trayMenu;
+				trayMenu.Popup += TrayMenu_Popup;
+				trayMenu.Collapse += TrayMenu_Collapse;
 			}
 			catch (Exception ex)
 			{
@@ -39,11 +44,21 @@ namespace NTray_NET
 			}
 		}
 
-		private void TestScript(object sender, EventArgs e)
+		private void TrayMenu_Collapse(object sender, EventArgs e)
 		{
 			//throw new NotImplementedException();
-			CSScripter c = new CSScripter();
-			c.Test();
+			Console.WriteLine("TrayMenu_Collapse");
+		}
+
+		private void TrayMenu_Popup(object sender, EventArgs e)
+		{
+			//throw new NotImplementedException();
+			Console.WriteLine("TrayMenu_Popup");
+		}
+
+		private void TrayIcon_MouseDoubleClick(object sender, MouseEventArgs e)
+		{
+			trayIcon.ShowBalloonTip(10, "stuff", "stop clicking on me!", ToolTipIcon.Info);
 		}
 
 		protected override void OnLoad(EventArgs e)
@@ -53,10 +68,15 @@ namespace NTray_NET
 			base.OnLoad(e);
 		}
 
-		private void OnExit(object sender, EventArgs e)
+		static public void Exit(object sender, EventArgs e)
 		{
 			Application.Exit();
 		}
+
+		//private void OnExit(object sender, EventArgs e)
+		//{
+		//	Application.Exit();
+		//}
 
 		protected override void Dispose(bool isDisposing)
 		{

@@ -367,10 +367,12 @@ function showpage(c,p) {
 </div>
 <a class="smenu" href="#c7p0" onclick="showpage('7', '0'); return false;"><nobr>Functions - time</nobr></a><br>
 <div id=c7m style='display: block'>
+<a class="smenu" href="#c7p_time_asctime" onclick="showpage('7', '_time_asctime'); return false;">&nbsp;&nbsp;time.asctime()</a><br>
+<a class="smenu" href="#c7p_time_gettimeofday" onclick="showpage('7', '_time_gettimeofday'); return false;">&nbsp;&nbsp;time.gettimeofday()</a><br>
 <a class="smenu" href="#c7p_time_gmtime" onclick="showpage('7', '_time_gmtime'); return false;">&nbsp;&nbsp;time.gmtime()</a><br>
 <a class="smenu" href="#c7p_time_localtime" onclick="showpage('7', '_time_localtime'); return false;">&nbsp;&nbsp;time.localtime()</a><br>
+<a class="smenu" href="#c7p_time_mktime" onclick="showpage('7', '_time_mktime'); return false;">&nbsp;&nbsp;time.mktime()</a><br>
 <a class="smenu" href="#c7p_time_now" onclick="showpage('7', '_time_now'); return false;">&nbsp;&nbsp;time.now()</a><br>
-<a class="smenu" href="#c7p_time_sqldate" onclick="showpage('7', '_time_sqldate'); return false;">&nbsp;&nbsp;time.sqldate()</a><br>
 <a class="smenu" href="#c7p_time_sqltime" onclick="showpage('7', '_time_sqltime'); return false;">&nbsp;&nbsp;time.sqltime()</a><br>
 </div>
 <a class="smenu" href="#c8p0" onclick="showpage('8', '0'); return false;"><nobr>Libraries - data</nobr></a><br>
@@ -1316,7 +1318,7 @@ Returns the number of bytes written.
 		<td></td>
 	</tr>
 </table>
-<pre>
+<code>
 pages = {
 	{ name="string.atoi",    tag="atoi"    };
 	{ name="string.cat",     tag="cat"     };
@@ -1335,7 +1337,7 @@ pages = {
 //	{ name="string.tolower", tag="tolower" };
 //	{ name="string.toupper", tag="toupper" };
 };
-</pre>
+</code>
 </div><div id="c6p_string_atoi" style="display: block"></div><div id="c6p_string_cat" style="display: block"><hr><h3><a name="nsp_string_cat"><code>(string) string.cat(string str1, string str2);</code></a></h3>
 <br>
 	string.cat(x, y) will not change x or y.  to set x to the result, use "x=string.cat(x, y)"<br>
@@ -1382,6 +1384,120 @@ Returns an upper case version of the supplied string.
 <!-- CONTENTS_END -->
 </div><div id=c7p0 style='display: block'><h1>7 - time.*()</h1>
 
+<p>
+All time functions assume the use of UTC times as input, and with the sole
+exception of time.localtime(), all functions return time in UTC if no input
+is given, and do not convert time between zones.  When getting a time structure,
+if you do not want to convert between timezones, will likely want to use the gmtime
+function, even when are working with local times, to avoid repeated conversions.
+For example, <code>
+	time.gmtime(time.mktime(time.gmtime()))
+</code> will return the same value in the first call to gmtime as the second.  In
+the case of <code>
+	time.localtime(time.mktime(time.localtime()))
+</code>, the time zone difference is added multiple times, which is very likely not
+the desired effect.  To convert the time zone only once, this would be safe:
+<code>
+	time.gmtime(time.mktime(time.localtime()))
+</code>
+</p>
+
+<code>
+time.now()			/* returns a number (seconds since January 1, 1970 UTC) */
+time.gettimeofday()		/* returns a table with the current time in seconds and microseconds */
+				/* <code>{ tv_sec = 1534689210, tv_usec = 747662 }</code> */
+
+time.gmtime([number|string])	/* returns a table describing the current date and time (UTC), */
+				/* or describing the number provided without converting the time zone. */
+time.localtime([number|string])	/* returns a table describing the current date and time , or describing */
+				/* the number provided, in both cases converting the time to your */
+				/* system's configured local time. */
+
+time.mktime(table|string)	/* returns a number representing the seconds since January 1, 1970 UTC as described in the parameter */
+				/* obsoletes time.tmtounix(table) and time.sqltounix(string) */
+
+time.sqltime([table|number])	/* returns a string in SQL format of the time provided by the numeric or tm table parameter */
+time.asctime([table|number])	/* identical to sqltime but may in the future return dates in other string formats */
+
+//sample tm-based (calendar time) table - Sat Aug 18 21:29:03 EDT 2018
+time.localtime() returns  {
+	tm_sec = 3,     /* The number of seconds after the minute, from 0-59.                  */
+	tm_min = 29,    /* The number of minutes after the hour, from 0-59.                    */
+	tm_hour = 21,   /* The number of hours past midnight, from 0-23.                       */
+	tm_mday = 18,   /* The day of the month, from 1-31.                                    */
+	tm_mon = 8,     /* The month of the year, from 1-12.                                   */
+	tm_year = 2018, /* The year.                                                           */
+	tm_wday = 6,    /* The number of days after Sunday, from 0-6.                          */
+	tm_yday = 229,  /* The number of days since January 1, from 0-365.                     */
+	tm_isdst = 1    /* A flag indicating daylight savings time is in effect for this date. */
+}
+</code>
+</div><div id="c7p_time_asctime" style="display: block"><!-- CONTENTS_START -->
+<A NAME="nsp_asctime"></A>
+<H2>time.asctime</H2><HR>
+
+<H4>Description</H4>
+<BLOCKQUOTE>
+Returns a string representation of <VAR>timestamp</VAR> in the format 'YYYY-MM-DD HH:MM:SS'.
+If <VAR>timestamp</VAR> is not defined, the function will use the current time.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><I>string</I> <B>=</B> <B>time.asctime(</B><I>[number timestamp]</I><B>)<BR></B></BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE CLASS="SYNTAX">
+<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
+<TR><TD><I>timestamp</I> </TD><TD>The <B>number</B> of seconds since January 1, 1970 UTC (commonly called a UNIX timestamp).</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE>
+Returns a formatted date <VAR>string</VAR> in the format 'YYYY-MM-DD HH:MM:SS'.
+</BLOCKQUOTE>
+
+<H4>Remarks</H4>
+<BLOCKQUOTE>
+No remarks.
+</BLOCKQUOTE>
+
+<H4>Examples</H4>
+<BLOCKQUOTE>
+<TABLE CLASS="EXAMPLES"><TR><TD>
+<CODE>
+	<B>print</B>(<B>time.asctime</B>());
+</CODE></TD></TR></TABLE>
+<BR>
+The above example will output something similar to: "<B>2015-01-01 16:30:45</B>"
+</BLOCKQUOTE>
+
+<H4>See Also</H4>
+<BLOCKQUOTE>
+<B><A HREF="#c7p_time_sqltime"          onClick="showpage('7', '_time_sqltime');         return false;">time.sqltime()</A></B>
+</BLOCKQUOTE>
+<!-- CONTENTS_END -->
+</div><div id="c7p_time_gettimeofday" style="display: block"><!-- CONTENTS_START -->
+<a name="nsp_gettimeofday"></a>
+<H2>time.gettimeofday</H2><HR>
+
+<H4>Description</H4>
+<BLOCKQUOTE>
+Returns a table with the elapsed time in seconds and microseconds since January 1, 1970.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><I>table</I> <B>=</B> <B>time.gettimeofday(</B><B>)<BR></B></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE>
+Returns a table with the time in seconds and microseconds since the creation of the UNIXverse.
+<code>
+{
+	tv_sec = 1534689210,
+	tv_usec = 747662
+}
+</code>
+</BLOCKQUOTE>
+<!-- CONTENTS_END -->
 </div><div id="c7p_time_gmtime" style="display: block"><!-- CONTENTS_START -->
 <A NAME="nsp_gmtime"></A>
 <H2>time.gmtime</H2><HR>
@@ -1390,6 +1506,21 @@ Returns an upper case version of the supplied string.
 <BLOCKQUOTE>
 Returns a table representation of <VAR>timestamp</VAR>. If <VAR>timestamp</VAR>
 is not defined, the function will use the current local system date.
+
+<code>
+{
+	tm_sec = 3,     /* The number of seconds after the minute, from 0-59.                  */
+	tm_min = 29,    /* The number of minutes after the hour, from 0-59.                    */
+	tm_hour = 21,   /* The number of hours past midnight, from 0-23.                       */
+	tm_mday = 18,   /* The day of the month, from 1-31.                                    */
+	tm_mon = 8,     /* The month of the year, from 1-12.                                   */
+	tm_year = 2018, /* The year.                                                           */
+	tm_wday = 6,    /* The number of days after Sunday, from 0-6.                          */
+	tm_yday = 229,  /* The number of days since January 1, from 0-365.                     */
+	tm_isdst = 0    /* A flag indicating daylight savings time is in effect for this date. */
+}
+</code>
+
 </BLOCKQUOTE>
 <!-- CONTENTS_END -->
 </div><div id="c7p_time_localtime" style="display: block"><!-- CONTENTS_START -->
@@ -1400,6 +1531,38 @@ is not defined, the function will use the current local system date.
 <BLOCKQUOTE>
 Returns a table representation of <VAR>timestamp</VAR>. If <VAR>timestamp</VAR>
 is not defined, the function will use the current local system date.
+
+<code>
+{
+	tm_sec = 3,     /* The number of seconds after the minute, from 0-59.                  */
+	tm_min = 29,    /* The number of minutes after the hour, from 0-59.                    */
+	tm_hour = 21,   /* The number of hours past midnight, from 0-23.                       */
+	tm_mday = 18,   /* The day of the month, from 1-31.                                    */
+	tm_mon = 8,     /* The month of the year, from 1-12.                                   */
+	tm_year = 2018, /* The year.                                                           */
+	tm_wday = 6,    /* The number of days after Sunday, from 0-6.                          */
+	tm_yday = 229,  /* The number of days since January 1, from 0-365.                     */
+	tm_isdst = 1    /* A flag indicating daylight savings time is in effect for this date. */
+}
+</code>
+		
+</BLOCKQUOTE>
+<!-- CONTENTS_END -->
+</div><div id="c7p_time_mktime" style="display: block"><!-- CONTENTS_START -->
+<a name="nsp_mktime"></a>
+<H2>time.mktime</H2><HR>
+
+<H4>Description</H4>
+<BLOCKQUOTE>
+Returns the time in seconds (represented by the parameter) since January 1, 1970.
+</BLOCKQUOTE>
+
+<H4>Syntax</H4>
+<BLOCKQUOTE><I>number</I> <B>=</B> <B>time.mktime(</B>table|string<B>)<BR></B></BLOCKQUOTE>
+
+<H4>Return Value</H4>
+<BLOCKQUOTE>
+Returns the time in seconds represented by the table or sql-formatted string provided as a parameter.
 </BLOCKQUOTE>
 <!-- CONTENTS_END -->
 </div><div id="c7p_time_now" style="display: block"><!-- CONTENTS_START -->
@@ -1408,65 +1571,15 @@ is not defined, the function will use the current local system date.
 
 <H4>Description</H4>
 <BLOCKQUOTE>
-Returns the elapsed time in seconds since January 1, 1970.
+Returns the elapsed time in seconds since January 1, 1970 UTC.
 </BLOCKQUOTE>
 
 <H4>Syntax</H4>
-<BLOCKQUOTE><I>number</I> <B>=</B> <B>time(</B><B>)<BR></B></BLOCKQUOTE>
+<BLOCKQUOTE><I>number</I> <B>=</B> <B>time.now(</B><B>)<BR></B></BLOCKQUOTE>
 
 <H4>Return Value</H4>
 <BLOCKQUOTE>
 Returns the time in seconds since the creation of the UNIXverse.
-</BLOCKQUOTE>
-<!-- CONTENTS_END -->
-</div><div id="c7p_time_sqldate" style="display: block"><!-- CONTENTS_START -->
-<A NAME="nsp_sqldate"></A>
-<H2>time.sqldate</H2><HR>
-
-<H4>Description</H4>
-<BLOCKQUOTE>
-Returns a string representation of <VAR>timestamp</VAR> in the format 'YYYY-MM-DD'.
-If <VAR>timestamp</VAR> is not defined, the function will use the current local
-system date.
-</BLOCKQUOTE>
-
-<H4>Syntax</H4>
-<BLOCKQUOTE><I>string</I> <B>=</B> <B>sqldate(</B><I>[number timestamp]</I><B>)<BR></B></BLOCKQUOTE>
-<BLOCKQUOTE>
-<TABLE CLASS="SYNTAX">
-<TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
-<TR><TD><I>timestamp</I> </TD><TD>The <B>number</B> of seconds since January 1, 1970 UTC (commonly called a UNIX timestamp).</TD></TR>
-</TABLE></BLOCKQUOTE>
-
-<H4>Return Value</H4>
-<BLOCKQUOTE>
-Returns a formatted date <VAR>string</VAR> in the format 'YYYY-MM-DD'.
-</BLOCKQUOTE>
-
-<H4>Remarks</H4>
-<BLOCKQUOTE>
-No remarks.
-</BLOCKQUOTE>
-
-<H4>Examples</H4>
-<BLOCKQUOTE>
-<TABLE CLASS="EXAMPLES"><TR><TD>
-<CODE>
-	<B>print</B>(<B>sqldate</B>());
-</CODE></TD></TR></TABLE>
-<BR>
-The above example will output something similar to: "<B>2015-01-01</B>"
-
-<TABLE CLASS="EXAMPLES"><TR><TD>
-<CODE>
-	<B>print</B>(<B>sqldate</B>(0)+" "+<B>sqltime</B>(0));
-</CODE></TD></TR></TABLE>
-<BR>The above example will output something similar to (note the adjustment for local time): "<B>1969-12-31 19:00:00</B>"
-</BLOCKQUOTE>
-
-<H4>See Also</H4>
-<BLOCKQUOTE>
-<B><A HREF="#c7p_time_sqltime"          onClick="showpage('7', '_time_sqltime');         return false;">time.sqltime()</A></B>
 </BLOCKQUOTE>
 <!-- CONTENTS_END -->
 </div><div id="c7p_time_sqltime" style="display: block"><!-- CONTENTS_START -->
@@ -1475,13 +1588,12 @@ The above example will output something similar to: "<B>2015-01-01</B>"
 
 <H4>Description</H4>
 <BLOCKQUOTE>
-Returns a string representation of <VAR>timestamp</VAR> in the format 'HH:MM:SS'.
-If <VAR>timestamp</VAR> is not defined, the function will use the current local
-system time.
+Returns a string representation of <VAR>timestamp</VAR> in the format 'YYYY-MM-DD HH:MM:SS'.
+If <VAR>timestamp</VAR> is not defined, the function will use the current time.
 </BLOCKQUOTE>
 
 <H4>Syntax</H4>
-<BLOCKQUOTE><I>string</I> <B>=</B> <B>sqltime(</B><I>[number timestamp]</I><B>)<BR></B></BLOCKQUOTE>
+<BLOCKQUOTE><I>string</I> <B>=</B> <B>time.sqltime(</B><I>[number timestamp]</I><B>)<BR></B></BLOCKQUOTE>
 <BLOCKQUOTE>
 <TABLE CLASS="SYNTAX">
 <TR><TD><B>Parameter</B></TD><TD><B>Description</B></TD></TR>
@@ -1490,34 +1602,27 @@ system time.
 
 <H4>Return Value</H4>
 <BLOCKQUOTE>
-Returns a formatted time <VAR>string</VAR> in the format 'HH:MM:SS'.
+Returns a formatted date <VAR>string</VAR> in the format 'YYYY-MM-DD HH:MM:SS'.
 </BLOCKQUOTE>
 
 <H4>Remarks</H4>
 <BLOCKQUOTE>
-No remarks.
+sqltime is functionally identical to asctime, but future versions of asctime might return dates in different string formats.
 </BLOCKQUOTE>
 
 <H4>Examples</H4>
 <BLOCKQUOTE>
 <TABLE CLASS="EXAMPLES"><TR><TD>
 <CODE>
-	<B>print</B>(<B>sqltime</B>());
+	<B>print</B>(<B>time.sqltime</B>());
 </CODE></TD></TR></TABLE>
 <BR>
-The above example will output something similar to: "<B>16:30:45</B>"
-
-<TABLE CLASS="EXAMPLES"><TR><TD>
-<CODE>
-	<B>print</B>(<B>sqldate</B>(0)+" "+<B>sqltime</B>(0));
-</CODE></TD></TR></TABLE>
-<BR>
-The above example will output something similar to (note the adjustment for local time): "<B>1969-12-31 19:00:00</B>"
+The above example will output something similar to: "<B>2015-01-01 16:30:45</B>"
 </BLOCKQUOTE>
 
 <H4>See Also</H4>
 <BLOCKQUOTE>
-<B><A HREF="#c7p_time_sqldate"          onClick="showpage('7', '_time_sqldate');         return false;">time.sqldate()</A></B>
+<B><A HREF="#c7p_time_asctime"          onClick="showpage('7', '_time_asctime');         return false;">time.asctime()</A></B>
 </BLOCKQUOTE>
 <!-- CONTENTS_END -->
 </div><div id=c8p0 style='display: block'><h1>8 - data.*()</h1>
@@ -1718,7 +1823,7 @@ hey.
 </p>
 <code class='c'>/*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2015 Dan Cahill
+    Copyright (C) 2007-2018 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -2052,7 +2157,7 @@ public:
 		</font>
 		</td><td align="right" valign="bottom" width="50%">
 		<font face=arial color="#000000" size=-2>
-		Copyright &copy; 2015 Dan Cahill<BR>
+		Copyright &copy; 2018 Dan Cahill<BR>
 		All rights reserved
 		</font>
 		</td></tr>

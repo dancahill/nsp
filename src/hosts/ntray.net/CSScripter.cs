@@ -1,11 +1,7 @@
 ﻿using System;
 using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Windows.Forms;
-//using Microsoft.CSharp.;
 
 namespace NTray_NET
 {
@@ -15,28 +11,18 @@ namespace NTray_NET
 		{
 		}
 
-		public static bool testbool = false;
-
-		public void Test()
+		public void ScriptLoad()
 		{
 			try
 			{
-				//string src = "using System.Windows.Forms;\r\nclass Test\r\n{\r\nstatic void Main(string[] args)\r\n{\r\nMessageBox.Show(\"Hello World!\", \"NScript\");\r\n}\r\n};";
-
-				AppDomain domain = AppDomain.CreateDomain("MyDomain");
-				Console.WriteLine("Host domain: " + AppDomain.CurrentDomain.FriendlyName);
-				Console.WriteLine("child domain: " + domain.FriendlyName);
-
 				CompilerParameters compilerparams = new CompilerParameters();
 				compilerparams.ReferencedAssemblies.Add(Application.ExecutablePath);
+				compilerparams.ReferencedAssemblies.Add("System.dll");
 				compilerparams.ReferencedAssemblies.Add("System.Windows.Forms.dll");
 				compilerparams.GenerateInMemory = true;
 				compilerparams.GenerateExecutable = true;
-
 				CodeDomProvider provider = new Microsoft.CSharp.CSharpCodeProvider();
 				CompilerResults results = provider.CompileAssemblyFromFile(compilerparams, System.IO.Path.Combine(Application.StartupPath, "NTray.NET.cs"));
-				//System.CodeDom.Compiler.CompilerResults results = provider.CompileAssemblyFromSource(compilerparams, src);
-
 				if (results.Errors.HasErrors)
 				{
 					string s = "";
@@ -47,28 +33,29 @@ namespace NTray_NET
 					}
 					throw new Exception(s);
 				}
-
-				results.CompiledAssembly.EntryPoint.Invoke(null, System.Reflection.BindingFlags.Static, null, new object[] { new string[] { "a", "b" } }, null);
-				//results.CompiledAssembly.EntryPoint.Invoke(null, System.Reflection.BindingFlags.Instance, null, new object[] { args }, null);
-
 				Assembly generatedAssembly = results.CompiledAssembly;
-				//generatedAssembly.CreateInstance("Test");
-				Type type = generatedAssembly.GetType("Test");
-				object obj = Activator.CreateInstance(type);
-
-				//var obj = Activator.CreateInstance(type);
-				//type.InvokeMember("Main2", BindingFlags.Default | BindingFlags.InvokeMethod, null, obj, null);
-				//type.InvokeMember("Main2", BindingFlags.Default | BindingFlags.InvokeMethod, null, obj, new string[] { });
-
-				//method.Invoke(obj, null);
-				type.GetMethod("Main2").Invoke(obj, new object[] { new string[] { "a", "b" } });
-				type.GetMethod("Main3").Invoke(obj, new object[] { });
+				//generatedAssembly.EntryPoint.Invoke(null, BindingFlags.Static, null, new object[] { new string[] { "a", "b" } }, null);
+				//results.CompiledAssembly.EntryPoint.Invoke(null, BindingFlags.Static, null, new object[] { new string[] { "a", "b" } }, null);
+				Type type = generatedAssembly.GetType("NTrayMenu");
+				if (type != null)
+				{
+					object obj = Activator.CreateInstance(type);
+					MethodInfo mi = type.GetMethod("SetMenu");
+					mi.Invoke(obj, new object[] { });
+					//type.GetMethod("Test1").Invoke(obj, new object[] { });
+					//type.GetMethod("Test2").Invoke(obj, new object[] { new string[] { "a", "b" } });
+					//type.GetMethod("Test3").Invoke(obj, new object[] { });
+				}
+				else
+				{
+					Console.WriteLine("ScriptLoad() warning, class not found");
+				}
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, "assembly exception", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show(ex.Message, "ScriptLoad() assembly exception", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
-			Console.WriteLine("NTray_NET.CSScripter.testbool: " + NTray_NET.CSScripter.testbool);
+			SysTrayApp.trayMenu.MenuItems.Add("Exit", SysTrayApp.Exit);
 		}
 	}
 }
