@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2018 Dan Cahill
+    Copyright (C) 2007-2019 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -73,6 +73,10 @@ void n_free(nsp_state *N, void **p, int osize)
 {
 #define __FN__ __FILE__ ":n_free()"
 	settrace();
+	if ((long int)p == 0x10) {
+		n_error(N, NE_MEM, __FN__, "ptr is invalid 0x%08X", p);
+		return;
+	}
 	if (!*p) n_error(N, NE_MEM, __FN__, "freeing 0x%08X twice", *p);
 #ifdef RECORD_MEMUSAGE
 	if (N) {

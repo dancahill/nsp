@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2018 Dan Cahill
+    Copyright (C) 2007-2019 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -192,7 +192,12 @@ void     n_storeval(nsp_state *N, obj_t *cobj);
 
 #define  striprn(s)      { int n=nc_strlen(s)-1; while (n>-1&&(s[n]=='\r'||s[n]=='\n')) s[n--]='\0'; }
 
-#define  n_peekop(N)     (*N->readptr!=OP_LINENUM?*N->readptr:n_skip_ws(N))
+#define  n_context_savjmp   N->context->savjmp
+#define  n_context_blockptr N->context->blockptr
+#define  n_context_blockend N->context->blockend
+#define  n_context_readptr  N->context->readptr
+
+#define  n_peekop(N)     (*n_context_readptr!=OP_LINENUM?*n_context_readptr:n_skip_ws(N))
 #define  n_expect(N,f,o) if (n_peekop(N)!=o) _n_expect(N, f, o);
 
 int n_expect_argtype(nsp_state *N, unsigned short type, unsigned short argnum, obj_t *obj, unsigned short allow_blank);

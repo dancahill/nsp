@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2018 Dan Cahill
+    Copyright (C) 2007-2019 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -72,6 +72,34 @@
 #endif
 #define _OSTYPE_ _OS_"/"_COMPILER_
 
+nsp_execcontext *n_newexeccontext(nsp_state *N, uchar *blockptr, uchar *blockend, uchar *readptr)
+{
+	nsp_execcontext *newcontext = n_alloc(N, sizeof(nsp_execcontext), 0);
+	newcontext->savjmp = NULL;
+	newcontext->blockptr = blockptr;
+	newcontext->blockend = blockend;
+	newcontext->readptr = readptr;
+	//uchar *oldbptr = N->blockptr;
+	//uchar *oldbend = N->blockend;
+	//uchar *oldrptr = N->readptr;
+	//jmp_buf *savjmp;
+	//N->savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
+	//newcontext->savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
+	return newcontext;
+}
+
+void n_freeexeccontext(nsp_state *N, nsp_execcontext **context)
+{
+#define __FN__ __FILE__ ":n_freeexeccontext()"
+	if (*context) {
+		//n_warn(N, __FN__, "context=0x%08x,0x%08x", context, *context);
+		//if (*(*context)->savjmp) n_free(N, (void *)&(*context)->savjmp, sizeof(jmp_buf));
+		n_free(N, (void *)context, sizeof(nsp_execcontext));
+		//n_warn(N, __FN__, "context=0x%08x,0x%08x", context, *context);
+	}
+#undef __FN__
+}
+
 obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 {
 #define __FN__ __FILE__ ":n_execfunction()"
@@ -87,7 +115,7 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 	DEBUG_IN();
 	settrace();
 	ftype = nsp_typeof(fobj);
-	if (ftype != NT_CFUNC&&ftype != NT_NFUNC) {
+	if (ftype != NT_CFUNC && ftype != NT_NFUNC) {
 		n_error(N, NE_SYNTAX, __FN__, "'%s' is not a function", fobj->name);
 	}
 	oldfunc = N->func;
@@ -122,24 +150,24 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 	/* set args */
 	if (n_peekop(N) == OP_POPAREN) {
 		for (i = 1;; i++) {
-			N->readptr = n_seekop(N, N->readptr, 0);
+			n_context_readptr = n_seekop(N, n_context_readptr, 0);
 			if (n_peekop(N) == OP_PCPAREN) break;
 			cobj = nsp_appendobj(N, &listobj, NULL);
 			n_setnamei(N, cobj, i);
 			if (n_peekop(N) == OP_MAND) {
-				N->readptr++;
+				n_context_readptr++;
 				n_expect(N, __FN__, OP_LABEL);
 				nsp_linkval(N, cobj, nsp_getobj(N, NULL, n_getlabel(N, NULL)));
 			}
 			else {
-				nsp_linkval(N, cobj, nsp_eval(N, (char *)N->readptr));
+				nsp_linkval(N, cobj, nsp_eval(N, (char *)n_context_readptr));
 			}
 			if (n_peekop(N) == OP_PCOMMA) continue;
 			n_expect(N, __FN__, OP_PCPAREN);
 			break;
 		}
 	}
-	N->readptr++;
+	n_context_readptr++;
 
 	if (noscopechange) {
 		/*
@@ -152,65 +180,38 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 
 		e = 0;
 		if (nsp_isstr(cobj2)) {
-			//nsp_exec(N, (char *)cobj2->val->d.str);
-
-
-
-
-
-
-
-
-
-			uchar *p;
+			uchar *p, *bp;
 			int psize;
 
-			uchar *oldbptr = N->blockptr;
-			uchar *oldbend = N->blockend;
-			uchar *oldrptr = N->readptr;
-			jmp_buf *savjmp;
-
+			nsp_execcontext *oldctx = N->context;
 			n_decompose(N, NULL, (uchar *)cobj2->val->d.str, &p, &psize);
-			if (p) N->blockptr = p;
-			N->blockend = N->blockptr + readi4((N->blockptr + 8));
-			N->readptr = N->blockptr + readi4((N->blockptr + 12));
+			bp = p ? p : oldctx->blockptr;
+			N->context = n_newexeccontext(N, bp, bp + readi4((bp + 8)), bp + readi4((bp + 12)));
 
-			savjmp = N->savjmp;
-			N->savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
-			if (setjmp(*N->savjmp) == 0) {
-				nsp_linkval(N, &N->r, nsp_exec(N, (char *)N->readptr));
+			savjmp = n_context_savjmp;
+			n_context_savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
+			if (setjmp(*n_context_savjmp) == 0) {
+				nsp_linkval(N, &N->r, nsp_exec(N, (char *)n_context_readptr));
 			}
-			n_free(N, (void *)&N->savjmp, sizeof(jmp_buf));
-			N->savjmp = savjmp;
+			n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
+			n_context_savjmp = savjmp;
 
+			n_freeexeccontext(N, &N->context);
+			N->context = oldctx;
 			if (p) n_free(N, (void *)&p, psize);
-
-			N->blockptr = oldbptr;
-			N->blockend = oldbend;
-			N->readptr = oldrptr;
-
-
-
-
-
-
-
-
-
-
 		}
 		else if (nsp_isstr(cobj1)) {
-			p = N->readptr;
+			p = n_context_readptr;
 
-			savjmp = N->savjmp;
-			N->savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
-			if ((e = setjmp(*N->savjmp)) == 0) {
+			savjmp = n_context_savjmp;
+			n_context_savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
+			if ((e = setjmp(*n_context_savjmp)) == 0) {
 				n = nsp_execfile(N, (char *)cobj1->val->d.str);
 			}
-			n_free(N, (void *)&N->savjmp, sizeof(jmp_buf));
-			N->savjmp = savjmp;
+			n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
+			n_context_savjmp = savjmp;
 
-			N->readptr = p;
+			n_context_readptr = p;
 		}
 		nsp_setbool(N, &N->r, "", n ? 0 : 1);
 		if (n < 0) n_warn(N, __FN__, "failed to include '%s'", cobj1->val->d.str);
@@ -218,7 +219,10 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 
 		if (N->ret) N->ret = 0;
 		N->func = oldfunc;
-		if (e && N->savjmp != NULL) longjmp(*N->savjmp, 1);
+
+		//n_warn(N, __FN__, "n_context_savjmp 1a");
+		if (e && n_context_savjmp != NULL) longjmp(*n_context_savjmp, 1);
+		//n_warn(N, __FN__, "n_context_savjmp 1b");
 		DEBUG_OUT();
 		return &N->r;
 	}
@@ -229,13 +233,13 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 
 	if (ftype == NT_CFUNC) {
 		/* exec the native function */
-		savjmp = N->savjmp;
-		N->savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
-		if ((e = setjmp(*N->savjmp)) == 0) {
+		savjmp = n_context_savjmp;
+		n_context_savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
+		if ((e = setjmp(*n_context_savjmp)) == 0) {
 			fobj->val->d.cfunc(N);
 		}
-		n_free(N, (void *)&N->savjmp, sizeof(jmp_buf));
-		N->savjmp = savjmp;
+		n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
+		n_context_savjmp = savjmp;
 	}
 	else {
 		char filenamebuf[MAX_OBJNAMELEN + 1];
@@ -244,12 +248,12 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 		uchar *oldrptr;
 		uchar *oldbend;
 
-		oldbptr = N->blockptr;
-		oldrptr = N->readptr;
-		oldbend = N->blockend;
-		N->blockptr = (uchar *)fobj->val->d.str;
-		N->readptr = (uchar *)fobj->val->d.str;
-		N->blockend = (uchar *)fobj->val->d.str + fobj->val->size;
+		oldbptr = n_context_blockptr;
+		oldrptr = n_context_readptr;
+		oldbend = n_context_blockend;
+		n_context_blockptr = (uchar *)fobj->val->d.str;
+		n_context_readptr = (uchar *)fobj->val->d.str;
+		n_context_blockend = (uchar *)fobj->val->d.str + fobj->val->size;
 		/* get the name of the source file */
 		n_expect(N, __FN__, OP_LABEL);
 		filenamebuf[0] = 0;
@@ -257,29 +261,31 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 		/* get the arg names */
 		n_expect(N, __FN__, OP_POPAREN);
 		for (i = 1;; i++) {
-			N->readptr = n_seekop(N, N->readptr, 0);
+			n_context_readptr = n_seekop(N, n_context_readptr, 0);
 			cobj = nsp_getobj(N, &N->l, n_ntoa(N, N->numbuf, i, 10, 0));
 			if (n_peekop(N) == OP_LABEL) n_setname(N, cobj, n_getlabel(N, NULL));
 			if (n_peekop(N) == OP_PCOMMA) continue;
 			n_expect(N, __FN__, OP_PCPAREN);
-			N->readptr++;
+
+			n_context_readptr++;
+
 			break;
 		}
 		n_expect(N, __FN__, OP_POBRACE);
 		/* save state and exec the script function */
 		oldfname = N->file;
 		N->file = filenamebuf;
-		savjmp = N->savjmp;
-		N->savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
-		if ((e = setjmp(*N->savjmp)) == 0) {
-			nsp_exec(N, (char *)N->readptr);
+		savjmp = n_context_savjmp;
+		n_context_savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
+		if ((e = setjmp(*n_context_savjmp)) == 0) {
+			nsp_exec(N, (char *)n_context_readptr);
 		}
-		n_free(N, (void *)&N->savjmp, sizeof(jmp_buf));
-		N->savjmp = savjmp;
+		n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
+		n_context_savjmp = savjmp;
 		N->file = oldfname;
-		N->blockptr = oldbptr;
-		N->readptr = oldrptr;
-		N->blockend = oldbend;
+		n_context_blockptr = oldbptr;
+		n_context_readptr = oldrptr;
+		n_context_blockend = oldbend;
 	}
 	//nsp_unlinkval(N, nsp_getobj(N, &listobj, "this"));
 	if (isnewobject) nsp_linkval(N, &N->r, &N->l);
@@ -288,7 +294,9 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject)
 	if (N->ret) N->ret = 0;
 	N->func = oldfunc;
 
-	if (e && N->savjmp != NULL) longjmp(*N->savjmp, 1);
+	//n_warn(N, __FN__, "n_context_savjmp 2a");
+	if (e && n_context_savjmp != NULL) longjmp(*n_context_savjmp, 1);
+	//n_warn(N, __FN__, "n_context_savjmp 2b");
 	DEBUG_OUT();
 	return &N->r;
 #undef __FN__
@@ -307,16 +315,16 @@ obj_t *n_execbasemethod(nsp_state *N, char *name, obj_t *pobj)
 	nc_memset((void *)&tobj, 0, sizeof(obj_t));
 	nsp_setcfunc(N, &tobj, "base_method", (NSP_CFUNC)nl_base_method);
 	nc_strncpy(tobj.name, name, MAX_OBJNAMELEN);
-	savjmp = N->savjmp;
-	N->savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
-	if ((e = setjmp(*N->savjmp)) == 0) {
+	savjmp = n_context_savjmp;
+	n_context_savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
+	if ((e = setjmp(*n_context_savjmp)) == 0) {
 		nobj = n_execfunction(N, &tobj, pobj, 0);
 	}
 	else {
 		nobj = NULL;
 	}
-	n_free(N, (void *)&N->savjmp, sizeof(jmp_buf));
-	N->savjmp = savjmp;
+	n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
+	n_context_savjmp = savjmp;
 	nsp_unlinkval(N, &tobj);
 	if (e) {
 		char errbuf[sizeof(N->errbuf)];
@@ -344,9 +352,9 @@ void n_execconstructor(nsp_state *N, obj_t *cobj, obj_t *pobj)
 			n_execfunction(N, xobj, cobj, 1);
 		}
 		else if (n_peekop(N) == OP_POPAREN) {
-			N->readptr += readi2((N->readptr + 1)) + 3;
+			n_context_readptr += readi2((n_context_readptr + 1)) + 3;
 			n_expect(N, __FN__, OP_PCPAREN);
-			N->readptr++;
+			n_context_readptr++;
 		}
 	}
 #undef __FN__
@@ -372,7 +380,7 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 #define __FN__ __FILE__ ":nsp_exec()"
 	obj_t *cobj, *tobj;
 	uchar block, ctype, op;
-	uchar jmp = N->savjmp ? 1 : 0, single = (uchar)N->single;
+	uchar jmp = n_context_savjmp ? 1 : 0, single = (uchar)N->single;
 	uchar *p;
 	int psize;
 
@@ -383,18 +391,18 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 		nsp_unlinkval(N, &N->r);
 		if (string == NULL || string[0] == 0) goto end;
 		n_decompose(N, NULL, (uchar *)string, &p, &psize);
-		if (p) N->blockptr = p;
-		N->blockend = N->blockptr + readi4((N->blockptr + 8));
-		N->readptr = N->blockptr + readi4((N->blockptr + 12));
-		N->savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
-		if (setjmp(*N->savjmp) != 0) goto end;
+		if (p) n_context_blockptr = p;
+		n_context_blockend = n_context_blockptr + readi4((n_context_blockptr + 8));
+		n_context_readptr = n_context_blockptr + readi4((n_context_blockptr + 12));
+		n_context_savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
+		if (setjmp(*n_context_savjmp) != 0) goto end;
 	}
 	else {
-		N->readptr = (uchar *)string;
+		n_context_readptr = (uchar *)string;
 	}
-	if (N->readptr == NULL) goto end;
+	if (n_context_readptr == NULL) goto end;
 	if (n_peekop(N) == OP_POBRACE) {
-		N->readptr = n_seekop(N, N->readptr, 0);
+		n_context_readptr = n_seekop(N, n_context_readptr, 0);
 		block = 1;
 	}
 	else block = 0;
@@ -404,28 +412,28 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 		}
 		if (block && (N->brk > 0 || N->cnt > 0 || n_peekop(N) == OP_PCBRACE)) goto end;
 		if (n_peekop(N) == OP_PCBRACE) {
-			N->readptr++;
+			n_context_readptr++;
 			goto endstmt;
 		}
-		else if (OP_ISMATH(*N->readptr)) {
-			op = *N->readptr++;
+		else if (OP_ISMATH(*n_context_readptr)) {
+			op = *n_context_readptr++;
 			switch (op) {
 			case OP_MQUESTION:
 				n_storeval(N, &N->r);
-				if (n_peekop(N) == OP_PSEMICOL) N->readptr++;
+				if (n_peekop(N) == OP_PSEMICOL) n_context_readptr++;
 				nc_printf(N, "%s", nsp_tostr(N, &N->r));
 				goto endstmt;
 			default:
-				n_warn(N, __FN__, "unexpected math op '%s'", n_getsym(N, *N->readptr));
-				N->readptr++;
+				n_warn(N, __FN__, "unexpected math op '%s'", n_getsym(N, *n_context_readptr));
+				n_context_readptr++;
 			}
 		}
-		else if (OP_ISPUNC(*N->readptr)) {
-			n_warn(N, __FN__, "unexpected punctuation '%s'", n_getsym(N, *N->readptr));
-			N->readptr++;
+		else if (OP_ISPUNC(*n_context_readptr)) {
+			n_warn(N, __FN__, "unexpected punctuation '%s'", n_getsym(N, *n_context_readptr));
+			n_context_readptr++;
 		}
-		else if (OP_ISKEY(*N->readptr)) {
-			op = *N->readptr++;
+		else if (OP_ISKEY(*n_context_readptr)) {
+			op = *n_context_readptr++;
 			switch (op) {
 			case OP_KLOCAL:
 			case OP_KVAR:     n_readvar(N, &N->l, NULL); goto endstmt;
@@ -444,12 +452,12 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 					}
 					tobj = cobj;
 					if (n_peekop(N) != OP_PDOT) break;
-					N->readptr++;
+					n_context_readptr++;
 				} while (1);
 				n_expect(N, __FN__, OP_POBRACE);
 				n_readtable(N, tobj);
 				n_expect(N, __FN__, OP_PCBRACE);
-				N->readptr++;
+				n_context_readptr++;
 				goto endstmt;
 			}
 			case OP_KIF:      n_if(N);      if (N->ret) goto end; else goto endstmt;
@@ -465,7 +473,7 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 				n_expect(N, __FN__ "1", OP_POBRACE);
 				n_readtable(N, cobj);
 				n_expect(N, __FN__, OP_PCBRACE);
-				N->readptr++;
+				n_context_readptr++;
 
 				goto endstmt;
 			case OP_KFUNC:
@@ -476,22 +484,22 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 			case OP_KBREAK:
 				if ((!block) && (!single)) n_error(N, NE_SYNTAX, __FN__, "break without block");
 				N->brk = (short)(n_peekop(N) == OP_NUMDATA ? n_getnumber(N) : 1);
-				if (n_peekop(N) == OP_PSEMICOL) N->readptr++;
+				if (n_peekop(N) == OP_PSEMICOL) n_context_readptr++;
 				goto end;
 			case OP_KCONT:
 				if ((!block) && (!single)) n_error(N, NE_SYNTAX, __FN__, "continue without block");
 				N->cnt = 1;
-				if (n_peekop(N) == OP_PSEMICOL) N->readptr++;
+				if (n_peekop(N) == OP_PSEMICOL) n_context_readptr++;
 				goto end;
 			case OP_KRET:
 				n_storeval(N, &N->r);
-				if (n_peekop(N) == OP_PSEMICOL) N->readptr++;
+				if (n_peekop(N) == OP_PSEMICOL) n_context_readptr++;
 				N->ret = 1;
 				goto end;
 			case OP_KTHROW:
 				n_storeval(N, &N->r);
 				n_error(N, NE_EXCEPTION, NULL, "%s", nsp_tostr(N, &N->r));
-				if (n_peekop(N) == OP_PSEMICOL) N->readptr++;
+				if (n_peekop(N) == OP_PSEMICOL) n_context_readptr++;
 				goto end;
 			case OP_KEXIT:
 				N->err = (short)(n_peekop(N) == OP_NUMDATA ? n_getnumber(N) : 0);
@@ -515,7 +523,7 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 			//uchar *p = N->readptr;
 			//uchar *e;
 
-			if (n_peekop(N) != OP_LABEL) n_error(N, NE_SYNTAX, __FN__, "expected a label [%d][%s]", *N->readptr, n_getsym(N, *N->readptr));
+			if (n_peekop(N) != OP_LABEL) n_error(N, NE_SYNTAX, __FN__, "expected a label [%d][%s]", *n_context_readptr, n_getsym(N, *n_context_readptr));
 			tobj = &N->l;
 			n_getlabel(N, namebuf);
 			cobj = nsp_getobj(N, NULL, namebuf);
@@ -523,7 +531,7 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 			while (n_peekop(N) == OP_POBRACKET || n_peekop(N) == OP_PDOT) {
 				pobj = tobj = cobj;
 				cobj = n_readindex(N, tobj, namebuf, &z);
-				if (namebuf[0] && (*N->readptr != OP_POPAREN) && (z || nsp_isnull(cobj))) {
+				if (namebuf[0] && (*n_context_readptr != OP_POPAREN) && (z || nsp_isnull(cobj))) {
 					if (nsp_isnull(tobj)) goto endstmt;
 					cobj = nsp_setnum(N, tobj, namebuf, 0);
 				}
@@ -552,15 +560,15 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 			n_readvar(N, tobj, cobj);
 		}
 	endstmt:
-		if (n_peekop(N) == OP_PSEMICOL) N->readptr++;
+		if (n_peekop(N) == OP_PSEMICOL) n_context_readptr++;
 		if (single) break;
 	}
 end:
 	if (jmp == 0) {
-		n_free(N, (void *)&N->savjmp, sizeof(jmp_buf));
+		n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
 		if (p) n_free(N, (void *)&p, psize);
-		N->blockend = NULL;
-		N->readptr = NULL;
+		n_context_blockend = NULL;
+		n_context_readptr = NULL;
 	}
 	DEBUG_OUT();
 	return NULL;
@@ -603,10 +611,10 @@ int nsp_execfile(nsp_state *N, char *file)
 	struct stat sb;
 	uchar *p;
 	int psize = 0;
-	uchar *oldbptr = N->blockptr;
-	uchar *oldbend = N->blockend;
-	uchar *oldrptr = N->readptr;
-	short int jmp = N->savjmp ? 1 : 0;
+	uchar *oldbptr = n_context_blockptr;
+	uchar *oldbend = n_context_blockend;
+	uchar *oldrptr = n_context_readptr;
+	short int jmp = n_context_savjmp ? 1 : 0;
 	int bl;
 	int fd;
 	int r;
@@ -627,8 +635,8 @@ int nsp_execfile(nsp_state *N, char *file)
 	//	n_warn(N, __FN__, "[%s][%s]", oldfname, namebuf);
 
 	if (jmp == 0) {
-		N->savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
-		if (setjmp(*N->savjmp) == 0) {
+		n_context_savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
+		if (setjmp(*n_context_savjmp) == 0) {
 		}
 		else {
 			rc = 0;
@@ -643,8 +651,8 @@ int nsp_execfile(nsp_state *N, char *file)
 		pfile = buf;
 	}
 	if ((fd = open(pfile, O_RDONLY | O_BINARY)) == -1) { rc = -1; goto end2; }
-	N->blockptr = (uchar *)n_alloc(N, sb.st_size + 2, 0);
-	p = N->blockptr;
+	n_context_blockptr = (uchar *)n_alloc(N, sb.st_size + 2, 0);
+	p = n_context_blockptr;
 	bl = sb.st_size;
 	for (;;) {
 		r = read(fd, p, bl);
@@ -654,33 +662,33 @@ int nsp_execfile(nsp_state *N, char *file)
 	}
 	close(fd);
 	rc = sb.st_size;
-	N->blockptr[sb.st_size] = '\0';
-	n_decompose(N, namebuf, N->blockptr, &p, &psize);
+	n_context_blockptr[sb.st_size] = '\0';
+	n_decompose(N, namebuf, n_context_blockptr, &p, &psize);
 	if (p) {
 		/* nsp_writefile(N, o, p); */
-		n_free(N, (void *)&N->blockptr, sb.st_size + 2);
-		N->blockptr = p;
+		n_free(N, (void *)&n_context_blockptr, sb.st_size + 2);
+		n_context_blockptr = p;
 		p = NULL;
 	}
-	N->blockend = N->blockptr + readi4((N->blockptr + 8));
-	N->readptr = N->blockptr + readi4((N->blockptr + 12));
+	n_context_blockend = n_context_blockptr + readi4((n_context_blockptr + 8));
+	n_context_readptr = n_context_blockptr + readi4((n_context_blockptr + 12));
 
 
 #if defined(WIN32) && defined(_DEBUG)
 	_RPT1(_CRT_WARN, "execing '%s'\r\n", pfile);
 #endif
 	N->file = pfile;
-	nsp_exec(N, (char *)N->readptr);
+	nsp_exec(N, (char *)n_context_readptr);
 	if (N->outbuflen) nl_flush(N);
 	rc = 0;
 end1:
-	n_free(N, (void *)&N->blockptr, psize);
-	N->blockptr = oldbptr;
-	N->blockend = oldbend;
-	N->readptr = oldrptr;
+	n_free(N, (void *)&n_context_blockptr, psize);
+	n_context_blockptr = oldbptr;
+	n_context_blockend = oldbend;
+	n_context_readptr = oldrptr;
 end2:
 	if (jmp == 0) {
-		n_free(N, (void *)&N->savjmp, sizeof(jmp_buf));
+		n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
 	}
 #if defined(WIN32) && defined(_DEBUG)
 	_RPT1(_CRT_WARN, "done '%s'\r\n", pfile);
@@ -816,6 +824,7 @@ nsp_state *nsp_newstate()
 	short i;
 
 	new_N = (nsp_state *)n_alloc(NULL, sizeof(nsp_state), 1);
+	new_N->context = n_newexeccontext(new_N, NULL, NULL, NULL);
 	new_N->outbuflen = 0;
 	new_N->outbufmax = MAX_OUTBUFSIZE;
 	new_N->outbuffer = (char *)n_alloc(NULL, new_N->outbufmax + 1, 1);// add one byte for null termination
@@ -915,7 +924,7 @@ nsp_state *nsp_newstate()
 	cobj = nsp_setstr(new_N, &new_N->g, "_version_", NSP_VERSION, -1);
 	cobj = nsp_setstr(new_N, &new_N->g, "_ostype_", _OSTYPE_, -1);
 	return new_N;
-}
+	}
 
 void nsp_freestate(nsp_state *N)
 {
@@ -936,6 +945,8 @@ void nsp_freestate(nsp_state *N)
 	if (N->g.val) n_free(N, (void *)&N->g.val, sizeof(val_t));
 	if (N->l.val) n_free(N, (void *)&N->l.val, sizeof(val_t));
 	if (N->r.val) n_free(N, (void *)&N->r.val, sizeof(val_t));
+	n_freeexeccontext(N, &N->context);
+	//n_free(N, (void *)&N->context, sizeof(nsp_execcontext));
 #undef __FN__
 }
 

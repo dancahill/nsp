@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2018 Dan Cahill
+    Copyright (C) 2007-2019 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -227,10 +227,10 @@ static void *thread_main(void *x)
 	if (cobj->val->type != NT_CDATA || cobj->val->d.str == NULL || nc_strcmp(cobj->val->d.str, "thread") != 0)
 		n_error(thread->N, NE_SYNTAX, "", "expected a thread");
 
-	p = thread->N->readptr;
-	thread->N->readptr = (uchar *)"";
+	p = thread->n_context_readptr;
+	thread->n_context_readptr = (uchar *)"";
 	n_execfunction(thread->N, fobj, thisobj, 0);
-	thread->N->readptr = p;
+	thread->n_context_readptr = p;
 
 	//nsp_exec(thread->N, "do_thread_stuff(this);");
 

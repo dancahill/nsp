@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2018 Dan Cahill
+    Copyright (C) 2007-2019 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -243,8 +243,8 @@ void n_error(nsp_state *N, short int err, const char *fname, const char *format,
 	_RPT1(_CRT_WARN, "NSP Exception: %s\r\n", N->errbuf);
 #endif
 	nl_flush(N);
-	if (N->savjmp != NULL) {
-		longjmp(*N->savjmp, 1);
+	if (n_context_savjmp != NULL) {
+		longjmp(*n_context_savjmp, 1);
 	}
 	else {
 		n_warn(N, __FN__, "jmp ptr not set - errno=%d :: \r\n%s", N->err, N->errbuf);
@@ -257,7 +257,7 @@ void _n_expect(nsp_state *N, const char *fname, uchar op)
 {
 #define __FN__ __FILE__ ":n_expect()"
 	settrace();
-	if (*N->readptr != op) n_error(N, NE_SYNTAX, fname, "expected a '%s'", n_getsym(N, op));
+	if (*n_context_readptr != op) n_error(N, NE_SYNTAX, fname, "expected a '%s'", n_getsym(N, op));
 #undef __FN__
 }
 
@@ -324,8 +324,8 @@ void n_warn(nsp_state *N, const char *fname, const char *format, ...)
 		nc_printf(N, "\r\n");
 	}
 	nl_flush(N);
-	if ((N->strict) && (N->savjmp != NULL)) {
-		longjmp(*N->savjmp, 1);
+	if ((N->strict) && (n_context_savjmp != NULL)) {
+		longjmp(*n_context_savjmp, 1);
 	}
 	return;
 #undef __FN__

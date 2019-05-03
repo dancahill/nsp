@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2018 Dan Cahill
+    Copyright (C) 2007-2019 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -185,8 +185,10 @@ NSP_CLASSMETHOD(libnsp_net_ftp_client_open)
 	if (nc_strncmp(iobuf, "230", 3) != 0) {
 		ftp_lasterr(N, iobuf);
 		tcp_close(N, sock, 1);
-		n_free(N, (void *)&N->r.val->d.str, sizeof(TCP_SOCKET) + 1);
-		N->r.val->size = 0;
+		if (N->r.val) {
+			n_free(N, (void *)&N->r.val->d.str, sizeof(TCP_SOCKET) + 1);
+			N->r.val->size = 0;
+		}
 		nsp_unlinkval(N, &N->r);
 		return -1;
 	}

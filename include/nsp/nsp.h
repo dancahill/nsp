@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2018 Dan Cahill
+    Copyright (C) 2007-2019 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -140,10 +140,14 @@ typedef struct nsp_objrec {
 	signed long nval;
 	char name[MAX_OBJNAMELEN + 1];
 } nsp_objrec;
-typedef struct nsp_state {
+typedef struct nsp_execcontext {
+	jmp_buf *savjmp;
 	uchar *blockptr;
 	uchar *blockend;
 	uchar *readptr;
+} nsp_execcontext;
+typedef struct nsp_state {
+	nsp_execcontext *context;
 	obj_t g;
 	obj_t l;
 	obj_t r;
@@ -158,7 +162,6 @@ typedef struct nsp_state {
 	short warnings;
 	short maxwarnings;
 	char warnformat;
-	jmp_buf *savjmp;
 	struct timeval ttime;
 	char numbuf[128];
 	char *outbuffer;

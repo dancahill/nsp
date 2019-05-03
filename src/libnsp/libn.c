@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2018 Dan Cahill
+    Copyright (C) 2007-2019 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1246,7 +1246,7 @@ NSP_FUNCTION(nl_strtrim)
 		while (nc_isspace(p[0])) { p++; plen--; }
 	}
 	if (nc_strcmp(fname, "trim") == 0 || nc_strcmp(fname, "trimend") == 0) {
-		while (nc_isspace(p[plen - 1])) { plen--; }
+		while (plen && nc_isspace(p[plen - 1])) { plen--; }
 	}
 	nsp_setstr(N, &N->r, "", p, plen);
 	return 0;
@@ -1532,30 +1532,30 @@ NSP_FUNCTION(nl_eval)
 		n_error(N, NE_SYNTAX, __FN__, "cowardly refusing to run aliased eval");
 	}
 	if ((cobj1->val->type == NT_STRING) && (cobj1->val->d.str != NULL)) {
-		uchar *oldbptr = N->blockptr;
-		uchar *oldbend = N->blockend;
-		uchar *oldrptr = N->readptr;
+		uchar *oldbptr = n_context_blockptr;
+		uchar *oldbend = n_context_blockend;
+		uchar *oldrptr = n_context_readptr;
 		jmp_buf *savjmp;
 
 		n_decompose(N, NULL, (uchar *)cobj1->val->d.str, &p, &psize);
-		if (p) N->blockptr = p;
-		N->blockend = N->blockptr + readi4((N->blockptr + 8));
-		N->readptr = N->blockptr + readi4((N->blockptr + 12));
+		if (p) n_context_blockptr = p;
+		n_context_blockend = n_context_blockptr + readi4((n_context_blockptr + 8));
+		n_context_readptr = n_context_blockptr + readi4((n_context_blockptr + 12));
 
-		savjmp = N->savjmp;
-		N->savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
-		if (setjmp(*N->savjmp) == 0) {
-			nsp_linkval(N, &N->r, nsp_eval(N, (char *)N->readptr));
-			//			nsp_linkval(N, &N->r, nsp_exec(N, (char *)N->readptr));
+		savjmp = n_context_savjmp;
+		n_context_savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
+		if (setjmp(*n_context_savjmp) == 0) {
+			nsp_linkval(N, &N->r, nsp_eval(N, (char *)n_context_readptr));
+			//nsp_linkval(N, &N->r, nsp_exec(N, (char *)N->readptr));
 		}
-		n_free(N, (void *)&N->savjmp, sizeof(jmp_buf));
-		N->savjmp = savjmp;
+		n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
+		n_context_savjmp = savjmp;
 
 		if (p) n_free(N, (void *)&p, psize);
 
-		N->blockptr = oldbptr;
-		N->blockend = oldbend;
-		N->readptr = oldrptr;
+		n_context_blockptr = oldbptr;
+		n_context_blockend = oldbend;
+		n_context_readptr = oldrptr;
 	}
 	else {
 		nsp_linkval(N, &N->r, cobj1);
@@ -1577,29 +1577,29 @@ NSP_FUNCTION(nl_exec)
 		n_error(N, NE_SYNTAX, __FN__, "cowardly refusing to run aliased exec");
 	}
 	if ((cobj1->val->type == NT_STRING) && (cobj1->val->d.str != NULL)) {
-		uchar *oldbptr = N->blockptr;
-		uchar *oldbend = N->blockend;
-		uchar *oldrptr = N->readptr;
+		uchar *oldbptr = n_context_blockptr;
+		uchar *oldbend = n_context_blockend;
+		uchar *oldrptr = n_context_readptr;
 		jmp_buf *savjmp;
 
 		n_decompose(N, NULL, (uchar *)cobj1->val->d.str, &p, &psize);
-		if (p) N->blockptr = p;
-		N->blockend = N->blockptr + readi4((N->blockptr + 8));
-		N->readptr = N->blockptr + readi4((N->blockptr + 12));
+		if (p) n_context_blockptr = p;
+		n_context_blockend = n_context_blockptr + readi4((n_context_blockptr + 8));
+		n_context_readptr = n_context_blockptr + readi4((n_context_blockptr + 12));
 
-		savjmp = N->savjmp;
-		N->savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
-		if (setjmp(*N->savjmp) == 0) {
-			nsp_linkval(N, &N->r, nsp_exec(N, (char *)N->readptr));
+		savjmp = n_context_savjmp;
+		n_context_savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
+		if (setjmp(*n_context_savjmp) == 0) {
+			nsp_linkval(N, &N->r, nsp_exec(N, (char *)n_context_readptr));
 		}
-		n_free(N, (void *)&N->savjmp, sizeof(jmp_buf));
-		N->savjmp = savjmp;
+		n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
+		n_context_savjmp = savjmp;
 
 		if (p) n_free(N, (void *)&p, psize);
 
-		N->blockptr = oldbptr;
-		N->blockend = oldbend;
-		N->readptr = oldrptr;
+		n_context_blockptr = oldbptr;
+		n_context_blockend = oldbend;
+		n_context_readptr = oldrptr;
 	}
 	else {
 		nsp_linkval(N, &N->r, cobj1);
@@ -1863,7 +1863,7 @@ NSP_FUNCTION(nl_append)
 	}
 	nobj = nsp_appendobj(N, cobj1, "0");
 	if (nobj->prev != NULL) {
-		n_setnamei(N, nobj, atoi(nobj->prev->name)+1);
+		n_setnamei(N, nobj, atoi(nobj->prev->name) + 1);
 	}
 	nsp_setstr(N, nobj, "", cobj2->val->d.str, cobj2->val->size);
 	return 0;
@@ -1903,9 +1903,9 @@ NSP_CLASSMETHOD(nl_base_method)
 			return cobj->val->d.cfunc(N);
 		}
 		else if (nsp_typeof(cobj) == NT_NFUNC) {
-			uchar *p = N->readptr;
+			uchar *p = n_context_readptr;
 			nsp_exec(N, (char *)cobj->val->d.str);
-			N->readptr = p;
+			n_context_readptr = p;
 			return 0;
 		}
 		else if (nc_strcmp(fname, "len") == 0 || nc_strcmp(fname, "length") == 0) {

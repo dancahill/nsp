@@ -1,6 +1,6 @@
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2018 Dan Cahill
+    Copyright (C) 2007-2019 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ static void sig_trap(int sig)
 			}
 		}
 #endif
-		if ((N) && (N->readptr)) printf("[%s][%.40s]\r\n", N->tracefn, N->readptr);
+		if ((N) && (n_context_readptr)) printf("[%s][%.40s]\r\n", N->tracefn, n_context_readptr);
 #if defined(linux)
 		{
 #define SIZE 100
@@ -229,7 +229,7 @@ void set_console_title(nsp_state *N)
 
 void do_banner() {
 	printf("\r\nNullLogic Embedded Scripting Language Version " NSP_VERSION);
-	printf("\r\nCopyright (C) 2007-2018 Dan Cahill\r\n\r\n");
+	printf("\r\nCopyright (C) 2007-2019 Dan Cahill\r\n\r\n");
 	return;
 }
 
