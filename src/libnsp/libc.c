@@ -208,10 +208,10 @@ void n_error(nsp_state *N, short int err, const char *fname, const char *format,
 	settrace();
 	N->err = err;
 	if (fname) {
-		if (N->func) {
+		if (N->context->funcname) {
 			//int n = nc_strlen(s) - 1; while (n>-1 && (s[n] == '\r' || s[n] == '\n')) s[n--] = '\0';
-			char *p = (char *)N->func + nc_strlen(N->func) - 1;
-			while (*p && p > N->func) { if (*p == '\\' || *p == '/') { p++; break; } p--; }
+			char *p = (char *)N->context->funcname + nc_strlen(N->context->funcname) - 1;
+			while (*p && p > N->context->funcname) { if (*p == '\\' || *p == '/') { p++; break; } p--; }
 
 			//			char *p1, *p2;
 			//			p1 = strrchr(N->func, '/');
@@ -225,11 +225,11 @@ void n_error(nsp_state *N, short int err, const char *fname, const char *format,
 			//len=nc_snprintf(N, N->errbuf, sizeof(N->errbuf)-1, "%-15s : %s() line %d, ", fname, N->func, N->line_num);
 			//len = nc_snprintf(N, N->errbuf, sizeof(N->errbuf) - 1, "%s() line %d, ", N->func, N->line_num);
 			//n_warn(N, __FN__, "zz1 '%s'", N->file);
-			len = nc_snprintf(N, N->errbuf, sizeof(N->errbuf) - 1, "%s%s%s() line %d, ", N->file != NULL ? N->file : "", N->file != NULL ? ":" : "", p, N->line_num);
+			len = nc_snprintf(N, N->errbuf, sizeof(N->errbuf) - 1, "%s%s%s() line %d, ", N->context->filename != NULL ? N->context->filename : "", N->context->filename != NULL ? ":" : "", p, N->context->line_num);
 		}
 		else {
 			//len=nc_snprintf(N, N->errbuf, sizeof(N->errbuf)-1, "%-15s : line %d, ", fname, N->line_num);
-			len = nc_snprintf(N, N->errbuf, sizeof(N->errbuf) - 1, "line %d, ", N->line_num);
+			len = nc_snprintf(N, N->errbuf, sizeof(N->errbuf) - 1, "line %d, ", N->context->line_num);
 		}
 	}
 	else {
@@ -257,7 +257,7 @@ void _n_expect(nsp_state *N, const char *fname, uchar op)
 {
 #define __FN__ __FILE__ ":n_expect()"
 	settrace();
-	if (*n_context_readptr != op) n_error(N, NE_SYNTAX, fname, "expected a '%s'", n_getsym(N, op));
+	if (*n_context_readptr != op) n_error(N, NE_SYNTAX, fname, "%s expected a '%s' found '%s'%d", fname, n_getsym(N, op), n_getsym(N, (int)*n_context_readptr), (int)*n_context_readptr);
 #undef __FN__
 }
 
@@ -296,20 +296,20 @@ void n_warn(nsp_state *N, const char *fname, const char *format, ...)
 	if (N->outbuflen > OUTBUFLOWAT) nl_flush(N);
 
 	if (N->warnformat == 'a') {
-		nc_printf(N, "\r\n[01;33;40m%s : line %d, ", p, N->line_num);
+		nc_printf(N, "\r\n[01;33;40m%s : line %d, ", p, N->context->line_num);
 	}
 	else if (N->warnformat == 'h') {
-		nc_printf(N, "<BR /><B>%s : line %d, ", p, N->line_num);
+		nc_printf(N, "<BR /><B>%s : line %d, ", p, N->context->line_num);
 	}
 	else {
-		nc_printf(N, "\r\n%s : line %d, ", p, N->line_num);
+		nc_printf(N, "\r\n%s : line %d, ", p, N->context->line_num);
 	}
 	va_start(ap, format);
 	len = nc_vsnprintf(N, N->outbuffer + N->outbuflen, N->outbufmax - N->outbuflen, format, ap);
 	va_end(ap);
 
 #if defined(WIN32) && defined(_DEBUG)
-	_RPT1(_CRT_WARN, "NSP Warning: %s : line %d, [%s]\r\n", p, N->line_num, N->outbuffer + N->outbuflen);
+	_RPT1(_CRT_WARN, "NSP Warning: %s : line %d, [%s]\r\n", p, N->context->line_num, N->outbuffer + N->outbuflen);
 #endif
 	N->outbuflen += len;
 

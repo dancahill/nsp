@@ -429,15 +429,15 @@ uchar n_skip_ws(nsp_state *N)
 #define __FN__ __FILE__ ":n_skip_ws()"
 	settrace();
 	while (*n_context_readptr == OP_LINENUM) {
-		N->line_num = readi4((n_context_readptr + 1)); n_context_readptr += 5;
+		N->context->line_num = readi4((n_context_readptr + 1)); n_context_readptr += 5;
 #if defined(WIN32) && defined(_DEBUG)
 		// this is useful -> http://www.cprogramming.com/tutorial/visual_studio_trace_log_messages.html
 		char *f = NULL;
-		if (N->file && N->file[0] != '\0') {
-			f = (char *)N->file + nc_strlen(N->file) - 1;
-			while (*f && f > N->file) { if (*f == '\\' || *f == '/') { f++; break; } f--; }
+		if (N->context->filename && N->context->filename[0] != '\0') {
+			f = (char *)N->context->filename + nc_strlen(N->context->filename) - 1;
+			while (*f && f > N->context->filename) { if (*f == '\\' || *f == '/') { f++; break; } f--; }
 		}
-		_RPT1(_CRT_WARN, "N->file='%s' N->line_num=%d N->func='%s'\r\n", f ? f : "", N->line_num, N->func ? N->func : "");
+		_RPT1(_CRT_WARN, "N->file='%s' N->line_num=%d N->func='%s'\r\n", f ? f : "", N->context->line_num, N->context->funcname ? N->context->funcname : "");
 #endif
 	}
 	return *n_context_readptr;

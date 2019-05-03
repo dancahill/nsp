@@ -1756,6 +1756,13 @@ namespace testlib.tests {
 		expect("b['c']", 3,      b['c']);
 		return;
 	};
+	function coroutine() {
+		return;
+		print("coroutines\r\n");
+		foreach (n,v in coroutine) {
+			print("\tmethod "+n+"\r\n");
+		}
+	};
 };
 
 if (stuff==null) print("run test1.ns\r\n");

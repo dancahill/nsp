@@ -145,6 +145,10 @@ typedef struct nsp_execcontext {
 	uchar *blockptr;
 	uchar *blockend;
 	uchar *readptr;
+	char *funcname;
+	char *filename;
+	char *tracefn;
+	long int line_num;
 } nsp_execcontext;
 typedef struct nsp_state {
 	nsp_execcontext *context;
@@ -168,11 +172,7 @@ typedef struct nsp_state {
 	unsigned short outbuflen;
 	unsigned short outbufmax;
 	char errbuf[256];
-	char *func;
-	char *file;
-	char *tracefn;
 	/* debug info */
-	long int line_num;
 	long int allocs;
 	long int allocmem;
 	long int frees;

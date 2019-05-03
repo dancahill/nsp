@@ -260,6 +260,32 @@ NSP_FUNCTION(nl_break)
 }
 
 /*
+ * coroutine functions
+ */
+NSP_FUNCTION(nl_coroutine)
+{
+#define __FN__ __FILE__ ":nl_coroutine()"
+	char *fname = nsp_getstr(N, &N->l, "0");
+	//obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	//int rc;
+
+	settrace();
+	n_warn(N, __FN__, "coroutine method '%s' missing?", fname);
+
+
+	if (nc_strcmp(fname, "start") == 0) {
+		n_execfunction(N, NULL, NULL, coroutine);
+	}
+
+
+	//n_expect_argtype(N, NT_STRING, 1, cobj1, 0);
+	//rc = chdir(cobj1->val->d.str);
+	//nsp_setnum(N, &N->r, "", rc);
+	return 0;
+#undef __FN__
+}
+
+/*
  * dl
  */
 
@@ -379,8 +405,6 @@ NSP_FUNCTION(nl_dl_load)
 }
 
 #endif /* HAVE_DL */
-
-
 
 /*
  * file functions

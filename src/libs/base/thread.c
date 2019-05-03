@@ -229,7 +229,7 @@ static void *thread_main(void *x)
 
 	p = thread->n_context_readptr;
 	thread->n_context_readptr = (uchar *)"";
-	n_execfunction(thread->N, fobj, thisobj, 0);
+	n_execfunction(thread->N, fobj, thisobj, function);
 	thread->n_context_readptr = p;
 
 	//nsp_exec(thread->N, "do_thread_stuff(this);");

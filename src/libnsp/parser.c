@@ -427,7 +427,7 @@ void n_storeval(nsp_state *N, obj_t *cobj)
 		n_context_readptr++;
 		n_getfunction(N, cobj);
 		if (n_peekop(N) == OP_POPAREN) {
-			n_execfunction(N, cobj, NULL, 0);
+			n_execfunction(N, cobj, NULL, function);
 			n_moveval(N, cobj, &N->r);
 		}
 		return;
@@ -499,7 +499,7 @@ static void n_evalobj(nsp_state *N, obj_t *cobj, uchar isnewobject)
 		switch (*n_context_readptr) {
 		case OP_POPAREN:
 			if (nobj->val->type == NT_NFUNC || nobj->val->type == NT_CFUNC) {
-				nobj = n_execfunction(N, nobj, isnewobject ? NULL : pobj, isnewobject);
+				nobj = n_execfunction(N, nobj, isnewobject ? NULL : pobj, isnewobject ? constructor : function);
 				if (n_peekop(N) == OP_PDOT) goto x;
 				isnewobject = 0;
 				break;

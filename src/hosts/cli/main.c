@@ -85,7 +85,7 @@ static void sig_trap(int sig)
 			}
 		}
 #endif
-		if ((N) && (n_context_readptr)) printf("[%s][%.40s]\r\n", N->tracefn, n_context_readptr);
+		if ((N) && (n_context_readptr)) printf("[%s][%.40s]\r\n", N->context->tracefn, n_context_readptr);
 #if defined(linux)
 		{
 #define SIZE 100

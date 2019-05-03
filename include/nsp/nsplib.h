@@ -62,7 +62,8 @@ uchar   *n_decompose(nsp_state *N, char *srcfile, uchar *srctext, uchar **dsttex
 /* debug.c */
 void     n_decompile(nsp_state *N, uchar *start, uchar *end, char *errbuf, unsigned short errmax);
 /* exec.c */
-obj_t   *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, uchar isnewobject);
+enum n_execfunctiontype { function, constructor, coroutine };
+obj_t   *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, enum n_execfunctiontype ftype);
 obj_t   *n_execbasemethod(nsp_state *N, char *name, obj_t *pobj);
 void     n_execconstructor(nsp_state *N, obj_t *cobj, obj_t *pobj);
 void     n_execdestructor(nsp_state *N, obj_t *cobj, char *cname);
@@ -108,6 +109,7 @@ NSP_FUNCTION(nl_break);
 NSP_FUNCTION(nl_flush);
 NSP_FUNCTION(nl_print);
 NSP_FUNCTION(nl_write);
+NSP_FUNCTION(nl_coroutine);
 NSP_FUNCTION(nl_dl_load);
 NSP_FUNCTION(nl_filemkdir);
 NSP_FUNCTION(nl_filechdir);
