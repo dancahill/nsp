@@ -216,7 +216,7 @@ NSP_FUNCTION(nl_print)
 {
 #define __FN__ __FILE__ ":nl_print()"
 	/* obj_t *cobj=N->l.val->d.table.f; */
-	obj_t *cobj = nsp_getobj(N, &N->l, "0");
+	obj_t *cobj = nsp_getobj(N, &N->context->l, "0");
 	int tlen = 0;
 
 	settrace();
@@ -232,7 +232,7 @@ NSP_FUNCTION(nl_print)
 NSP_FUNCTION(nl_write)
 {
 #define __FN__ __FILE__ ":nl_write()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	int len;
 
 	settrace();
@@ -262,19 +262,87 @@ NSP_FUNCTION(nl_break)
 /*
  * coroutine functions
  */
+
+typedef struct COROUTINE {
+	/* standard header info for CDATA object */
+	char      obj_type[16]; /* tell us all about yourself in 15 characters or less */
+	NSP_CFREE obj_term;     /* now tell us how to kill you */
+	/* now begin the stuff that's object-specific */
+	nsp_execcontext *ctx;
+} COROUTINE;
+
+static COROUTINE *getcoroutineconn(nsp_state *N)
+{
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *cobj;
+	COROUTINE *conn;
+
+	cobj = nsp_getobj(N, thisobj, "costate");
+	if ((cobj->val->type != NT_CDATA) || (cobj->val->d.str == NULL) || (strcmp(cobj->val->d.str, "coroutine") != 0))
+		n_error(N, NE_SYNTAX, "coroutine", "expected a coroutine");
+	conn = (COROUTINE *)cobj->val->d.str;
+	return conn;
+}
+
+static void coroutine_murder(nsp_state *N, obj_t *cobj)
+{
+#define __FN__ __FILE__ ":coroutine_murder()"
+	//n_warn(N, __FN__, "reaper is claiming another lost soul");
+	if ((cobj->val->type != NT_CDATA) || (cobj->val->d.str == NULL) || (nc_strcmp(cobj->val->d.str, "coroutine") != 0))
+		n_error(N, NE_SYNTAX, __FN__, "expected a coroutine");
+	n_free(N, (void *)&cobj->val->d.str, sizeof(COROUTINE) + 1);
+	return;
+#undef __FN__
+}
+
 NSP_FUNCTION(nl_coroutine)
 {
 #define __FN__ __FILE__ ":nl_coroutine()"
-	char *fname = nsp_getstr(N, &N->l, "0");
-	//obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	//int rc;
+	char *fname = nsp_getstr(N, &N->context->l, "0");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	COROUTINE *conn;
 
 	settrace();
-	n_warn(N, __FN__, "coroutine method '%s' missing?", fname);
+	if (nc_strcmp(fname, "coroutine") == 0) {
+		//n_warn(N, __FN__, "coroutine constructor called");
+		obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+		obj_t *cobj;
 
+		if (cobj1->val->type != NT_CFUNC && cobj1->val->type != NT_NFUNC) {
+			n_warn(N, __FN__, "coroutine parameter is not a function");
+			return 0;
+		}
 
-	if (nc_strcmp(fname, "start") == 0) {
-		n_execfunction(N, NULL, NULL, coroutine);
+		conn = n_alloc(N, sizeof(COROUTINE) + 1, 1);
+		strcpy(conn->obj_type, "coroutine");
+		conn->obj_term = (NSP_CFREE)coroutine_murder;
+
+		cobj = nsp_setcdata(N, thisobj, "costate", NULL, 0);
+		cobj->val->d.str = (void *)conn;
+		cobj->val->size = sizeof(COROUTINE) + 1;
+
+		n_warn(N, __FN__, "coroutine '%s'", fname);
+		//n_warn(N, __FN__, "coroutine type = %d - good", cobj1->val->type);
+		n_execfunction(N, cobj1, NULL, coroutine);
+	}
+	else if (nc_strcmp(fname, "resume") == 0) {
+		conn = getcoroutineconn(N);
+		//if (!conn) 
+		n_warn(N, __FN__, "coroutine '%s' empty", fname);
+		//n_execfunction(N, NULL, NULL, coroutine);
+	}
+	else if (nc_strcmp(fname, "yield") == 0) {
+		conn = getcoroutineconn(N);
+		n_warn(N, __FN__, "coroutine '%s' empty", fname);
+		//n_execfunction(N, NULL, NULL, coroutine);
+	}
+	else if (nc_strcmp(fname, "status") == 0) {
+		conn = getcoroutineconn(N);
+		n_warn(N, __FN__, "coroutine '%s' empty", fname);
+		//n_execfunction(N, NULL, NULL, coroutine);
+	}
+	else {
+		n_warn(N, __FN__, "coroutine method '%s' missing?", fname);
 	}
 
 
@@ -354,7 +422,7 @@ static int lib_close(void *handle)
 NSP_FUNCTION(nl_dl_load)
 {
 #define __FN__ __FILE__ ":libnsp_dl_load()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	obj_t *cobj, *tobj;
 	NSP_CFUNC cfunc;
 #ifdef WIN32
@@ -412,7 +480,7 @@ NSP_FUNCTION(nl_dl_load)
 NSP_FUNCTION(nl_filechdir)
 {
 #define __FN__ __FILE__ ":nl_filechdir()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	int rc;
 
 	settrace();
@@ -427,7 +495,7 @@ NSP_FUNCTION(nl_filechdir)
 NSP_FUNCTION(nl_fileexists)
 {
 #define __FN__ __FILE__ ":nl_fileexists()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	struct stat sb;
 	int rc;
 	char *file;
@@ -452,8 +520,8 @@ NSP_FUNCTION(nl_fileexists)
 NSP_FUNCTION(nl_filemkdir)
 {
 #define __FN__ __FILE__ ":nl_filemkdir()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
 #if !defined(_MSC_VER) && !defined(__BORLANDC__) && !defined( __TURBOC__)
 	mode_t umask = 0755;
 #endif
@@ -476,8 +544,8 @@ NSP_FUNCTION(nl_filemkdir)
 NSP_FUNCTION(nl_filereadall)
 {
 #define __FN__ __FILE__ ":nl_filereadall()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
 	obj_t *robj;
 	struct stat sb;
 	char *p;
@@ -520,8 +588,8 @@ NSP_FUNCTION(nl_filereadall)
 NSP_FUNCTION(nl_filerename)
 {
 #define __FN__ __FILE__ ":nl_filerename()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
 	struct stat sb;
 
 	settrace();
@@ -541,7 +609,7 @@ NSP_FUNCTION(nl_filerename)
 NSP_FUNCTION(nl_filestat)
 {
 #define __FN__ __FILE__ ":nl_filestat()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	obj_t tobj;
 	struct stat sb;
 	int rc;
@@ -592,7 +660,7 @@ NSP_FUNCTION(nl_filestat)
 NSP_FUNCTION(nl_fileunlink)
 {
 #define __FN__ __FILE__ ":nl_fileunlink()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	int rc = -1;
 	int i;
 
@@ -600,7 +668,7 @@ NSP_FUNCTION(nl_fileunlink)
 	//if (cobj1->val->type != NT_STRING || cobj1->val->size < 1) n_error(N, NE_SYNTAX, __FN__, "expected a string for arg1");
 	n_expect_argtype(N, NT_STRING, 1, cobj1, 0);
 	for (i = 1;; i++) {
-		cobj1 = nsp_getobj(N, &N->l, n_ntoa(N, N->numbuf, i, 10, 0));
+		cobj1 = nsp_getobj(N, &N->context->l, n_ntoa(N, N->numbuf, i, 10, 0));
 		if (!nsp_isstr(cobj1) || cobj1->val->size < 1) break;
 		rc = unlink(cobj1->val->d.str);
 		if (rc) break;
@@ -613,10 +681,10 @@ NSP_FUNCTION(nl_fileunlink)
 NSP_FUNCTION(nl_filewriteall)
 {
 #define __FN__ __FILE__ ":nl_filewriteall()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
-	obj_t *cobj3 = nsp_getobj(N, &N->l, "3");
-	char *fname = nsp_getstr(N, &N->l, "0");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
+	obj_t *cobj3 = nsp_getobj(N, &N->context->l, "3");
+	char *fname = nsp_getstr(N, &N->context->l, "0");
 	int fd = -1;
 	int w = 0;
 	int offset = 0;
@@ -654,9 +722,9 @@ NSP_FUNCTION(nl_filewriteall)
 NSP_FUNCTION(nl_math)
 {
 #define __FN__ __FILE__ ":nl_math1()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
-	char *fname = nsp_getstr(N, &N->l, "0");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
+	char *fname = nsp_getstr(N, &N->context->l, "0");
 	num_t n;
 
 	settrace();
@@ -752,7 +820,7 @@ NSP_FUNCTION(nl_math)
 NSP_FUNCTION(nl_tonumber)
 {
 #define __FN__ __FILE__ ":nl_tonumber()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 
 	settrace();
 	nsp_setnum(N, &N->r, "", nsp_tonum(N, cobj1));
@@ -763,10 +831,10 @@ NSP_FUNCTION(nl_tonumber)
 NSP_FUNCTION(nl_tostring)
 {
 #define __FN__ __FILE__ ":nl_tostring()"
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
-	obj_t *basetype = nsp_getobj(N, &N->l, "basetype");
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *basetype = nsp_getobj(N, &N->context->l, "basetype");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
 	unsigned short d;
 	char *p;
 
@@ -794,8 +862,8 @@ NSP_FUNCTION(nl_tostring)
 NSP_FUNCTION(nl_atoi)
 {
 #define __FN__ __FILE__ ":nl_atoi()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
 	unsigned int offset = 0;
 	short i = -1;
 
@@ -813,7 +881,7 @@ NSP_FUNCTION(nl_atoi)
 NSP_FUNCTION(nl_itoa)
 {
 #define __FN__ __FILE__ ":nl_itoa()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	obj_t *robj;
 
 	settrace();
@@ -827,8 +895,8 @@ NSP_FUNCTION(nl_itoa)
 NSP_FUNCTION(nl_strcat)
 {
 #define __FN__ __FILE__ ":nl_strcat()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
 	obj_t *robj;
 
 	settrace();
@@ -847,10 +915,10 @@ NSP_FUNCTION(nl_strcat)
 NSP_FUNCTION(nl_strcmp)
 {
 #define __FN__ __FILE__ ":nl_strcmp()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
-	obj_t *cobj3 = nsp_getobj(N, &N->l, "3");
-	char *fname = nsp_getstr(N, &N->l, "0");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
+	obj_t *cobj3 = nsp_getobj(N, &N->context->l, "3");
+	char *fname = nsp_getstr(N, &N->context->l, "0");
 	uchar *s1, *s2;
 	int i, rval = 0;
 
@@ -896,11 +964,11 @@ NSP_FUNCTION(nl_strcmp)
 NSP_FUNCTION(nl_strcontains)
 {
 #define __FN__ __FILE__ ":nl_strcontains()"
-	obj_t *basetype = nsp_getobj(N, &N->l, "basetype");
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
-	char *fname = nsp_getstr(N, &N->l, "0");
+	obj_t *basetype = nsp_getobj(N, &N->context->l, "basetype");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
+	char *fname = nsp_getstr(N, &N->context->l, "0");
 	unsigned int i = 0, j = 0;
 
 	settrace();
@@ -947,10 +1015,10 @@ NSP_FUNCTION(nl_strcontains)
 NSP_FUNCTION(nl_strjoin)
 {
 #define __FN__ __FILE__ ":nl_strjoin()"
-	obj_t *basetype = nsp_getobj(N, &N->l, "basetype");
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
+	obj_t *basetype = nsp_getobj(N, &N->context->l, "basetype");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
 	obj_t *cobj, *robj;
 	char *p = NULL, *p2;
 	int len1 = 0, len2 = 0;
@@ -1017,9 +1085,9 @@ NSP_FUNCTION(nl_strjoin)
 NSP_FUNCTION(nl_strlen)
 {
 #define __FN__ __FILE__ ":nl_strlen()"
-	obj_t *basetype = nsp_getobj(N, &N->l, "basetype");
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *basetype = nsp_getobj(N, &N->context->l, "basetype");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 
 	settrace();
 	if (!nsp_isnull(basetype)) {
@@ -1034,11 +1102,11 @@ NSP_FUNCTION(nl_strlen)
 NSP_FUNCTION(nl_strrep)
 {
 #define __FN__ __FILE__ ":nl_strrep()"
-	obj_t *basetype = nsp_getobj(N, &N->l, "basetype");
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
-	obj_t *cobj3 = nsp_getobj(N, &N->l, "3");
+	obj_t *basetype = nsp_getobj(N, &N->context->l, "basetype");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
+	obj_t *cobj3 = nsp_getobj(N, &N->context->l, "3");
 	char *ss, *se;
 	char *s2;
 	int l2;
@@ -1082,10 +1150,10 @@ NSP_FUNCTION(nl_strrep)
 NSP_FUNCTION(nl_strsplit)
 {
 #define __FN__ __FILE__ ":nl_strsplit()"
-	obj_t *basetype = nsp_getobj(N, &N->l, "basetype");
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
+	obj_t *basetype = nsp_getobj(N, &N->context->l, "basetype");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
 	obj_t tobj;
 	char *ss, *se;
 	int i = 0;
@@ -1140,11 +1208,11 @@ NSP_FUNCTION(nl_strsplit)
 NSP_FUNCTION(nl_strstr)
 {
 #define __FN__ __FILE__ ":nl_strstr()"
-	obj_t *basetype = nsp_getobj(N, &N->l, "basetype");
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
-	char *fname = nsp_getstr(N, &N->l, "0");
+	obj_t *basetype = nsp_getobj(N, &N->context->l, "basetype");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
+	char *fname = nsp_getstr(N, &N->context->l, "0");
 	unsigned int i = 0, j = 0;
 
 	settrace();
@@ -1182,11 +1250,11 @@ NSP_FUNCTION(nl_strstr)
 NSP_FUNCTION(nl_strsub)
 {
 #define __FN__ __FILE__ ":nl_strsub()"
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
-	obj_t *basetype = nsp_getobj(N, &N->l, "basetype");
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
-	obj_t *cobj3 = nsp_getobj(N, &N->l, "3");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *basetype = nsp_getobj(N, &N->context->l, "basetype");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
+	obj_t *cobj3 = nsp_getobj(N, &N->context->l, "3");
 	unsigned int offset, max = 0;
 
 	settrace();
@@ -1214,11 +1282,11 @@ NSP_FUNCTION(nl_strsub)
 NSP_FUNCTION(nl_strtolower)
 {
 #define __FN__ __FILE__ ":nl_strtolower()"
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
-	obj_t *basetype = nsp_getobj(N, &N->l, "basetype");
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *basetype = nsp_getobj(N, &N->context->l, "basetype");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	obj_t *robj;
-	char *fname = nsp_getstr(N, &N->l, "0");
+	char *fname = nsp_getstr(N, &N->context->l, "0");
 	int i;
 
 	settrace();
@@ -1247,11 +1315,11 @@ NSP_FUNCTION(nl_strtolower)
 NSP_FUNCTION(nl_strtrim)
 {
 #define __FN__ __FILE__ ":nl_strtrim()"
-	obj_t *basetype = nsp_getobj(N, &N->l, "basetype");
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *basetype = nsp_getobj(N, &N->context->l, "basetype");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	//	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
-	char *fname = nsp_getstr(N, &N->l, "0");
+	char *fname = nsp_getstr(N, &N->context->l, "0");
 	char *p;
 	int plen;
 
@@ -1280,7 +1348,7 @@ NSP_FUNCTION(nl_strtrim)
 NSP_FUNCTION(nl_asctime)
 {
 #define __FN__ __FILE__ ":nl_asctime()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	//char *fname = nsp_getstr(N, &N->l, "0");
 	struct timeval ttime;
 	time_t t;
@@ -1397,7 +1465,7 @@ static int getunixfromstring(char *datestr)
 NSP_FUNCTION(nl_sqltounix)
 {
 #define __FN__ __FILE__ ":nl_sqltounix()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	int unixdate = 0;
 
 	settrace();
@@ -1411,7 +1479,7 @@ NSP_FUNCTION(nl_sqltounix)
 NSP_FUNCTION(nl_mktime)
 {
 #define __FN__ __FILE__ ":nl_mktime()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 
 	settrace();
 	if (nsp_istable(cobj1)) {
@@ -1444,8 +1512,8 @@ NSP_FUNCTION(nl_time)
 NSP_FUNCTION(nl_gmtime)
 {
 #define __FN__ __FILE__ ":nl_gmtime()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	char *fname = nsp_getstr(N, &N->l, "0");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	char *fname = nsp_getstr(N, &N->context->l, "0");
 	obj_t tobj;
 	time_t t;
 	struct tm *tp;
@@ -1526,7 +1594,7 @@ NSP_FUNCTION(nl_runtime)
 NSP_FUNCTION(nl_sleep)
 {
 #define __FN__ __FILE__ ":nl_sleep()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	double n = 1;
 
 	settrace();
@@ -1546,8 +1614,8 @@ NSP_FUNCTION(nl_sleep)
 NSP_FUNCTION(nl_eval)
 {
 #define __FN__ __FILE__ ":nl_eval()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	char *fname = nsp_getstr(N, &N->l, "0");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	char *fname = nsp_getstr(N, &N->context->l, "0");
 	uchar *p;
 	int psize;
 
@@ -1591,8 +1659,8 @@ NSP_FUNCTION(nl_eval)
 NSP_FUNCTION(nl_exec)
 {
 #define __FN__ __FILE__ ":nl_exec()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	char *fname = nsp_getstr(N, &N->l, "0");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	char *fname = nsp_getstr(N, &N->context->l, "0");
 	uchar *p;
 	int psize;
 
@@ -1635,8 +1703,8 @@ NSP_FUNCTION(nl_exec)
 NSP_FUNCTION(nl_iname)
 {
 #define __FN__ __FILE__ ":nl_iname()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
 	obj_t *cobj;
 
 	settrace();
@@ -1656,8 +1724,8 @@ NSP_FUNCTION(nl_iname)
 NSP_FUNCTION(nl_ival)
 {
 #define __FN__ __FILE__ ":nl_ival()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
 	obj_t *cobj;
 
 	settrace();
@@ -1696,7 +1764,7 @@ NSP_FUNCTION(nl_include)
 NSP_FUNCTION(nl_serialize)
 {
 #define __FN__ __FILE__ ":nl_serialize()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 
 	settrace();
 	if (!nsp_isnull(cobj1)) {
@@ -1712,9 +1780,9 @@ NSP_FUNCTION(nl_serialize)
 NSP_FUNCTION(nl_sizeof)
 {
 #define __FN__ __FILE__ ":nl_sizeof()"
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
-	obj_t *basetype = nsp_getobj(N, &N->l, "basetype");
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *basetype = nsp_getobj(N, &N->context->l, "basetype");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	int size = 0;
 
 	settrace();
@@ -1747,9 +1815,9 @@ NSP_FUNCTION(nl_sizeof)
 NSP_FUNCTION(nl_typeof)
 {
 #define __FN__ __FILE__ ":nl_typeof()"
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
-	obj_t *basetype = nsp_getobj(N, &N->l, "basetype");
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *basetype = nsp_getobj(N, &N->context->l, "basetype");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	NSP_CDATA *chead;
 	char *p;
 
@@ -1778,7 +1846,7 @@ NSP_FUNCTION(nl_typeof)
 NSP_FUNCTION(nl_system)
 {
 #define __FN__ __FILE__ ":nl_system()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	int n = -1;
 
 	settrace();
@@ -1798,7 +1866,7 @@ NSP_FUNCTION(nl_copy)
 {
 #define __FN__ __FILE__ ":nl_copy()"
 	settrace();
-	n_copyval(N, &N->r, nsp_getobj(N, &N->l, "1"));
+	n_copyval(N, &N->r, nsp_getobj(N, &N->context->l, "1"));
 	return 0;
 #undef __FN__
 }
@@ -1806,8 +1874,8 @@ NSP_FUNCTION(nl_copy)
 NSP_FUNCTION(nl_printf)
 {
 #define __FN__ __FILE__ ":nl_printf()"
-	char *fname = nsp_getstr(N, &N->l, "0");
-	obj_t *fobj = nsp_getobj(N, &N->l, "1");
+	char *fname = nsp_getstr(N, &N->context->l, "0");
+	obj_t *fobj = nsp_getobj(N, &N->context->l, "1");
 	obj_t *cobj, *robj;
 	char tmp[80];
 	char *ss, *s, *p;
@@ -1866,10 +1934,10 @@ NSP_FUNCTION(nl_printf)
 NSP_FUNCTION(nl_append)
 {
 #define __FN__ __FILE__ ":nl_append()"
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
-	obj_t *basetype = nsp_getobj(N, &N->l, "basetype");
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *basetype = nsp_getobj(N, &N->context->l, "basetype");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
 	obj_t *nobj;
 	//int size = 0;
 
@@ -1897,10 +1965,10 @@ NSP_FUNCTION(nl_append)
 NSP_FUNCTION(nl_zlink)
 {
 #define __FN__ __FILE__ ":nl_zlink()"
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
-	obj_t *basetype = nsp_getobj(N, &N->l, "basetype");
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *basetype = nsp_getobj(N, &N->context->l, "basetype");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
 
 	settrace();
 	if (!nsp_isnull(basetype)) {
@@ -1915,11 +1983,11 @@ NSP_FUNCTION(nl_zlink)
 NSP_CLASSMETHOD(nl_base_method)
 {
 #define __FN__ __FILE__ ":nl_base_method()"
-	char *fname = nsp_getstr(N, &N->l, "0");
-	unsigned short ftype = nsp_typeof(nsp_getobj(N, &N->l, "this"));
+	char *fname = nsp_getstr(N, &N->context->l, "0");
+	unsigned short ftype = nsp_typeof(nsp_getobj(N, &N->context->l, "this"));
 
 	settrace();
-	nsp_setnum(N, &N->l, "basetype", ftype);
+	nsp_setnum(N, &N->context->l, "basetype", ftype);
 	if (nc_strcmp(fname, "gettype") == 0) return nl_typeof(N);
 	if (ftype == NT_STRING) {
 		obj_t *cobj = nsp_getobj(N, nsp_getobj(N, &N->g, "string"), fname);

@@ -79,6 +79,11 @@ nsp_execcontext *n_newexeccontext(nsp_state *N, uchar *blockptr, uchar *blockend
 	newcontext->blockptr = blockptr;
 	newcontext->blockend = blockend;
 	newcontext->readptr = readptr;
+
+	nsp_setvaltype(N, &newcontext->l, NT_TABLE);
+	newcontext->l.val->attr |= NST_AUTOSORT;
+	n_setname(N, &newcontext->l, "!LOCALS!");
+
 	return newcontext;
 }
 
@@ -86,6 +91,9 @@ void n_freeexeccontext(nsp_state *N, nsp_execcontext **context)
 {
 #define __FN__ __FILE__ ":n_freeexeccontext()"
 	if (*context) {
+		nsp_unlinkval(N, &(*context)->l);
+		//nsp_freetable(N, &(*context)->l);
+//		if ((*context)->l.val) n_free(N, (void *)&(*context)->l.val, sizeof(val_t));
 		n_free(N, (void *)context, sizeof(nsp_execcontext));
 	}
 #undef __FN__
@@ -119,6 +127,35 @@ static void n_execfunction_setargs(nsp_state *N, obj_t *cobj, obj_t *listobj)
 #undef __FN__
 }
 
+// take function parameter names and map them to the arguments we've collected
+static void n_execfunction_getargs(nsp_state *N, obj_t *cobj, obj_t *fobj)
+{
+#define __FN__ __FILE__ ":n_execfunction_getargs()"
+	char filenamebuf[MAX_OBJNAMELEN + 1];
+	unsigned short i;
+
+	N->context->blockptr = (uchar *)fobj->val->d.str;
+	N->context->blockend = (uchar *)fobj->val->d.str;
+	N->context->readptr = (uchar *)fobj->val->d.str;
+	/* get the name of the source file */
+	n_expect(N, __FN__, OP_LABEL);
+	filenamebuf[0] = 0;
+	n_getlabel(N, filenamebuf);
+	/* get the arg names */
+	n_expect(N, __FN__, OP_POPAREN);
+	for (i = 1;; i++) {
+		n_context_readptr = n_seekop(N, n_context_readptr, 0);
+		cobj = nsp_getobj(N, &N->context->l, n_ntoa(N, N->numbuf, i, 10, 0));
+		if (n_peekop(N) == OP_LABEL) n_setname(N, cobj, n_getlabel(N, NULL));
+		if (n_peekop(N) == OP_PCOMMA) continue;
+		n_expect(N, __FN__, OP_PCPAREN);
+		n_context_readptr++;
+		break;
+	}
+	n_expect(N, __FN__, OP_POBRACE);
+#undef __FN__
+}
+
 /// <summary>
 /// execute c or script function
 /// </summary>
@@ -132,7 +169,6 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, enum n_execfunctio
 	//char *oldfunc;
 	jmp_buf *savjmp;
 	obj_t listobj, *cobj;
-	val_t *olobj;
 	unsigned short fobjtype;
 	int e;
 	//short noscopechange = 0;
@@ -158,6 +194,10 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, enum n_execfunctio
 	/* set args */
 	n_execfunction_setargs(N, cobj, &listobj);
 
+	if (ftype == coroutine) {
+		n_warn(N, __FN__, "trying to run a coroutine");
+	}
+
 	if (fobjtype == NT_CFUNC && (NSP_CFUNC)(fobj->val->d.cfunc) == (NSP_CFUNC)nl_include) {
 		/* begin file include execution */
 		/*
@@ -165,139 +205,95 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, enum n_execfunctio
 		 */
 		obj_t *cobj1 = nsp_getobj(N, &listobj, "1");
 		obj_t *cobj2 = nsp_getobj(N, &listobj, "2");
-		uchar *p;
+		//uchar *p;
 		int n = 0;
-
+		int paramtouse = 0;
+		uchar *p = NULL;
+		int psize = 0;
 		e = 0;
+
 		if (nsp_isstr(cobj2)) {
-			uchar *p, *bp;
-			int psize;
-
-			nsp_execcontext *oldctx = N->context;
+			paramtouse = 2;
 			n_decompose(N, NULL, (uchar *)cobj2->val->d.str, &p, &psize);
-			bp = p ? p : oldctx->blockptr;
-			N->context = n_newexeccontext(N, bp, bp + readi4((bp + 8)), bp + readi4((bp + 12)));
-			N->context->funcname = "";
-			N->context->filename = oldctx->filename;
-			N->context->line_num = oldctx->line_num;
-
-			savjmp = n_context_savjmp;
-			n_context_savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
-			//n_warn(N, __FN__, "include(s) context function name = '%s', file name = '%s', line = '%d'", N->context->funcname, N->context->filename, N->context->line_num);
-			if (setjmp(*n_context_savjmp) == 0) {
-				nsp_linkval(N, &N->r, nsp_exec(N, (char *)n_context_readptr));
-			}
-			n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
-			n_context_savjmp = savjmp;
-
-			oldctx->line_num = N->context->line_num;
-			n_freeexeccontext(N, &N->context);
-			N->context = oldctx;
-			if (p) n_free(N, (void *)&p, psize);
 		}
 		else if (nsp_isstr(cobj1)) {
-			p = n_context_readptr;
-
-			nsp_execcontext *oldctx = N->context;
-			N->context = n_newexeccontext(N, oldctx->blockptr, oldctx->blockend, oldctx->readptr);
-			N->context->funcname = "";
-			N->context->filename = (char *)cobj1->val->d.str;
-			N->context->line_num = oldctx->line_num;
-
-			savjmp = n_context_savjmp;
-			n_context_savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
-			//n_warn(N, __FN__, "include(f) context function name = '%s', file name = '%s', line = '%d'", N->context->funcname, N->context->filename, N->context->line_num);
-			if ((e = setjmp(*n_context_savjmp)) == 0) {
-				n = nsp_execfile(N, N->context->filename);
-			}
-			n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
-			n_context_savjmp = savjmp;
-
-			oldctx->line_num = N->context->line_num;
-			n_freeexeccontext(N, &N->context);
-			N->context = oldctx;
-
-			n_context_readptr = p;
+			paramtouse = 1;
 		}
+		else {
+			DEBUG_OUT();
+			return &N->r;
+		}
+
+		nsp_execcontext *oldctx = N->context;
+		N->context = n_newexeccontext(N, oldctx->blockptr, oldctx->blockend, oldctx->readptr);
+		if (p) {
+			N->context->blockptr = p;
+			N->context->blockend = p + readi4((p + 8));
+			N->context->readptr = p + readi4((p + 12));
+		}
+		N->context->funcname = "";
+		N->context->filename = oldctx->filename;
+		if (paramtouse == 1) N->context->filename = (char *)cobj1->val->d.str;
+		N->context->linenum = oldctx->linenum;
+		nsp_linkval(N, &N->context->l, &oldctx->l);
+
+		savjmp = n_context_savjmp;
+		n_context_savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
+		if ((e = setjmp(*n_context_savjmp)) == 0) {
+			if (paramtouse == 1) n = nsp_execfile(N, N->context->filename);
+			else nsp_linkval(N, &N->r, nsp_exec(N, (char *)n_context_readptr));
+		}
+		n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
+		n_context_savjmp = savjmp;
+
+		nsp_unlinkval(N, &N->context->l);
+		oldctx->linenum = N->context->linenum;
+		n_freeexeccontext(N, &N->context);
+		N->context = oldctx;
+
+		if (p) n_free(N, (void *)&p, psize);
+
 		nsp_setbool(N, &N->r, "", n ? 0 : 1);
 		if (n < 0) n_warn(N, __FN__, "failed to include '%s'", cobj1->val->d.str);
 		nsp_unlinkval(N, &listobj);
-		if (N->ret) N->ret = 0;
-		if (e && n_context_savjmp != NULL) longjmp(*n_context_savjmp, 1);
-		DEBUG_OUT();
-		return &N->r;
 		/* end file include execution */
 	}
-
-	olobj = N->l.val; N->l.val = listobj.val; listobj.val = NULL;
-	nsp_unlinkval(N, &N->r);
-
-	if (fobjtype == NT_CFUNC) {
-		/* exec the native function */
+	else {
+		/* standard function execution */
+		val_t *olobj;
 		nsp_execcontext *oldctx = N->context;
 		N->context = n_newexeccontext(N, oldctx->blockptr, oldctx->blockend, oldctx->readptr);
-		//N->context->funcname = "";
 		N->context->funcname = fobj->name;
 		N->context->filename = oldctx->filename;
-		N->context->line_num = oldctx->line_num;
+		N->context->linenum = oldctx->linenum;
+
+		nsp_linkval(N, &N->context->l, &oldctx->l);
+
+		olobj = N->context->l.val; N->context->l.val = listobj.val; listobj.val = NULL;
+		nsp_unlinkval(N, &N->r);
+
+		if (fobjtype == NT_NFUNC) n_execfunction_getargs(N, cobj, fobj);
 
 		savjmp = n_context_savjmp;
 		n_context_savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
-		//n_warn(N, __FN__, "exec(c) function name = '%s', file name = '%s', line = '%d'", N->context->funcname, N->context->filename, N->context->line_num);
 		if ((e = setjmp(*n_context_savjmp)) == 0) {
-			fobj->val->d.cfunc(N);
-		}
-		n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
-		n_context_savjmp = savjmp;
-\
-		oldctx->line_num = N->context->line_num;
-		n_freeexeccontext(N, &N->context);
-		N->context = oldctx;
-	}
-	else {
-		char filenamebuf[MAX_OBJNAMELEN + 1];
-		unsigned short i;
-
-		// must back up the context pointers before reading the filename label
-		nsp_execcontext *oldctx = N->context;
-		N->context = n_newexeccontext(N, (uchar *)fobj->val->d.str, (uchar *)fobj->val->d.str, (uchar *)fobj->val->d.str);
-		N->context->funcname = fobj->name;
-		N->context->filename = filenamebuf;
-		N->context->line_num = oldctx->line_num;
-		/* get the name of the source file */
-		n_expect(N, __FN__, OP_LABEL);
-		filenamebuf[0] = 0;
-		n_getlabel(N, filenamebuf);
-		/* get the arg names */
-		n_expect(N, __FN__, OP_POPAREN);
-		for (i = 1;; i++) {
-			n_context_readptr = n_seekop(N, n_context_readptr, 0);
-			cobj = nsp_getobj(N, &N->l, n_ntoa(N, N->numbuf, i, 10, 0));
-			if (n_peekop(N) == OP_LABEL) n_setname(N, cobj, n_getlabel(N, NULL));
-			if (n_peekop(N) == OP_PCOMMA) continue;
-			n_expect(N, __FN__, OP_PCPAREN);
-			n_context_readptr++;
-			break;
-		}
-		n_expect(N, __FN__, OP_POBRACE);
-		/* save state and exec the script function */
-		savjmp = n_context_savjmp;
-		n_context_savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
-		//n_warn(N, __FN__, "exec(s) function name = '%s', file name = '%s', line = '%d'", N->context->funcname, N->context->filename, N->context->line_num);
-		if ((e = setjmp(*n_context_savjmp)) == 0) {
-			nsp_exec(N, (char *)n_context_readptr);
+			if (fobjtype == NT_CFUNC) fobj->val->d.cfunc(N);
+			else nsp_exec(N, (char *)n_context_readptr);
 		}
 		n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
 		n_context_savjmp = savjmp;
 
-		oldctx->line_num = N->context->line_num;
+		//nsp_unlinkval(N, nsp_getobj(N, &listobj, "this"));
+		if (ftype == constructor) nsp_linkval(N, &N->r, &N->context->l);
+		nsp_unlinkval(N, &N->context->l);
+		N->context->l.val = olobj;
+		//nsp_unlinkval(N, &N->context->l);
+		oldctx->linenum = N->context->linenum;
 		n_freeexeccontext(N, &N->context);
 		N->context = oldctx;
+		//nsp_unlinkval(N, &N->context->l);
+		/* end standard function execution */
 	}
-	//nsp_unlinkval(N, nsp_getobj(N, &listobj, "this"));
-	if (ftype == constructor) nsp_linkval(N, &N->r, &N->l);
-	nsp_unlinkval(N, &N->l);
-	N->l.val = olobj;
 	if (N->ret) N->ret = 0;
 	if (e && n_context_savjmp != NULL) longjmp(*n_context_savjmp, 1);
 	DEBUG_OUT();
@@ -439,7 +435,7 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 			op = *n_context_readptr++;
 			switch (op) {
 			case OP_KLOCAL:
-			case OP_KVAR:     n_readvar(N, &N->l, NULL); goto endstmt;
+			case OP_KVAR:     n_readvar(N, &N->context->l, NULL); goto endstmt;
 			case OP_KGLOB:    n_readvar(N, &N->g, NULL); goto endstmt;
 			case OP_KNAMESPACE: {
 				char namebuf[MAX_OBJNAMELEN + 1];
@@ -527,7 +523,7 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 			//uchar *e;
 
 			if (n_peekop(N) != OP_LABEL) n_error(N, NE_SYNTAX, __FN__, "expected a label [%d][%s]", *n_context_readptr, n_getsym(N, *n_context_readptr));
-			tobj = &N->l;
+			tobj = &N->context->l;
 			n_getlabel(N, namebuf);
 			cobj = nsp_getobj(N, NULL, namebuf);
 		x:
@@ -731,7 +727,8 @@ nsp_state *nsp_newstate()
 		{ NULL, NULL }
 	};
 	FUNCTION list_coroutine[] = {
-			{ "create", (NSP_CFUNC)nl_coroutine },
+			{ "coroutine", (NSP_CFUNC)nl_coroutine },
+			//{ "create", (NSP_CFUNC)nl_coroutine },
 			{ "resume", (NSP_CFUNC)nl_coroutine },
 			{ "yield", (NSP_CFUNC)nl_coroutine },
 			{ "status", (NSP_CFUNC)nl_coroutine },
@@ -847,14 +844,10 @@ nsp_state *nsp_newstate()
 	new_N->warnformat = 'r';
 #endif
 
+	n_setname(new_N, &new_N->g, "!GLOBALS!");
 	nsp_setvaltype(new_N, &new_N->g, NT_TABLE);
 	new_N->g.val->attr |= NST_AUTOSORT;
 
-	nsp_setvaltype(new_N, &new_N->l, NT_TABLE);
-	new_N->l.val->attr |= NST_AUTOSORT;
-
-	n_setname(new_N, &new_N->g, "!GLOBALS!");
-	n_setname(new_N, &new_N->l, "!LOCALS!");
 	n_setname(new_N, &new_N->r, "!RETVAL!");
 	//	cobj=nsp_settable(new_N, &new_N->g, "_GLOBALS");
 	cobj = nsp_setbool(new_N, &new_N->g, "_GLOBALS", 0);
@@ -952,14 +945,12 @@ void nsp_freestate(nsp_state *N)
 	if (N->outbuflen) nl_flush(N);
 	if (nsp_istable((cobj = nsp_getobj(N, &N->g, "_GLOBALS")))) nsp_unlinkval(N, cobj);
 	nsp_freetable(N, &N->g);
-	nsp_freetable(N, &N->l);
 	n_freeval(N, &N->r);
 	/* WHY THE F?*# IS IT THAT THIS IS NOT PORTABLE C / C++, */
 	// if (N->g.val) n_free(N, (void *)&N->g.val, sizeof(val_t));
 	/* AND THIS IS? */
 	// if (N->g.val) { void *x=N->g.val; n_free(N, &x, sizeof(val_t)); }
 	if (N->g.val) n_free(N, (void *)&N->g.val, sizeof(val_t));
-	if (N->l.val) n_free(N, (void *)&N->l.val, sizeof(val_t));
 	if (N->r.val) n_free(N, (void *)&N->r.val, sizeof(val_t));
 	n_freeexeccontext(N, &N->context);
 	//n_free(N, (void *)&N->context, sizeof(nsp_execcontext));

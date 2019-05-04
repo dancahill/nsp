@@ -134,7 +134,7 @@ static void n_dumpvars(nsp_state *N, obj_t *tobj, int depth)
 NSP_FUNCTION(libnsp_data_json_encode)
 {
 #define __FN__ __FILE__ ":libnsp_data_json_encode()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 
 	settrace();
 	if (!nsp_isnull(cobj1)) {

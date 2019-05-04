@@ -44,7 +44,7 @@
 
 static void ftp_lasterr(nsp_state *N, char *msg)
 {
-	nsp_setstr(N, nsp_getobj(N, &N->l, "this"), "last_err", msg, -1);
+	nsp_setstr(N, nsp_getobj(N, &N->context->l, "this"), "last_err", msg, -1);
 	return;
 }
 
@@ -82,7 +82,7 @@ NSP_CLASSMETHOD(libnsp_net_ftp_client_open)
 {
 #define __FN__ __FILE__ ":libnsp_net_ftp_client_open()"
 	char iobuf[1024];
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
 	obj_t *cobj;
 	int i = 0;
 
@@ -94,7 +94,7 @@ NSP_CLASSMETHOD(libnsp_net_ftp_client_open)
 	int rc;
 
 	if (!nsp_istable(thisobj)) n_error(N, NE_SYNTAX, __FN__, "expected a table for 'this'");
-	if (nsp_isstr((cobj = nsp_getobj(N, &N->l, "1")))) {
+	if (nsp_isstr((cobj = nsp_getobj(N, &N->context->l, "1")))) {
 		host = cobj->val->d.str;
 	}
 	else if (nsp_isstr((cobj = nsp_getobj(N, thisobj, "host")))) {
@@ -103,7 +103,7 @@ NSP_CLASSMETHOD(libnsp_net_ftp_client_open)
 	else {
 		n_error(N, NE_SYNTAX, __FN__, "expected a string for host");
 	}
-	if (nsp_isnum((cobj = nsp_getobj(N, &N->l, "2")))) {
+	if (nsp_isnum((cobj = nsp_getobj(N, &N->context->l, "2")))) {
 		port = (unsigned short)nsp_tonum(N, cobj);
 	}
 	else if (nsp_isnum((cobj = nsp_getobj(N, thisobj, "port")))) {
@@ -112,7 +112,7 @@ NSP_CLASSMETHOD(libnsp_net_ftp_client_open)
 	else {
 		n_error(N, NE_SYNTAX, __FN__, "expected a number for port");
 	}
-	if (nsp_isstr((cobj = nsp_getobj(N, &N->l, "3")))) {
+	if (nsp_isstr((cobj = nsp_getobj(N, &N->context->l, "3")))) {
 		user = cobj->val->d.str;
 	}
 	else if (nsp_isstr((cobj = nsp_getobj(N, thisobj, "username")))) {
@@ -121,7 +121,7 @@ NSP_CLASSMETHOD(libnsp_net_ftp_client_open)
 	else {
 		n_error(N, NE_SYNTAX, __FN__, "expected a string for username");
 	}
-	if (nsp_isstr((cobj = nsp_getobj(N, &N->l, "4")))) {
+	if (nsp_isstr((cobj = nsp_getobj(N, &N->context->l, "4")))) {
 		pass = cobj->val->d.str;
 	}
 	else if (nsp_isstr((cobj = nsp_getobj(N, thisobj, "password")))) {
@@ -236,7 +236,7 @@ NSP_CLASSMETHOD(libnsp_net_ftp_client_close)
 {
 #define __FN__ __FILE__ ":libnsp_net_ftp_client_close()"
 	char iobuf[1024];
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
 	obj_t *cobj;
 	TCP_SOCKET *sock;
 	int rc;
@@ -266,7 +266,7 @@ NSP_CLASSMETHOD(libnsp_net_ftp_client_cwd)
 {
 #define __FN__ __FILE__ ":libnsp_net_ftp_client_cwd()"
 	char iobuf[1024];
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
 	obj_t *cobj;
 	TCP_SOCKET *sock;
 	int rc;
@@ -281,7 +281,7 @@ NSP_CLASSMETHOD(libnsp_net_ftp_client_cwd)
 		n_error(N, NE_SYNTAX, __FN__, "expected a socket");
 	sock = (TCP_SOCKET *)cobj->val->d.str;
 
-	if (nsp_isstr((cobj = nsp_getobj(N, &N->l, "1")))) {
+	if (nsp_isstr((cobj = nsp_getobj(N, &N->context->l, "1")))) {
 		dir = cobj->val->d.str;
 	}
 
@@ -307,7 +307,7 @@ NSP_CLASSMETHOD(libnsp_net_ftp_client_pwd)
 {
 #define __FN__ __FILE__ ":libnsp_net_ftp_client_pwd()"
 	char iobuf[1024];
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
 	obj_t *cobj;
 	TCP_SOCKET *sock;
 	int rc;
@@ -602,7 +602,7 @@ NSP_CLASSMETHOD(libnsp_net_ftp_client_ls)
 {
 #define __FN__ __FILE__ ":libnsp_net_ftp_client_ls()"
 	char iobuf[1024];
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
 	obj_t *cobj;
 	TCP_SOCKET *sock;
 	TCP_SOCKET sock2;
@@ -678,10 +678,10 @@ NSP_CLASSMETHOD(libnsp_net_ftp_client_ls)
 NSP_CLASSMETHOD(libnsp_net_ftp_client_retr)
 {
 #define __FN__ __FILE__ ":libnsp_net_ftp_client_retr()"
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
 	obj_t *cobj;
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
 	TCP_SOCKET *sock;
 	TCP_SOCKET sock2;
 	int rc;
@@ -766,10 +766,10 @@ NSP_CLASSMETHOD(libnsp_net_ftp_client_retr)
 NSP_CLASSMETHOD(libnsp_net_ftp_client_stor)
 {
 #define __FN__ __FILE__ ":libnsp_net_ftp_client_stor()"
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
 	obj_t *cobj;
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
-	obj_t *cobj2 = nsp_getobj(N, &N->l, "2");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	obj_t *cobj2 = nsp_getobj(N, &N->context->l, "2");
 	TCP_SOCKET *sock;
 	TCP_SOCKET sock2;
 	int rc;
@@ -854,7 +854,7 @@ NSP_CLASSMETHOD(libnsp_net_ftp_client_stor)
 NSP_CLASS(libnsp_net_ftp_client_client)
 {
 #define __FN__ __FILE__ ":libnsp_net_ftp_client_client()"
-	obj_t *thisobj = nsp_getobj(N, &N->l, "this");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
 	//obj_t *cobj;
 
 	nsp_setbool(N, thisobj, "socket", 0);

@@ -511,7 +511,7 @@ obj_t *nsp_getobj_ex(nsp_state *N, obj_t *tobj, char *oname, unsigned short foll
 	if (foundz) *foundz = 0;
 	if (tobj == &N->r) return tobj;
 	if (N != NULL && tobj == NULL) {
-		for (cobj = N->l.val->d.table.f; cobj; cobj = cobj->next) {
+		for (cobj = N->context->l.val->d.table.f; cobj; cobj = cobj->next) {
 			/* printf("%s oname=%s 0x%08X %s\n", __FN__, oname, cobj, cobj->name); */
 			//			if (cobj->hash==hash&&nc_strcmp(cobj->name, oname)==0) return cobj;
 			if (cobj->hash == hash) {

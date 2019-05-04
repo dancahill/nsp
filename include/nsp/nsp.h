@@ -141,20 +141,21 @@ typedef struct nsp_objrec {
 	char name[MAX_OBJNAMELEN + 1];
 } nsp_objrec;
 typedef struct nsp_execcontext {
-	jmp_buf *savjmp;
+	obj_t l; // local variables
+	//obj_t t; // 'this' object
 	uchar *blockptr;
 	uchar *blockend;
 	uchar *readptr;
+	jmp_buf *savjmp;
 	char *funcname;
 	char *filename;
 	char *tracefn;
-	long int line_num;
+	long int linenum;
 } nsp_execcontext;
 typedef struct nsp_state {
-	nsp_execcontext *context;
-	obj_t g;
-	obj_t l;
-	obj_t r;
+	nsp_execcontext *context; // local execution context
+	obj_t g; // global variables
+	obj_t r; // return variable
 	short brk;
 	short cnt;
 	short ret;
@@ -298,7 +299,7 @@ public:
 	}
 	obj_t *getL()
 	{
-		return &this->N->l;
+		return &this->N->context->l;
 	}
 	nsp_t *getN()
 	{

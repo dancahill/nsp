@@ -225,11 +225,11 @@ void n_error(nsp_state *N, short int err, const char *fname, const char *format,
 			//len=nc_snprintf(N, N->errbuf, sizeof(N->errbuf)-1, "%-15s : %s() line %d, ", fname, N->func, N->line_num);
 			//len = nc_snprintf(N, N->errbuf, sizeof(N->errbuf) - 1, "%s() line %d, ", N->func, N->line_num);
 			//n_warn(N, __FN__, "zz1 '%s'", N->file);
-			len = nc_snprintf(N, N->errbuf, sizeof(N->errbuf) - 1, "%s%s%s() line %d, ", N->context->filename != NULL ? N->context->filename : "", N->context->filename != NULL ? ":" : "", p, N->context->line_num);
+			len = nc_snprintf(N, N->errbuf, sizeof(N->errbuf) - 1, "%s%s%s() line %d, ", N->context->filename != NULL ? N->context->filename : "", N->context->filename != NULL ? ":" : "", p, N->context->linenum);
 		}
 		else {
 			//len=nc_snprintf(N, N->errbuf, sizeof(N->errbuf)-1, "%-15s : line %d, ", fname, N->line_num);
-			len = nc_snprintf(N, N->errbuf, sizeof(N->errbuf) - 1, "line %d, ", N->context->line_num);
+			len = nc_snprintf(N, N->errbuf, sizeof(N->errbuf) - 1, "line %d, ", N->context->linenum);
 		}
 	}
 	else {
@@ -296,20 +296,20 @@ void n_warn(nsp_state *N, const char *fname, const char *format, ...)
 	if (N->outbuflen > OUTBUFLOWAT) nl_flush(N);
 
 	if (N->warnformat == 'a') {
-		nc_printf(N, "\r\n[01;33;40m%s : line %d, ", p, N->context->line_num);
+		nc_printf(N, "\r\n[01;33;40m%s : line %d, ", p, N->context->linenum);
 	}
 	else if (N->warnformat == 'h') {
-		nc_printf(N, "<BR /><B>%s : line %d, ", p, N->context->line_num);
+		nc_printf(N, "<BR /><B>%s : line %d, ", p, N->context->linenum);
 	}
 	else {
-		nc_printf(N, "\r\n%s : line %d, ", p, N->context->line_num);
+		nc_printf(N, "\r\n%s : line %d, ", p, N->context->linenum);
 	}
 	va_start(ap, format);
 	len = nc_vsnprintf(N, N->outbuffer + N->outbuflen, N->outbufmax - N->outbuflen, format, ap);
 	va_end(ap);
 
 #if defined(WIN32) && defined(_DEBUG)
-	_RPT1(_CRT_WARN, "NSP Warning: %s : line %d, [%s]\r\n", p, N->context->line_num, N->outbuffer + N->outbuflen);
+	_RPT1(_CRT_WARN, "NSP Warning: %s : line %d, [%s]\r\n", p, N->context->linenum, N->outbuffer + N->outbuflen);
 #endif
 	N->outbuflen += len;
 

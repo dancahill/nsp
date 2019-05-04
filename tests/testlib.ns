@@ -663,7 +663,12 @@ namespace testlib.tests {
 			if (!quiet) print("\tuser-defined class and methods\r\n");
 			x=new str("AbC");
 			// dump(x);
+
+			//io.flush();
+			//debug.break();
 			expect("x.size()", 3, x.size()); // will print 3
+			//io.flush();
+
 			x.set("aBcDeF");
 			expect("x.size()", 6, x.size()); // will print 6
 			expect("x.lower()",  "abcdef", x.lower()); // will print abcdef
@@ -1757,11 +1762,22 @@ namespace testlib.tests {
 		return;
 	};
 	function coroutine() {
-		return;
 		print("coroutines\r\n");
 		foreach (n,v in coroutine) {
 			print("\tmethod "+n+"\r\n");
 		}
+		f=function () {
+			print("\r\ncoroutine doing stuff\r\n");
+			//coroutine.yield();
+			print("\r\ncoroutine done\r\n");
+		};
+		//coroutine.create( f );
+		co=new coroutine(f);
+		co.resume();
+		print("\r\ndone stuff\r\n");
+
+
+		return;
 	};
 };
 

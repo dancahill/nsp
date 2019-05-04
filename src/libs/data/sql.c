@@ -22,7 +22,7 @@
 NSP_FUNCTION(libnsp_data_sql_common_escape)
 {
 #define __FN__ __FILE__ ":libnsp_data_sql_common_escape()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 
 	char *ss, *se;
 	char *s2;

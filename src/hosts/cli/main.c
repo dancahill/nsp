@@ -103,6 +103,7 @@ static void sig_trap(int sig)
 				free(strings);
 			}
 		}
+		if (N && N->context) printf("[%s][%ld]\r\n", N->context->filename, N->context->linenum);
 #endif
 		exit(-1);
 	case 13: /* SIGPIPE */
@@ -133,7 +134,7 @@ static void timeout(int i) {
 
 static NSP_FUNCTION(neslib_io_gets)
 {
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 #if !defined(WIN32)&&!defined(__TURBOC__)
 	struct sigaction sa;
 	int err = 0;

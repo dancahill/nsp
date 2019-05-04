@@ -518,7 +518,7 @@ static void n_evalobj(nsp_state *N, obj_t *cobj, uchar isnewobject)
 		case OP_MSUBEQ:
 		case OP_MMULEQ:
 		case OP_MDIVEQ: if (nsp_isnull(nobj)) n_error(N, NE_SYNTAX, __FN__, "null object");
-		case OP_MEQ: n_context_readptr = p; nobj = n_readvar(N, &N->l, NULL); break;
+		case OP_MEQ: n_context_readptr = p; nobj = n_readvar(N, &N->context->l, NULL); break;
 		}
 		switch (nsp_typeof(nobj)) {
 		case NT_NULL:

@@ -22,7 +22,7 @@
 NSP_FUNCTION(libnsp_base_rot13)
 {
 #define __FN__ __FILE__ ":libnsp_base_rot13()"
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	obj_t *robj;
 	char *p;
 

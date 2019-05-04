@@ -126,7 +126,7 @@ void n_for(nsp_state *N)
 	}
 	be = ++n_context_readptr;
 	n_context_readptr = arginit;
-	n_readvar(N, &N->l, NULL);
+	n_readvar(N, &N->context->l, NULL);
 	for (;;) {
 		if (argcomp[0] != OP_PSEMICOL) {
 			cobj = nsp_eval(N, (char *)argcomp);
@@ -141,7 +141,7 @@ void n_for(nsp_state *N)
 		if (N->brk) { N->brk--; break; }
 		if (N->ret) break;
 		n_context_readptr = argexec;
-		n_readvar(N, &N->l, NULL);
+		n_readvar(N, &N->context->l, NULL);
 	}
 	n_context_readptr = be;
 	if (single) --n_context_readptr;
@@ -210,10 +210,10 @@ void n_foreach(nsp_state *N)
 	be = ++n_context_readptr;
 	for (iobj = sobj->val->d.table.f; iobj; iobj = iobj->next) {
 		if (nsp_isnull(iobj) || iobj->val->attr&NST_SYSTEM) continue;
-		if (namep) nsp_setstr(N, &N->l, namep, iobj->name, -1);
+		if (namep) nsp_setstr(N, &N->context->l, namep, iobj->name, -1);
 		n_context_readptr = bs;
 		N->single = single;
-		xobj = nsp_setnum(N, &N->l, valp, 0);
+		xobj = nsp_setnum(N, &N->context->l, valp, 0);
 		nsp_linkval(N, xobj, iobj);
 		nsp_exec(N, (char *)n_context_readptr);
 		nsp_unlinkval(N, xobj);
@@ -488,7 +488,7 @@ void n_try(nsp_state *N)
 		be = ++n_context_readptr;
 		if (except) {
 			n_context_readptr = bs;
-			tobj = nsp_settable(N, &N->l, exnamebuf);
+			tobj = nsp_settable(N, &N->context->l, exnamebuf);
 			/* needing setvaltype is a bug */
 			nsp_setvaltype(N, tobj, NT_TABLE);
 			nsp_setnum(N, tobj, "errno", N->err);
@@ -506,7 +506,7 @@ void n_try(nsp_state *N)
 			}
 			n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
 			n_context_savjmp = savjmp;
-			n_freeval(N, nsp_getobj(N, &N->l, exnamebuf));
+			n_freeval(N, nsp_getobj(N, &N->context->l, exnamebuf));
 		}
 		n_context_readptr = be;
 	}
