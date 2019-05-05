@@ -147,6 +147,7 @@ typedef struct nsp_execcontext {
 	uchar *blockend;
 	uchar *readptr;
 	jmp_buf *savjmp;
+	//uchar yielded;
 	char *funcname;
 	char *filename;
 	char *tracefn;
@@ -163,6 +164,8 @@ typedef struct nsp_state {
 	short signal; /* intended for external signals to the parser.  for now, non-zero just means to shut down */
 	short debug;
 	short single;
+	short coroutine;
+	short yielded;
 	short strict;
 	short warnings;
 	short maxwarnings;

@@ -109,6 +109,8 @@ NSP_FUNCTION(nl_break);
 NSP_FUNCTION(nl_flush);
 NSP_FUNCTION(nl_print);
 NSP_FUNCTION(nl_write);
+
+NSP_FUNCTION(nl_coroutine_constructor);
 NSP_FUNCTION(nl_coroutine);
 NSP_FUNCTION(nl_dl_load);
 NSP_FUNCTION(nl_filemkdir);

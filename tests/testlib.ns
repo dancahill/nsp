@@ -1762,20 +1762,28 @@ namespace testlib.tests {
 		return;
 	};
 	function coroutine() {
+		return;
 		print("coroutines\r\n");
 		foreach (n,v in coroutine) {
 			print("\tmethod "+n+"\r\n");
 		}
 		f=function () {
-			print("\r\ncoroutine doing stuff\r\n");
+			print("coroutine: doing stuff\r\n");
+			//debug.break();
 			//coroutine.yield();
-			print("\r\ncoroutine done\r\n");
+			print("coroutine: done\r\n");
 		};
 		//coroutine.create( f );
-		co=new coroutine(f);
-		co.resume();
-		print("\r\ndone stuff\r\n");
+		co=new coroutine(f());
+		print("main: new coroutine created\r\n");
 
+//		print("\r\nstarting\r\n");
+//		co.resume();
+
+		print("main: resuming coroutine\r\n");
+		co.resume();
+
+		print("\r\ndone stuff\r\n");
 
 		return;
 	};

@@ -287,11 +287,69 @@ static COROUTINE *getcoroutineconn(nsp_state *N)
 static void coroutine_murder(nsp_state *N, obj_t *cobj)
 {
 #define __FN__ __FILE__ ":coroutine_murder()"
+	COROUTINE *conn;
+
 	//n_warn(N, __FN__, "reaper is claiming another lost soul");
 	if ((cobj->val->type != NT_CDATA) || (cobj->val->d.str == NULL) || (nc_strcmp(cobj->val->d.str, "coroutine") != 0))
 		n_error(N, NE_SYNTAX, __FN__, "expected a coroutine");
+
+	conn = (COROUTINE *)cobj->val->d.str;
+	n_freeexeccontext(N, &conn->ctx);
+
 	n_free(N, (void *)&cobj->val->d.str, sizeof(COROUTINE) + 1);
 	return;
+#undef __FN__
+}
+
+NSP_FUNCTION(nl_coroutine_constructor)
+{
+#define __FN__ __FILE__ ":nl_coroutine()"
+	//	char *fname = nsp_getstr(N, &N->context->l, "0");
+	//	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
+	COROUTINE *conn;
+
+	settrace();
+	//n_warn(N, __FN__, "coroutine constructor called");
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *cobj;
+
+	//if (cobj1->val->type != NT_CFUNC && cobj1->val->type != NT_NFUNC) {
+	//	n_warn(N, __FN__, "coroutine parameter is not a function");
+	//	return 0;
+	//}
+
+	jmp_buf *savjmp;
+	int e;
+
+	conn = n_alloc(N, sizeof(COROUTINE) + 1, 1);
+	strcpy(conn->obj_type, "coroutine");
+	conn->obj_term = (NSP_CFREE)coroutine_murder;
+
+	cobj = nsp_setcdata(N, thisobj, "costate", NULL, 0);
+	cobj->val->d.str = (void *)conn;
+	cobj->val->size = sizeof(COROUTINE) + 1;
+
+	//n_warn(N, __FN__, "coroutine '%s'", fname);
+	//n_warn(N, __FN__, "coroutine type = %d - good", cobj1->val->type);
+
+//	nsp_execcontext *oldctx = N->context;
+//	conn->ctx = n_newexeccontext(N, oldctx->blockptr, oldctx->blockend, oldctx->readptr);
+//	conn->ctx = N->context;
+	//N->context = conn->ctx;
+	//N->context = n_newexeccontext(N, N->context->blockptr, N->context->blockend, N->context->readptr);
+
+	N->coroutine = 1;
+	//savjmp = n_context_savjmp;
+	//n_context_savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
+	//if ((e = setjmp(*n_context_savjmp)) == 0) {
+	//	n_execfunction(N, cobj1, NULL, coroutine);
+	//}
+	//n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
+	//n_context_savjmp = savjmp;
+	N->coroutine = 0;
+
+	//	N->context = oldctx;
+	return 0;
 #undef __FN__
 }
 
@@ -304,51 +362,36 @@ NSP_FUNCTION(nl_coroutine)
 
 	settrace();
 	if (nc_strcmp(fname, "coroutine") == 0) {
-		//n_warn(N, __FN__, "coroutine constructor called");
-		obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
-		obj_t *cobj;
+	} else if (nc_strcmp(fname, "resume") == 0) {
+		jmp_buf *savjmp;
+		int e;
 
-		if (cobj1->val->type != NT_CFUNC && cobj1->val->type != NT_NFUNC) {
-			n_warn(N, __FN__, "coroutine parameter is not a function");
-			return 0;
-		}
-
-		conn = n_alloc(N, sizeof(COROUTINE) + 1, 1);
-		strcpy(conn->obj_type, "coroutine");
-		conn->obj_term = (NSP_CFREE)coroutine_murder;
-
-		cobj = nsp_setcdata(N, thisobj, "costate", NULL, 0);
-		cobj->val->d.str = (void *)conn;
-		cobj->val->size = sizeof(COROUTINE) + 1;
-
-		n_warn(N, __FN__, "coroutine '%s'", fname);
-		//n_warn(N, __FN__, "coroutine type = %d - good", cobj1->val->type);
-		n_execfunction(N, cobj1, NULL, coroutine);
-	}
-	else if (nc_strcmp(fname, "resume") == 0) {
 		conn = getcoroutineconn(N);
-		//if (!conn) 
-		n_warn(N, __FN__, "coroutine '%s' empty", fname);
-		//n_execfunction(N, NULL, NULL, coroutine);
+		nsp_execcontext *oldctx = N->context;
+		N->context = conn->ctx;
+		N->coroutine = 1;
+		savjmp = n_context_savjmp;
+		n_context_savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
+		if ((e = setjmp(*n_context_savjmp)) == 0) {
+			N->yielded = 1;
+			nsp_exec(N, "");
+		}
+		n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
+		n_context_savjmp = savjmp;
+		N->coroutine = 0;
+		N->context = oldctx;
 	}
 	else if (nc_strcmp(fname, "yield") == 0) {
-		conn = getcoroutineconn(N);
-		n_warn(N, __FN__, "coroutine '%s' empty", fname);
-		//n_execfunction(N, NULL, NULL, coroutine);
+		N->yielded = 1;
+		n_warn(N, __FN__, "coroutine '%s' called", fname);
 	}
 	else if (nc_strcmp(fname, "status") == 0) {
 		conn = getcoroutineconn(N);
 		n_warn(N, __FN__, "coroutine '%s' empty", fname);
-		//n_execfunction(N, NULL, NULL, coroutine);
 	}
 	else {
 		n_warn(N, __FN__, "coroutine method '%s' missing?", fname);
 	}
-
-
-	//n_expect_argtype(N, NT_STRING, 1, cobj1, 0);
-	//rc = chdir(cobj1->val->d.str);
-	//nsp_setnum(N, &N->r, "", rc);
 	return 0;
 #undef __FN__
 }
