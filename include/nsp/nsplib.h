@@ -196,7 +196,7 @@ void     n_storeval(nsp_state *N, obj_t *cobj);
 
 #define  striprn(s)      { int n=nc_strlen(s)-1; while (n>-1&&(s[n]=='\r'||s[n]=='\n')) s[n--]='\0'; }
 
-#define  n_context_savjmp   N->context->savjmp
+#define  n_context_savjmp   N->savjmp
 #define  n_context_blockptr N->context->blockptr
 #define  n_context_blockend N->context->blockend
 #define  n_context_readptr  N->context->readptr

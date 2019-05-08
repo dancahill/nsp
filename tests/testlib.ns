@@ -1761,32 +1761,6 @@ namespace testlib.tests {
 		expect("b['c']", 3,      b['c']);
 		return;
 	};
-	function coroutine() {
-		return;
-		print("coroutines\r\n");
-		foreach (n,v in coroutine) {
-			print("\tmethod "+n+"\r\n");
-		}
-		f=function () {
-			print("coroutine: doing stuff\r\n");
-			//debug.break();
-			//coroutine.yield();
-			print("coroutine: done\r\n");
-		};
-		//coroutine.create( f );
-		co=new coroutine(f());
-		print("main: new coroutine created\r\n");
-
-//		print("\r\nstarting\r\n");
-//		co.resume();
-
-		print("main: resuming coroutine\r\n");
-		co.resume();
-
-		print("\r\ndone stuff\r\n");
-
-		return;
-	};
 };
 
 if (stuff==null) print("run test1.ns\r\n");

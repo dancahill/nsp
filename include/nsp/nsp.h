@@ -142,18 +142,19 @@ typedef struct nsp_objrec {
 } nsp_objrec;
 typedef struct nsp_execcontext {
 	obj_t l; // local variables
-	//obj_t t; // 'this' object
+	obj_t t; // 'this' object
 	uchar *blockptr;
 	uchar *blockend;
 	uchar *readptr;
-	jmp_buf *savjmp;
-	//uchar yielded;
+	uchar yielded;
+	short coroutine;
 	char *funcname;
 	char *filename;
 	char *tracefn;
 	long int linenum;
 } nsp_execcontext;
 typedef struct nsp_state {
+	jmp_buf *savjmp;
 	nsp_execcontext *context; // local execution context
 	obj_t g; // global variables
 	obj_t r; // return variable
@@ -164,7 +165,6 @@ typedef struct nsp_state {
 	short signal; /* intended for external signals to the parser.  for now, non-zero just means to shut down */
 	short debug;
 	short single;
-	short coroutine;
 	short yielded;
 	short strict;
 	short warnings;

@@ -269,6 +269,10 @@ typedef struct COROUTINE {
 	NSP_CFREE obj_term;     /* now tell us how to kill you */
 	/* now begin the stuff that's object-specific */
 	nsp_execcontext *ctx;
+	short firstrun;
+	uchar *p;
+	int plen;
+	uchar *lastreadptr;
 } COROUTINE;
 
 static COROUTINE *getcoroutineconn(nsp_state *N)
@@ -289,13 +293,15 @@ static void coroutine_murder(nsp_state *N, obj_t *cobj)
 #define __FN__ __FILE__ ":coroutine_murder()"
 	COROUTINE *conn;
 
-	//n_warn(N, __FN__, "reaper is claiming another lost soul");
+	n_warn(N, __FN__, "reaper is claiming another lost soul");
 	if ((cobj->val->type != NT_CDATA) || (cobj->val->d.str == NULL) || (nc_strcmp(cobj->val->d.str, "coroutine") != 0))
 		n_error(N, NE_SYNTAX, __FN__, "expected a coroutine");
 
 	conn = (COROUTINE *)cobj->val->d.str;
+	//conn->ctx->coroutine = 0;
 	n_freeexeccontext(N, &conn->ctx);
 
+	if (conn->p) n_free(N, (void *)&conn->p, conn->plen);
 	n_free(N, (void *)&cobj->val->d.str, sizeof(COROUTINE) + 1);
 	return;
 #undef __FN__
@@ -304,22 +310,12 @@ static void coroutine_murder(nsp_state *N, obj_t *cobj)
 NSP_FUNCTION(nl_coroutine_constructor)
 {
 #define __FN__ __FILE__ ":nl_coroutine()"
-	//	char *fname = nsp_getstr(N, &N->context->l, "0");
-	//	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	COROUTINE *conn;
-
-	settrace();
-	//n_warn(N, __FN__, "coroutine constructor called");
 	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
 	obj_t *cobj;
 
-	//if (cobj1->val->type != NT_CFUNC && cobj1->val->type != NT_NFUNC) {
-	//	n_warn(N, __FN__, "coroutine parameter is not a function");
-	//	return 0;
-	//}
-
-	jmp_buf *savjmp;
-	int e;
+	settrace();
+	//n_warn(N, __FN__, "coroutine constructor called");
 
 	conn = n_alloc(N, sizeof(COROUTINE) + 1, 1);
 	strcpy(conn->obj_type, "coroutine");
@@ -329,26 +325,56 @@ NSP_FUNCTION(nl_coroutine_constructor)
 	cobj->val->d.str = (void *)conn;
 	cobj->val->size = sizeof(COROUTINE) + 1;
 
-	//n_warn(N, __FN__, "coroutine '%s'", fname);
-	//n_warn(N, __FN__, "coroutine type = %d - good", cobj1->val->type);
+	//n_dumpvars(N, &N->context->l, 0);
+	//n_warn(N, __FN__, "coroutine constructor: &N->context->l='%s'", N->r.val->d.str);
 
-//	nsp_execcontext *oldctx = N->context;
-//	conn->ctx = n_newexeccontext(N, oldctx->blockptr, oldctx->blockend, oldctx->readptr);
-//	conn->ctx = N->context;
-	//N->context = conn->ctx;
-	//N->context = n_newexeccontext(N, N->context->blockptr, N->context->blockend, N->context->readptr);
+	conn->ctx = N->context;
+	conn->firstrun = 1;
+	conn->p = NULL;
+	conn->plen = 0;
 
-	N->coroutine = 1;
-	//savjmp = n_context_savjmp;
-	//n_context_savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
-	//if ((e = setjmp(*n_context_savjmp)) == 0) {
-	//	n_execfunction(N, cobj1, NULL, coroutine);
-	//}
-	//n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
-	//n_context_savjmp = savjmp;
-	N->coroutine = 0;
+	//	nsp_linkval(N, &conn->ctx->l, &N->context->l);
 
-	//	N->context = oldctx;
+
+
+		//cobj = nsp_appendobj(N, &N->context->l, "this");
+		//nsp_linkval(N, cobj, nsp_getobj(N, thisobj, "this"));
+
+		//n_dumpvars(N, &N->context->l, 0);
+		//n_warn(N, __FN__, "coroutine constructor b: &N->context->l='%s'", N->r.val->d.str);
+
+
+
+	nsp_execcontext *oldctx = N->context;
+	N->context = conn->ctx;
+
+#include "opcodes.h"
+#if false
+	n_expect(N, __FN__, OP_POPAREN);
+	n_context_readptr = n_seekop(N, n_context_readptr, 0);
+	n_context_blockptr = n_context_readptr;
+	n_skipto(N, __FN__, OP_PCPAREN);
+	n_expect(N, __FN__, OP_PCPAREN);
+	n_context_blockend = n_context_readptr;
+	n_context_readptr = n_context_blockptr;
+
+	int len = n_context_blockend - n_context_blockptr;
+	conn->p = n_alloc(N, len + 2, 1);
+	nc_memcpy(conn->p, n_context_blockptr, len);
+
+	if (conn->p) conn->plen = len + 2;
+	n_context_blockptr = conn->p;
+	n_context_blockend = conn->p + len;
+	n_context_readptr = conn->p;
+
+
+#endif
+
+	nsp_setcfunc(N, thisobj, "yield", (NSP_CFUNC)nl_coroutine);
+	nsp_setbool(N, thisobj, "yieldadded", 1);
+
+	N->context = oldctx;
+
 	return 0;
 #undef __FN__
 }
@@ -359,31 +385,93 @@ NSP_FUNCTION(nl_coroutine)
 	char *fname = nsp_getstr(N, &N->context->l, "0");
 	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	COROUTINE *conn;
+	jmp_buf *savjmp;
+	int e;
 
 	settrace();
 	if (nc_strcmp(fname, "coroutine") == 0) {
-	} else if (nc_strcmp(fname, "resume") == 0) {
-		jmp_buf *savjmp;
-		int e;
+	}
+	else if (nc_strcmp(fname, "resume") == 0) {
+		//n_dumpvars(N, &N->context->l, 0);
+		//n_warn(N, __FN__, "coroutine resumed: &N->context->l='%s'", N->r.val->d.str);
+		//nsp_unlinkval(N, &N->r);
 
-		conn = getcoroutineconn(N);
 		nsp_execcontext *oldctx = N->context;
+		conn = getcoroutineconn(N);
+		if (!conn) n_warn(N, __FN__, "coroutine resume: conn not found");
+
 		N->context = conn->ctx;
-		N->coroutine = 1;
-		savjmp = n_context_savjmp;
-		n_context_savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
-		if ((e = setjmp(*n_context_savjmp)) == 0) {
-			N->yielded = 1;
-			nsp_exec(N, "");
+
+		//n_dumpvars(N, &N->context->l, 0);
+		//n_warn(N, __FN__, "coroutine resumed: &N->context->l='%s'", N->r.val->d.str);
+		//nsp_unlinkval(N, &N->r);
+
+		if (conn->firstrun) {
+			n_warn(N, __FN__, "coroutine resumed - first run, context=0x%08x readptr=0x%08x", N->context, n_context_readptr);
+			conn->lastreadptr = n_context_readptr;
 		}
-		n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
-		n_context_savjmp = savjmp;
-		N->coroutine = 0;
+		else {
+			n_warn(N, __FN__, "coroutine resumed, context=0x%08x readptr=0x%08x", N->context, n_context_readptr);
+			n_context_readptr = conn->lastreadptr;
+		}
+		conn->firstrun = 0;
+
+		n_dumpvars(N, &N->context->l, 0);
+		n_warn(N, __FN__, "coroutine resumed: &N->context->l='%s'", N->r.val->d.str);
+		nsp_unlinkval(N, &N->r);
+
+		//return 0;
+		//n_warn(N, __FN__, "coroutine '%s' called, readptr='0x%08x'", fname, n_context_readptr);
+		//		savjmp = n_context_savjmp;
+		//		n_context_savjmp = (jmp_buf *)n_alloc(N, sizeof(jmp_buf), 0);
+		//		if ((e = setjmp(*n_context_savjmp)) == 0) {
+		if (N->yielded) {
+			n_warn(N, __FN__, "already yielded?");
+		}
+		//N->yielded = 1;
+		//nsp_exec(N, NULL);
+		nsp_exec(N, (char *)n_context_readptr);
+		if (N->yielded) {
+			//n_warn(N, __FN__, "coroutine was yielded");
+			n_warn(N, __FN__, "coroutine was yielded at context=0x%08x readptr=0x%08x", N->context, n_context_readptr);
+		}
+
+		N->yielded = 0;
+		//		}
+		//		n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
+		//		n_context_savjmp = savjmp;
 		N->context = oldctx;
+		n_warn(N, __FN__, "coroutine resume: done");
 	}
 	else if (nc_strcmp(fname, "yield") == 0) {
+
+		if (n_peekop(N) == OP_PSEMICOL) n_context_readptr++;
+
 		N->yielded = 1;
-		n_warn(N, __FN__, "coroutine '%s' called", fname);
+		//conn->lastreadptr = n_context_readptr;
+		n_warn(N, __FN__, "coroutine '%s' called at '0x%08x'", fname, n_context_readptr);
+		//		return;
+
+		//		obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+
+				//n_dumpvars(N, thisobj, 0);
+				//n_warn(N, __FN__, "coroutine yield: thisobj='%s'", N->r.val->d.str);
+				//nsp_unlinkval(N, &N->r);
+
+		conn = getcoroutineconn(N);
+		if (!conn) n_warn(N, __FN__, "coroutine resume: conn not found");
+		else n_warn(N, __FN__, "coroutine yield: conn found");
+
+		conn->lastreadptr = n_context_readptr;
+
+		n_dumpvars(N, &N->context->l, 0);
+		n_warn(N, __FN__, "coroutine yield: &newctx->l='%s'", N->r.val->d.str);
+		nsp_unlinkval(N, &N->r);
+
+
+		//conn = getcoroutineconn(N);
+		//if (!conn) n_warn(N, __FN__, "coroutine resume: conn not found");
+
 	}
 	else if (nc_strcmp(fname, "status") == 0) {
 		conn = getcoroutineconn(N);
