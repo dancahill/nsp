@@ -147,7 +147,6 @@ typedef struct nsp_execcontext {
 	uchar *blockend;
 	uchar *readptr;
 	uchar yielded;
-	short coroutine;
 	char *funcname;
 	char *filename;
 	char *tracefn;

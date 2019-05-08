@@ -97,12 +97,13 @@ void n_freeexeccontext(nsp_state *N, nsp_execcontext **context)
 {
 #define __FN__ __FILE__ ":n_freeexeccontext()"
 	if (*context) {
-		if (&(*context)->coroutine == 1) {
-			n_warn(N, __FN__, "n_freeexeccontext context belongs to a coroutine - not freeing");
-			return;
-		}
-		nsp_unlinkval(N, &(*context)->t);
-		nsp_unlinkval(N, &(*context)->l);
+		nsp_execcontext *ctx = *context;
+
+		//obj_t *thisobj = nsp_getobj(N, &ctx->l, "this");
+		//if (thisobj) nsp_unlinkval(N, thisobj);
+
+		nsp_unlinkval(N, &ctx->t);
+		nsp_unlinkval(N, &ctx->l);
 		//nsp_freetable(N, &(*context)->l);
 		//if ((*context)->l.val) n_free(N, (void *)&(*context)->l.val, sizeof(val_t));
 		n_free(N, (void *)context, sizeof(nsp_execcontext));
@@ -193,20 +194,6 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, enum n_execfunctio
 
 	DEBUG_IN();
 	settrace();
-
-	if (N->yielded == 2) {
-		//	//char *fname = nsp_getstr(N, &N->context->l, "0");
-		//	n_warn(N, __FN__, "n_execfunction coroutine fobj->name '%s'", fobj->name);
-
-		//	n_dumpvars(N, &N->context->l, 0);
-		//	n_warn(N, __FN__, "n_execfunction coroutine &N->context->l='%s'", N->r.val->d.str);
-
-		//	N->yielded--;
-		n_dumpvars(N, &N->context->l, 0);
-		n_warn(N, __FN__, "n_execfunction: coroutine constructor: yielded local ='%s'", N->r.val->d.str);
-		nsp_unlinkval(N, &N->r);
-	}
-
 	fobjtype = nsp_typeof(fobj);
 	if (fobjtype != NT_CFUNC && fobjtype != NT_NFUNC) {
 		n_error(N, NE_SYNTAX, __FN__, "'%s' is not a function", fobj->name);
@@ -226,147 +213,53 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, enum n_execfunctio
 	nsp_setstr(N, cobj, "0", fobj->name, -1);
 
 	if (fobjtype == NT_CFUNC && (NSP_CFUNC)(fobj->val->d.cfunc) == (NSP_CFUNC)nl_coroutine_constructor) {
-		n_warn(N, __FN__, "n_execfunction coroutine constructor");
+		short fnfound = 0;
 
-
-
-
-
-		//		if (ctype == NT_NFUNC || ctype == NT_CFUNC) {
-		//			n_execfunction(N, cobj, pobj, function);
-		char *origin = n_context_readptr;
+		//n_warn(N, __FN__, "n_execfunction coroutine constructor");
 		n_expect(N, __FN__, OP_POPAREN);
 		n_context_readptr = n_seekop(N, n_context_readptr, 0);
-
-		short fnfound = 0;
 		if (n_peekop(N) == OP_LABEL) {
-			uchar *p = n_context_readptr;
 			char *l = n_getlabel(N, NULL);
-			n_warn(N, __FN__, "n_execfunction found '%s'", l);
 			obj_t *nobj = nsp_getobj(N, NULL, l);
-			obj_t *pobj = NULL;
-			char namebuf[MAX_OBJNAMELEN + 1];
-
-			if (*n_context_readptr == OP_POPAREN) {
-				if (nobj->val->type == NT_NFUNC || nobj->val->type == NT_CFUNC) {
-					fobj = nobj;
-					fobjtype = nsp_typeof(fobj);
-					fnfound = 1;
-				}
+			if ((nobj->val->type == NT_NFUNC || nobj->val->type == NT_CFUNC) && *n_context_readptr == OP_POPAREN) {
+				fobj = nobj;
+				fobjtype = nsp_typeof(fobj);
+				fnfound = 1;
 			}
 		}
-		if (!fnfound) {
-			n_error(N, NE_SYNTAX, __FN__, "expected a 'function'");
-		}
-
-
-		n_warn(N, __FN__, "n_execfunction found a function in parameters - good");
-
+		if (!fnfound) n_error(N, NE_SYNTAX, __FN__, "expected a function as coroutine parameter");
+		//n_warn(N, __FN__, "n_execfunction found a function in parameters - good");
 		nsp_execcontext *oldctx = N->context;
 		nsp_execcontext *newctx = n_newexeccontext(N);
-
-		nsp_linkval(N, &newctx->l, &listobj);
-
 		N->context = newctx;
+		nsp_linkval(N, &N->context->l, &listobj);
 		nl_coroutine_constructor(N);
 
-		/* set args */
 		n_execfunction_setargs(N, &listobj);
-
-
 		if (fobjtype == NT_NFUNC) n_execfunction_setargnames(N, fobj);
-
 		nsp_unlinkval(N, &N->r);
-
-
-
-
-
-
 
 		//n_dumpvars(N, &N->context->l, 0);
 		//n_warn(N, __FN__, "coroutine constructor: &N->context->l='%s'", N->r.val->d.str);
 		//nsp_unlinkval(N, &N->r);
-		// listobj has 'this' so dumping vars could be an infinite loop
-//		n_dumpvars(N, &listobj, 0);
-//		n_warn(N, __FN__, "coroutine constructor: &listobj='%s'", N->r.val->d.str);
-//		nsp_unlinkval(N, &N->r);
 
-
-
-		newctx->funcname = fobj->name;
-
-		newctx->coroutine = 1;
-
+		N->context->funcname = fobj->name;
 		if (thisobj) {
 			//nsp_linkval(N, nsp_appendobj(N, &newctx->l, "this"), thisobj);
-			nsp_linkval(N, &newctx->t, thisobj);
-			nsp_setbool(N, &newctx->t, "iscoroutine", 1);
-
-
-			//nsp_linkval(N, nsp_appendobj(N, &newctx->l, "this"), thisobj);
-			//nsp_linkval(N, &newctx->t, thisobj);
-			nsp_setbool(N, &newctx->l, "test", 1);
-			nsp_setbool(N, &N->context->l, "test", 1);
+			nsp_linkval(N, &N->context->t, thisobj);
 		}
-
-
-		n_dumpvars(N, &newctx->l, 0);
-		n_warn(N, __FN__, "coroutine constructor: &newctx->l='%s'", N->r.val->d.str);
-		nsp_unlinkval(N, &N->r);
-		n_dumpvars(N, &newctx->t, 0);
-		n_warn(N, __FN__, "coroutine constructor: &newctx->t='%s'", N->r.val->d.str);
-		nsp_unlinkval(N, &N->r);
-
-		// put a link to 'this' in the new locals
-//		cobj = nsp_appendobj(N, &N->context->l, "this");
-//		nsp_linkval(N, cobj, nsp_getobj(N, &listobj, "this"));
-
-
-//		n_dumpvars(N, &N->context->l, 0);
-//		n_warn(N, __FN__, "coroutine constructor: &N->context->l='%s'", N->r.val->d.str);
-//		nsp_unlinkval(N, &N->r);
-
-		//		N->context = oldctx;
-		N->yielded = 2;
-		//		n_execfunction_setargs(N, &listobj);
-		N->yielded = 0;
-
-		//n_dumpvars(N, pobj, 0);
-		//n_warn(N, __FN__, "n_execfunction coroutine pobj='%s'", N->r.val->d.str);
 		nsp_unlinkval(N, &listobj);
 		N->context = oldctx;
-
-
 		n_expect(N, __FN__, OP_POPAREN);
 		n_context_readptr = n_seekop(N, n_context_readptr, 0);
 		n_skipto(N, __FN__, OP_PCPAREN);
 		n_expect(N, __FN__, OP_PCPAREN);
 		n_context_readptr++;
-
-		n_warn(N, __FN__, "n_execfunction coroutine done");
-
+		n_expect(N, __FN__, OP_PCPAREN);
+		n_context_readptr++;
+		//n_warn(N, __FN__, "n_execfunction coroutine done");
 		DEBUG_OUT();
 		return &N->r;
-
-		//nsp_linkval(N, &N->context->l, &listobj);
-
-		//N->yielded = 2;
-		//		n_execfunction_setargs(N, &listobj);
-				//		nsp_linkval(N, &N->context->l, &listobj);
-		//		N->yielded = 0;
-
-				//n_dumpvars(N, &N->context->l, 0);
-				//n_warn(N, __FN__, "n_execfunction coroutine listobj='%s'", N->r.val->d.str);
-
-
-				//N->context = oldctx;
-
-		//		nsp_unlinkval(N, &N->r);
-		//		nsp_unlinkval(N, &listobj);
-
-		//		n_warn(N, __FN__, "nl_coroutine constructor done preparing args");
-		//		return &N->r;
 	}
 
 	/* set args */
@@ -385,23 +278,8 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, enum n_execfunctio
 			return &N->r;
 		}
 	}
-
 	nsp_execcontext *oldctx = N->context;
-
-	int wasyielded = N->yielded;
-
-	if (N->yielded == 2) {
-		int n = 42;
-		N->context = n_newexeccontext(N);
-	}
-	else if (N->yielded == 1) {
-		int n = 42;
-		//N->context = n_newexeccontext(N);
-	}
-	else {
-		N->context = n_newexeccontext(N);
-	}
-
+	N->context = n_newexeccontext(N);
 	if (include == 2) {
 		obj_t *cobj2 = nsp_getobj(N, &listobj, "2");
 		n_decompose(N, NULL, (uchar *)cobj2->val->d.str, &p, &psize);
@@ -439,24 +317,7 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, enum n_execfunctio
 	else {
 		if (ftype == constructor) nsp_linkval(N, &N->r, &N->context->l);
 	}
-
-	if (wasyielded != N->yielded) {
-		n_warn(N, __FN__, "yielded state changed since entry");
-	}
-
-
-	if (wasyielded == 2) {
-		//n_warn(N, __FN__, "N->yielded=%d, readptr='0x%08x'", N->yielded, n_context_readptr);
-		n_freeexeccontext(N, &N->context);
-	}
-	else if (wasyielded == 1) {
-		//n_warn(N, __FN__, "N->yielded=%d, readptr='0x%08x'", N->yielded, n_context_readptr);
-		//n_freeexeccontext(N, &N->context);
-	}
-	else {
-		n_freeexeccontext(N, &N->context);
-	}
-
+	n_freeexeccontext(N, &N->context);
 	N->context = oldctx;
 	if (include == 2 && p) n_free(N, (void *)&p, psize);
 	nsp_unlinkval(N, &listobj);
@@ -477,9 +338,9 @@ obj_t *n_execbasemethod(nsp_state *N, char *name, obj_t *pobj)
 	int e;
 
 	n_expect(N, __FN__, OP_POPAREN);
-	if (N->yielded) {
-		int x = 42;
-	}
+	//if (N->yielded) {
+	//	int x = 42;
+	//}
 	nc_memset((void *)&tobj, 0, sizeof(obj_t));
 	nsp_setcfunc(N, &tobj, "base_method", (NSP_CFUNC)nl_base_method);
 	nc_strncpy(tobj.name, name, MAX_OBJNAMELEN);
@@ -559,12 +420,8 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 	if (N->yielded) {
 		//n_dumpvars(N, &N->context->l, 0);
 		//n_warn(N, __FN__, "nsp_exec coroutine locals='%s'", N->r.val->d.str);
-
 		//n_warn(N, __FN__, "yielded coroutine resuming");
-		//if (N->yielded == 2) { N->yielded = 1; return NULL; }
-		//if (N->yielded == 2) 
 		return NULL;
-		//		if (N->yielded == 1) N->yielded = 0;
 	}
 	else if (jmp == 0) {
 		nsp_unlinkval(N, &N->r);
@@ -746,9 +603,7 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 	endstmt:
 		if (n_peekop(N) == OP_PSEMICOL) n_context_readptr++;
 		if (N->yielded) {
-			n_warn(N, __FN__, "nsp_exec coroutine yielding at context=0x%08x readptr=0x%08x", N->context, n_context_readptr);
-			//N->yielded = 0;
-			//return NULL;
+			//n_warn(N, __FN__, "nsp_exec coroutine yielding at context=0x%08x readptr=0x%08x", N->context, n_context_readptr);
 			break;
 		}
 		if (single) break;
@@ -896,109 +751,109 @@ typedef struct FUNCTION {
 nsp_state *nsp_newstate()
 {
 	FUNCTION list[] = {
-			{ "copy", (NSP_CFUNC)nl_copy },
-			{ "eval", (NSP_CFUNC)nl_eval },
-			{ "exec", (NSP_CFUNC)nl_exec },
-			{ "include", (NSP_CFUNC)nl_include },
-			{ "print", (NSP_CFUNC)nl_print },
-			{ "printf", (NSP_CFUNC)nl_printf },
-			{ "runtime", (NSP_CFUNC)nl_runtime },
-			{ "serialize", (NSP_CFUNC)nl_serialize },
-			{ "sizeof", (NSP_CFUNC)nl_sizeof },
-			{ "sleep", (NSP_CFUNC)nl_sleep },
-			{ "sprintf", (NSP_CFUNC)nl_printf },
-			{ "system", (NSP_CFUNC)nl_system },
-			{ "tonumber", (NSP_CFUNC)nl_tonumber },
-			{ "typeof", (NSP_CFUNC)nl_typeof },
-			{ "write", (NSP_CFUNC)nl_write },
-			{ NULL, NULL }
+		{ "copy", (NSP_CFUNC)nl_copy },
+		{ "eval", (NSP_CFUNC)nl_eval },
+		{ "exec", (NSP_CFUNC)nl_exec },
+		{ "include", (NSP_CFUNC)nl_include },
+		{ "print", (NSP_CFUNC)nl_print },
+		{ "printf", (NSP_CFUNC)nl_printf },
+		{ "runtime", (NSP_CFUNC)nl_runtime },
+		{ "serialize", (NSP_CFUNC)nl_serialize },
+		{ "sizeof", (NSP_CFUNC)nl_sizeof },
+		{ "sleep", (NSP_CFUNC)nl_sleep },
+		{ "sprintf", (NSP_CFUNC)nl_printf },
+		{ "system", (NSP_CFUNC)nl_system },
+		{ "tonumber", (NSP_CFUNC)nl_tonumber },
+		{ "typeof", (NSP_CFUNC)nl_typeof },
+		{ "write", (NSP_CFUNC)nl_write },
+		{ NULL, NULL }
 	};
 	FUNCTION list_debug[] = {
 		{ "break", (NSP_CFUNC)nl_break },
 		{ NULL, NULL }
 	};
 	FUNCTION list_coroutine[] = {
-			{ "coroutine", (NSP_CFUNC)nl_coroutine_constructor },
-			{ "resume", (NSP_CFUNC)nl_coroutine },
-			{ "yield", (NSP_CFUNC)nl_coroutine },
-			{ "status", (NSP_CFUNC)nl_coroutine },
-			{ NULL, NULL }
+		{ "coroutine", (NSP_CFUNC)nl_coroutine_constructor },
+		{ "resume", (NSP_CFUNC)nl_coroutine },
+		{ "yield", (NSP_CFUNC)nl_coroutine },
+		{ "status", (NSP_CFUNC)nl_coroutine },
+		{ NULL, NULL }
 	};
 	FUNCTION list_dl[] = {
-			{ "load", (NSP_CFUNC)nl_dl_load },
-			//{ "loadlib", (NSP_CFUNC)nl_dl_load },// deprecated
-			{ NULL, NULL }
+		{ "load", (NSP_CFUNC)nl_dl_load },
+		//{ "loadlib", (NSP_CFUNC)nl_dl_load },// deprecated
+		{ NULL, NULL }
 	};
 	FUNCTION list_file[] = {
-			{ "append", (NSP_CFUNC)nl_filewriteall },
-			{ "chdir", (NSP_CFUNC)nl_filechdir },
-			{ "exists", (NSP_CFUNC)nl_fileexists },
-			{ "mkdir", (NSP_CFUNC)nl_filemkdir },
-			{ "readall", (NSP_CFUNC)nl_filereadall },
-			{ "rename", (NSP_CFUNC)nl_filerename },
-			{ "stat", (NSP_CFUNC)nl_filestat },
-			{ "unlink", (NSP_CFUNC)nl_fileunlink },
-			{ "writeall", (NSP_CFUNC)nl_filewriteall },
-			{ NULL, NULL }
+		{ "append", (NSP_CFUNC)nl_filewriteall },
+		{ "chdir", (NSP_CFUNC)nl_filechdir },
+		{ "exists", (NSP_CFUNC)nl_fileexists },
+		{ "mkdir", (NSP_CFUNC)nl_filemkdir },
+		{ "readall", (NSP_CFUNC)nl_filereadall },
+		{ "rename", (NSP_CFUNC)nl_filerename },
+		{ "stat", (NSP_CFUNC)nl_filestat },
+		{ "unlink", (NSP_CFUNC)nl_fileunlink },
+		{ "writeall", (NSP_CFUNC)nl_filewriteall },
+		{ NULL, NULL }
 	};
 	FUNCTION list_io[] = {
-			{ "print", (NSP_CFUNC)nl_print },
-			{ "write", (NSP_CFUNC)nl_write },
-			{ "flush", (NSP_CFUNC)nl_flush },
-			{ NULL, NULL }
+		{ "print", (NSP_CFUNC)nl_print },
+		{ "write", (NSP_CFUNC)nl_write },
+		{ "flush", (NSP_CFUNC)nl_flush },
+		{ NULL, NULL }
 	};
 	FUNCTION list_math[] = {
-			{ "abs", (NSP_CFUNC)nl_math },
-			{ "ceil", (NSP_CFUNC)nl_math },
-			{ "floor", (NSP_CFUNC)nl_math },
-			{ "rand", (NSP_CFUNC)nl_math },
+		{ "abs", (NSP_CFUNC)nl_math },
+		{ "ceil", (NSP_CFUNC)nl_math },
+		{ "floor", (NSP_CFUNC)nl_math },
+		{ "rand", (NSP_CFUNC)nl_math },
 
-			{"acos",  (NSP_CFUNC)nl_math },
-			{"asin",  (NSP_CFUNC)nl_math },
-			{"atan",  (NSP_CFUNC)nl_math },
-			{"atan2", (NSP_CFUNC)nl_math },
-			{"cos",   (NSP_CFUNC)nl_math },
-			{"sin",   (NSP_CFUNC)nl_math },
-			{"tan",   (NSP_CFUNC)nl_math },
-			{"exp",   (NSP_CFUNC)nl_math },
-			{"log",   (NSP_CFUNC)nl_math },
-			{"log10", (NSP_CFUNC)nl_math },
-			{"cosh",  (NSP_CFUNC)nl_math },
-			{"sinh",  (NSP_CFUNC)nl_math },
-			{"tanh",  (NSP_CFUNC)nl_math },
-			{"sqrt",  (NSP_CFUNC)nl_math },
+		{"acos",  (NSP_CFUNC)nl_math },
+		{"asin",  (NSP_CFUNC)nl_math },
+		{"atan",  (NSP_CFUNC)nl_math },
+		{"atan2", (NSP_CFUNC)nl_math },
+		{"cos",   (NSP_CFUNC)nl_math },
+		{"sin",   (NSP_CFUNC)nl_math },
+		{"tan",   (NSP_CFUNC)nl_math },
+		{"exp",   (NSP_CFUNC)nl_math },
+		{"log",   (NSP_CFUNC)nl_math },
+		{"log10", (NSP_CFUNC)nl_math },
+		{"cosh",  (NSP_CFUNC)nl_math },
+		{"sinh",  (NSP_CFUNC)nl_math },
+		{"tanh",  (NSP_CFUNC)nl_math },
+		{"sqrt",  (NSP_CFUNC)nl_math },
 
-			{ NULL, NULL }
+		{ NULL, NULL }
 	};
 	FUNCTION list_string[] = {
-			{ "atoi", (NSP_CFUNC)nl_atoi },
-			{ "itoa", (NSP_CFUNC)nl_itoa },
-			{ "cat", (NSP_CFUNC)nl_strcat },
-			{ "cmp", (NSP_CFUNC)nl_strcmp },
-			{ "icmp", (NSP_CFUNC)nl_strcmp },
-			{ "ncmp", (NSP_CFUNC)nl_strcmp },
-			{ "nicmp", (NSP_CFUNC)nl_strcmp },
+		{ "atoi", (NSP_CFUNC)nl_atoi },
+		{ "itoa", (NSP_CFUNC)nl_itoa },
+		{ "cat", (NSP_CFUNC)nl_strcat },
+		{ "cmp", (NSP_CFUNC)nl_strcmp },
+		{ "icmp", (NSP_CFUNC)nl_strcmp },
+		{ "ncmp", (NSP_CFUNC)nl_strcmp },
+		{ "nicmp", (NSP_CFUNC)nl_strcmp },
 
-			{ "contains", (NSP_CFUNC)nl_strcontains },
-			{ "endswith", (NSP_CFUNC)nl_strcontains },
-			{ "startswith", (NSP_CFUNC)nl_strcontains },
+		{ "contains", (NSP_CFUNC)nl_strcontains },
+		{ "endswith", (NSP_CFUNC)nl_strcontains },
+		{ "startswith", (NSP_CFUNC)nl_strcontains },
 
-			{ "join", (NSP_CFUNC)nl_strjoin },
-			{ "len", (NSP_CFUNC)nl_strlen },
-			{ "replace", (NSP_CFUNC)nl_strrep },
-			{ "split", (NSP_CFUNC)nl_strsplit },
-			{ "str", (NSP_CFUNC)nl_strstr },
-			{ "istr", (NSP_CFUNC)nl_strstr },
-			{ "sub", (NSP_CFUNC)nl_strsub },
-			{ "tostring", (NSP_CFUNC)nl_tostring },
-			{ "tolower", (NSP_CFUNC)nl_strtolower },
-			{ "toupper", (NSP_CFUNC)nl_strtolower },
+		{ "join", (NSP_CFUNC)nl_strjoin },
+		{ "len", (NSP_CFUNC)nl_strlen },
+		{ "replace", (NSP_CFUNC)nl_strrep },
+		{ "split", (NSP_CFUNC)nl_strsplit },
+		{ "str", (NSP_CFUNC)nl_strstr },
+		{ "istr", (NSP_CFUNC)nl_strstr },
+		{ "sub", (NSP_CFUNC)nl_strsub },
+		{ "tostring", (NSP_CFUNC)nl_tostring },
+		{ "tolower", (NSP_CFUNC)nl_strtolower },
+		{ "toupper", (NSP_CFUNC)nl_strtolower },
 
-			{ "trim", (NSP_CFUNC)nl_strtrim},
-			{ "trimstart", (NSP_CFUNC)nl_strtrim },
-			{ "trimend", (NSP_CFUNC)nl_strtrim },
+		{ "trim", (NSP_CFUNC)nl_strtrim},
+		{ "trimstart", (NSP_CFUNC)nl_strtrim },
+		{ "trimend", (NSP_CFUNC)nl_strtrim },
 
-			{ NULL, NULL }
+		{ NULL, NULL }
 	};
 	FUNCTION list_table[] = {
 		{ "iname", (NSP_CFUNC)nl_iname },
@@ -1007,14 +862,14 @@ nsp_state *nsp_newstate()
 		{ NULL, NULL }
 	};
 	FUNCTION list_time[] = {
-			{ "asctime", (NSP_CFUNC)nl_asctime },
-			{ "gettimeofday", (NSP_CFUNC)nl_gettimeofday },
-			{ "gmtime", (NSP_CFUNC)nl_gmtime },
-			{ "localtime", (NSP_CFUNC)nl_gmtime },
-			{ "mktime", (NSP_CFUNC)nl_mktime },
-			{ "now", (NSP_CFUNC)nl_time },
-			{ "sqltime", (NSP_CFUNC)nl_asctime },
-			{ NULL, NULL }
+		{ "asctime", (NSP_CFUNC)nl_asctime },
+		{ "gettimeofday", (NSP_CFUNC)nl_gettimeofday },
+		{ "gmtime", (NSP_CFUNC)nl_gmtime },
+		{ "localtime", (NSP_CFUNC)nl_gmtime },
+		{ "mktime", (NSP_CFUNC)nl_mktime },
+		{ "now", (NSP_CFUNC)nl_time },
+		{ "sqltime", (NSP_CFUNC)nl_asctime },
+		{ NULL, NULL }
 	};
 	nsp_state *new_N;
 	obj_t *cobj;
