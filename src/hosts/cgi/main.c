@@ -60,7 +60,7 @@ static NSP_FUNCTION(nescgi_flush)
 static NSP_FUNCTION(nescgi_sendfile)
 {
 	char tmppath[512];
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	obj_t *headobj = nsp_settable(N, &N->g, "_HEADER");
 	obj_t *cobj;
 	struct stat sb;
@@ -120,11 +120,11 @@ static NSP_FUNCTION(nescgi_sendfile)
 
 static NSP_FUNCTION(htnsp_convertnsp)
 {
-	obj_t *cobj1 = nsp_getobj(N, &N->l, "1");
+	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	char *ss, *se;
 
 	if (cobj1->val->type != NT_STRING) {
-		printf("%s() expected a string for arg1\r\n", nsp_getstr(N, &N->l, "0"));
+		printf("%s() expected a string for arg1\r\n", nsp_getstr(N, &N->context->l, "0"));
 		return 0;
 	}
 	if (cobj1->val->d.str == NULL) return 0;

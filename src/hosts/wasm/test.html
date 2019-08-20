@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>WebAssembly Example</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<style>
+		.code {
+			width: 500px;
+			height: 400px;
+			background-color: aqua;
+		}
+		textarea {
+			width: 800px;
+			height: 400px;
+			background-color: burlywood;
+		}
+		.scriptout {
+			border-width: 1px;
+			border-color: black;
+			background-color: darkgray;
+		}
+	</style>
+	<script src="index.js"></script>
+	<script>
+		function init() {
+			setTimeout(function () {
+				console.log("doing c call");
+				/* (name of C function), return type, argument types, arguments */
+				var retPtr = Module.ccall('docall', 'number', ['string', 'string'], ["scriptout", "this is a test string\n"]);
+				console.log("docall result = ", retPtr);
+
+				var runcode = document.querySelector('.runcode');
+				runcode.addEventListener('click', function (e) {
+					try {
+						e.preventDefault();
+						var codetorun = document.getElementById("input");
+						//console.log('running: ' + codetorun.value);
+						/* (name of C function), return type, argument types, arguments */
+						var retPtr = Module.ccall('runscript', 'number', ['string', 'string'], ["scriptout", codetorun.value]);
+						console.log("runscript result = ", retPtr);
+						//var retPtr = Module.ccall('runscript', 'number', ['string', 'string'], ["scriptout", stringToUTF8(codetorun.value)]);
+						//console.log("runscript result = ", retPtr);
+						//document.getElementById("scriptout").textContent = "stuff";
+					} catch (ex) {
+						console.error(ex);
+						document.getElementById("scriptout").insertAdjacentHTML('beforeend', ex);
+						//document.querySelector('.scriptout').textContent = ex;
+					}
+				});
+			}, 1000);
+		}
+	</script>
+</head>
+<body onload="init()">
+	<!-- Include the JavaScript glue code. -->
+	<!-- This will load the WebAssembly module and run its main. -->
+	<div class="code"><textarea id="input">function mysqrt(vol) {
+	local square = {
+		1,
+		1, 1, 1,
+		2, 2, 2, 2, 2,
+		3, 3, 3, 3, 3, 3, 3,
+		4, 4, 4, 4, 4, 4, 4, 4, 4,
+		5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+		6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+		7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+		8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+		9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+		10
+	}
+	local vt=tonumber(vol);
+	local depth=0;
+	local base1=0;
+
+	if (vt<0) {
+		print("You cannot calculate the base of a negative volume.\n");
+		return;
+	}
+	while (vt>100) {
+		vt/=100;
+		depth++;
+	}
+	base1=square[math.floor(vt)];
+	while (depth--) base1*=10;
+	print("\nthe square root of ",vol," is...\n");
+	vol=tonumber(vol);
+	for (i=0;i<5;i++) {
+		if ((diff=vol/base1-base1)==0) break;
+		print("base\t=",string.sub(base1.tostring()+" "*30, 0, 30),"\tdiff\t=",diff,"\n");
+		base1+=diff*0.5;
+	}
+	//print("",base1,"(",math.sqrt(vol),")\n");
+	return base1;
+}
+
+mysqrt(-1);
+mysqrt(0.09);
+mysqrt(2);
+mysqrt(64);
+mysqrt(625);
+mysqrt(1000);
+mysqrt(9801);
+mysqrt(1234567890);
+mysqrt(4294967296);
+mysqrt("1000000000000000000000000000");
+</textarea>
+	</div>
+	<br /><button class="runcode">Run Stuff</button><br/>
+	<div id="scriptout" class="scriptout"></div>
+	<textarea id="output" rows="8"></textarea>
+</body>
+</html>

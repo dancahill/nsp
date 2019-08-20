@@ -344,6 +344,7 @@ num_t n_aton(nsp_state *N, const char *str)
 	num_t rdot = 0.1;
 
 	settrace();
+	if (str == NULL) return 0;
 	if (*s == '-') { neg = 1; s++; }
 	while (nc_isdigit(*s)) {
 		rval = 10 * rval + (*s++ - '0');

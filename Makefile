@@ -77,6 +77,10 @@ cli: libnsp
 	@echo
 	@echo
 
+wasm: cli
+	@cd src/hosts/wasm     && $(MAKE) && cd ../../..
+
+
 # rules for everything else
 clean:
 	@touch src/config.mak

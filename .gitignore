@@ -18,3 +18,4 @@ src/config-win.ns
 ~AutoRecover.*.vcxproj
 /.vs/NSP/v15
 /.vs/config/applicationhost.config
+/.vs/NSP/v16

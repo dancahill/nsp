@@ -292,6 +292,8 @@ static COROUTINE *getcoroutineconn(nsp_state *N)
 	return conn;
 }
 
+void n_freeexeccontext(nsp_state *N, nsp_execcontext **context);
+
 static void coroutine_murder(nsp_state *N, obj_t *cobj)
 {
 #define __FN__ __FILE__ ":coroutine_murder()"
