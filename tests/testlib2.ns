@@ -1,5 +1,30 @@
 #!/usr/bin/nsp
-namespace testlib {
+
+class testlib2 {
+	function _constructor() {
+	}
+	function shared_sql_tests(db) {
+		db.open();
+		db.query("CREATE TABLE test_table ( id integer, col1 varchar(8), col2 varchar(8) );", false);
+		printf("db.changes = %d;\r\n", db.changes);
+		db.begin();
+		db.query(sprintf("INSERT INTO test_table (id, col1, col2) VALUES (1, 'a', '%s');", db.escape("abc")), false);
+		printf("db.changes = %d;\r\n", db.changes);
+		db.query(sprintf("INSERT INTO test_table (id, col1, col2) VALUES (2, 'b', '%s');", db.escape("a'b'c")), false);
+		printf("db.changes = %d;\r\n", db.changes);
+		db.query(sprintf("INSERT INTO test_table (id, col1, col2) VALUES (3, 'c', '%s');", db.escape('a"b"c')), false);
+		printf("db.changes = %d;\r\n", db.changes);
+		db.commit();
+		//db.rollback();
+		db.query("SELECT * FROM test_table;");
+		printf("db.last_query = \"%s\";\r\n", db.last_query);
+		while ((row=db.getnext())!=null) {
+			printf("row = %s;\r\n", serialize(row).replace('\r', '').replace('\n', ' ').replace('\t', ''));
+		}
+		db.endquery();
+		printf("db.changes = %d;\r\n", db.changes);
+		db.close();
+	};
 	function fbsql() {
 		ci = { host="localhost", port=3050, username="SYSDBA", password="masterkey", database="/tmp/nstest.fdb" };
 		file.unlink(ci.database);
@@ -10,7 +35,7 @@ namespace testlib {
 			dl.load("data");
 			dl.load("fbsql");
 			db=new data.fbsql.client(ci);
-			shared_sql_tests(db);
+			this.shared_sql_tests(db);
 		} catch (ex) {
 			printf("Exception: %s\r\n", ex.description);
 		}
@@ -25,7 +50,7 @@ namespace testlib {
 			dl.load("data");
 			dl.load("mysql");
 			db=new data.mysql.client(ci);
-			shared_sql_tests(db);
+			this.shared_sql_tests(db);
 		} catch (ex) {
 			printf("Exception: %s\r\n", ex.description);
 		}
@@ -40,7 +65,7 @@ namespace testlib {
 			dl.load("data");
 			dl.load("pgsql");
 			db=new data.pgsql.client(ci);
-			shared_sql_tests(db);
+			this.shared_sql_tests(db);
 		} catch (ex) {
 			printf("Exception: %s\r\n", ex.description);
 		}
@@ -54,7 +79,7 @@ namespace testlib {
 			dl.load("data");
 			dl.load("sqlite");
 			db=new data.sqlite.client(ci);
-			shared_sql_tests(db);
+			this.shared_sql_tests(db);
 		} catch (ex) {
 			printf("Exception: %s\r\n", ex.description);
 		}
@@ -62,27 +87,8 @@ namespace testlib {
 	};
 };
 
-function shared_sql_tests(db) {
-	db.open();
-	db.query("CREATE TABLE test_table ( id integer, col1 varchar(8), col2 varchar(8) );", false);
-	printf("db.changes = %d;\r\n", db.changes);
-	db.begin();
-	db.query(sprintf("INSERT INTO test_table (id, col1, col2) VALUES (1, 'a', '%s');", db.escape("abc")), false);
-	printf("db.changes = %d;\r\n", db.changes);
-	db.query(sprintf("INSERT INTO test_table (id, col1, col2) VALUES (2, 'b', '%s');", db.escape("a'b'c")), false);
-	printf("db.changes = %d;\r\n", db.changes);
-	db.query(sprintf("INSERT INTO test_table (id, col1, col2) VALUES (3, 'c', '%s');", db.escape('a"b"c')), false);
-	printf("db.changes = %d;\r\n", db.changes);
-	db.commit();
-	//db.rollback();
-	db.query("SELECT * FROM test_table;");
-	printf("db.last_query = \"%s\";\r\n", db.last_query);
-	while ((row=db.getnext())!=null) {
-		printf("row = %s;\r\n", serialize(row).replace('\r', '').replace('\n', ' ').replace('\t', ''));
-	}
-	db.endquery();
-	printf("db.changes = %d;\r\n", db.changes);
-	db.close();
-};
-
-if (stuff==null) print("run test2.ns\r\n");
+//tests = new testlib2();
+//tests.fbsql();
+//tests.mysql();
+//tests.pgsql();
+//tests.sqlite();

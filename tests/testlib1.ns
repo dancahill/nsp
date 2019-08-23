@@ -1,15 +1,20 @@
 #!/usr/bin/nsp
 
-namespace testlib {
+class testlib1 {
+	function _constructor() {
+		printf("running testlib1 constructor\r\n");
+	}
+	function _destructor() {
+		printf("running testlib1 destructor\r\n");
+	}
 	function runtests() {
 		global stuff=true;
-		//include("testlib.ns");
 		global numtests=0;
 		global numerrors=0;
-		global expect=testlib.expect;
+		global expect=this.expect;
 
 		if (!quiet) print("        STARTING TESTS\n");
-		foreach (n,v in testlib.tests) {
+		foreach (n,v in testlib1.tests) {
 			//if (n=='expect' || n=='runtests') continue;
 			if (n=='load') continue;
 			//printf("[%s][%s]\r\n", n, v.gettype());
@@ -102,7 +107,7 @@ namespace testlib {
 	};
 }
 
-namespace testlib.tests {
+namespace testlib1.tests {
 	// _misc.ns
 	function misc() {
 	//print("including mime.ns",include("lib/_mime.ns"),"\r\n");
@@ -1763,4 +1768,6 @@ namespace testlib.tests {
 	};
 };
 
-if (stuff==null) print("run test1.ns\r\n");
+//tests = new testlib1();
+//tests.runtests();
+//delete tests;

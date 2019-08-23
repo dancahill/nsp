@@ -1,9 +1,12 @@
 #!/usr/bin/nsp
-global stuff=true;
-include("testlib.ns");
-include("testlib2.ns");
+//global stuff=true;
+//include("testlib.ns");
 //testlib.runtests();
-testlib.fbsql();
-testlib.mysql();
-testlib.pgsql();
-testlib.sqlite();
+
+
+include("testlib2.ns");
+tests = new testlib2();
+tests.fbsql();
+tests.mysql();
+tests.pgsql();
+tests.sqlite();

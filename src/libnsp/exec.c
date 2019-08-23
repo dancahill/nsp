@@ -365,18 +365,20 @@ void n_execconstructor(nsp_state *N, obj_t *cobj, obj_t *pobj)
 
 	nsp_setvaltype(N, cobj, NT_TABLE);
 	nsp_zlink(N, cobj, pobj);
+	xobj = nsp_getobj(N, cobj, "_constructor");
+	if (!nsp_isnull(xobj)) {
+		n_execfunction(N, xobj, cobj, constructor);
+		return;
+	}
 	xobj = nsp_getobj(N, cobj, pobj->name);
 	if (!nsp_isnull(xobj)) {
 		n_execfunction(N, xobj, cobj, constructor);
-	} else {
-		xobj = nsp_getobj(N, cobj, "_constructor");
-		if (!nsp_isnull(xobj)) {
-			n_execfunction(N, xobj, cobj, constructor);
-		} else if (n_peekop(N) == OP_POPAREN) {
-			n_context_readptr += readi2((n_context_readptr + 1)) + 3;
-			n_expect(N, __FN__, OP_PCPAREN);
-			n_context_readptr++;
-		}
+		return;
+	}
+	if (n_peekop(N) == OP_POPAREN) {
+		n_context_readptr += readi2((n_context_readptr + 1)) + 3;
+		n_expect(N, __FN__, OP_PCPAREN);
+		n_context_readptr++;
 	}
 #undef __FN__
 }

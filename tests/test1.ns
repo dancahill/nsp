@@ -1,4 +1,4 @@
 #!/usr/bin/nsp
-global stuff=true;
-include("testlib.ns");
-testlib.runtests();
+include("testlib1.ns");
+tests = new testlib1();
+tests.runtests();

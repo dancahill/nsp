@@ -415,6 +415,11 @@ err:
 //	};
 //});
 
+// to write to idbfs with stdio:
+//https://stackoverflow.com/questions/54617194/how-to-save-files-from-c-to-browser-storage-with-emscripten
+
+
+
 EM_JS(void, divappend, (const char *div, const char *str), {
 	try {
 		document.getElementById(UTF8ToString(div)).insertAdjacentHTML("beforeend", UTF8ToString(str));
