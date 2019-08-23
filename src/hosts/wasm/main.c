@@ -52,7 +52,7 @@ extern char **environ;
 #ifndef STDOUT_FILENO
 #define STDOUT_FILENO 1
 #endif
-static int flush(nsp_state *N)
+static int flush(nsp_state * N)
 {
 	if (N == NULL || N->outbuflen == 0) return 0;
 	N->outbuffer[N->outbuflen] = '\0';
@@ -79,7 +79,7 @@ static void sig_trap(int sig)
 			if ((rc = GetLastError()) != 0) {
 				LPVOID lpMsgBuf;
 
-				FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, rc, 0, (LPTSTR)&lpMsgBuf, 0, NULL);
+				FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, rc, 0, (LPTSTR)& lpMsgBuf, 0, NULL);
 				printf("GetLastError = %s\r\n", (char *)lpMsgBuf);
 				LocalFree(lpMsgBuf);
 			}
@@ -184,28 +184,26 @@ static void preppath(nsp_state *N, char *name)
 	unsigned int j;
 
 	p = name;
-	nc_memset((void *)&buf, 0, sizeof(buf));
+	nc_memset((void *)& buf, 0, sizeof(buf));
 	if ((name[0] == '/') || (name[0] == '\\') || (name[1] == ':')) {
 		/* it's an absolute path.... probably... */
 		strncpy(buf, name, sizeof(buf) - 1);
-	}
-	else if (name[0] == '.') {
+	} else if (name[0] == '.') {
 		/* looks relative... */
 		if (getcwd(buf, sizeof(buf) - strlen(name) - 2) != NULL) {
 			strncat(buf, "/", sizeof(buf) - strlen(buf) - 1);
 			strncat(buf, name, sizeof(buf) - strlen(buf) - 1);
 		}
-	}
-	else {
+	} else {
 		if (getcwd(buf, sizeof(buf) - strlen(name) - 2) != NULL) {
 			strncat(buf, "/", sizeof(buf) - strlen(buf) - 1);
 			strncat(buf, name, sizeof(buf) - strlen(buf) - 1);
 		}
 	}
-	for (j = 0;j < strlen(buf);j++) {
+	for (j = 0; j < strlen(buf); j++) {
 		if (buf[j] == '\\') buf[j] = '/';
 	}
-	for (j = strlen(buf) - 1;j > 0;j--) {
+	for (j = strlen(buf) - 1; j > 0; j--) {
 		if (buf[j] == '/') { buf[j] = '\0'; p = buf + j + 1; break; }
 	}
 	nsp_setstr(N, &N->g, "_filename", p, -1);
@@ -221,7 +219,7 @@ void set_console_title(nsp_state *N)
 #ifdef WIN32
 	char tmpbuf[80];
 
-	nc_memset((void *)&tmpbuf, 0, sizeof(tmpbuf));
+	nc_memset((void *)& tmpbuf, 0, sizeof(tmpbuf));
 	_snprintf(tmpbuf, sizeof(tmpbuf) - 1, "NSP %s", nsp_getstr(N, &N->g, "_filename"));
 	SetConsoleTitle(tmpbuf);
 #endif
@@ -283,6 +281,33 @@ static void printstate(nsp_state *N, char *fn)
 	return;
 }
 
+
+/*
+https://developer.mozilla.org/en-US/docs/WebAssembly/C_to_wasm
+https://emscripten.org/docs/porting/connecting_cpp_and_javascript/Interacting-with-code.html#calling-compiled-c-functions-from-javascript-using-ccall-cwrap
+https://emscripten.org/docs/tools_reference/emsdk.html#emsdk-install-old-tools
+https://emscripten.org/docs/api_reference/emscripten.h.html
+*/
+
+#include <emscripten/emscripten.h>
+
+void jsinit()
+{
+	EM_ASM(
+		nsp = {
+			runscript: function(target, script) {
+				//document.getElementById("output").textContent = "";
+				//var codetorun = document.getElementById("input").textContent;
+				/* (name of C function), return type, argument types, arguments */
+				var retPtr = Module.ccall("runscript", "number",["string", "string"],[target, script]);
+				//console.log("runscript result = ", retPtr);
+				return retPtr;
+			}
+		};
+	);
+}
+
+
 /* int main(int argc, char *argv[], char *environ[]) */
 int main(int argc, char *argv[])
 {
@@ -293,10 +318,11 @@ int main(int argc, char *argv[])
 	char c;
 	short intstatus = 0;
 	short preload = 1;
-	char *fn=NULL;
+	char *fn = NULL;
 
 	printf("WebAssembly module loaded\n");
 
+	jsinit();
 
 	setvbuf(stdout, NULL, _IONBF, 0);
 	if (argc < 2) {
@@ -310,7 +336,7 @@ int main(int argc, char *argv[])
 	//nspbase_register_all(N);
 	/* add env */
 	tobj = nsp_settable(N, &N->g, "_ENV");
-	for (i = 0;environ[i] != NULL;i++) {
+	for (i = 0; environ[i] != NULL; i++) {
 		strncpy(tmpbuf, environ[i], MAX_OBJNAMELEN);
 		p = strchr(tmpbuf, '=');
 		if (!p) continue;
@@ -320,59 +346,51 @@ int main(int argc, char *argv[])
 	}
 	/* add args */
 	tobj = nsp_settable(N, &N->g, "_ARGS");
-	for (i = 0;i < argc;i++) {
+	for (i = 0; i < argc; i++) {
 		n_ntoa(N, tmpbuf, i, 10, 0);
 		nsp_setstr(N, tobj, tmpbuf, argv[i], -1);
 	}
 	tobj = nsp_settable(N, &N->g, "io");
 	nsp_setcfunc(N, tobj, "gets", (NSP_CFUNC)neslib_io_gets);
-	for (i = 1;i < argc;i++) {
+	for (i = 1; i < argc; i++) {
 		if (argv[i] == NULL) break;
 		if (argv[i][0] == '-') {
 			c = argv[i][1];
 			if (!c) {
 				break;
-			}
-			else if ((c == 'd') || (c == 'D')) {
+			} else if ((c == 'd') || (c == 'D')) {
 				N->debug = 1;
-			}
-			else if ((c == 's') || (c == 'S')) {
+			} else if ((c == 's') || (c == 'S')) {
 				intstatus = 1;
-			}
-			else if ((c == 'b') || (c == 'B')) {
+			} else if ((c == 'b') || (c == 'B')) {
 				preload = 0;
-			}
-			else if ((c == 'e') || (c == 'E')) {
+			} else if ((c == 'e') || (c == 'E')) {
 				if (++i < argc) {
 					if (preload) do_preload(N);
 					nsp_exec(N, argv[i]);
 					if (N->err) goto err;
 				}
-			}
-			else if ((c == 'f') || (c == 'F')) {
+			} else if ((c == 'f') || (c == 'F')) {
 				if (++i < argc) {
 					preppath(N, argv[i]);
 					set_console_title(N);
 					if (preload) do_preload(N);
-					fn=argv[i];
+					fn = argv[i];
 					nsp_execfile(N, fn);
 					if (N->err) goto err;
 				}
-			}
-			else if ((c == 'v') || (c == 'V')) {
+			} else if ((c == 'v') || (c == 'V')) {
 				printf(NSP_VERSION "\r\n");
 				return 0;
-			}
-			else {
+			} else {
 				do_help(argv[0]);
 				return -1;
 			}
-		}
-		else {
+		} else {
 			preppath(N, argv[i]);
 			set_console_title(N);
 			if (preload) do_preload(N);
-			fn=argv[i];
+			fn = argv[i];
 			nsp_execfile(N, fn);
 			if (N->err) goto err;
 		}
@@ -385,30 +403,56 @@ err:
 	return 0;
 }
 
-/*
-https://developer.mozilla.org/en-US/docs/WebAssembly/C_to_wasm
-https://emscripten.org/docs/porting/connecting_cpp_and_javascript/Interacting-with-code.html#calling-compiled-c-functions-from-javascript-using-ccall-cwrap
-https://emscripten.org/docs/tools_reference/emsdk.html#emsdk-install-old-tools
-https://emscripten.org/docs/api_reference/emscripten.h.html
-*/
-
-#include <emscripten/emscripten.h>
+//EM_JS(void, jsinit, (), {
+//	nsp = {
+//		runscript: function (script) {
+//			//document.getElementById("output").textContent = "";
+//			//var codetorun = document.getElementById("input").textContent;
+//			/* (name of C function), return type, argument types, arguments */
+//			var retPtr = Module.ccall("runscript", "number", ["string", "string"], ["output", script]);
+//			console.log("runscript result = ", retPtr);
+//		}
+//	};
+//});
 
 EM_JS(void, divappend, (const char *div, const char *str), {
 	try {
-		document.getElementById(UTF8ToString(div)).insertAdjacentHTML('beforeend', UTF8ToString(str));
-	} catch (ex) {
-		console.warn("divappend() exception: ", ex);
+		document.getElementById(UTF8ToString(div)).insertAdjacentHTML("beforeend", UTF8ToString(str));
 	}
-});
+ catch (ex) {
+      console.warn("divappend() exception: ", ex);
+}
+	});
 
 NSP_FUNCTION(wasm_flush)
 {
+	obj_t *oobj = nsp_getobj(N, &N->g, "io");
+	obj_t *cobj = nsp_getobj(N, oobj, "outputid");
+
 	if (N == NULL || N->outbuflen == 0) return 0;
+	if (!nsp_isstr(cobj)) {
+		cobj = nsp_setstr(N, oobj, "outputid", "output", -1);
+	}
 	N->outbuffer[N->outbuflen] = '\0';
-	divappend("output", N->outbuffer);
+	divappend(nsp_tostr(N, cobj), N->outbuffer);
 	//write(STDOUT_FILENO, N->outbuffer, N->outbuflen);
 	N->outbuflen = 0;
+	return 0;
+}
+
+EMSCRIPTEN_KEEPALIVE int setoutput(const char *id)
+{
+	obj_t *oobj = nsp_getobj(N, &N->g, "io");
+	obj_t *cobj = nsp_getobj(N, oobj, "outputid");
+
+	if (!nsp_isstr(cobj)) {
+		nsp_setstr(N, oobj, "outputid", (char *)id, -1);
+	} else {
+		if (nc_strcmp(nsp_tostr(N, cobj), id) != 0) {
+			wasm_flush(N);
+			nsp_setstr(N, oobj, "outputid", (char *)id, -1);
+		}
+	}
 	return 0;
 }
 
@@ -420,7 +464,7 @@ EMSCRIPTEN_KEEPALIVE int docall(const char *id, const char *str)
 	//);
 	//printf("WebAssembly module function called [...]\n");
 	printf("WebAssembly docall() [%s][%s]\n", id, str);
-	divappend("output", str);
+	divappend(id, str);
 	return 41;
 }
 
@@ -430,10 +474,12 @@ EMSCRIPTEN_KEEPALIVE int runscript(const char *id, const char *str)
 		printf("WebAssembly runscript() failed to create new state\n");
 		return -1;
 	}
+	nsp_setstr(N, nsp_getobj(N, &N->g, "io"), "outputid", "output", -1);
 	nsp_setcfunc(N, nsp_settable(N, &N->g, "io"), "flush", wasm_flush);
 	nsp_exec(N, str);
-	if (N->err) divappend("output", N->errbuf);
 	wasm_flush(N);
+	if (N->err) printf("N->err: %s\r\n", N->errbuf);
+	//if (N->err) divappend("output", N->errbuf);
 	nsp_freestate(N);
 	//if (intstatus || N->allocs != N->frees) printstate(N, fn);
 	nsp_endstate(N);

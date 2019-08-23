@@ -493,7 +493,8 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 					n_expect(N, __FN__, OP_LABEL);
 					n_getlabel(N, namebuf);
 					cobj = nsp_getobj(N, tobj, namebuf);
-					if (!nsp_istable(cobj) != NT_TABLE) {
+					//if (!nsp_istable(cobj) != NT_TABLE) {
+					if (!nsp_istable(cobj)) {
 						cobj = nsp_settable(N, tobj, namebuf);
 					}
 					tobj = cobj;

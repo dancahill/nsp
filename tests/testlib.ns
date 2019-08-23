@@ -34,7 +34,7 @@ namespace testlib {
 				print("-------------------------------------------------------------------\n");
 			}
 		}
-		if (typeof(sqlquery)=='function') Q=sqlquery("SELECT * FROM nullsd_sessions");
+		if (typeof(sqlquery)=='function') Q=sqlquery("SELECT * FROM nullg_sessions");
 		if (typeof(dirlist)=='function') D=dirlist(_filepath);
 		x=quiet;
 		global quiet=false;
@@ -503,7 +503,7 @@ namespace testlib.tests {
 	};
 	// load.ns
 	function load() {
-		include("/etc/nullsd/nullgs.conf");
+		include("/etc/nullg/nullg.conf");
 		global junk = { };
 		for (j=0;j<100;j++) {
 			junk[j] = { a=1, b=2, c=3, d="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" };
