@@ -42,12 +42,14 @@ int nspbase_register_all(nsp_state *N)
 	//nsp_setcfunc(N, tobj, "unlink", (NSP_CFUNC)libnsp_base_file_unlink);
 	//nsp_setcfunc(N, tobj, "writeall", (NSP_CFUNC)libnsp_base_file_writeall);
 
+#ifdef HAVE_PIPE
 	tobj = nsp_settable(N, &N->g, "pipe");
 	tobj->val->attr |= NST_HIDDEN;
 	nsp_setcfunc(N, tobj, "open", (NSP_CFUNC)libnsp_base_pipe_open);
 	nsp_setcfunc(N, tobj, "read", (NSP_CFUNC)libnsp_base_pipe_read);
 	nsp_setcfunc(N, tobj, "write", (NSP_CFUNC)libnsp_base_pipe_write);
 	nsp_setcfunc(N, tobj, "close", (NSP_CFUNC)libnsp_base_pipe_close);
+#endif
 
 	nsp_setcfunc(N, &N->g, "rot13", (NSP_CFUNC)libnsp_base_rot13);
 

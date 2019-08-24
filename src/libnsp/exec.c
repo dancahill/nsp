@@ -48,6 +48,8 @@
 #  define _OS_ "OpenBSD"
 #elif defined(SOLARIS)
 #  define _OS_ "Solaris"
+#elif defined(__EMSCRIPTEN__)
+#  define _OS_ "wasm"
 #else
 #  define _OS_ "unknown"
 #endif
@@ -56,6 +58,8 @@
 #    undef _OS_
 #    define _OS_ "Windows"
 #    define _COMPILER_ "gcc (cygwin)"
+#  elif defined(__EMSCRIPTEN__)
+#    define _COMPILER_ "emcc"
 #  else
 #    define _COMPILER_ "gcc"
 #  endif
@@ -365,6 +369,11 @@ void n_execconstructor(nsp_state *N, obj_t *cobj, obj_t *pobj)
 
 	nsp_setvaltype(N, cobj, NT_TABLE);
 	nsp_zlink(N, cobj, pobj);
+	xobj = nsp_getobj(N, cobj, "constructor");
+	if (!nsp_isnull(xobj)) {
+		n_execfunction(N, xobj, cobj, constructor);
+		return;
+	}
 	xobj = nsp_getobj(N, cobj, "_constructor");
 	if (!nsp_isnull(xobj)) {
 		n_execfunction(N, xobj, cobj, constructor);
@@ -388,8 +397,15 @@ void n_execdestructor(nsp_state *N, obj_t *cobj, char *cname)
 #define __FN__ __FILE__ ":n_execdestrutor()"
 	obj_t *xobj;
 
+	xobj = nsp_getobj(N, cobj, "destructor");
+	if (!nsp_isnull(xobj)) {
+		n_execfunction(N, xobj, cobj, function);
+		return;
+	}
 	xobj = nsp_getobj(N, cobj, "_destructor");
-	if (!nsp_isnull(xobj)) n_execfunction(N, xobj, cobj, function);
+	if (!nsp_isnull(xobj)) {
+		n_execfunction(N, xobj, cobj, function);
+	}
 #undef __FN__
 }
 

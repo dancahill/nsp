@@ -1,14 +1,15 @@
 #!/usr/bin/nsp
 
 class testlib1 {
-	function _constructor() {
+	function constructor() {
 		printf("running testlib1 constructor\r\n");
+		if (_ostype_=="wasm/emcc") global _SERVER={ dummy=true };
+		this.starttime=runtime();
 	}
-	function _destructor() {
+	function destructor() {
 		printf("running testlib1 destructor\r\n");
 	}
 	function runtests() {
-		global stuff=true;
 		global numtests=0;
 		global numerrors=0;
 		global expect=this.expect;
@@ -40,7 +41,7 @@ class testlib1 {
 			}
 		}
 		if (typeof(sqlquery)=='function') Q=sqlquery("SELECT * FROM nullg_sessions");
-		if (typeof(dirlist)=='function') D=dirlist(_filepath);
+		if (typeof(dirlist)=='function' && _ostype_!="wasm/emcc") D=dirlist(_filepath);
 		x=quiet;
 		global quiet=false;
 		expect("tests passed/total", sprintf("%d/%d", numtests, numtests), sprintf("%d/%d", numtests-numerrors, numtests));
@@ -48,7 +49,7 @@ class testlib1 {
 		global quiet=x;
 		numtests--;
 		print("-------------------------------------------------------------------\n");
-		if (!quiet) print("        FINISHED TESTS       = "+runtime()+" seconds\n");
+		if (!quiet) print("        FINISHED TESTS       = "+(runtime()-this.starttime)+" seconds\n");
 		global decomped_script=null;
 	//	global _ARGS={};
 		global _ENV={};
@@ -61,7 +62,7 @@ class testlib1 {
 			io.gets();
 		}
 		return;
-	};
+	}
 	// _expect.ns
 	function expect(msg, a, b) {
 		var sp="                              ";
@@ -104,7 +105,7 @@ class testlib1 {
 		global numtests++;
 		io.flush();
 		return;
-	};
+	}
 }
 
 namespace testlib1.tests {
@@ -431,6 +432,10 @@ namespace testlib1.tests {
 		/* declare a lambda, execute it inline, and return the result */
 		x=function (y) { return y*2; }(21);
 		expect("...", 42, x);
+
+		local function hello(s) { printf("%s, ", s); return function (s) { printf("%s!\n", s); } };
+		hello("Hello")("World");
+
 		return;
 	};
 	// if.ns

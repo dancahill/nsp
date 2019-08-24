@@ -17,240 +17,68 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nsp/nsplib.h"
-#if defined(linux)
-#include <execinfo.h>
-#endif
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#ifdef WIN32
-#include <direct.h>
-#include <io.h>
-#include <process.h>
-#else
-#ifdef __TURBOC__
-#else
-#include <errno.h>
 #include <unistd.h>
-#endif
-#endif
+#include <emscripten/emscripten.h>
 
-#include <signal.h>
+int nspbase_register_all(nsp_state *N);
+
 nsp_state *N;
-
-#if defined(__BORLANDC__)
-extern char **_environ;
-#define environ _environ
-#elif defined(_MSC_VER)
-_CRTIMP extern char **environ;
-#else
 extern char **environ;
-#endif
 
-#define striprn(s) { int n=nc_strlen(s)-1; while (n>-1&&(s[n]=='\r'||s[n]=='\n')) s[n--]='\0'; }
+/*
+https://developer.mozilla.org/en-US/docs/WebAssembly/C_to_wasm
+https://emscripten.org/docs/porting/connecting_cpp_and_javascript/Interacting-with-code.html#calling-compiled-c-functions-from-javascript-using-ccall-cwrap
+https://emscripten.org/docs/tools_reference/emsdk.html#emsdk-install-old-tools
+https://emscripten.org/docs/api_reference/emscripten.h.html
 
-#ifndef STDOUT_FILENO
-#define STDOUT_FILENO 1
-#endif
-static int flush(nsp_state * N)
+to write to idbfs with stdio:
+https://stackoverflow.com/questions/54617194/how-to-save-files-from-c-to-browser-storage-with-emscripten
+*/
+
+void jsinit()
 {
-	if (N == NULL || N->outbuflen == 0) return 0;
-	N->outbuffer[N->outbuflen] = '\0';
-#if defined(WIN32) && defined(_DEBUG)
-	OutputDebugStringA(N->outbuffer);
-#endif
-	if (write(STDOUT_FILENO, N->outbuffer, N->outbuflen) != N->outbuflen) {
-		printf("flush() error\r\n");
+	EM_ASM(
+		nsp = {};
+		nsp.runscript = function(target, script) {
+			/* (name of C function), return type, argument types, arguments */
+			return Module.ccall("runscript", "number", ["string", "string"], [target, script]);;
+		};
+		nsp.destroystate = function() {
+			return Module.ccall("destroystate", "number", [], []);
+		};
+	);
+}
+
+EM_JS(void, divappend, (const char *div, const char *str), {
+	try {
+		document.getElementById(UTF8ToString(div)).insertAdjacentHTML("beforeend", UTF8ToString(str));
+	} catch (ex) {
+		console.warn("divappend() exception: ", ex);
 	}
+});
+
+static int wasm_flush(nsp_state * N)
+{
+	obj_t *oobj = nsp_getobj(N, &N->g, "io");
+	obj_t *cobj = nsp_getobj(N, oobj, "outputid");
+
+	if (N == NULL || N->outbuflen == 0) return 0;
+	if (!nsp_isstr(cobj)) {
+		cobj = nsp_setstr(N, oobj, "outputid", "output", -1);
+	}
+	N->outbuffer[N->outbuflen] = '\0';
+	divappend(nsp_tostr(N, cobj), N->outbuffer);
+	//write(STDOUT_FILENO, N->outbuffer, N->outbuflen);
 	N->outbuflen = 0;
 	return 0;
-}
-
-static void sig_trap(int sig)
-{
-	flush(N); /* if we die here, we should flush the buffer first */
-	switch (sig) {
-	case 11:
-		printf("Segmentation Violation\r\n");
-#ifdef WIN32
-		{
-			DWORD rc;
-
-			if ((rc = GetLastError()) != 0) {
-				LPVOID lpMsgBuf;
-
-				FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, rc, 0, (LPTSTR)& lpMsgBuf, 0, NULL);
-				printf("GetLastError = %s\r\n", (char *)lpMsgBuf);
-				LocalFree(lpMsgBuf);
-			}
-		}
-#endif
-		if ((N) && (n_context_readptr)) printf("[%s][%.40s]\r\n", N->context->tracefn, n_context_readptr);
-#if defined(linux)
-		{
-#define SIZE 100
-			void *buffer[SIZE];
-			char **strings;
-			int j, nptrs;
-
-			nptrs = backtrace(buffer, SIZE);
-			printf("SIGSEGV backtrace() returned %d addresses\r\n", nptrs);
-			strings = backtrace_symbols(buffer, nptrs);
-			if (strings != NULL) {
-				for (j = 0; j < nptrs; j++) {
-					printf("SIGSEGV [%s]\r\n", strings[j]);
-				}
-				free(strings);
-			}
-		}
-		if (N && N->context) printf("[%s][%ld]\r\n", N->context->filename, N->context->linenum);
-#endif
-		exit(-1);
-	case 13: /* SIGPIPE */
-		return;
-	default:
-		printf("Unexpected signal [%d] received\r\n", sig);
-	}
-}
-
-static void setsigs(void)
-{
-#if defined(WIN32)
-	signal(SIGSEGV, sig_trap);
-#elif !defined(__TURBOC__)
-	struct sigaction sa;
-
-	memset(&sa, 0, sizeof(sa));
-	sa.sa_handler = sig_trap;
-	sigemptyset(&sa.sa_mask);
-	sigaction(SIGSEGV, &sa, NULL);
-	sigaction(SIGPIPE, &sa, NULL);
-#endif
-	return;
-}
-
-static void timeout(int i) {
-}
-
-static NSP_FUNCTION(neslib_io_gets)
-{
-	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
-#if !defined(WIN32)&&!defined(__TURBOC__)
-	struct sigaction sa;
-	int err = 0;
-#endif
-	char buf[1024];
-	char *ret;
-	int t = 0;
-
-	if (nsp_isnum(cobj1)) {
-		t = (int)cobj1->val->d.num;
-	}
-
-	flush(N);
-#if !defined(WIN32)&&!defined(__TURBOC__)
-	memset(&sa, 0, sizeof(sa));
-	sa.sa_handler = timeout;
-	sigaction(SIGALRM, &sa, NULL);
-	alarm(t);
-#endif
-	ret = fgets(buf, sizeof(buf) - 1, stdin);
-#if !defined(WIN32)&&!defined(__TURBOC__)
-	err = errno;
-	alarm(0);
-	if (ret == NULL) {
-		switch (err) {
-		case EINTR:
-			printf("timed out\r\n");
-			return -2;
-		default:
-			return -1;
-		}
-	}
-#else
-	if (ret == NULL) {
-		printf("fgets() error\r\n");
-	}
-#endif
-	striprn(buf);
-	nsp_setstr(N, &N->r, "", buf, -1);
-	return 0;
-}
-
-static void preppath(nsp_state *N, char *name)
-{
-	char buf[1024];
-	char *p;
-	unsigned int j;
-
-	p = name;
-	nc_memset((void *)& buf, 0, sizeof(buf));
-	if ((name[0] == '/') || (name[0] == '\\') || (name[1] == ':')) {
-		/* it's an absolute path.... probably... */
-		strncpy(buf, name, sizeof(buf) - 1);
-	} else if (name[0] == '.') {
-		/* looks relative... */
-		if (getcwd(buf, sizeof(buf) - strlen(name) - 2) != NULL) {
-			strncat(buf, "/", sizeof(buf) - strlen(buf) - 1);
-			strncat(buf, name, sizeof(buf) - strlen(buf) - 1);
-		}
-	} else {
-		if (getcwd(buf, sizeof(buf) - strlen(name) - 2) != NULL) {
-			strncat(buf, "/", sizeof(buf) - strlen(buf) - 1);
-			strncat(buf, name, sizeof(buf) - strlen(buf) - 1);
-		}
-	}
-	for (j = 0; j < strlen(buf); j++) {
-		if (buf[j] == '\\') buf[j] = '/';
-	}
-	for (j = strlen(buf) - 1; j > 0; j--) {
-		if (buf[j] == '/') { buf[j] = '\0'; p = buf + j + 1; break; }
-	}
-	nsp_setstr(N, &N->g, "_filename", p, -1);
-	nsp_setstr(N, &N->g, "_filepath", buf, -1);
-#if defined(WIN32) && defined(_DEBUG)
-	nsp_setbool(N, &N->g, "_debug", 1);
-#endif
-	return;
-}
-
-void set_console_title(nsp_state *N)
-{
-#ifdef WIN32
-	char tmpbuf[80];
-
-	nc_memset((void *)& tmpbuf, 0, sizeof(tmpbuf));
-	_snprintf(tmpbuf, sizeof(tmpbuf) - 1, "NSP %s", nsp_getstr(N, &N->g, "_filename"));
-	SetConsoleTitle(tmpbuf);
-#endif
-	return;
 }
 
 void do_banner() {
 	printf("\r\nNullLogic Embedded Scripting Language Version " NSP_VERSION);
 	printf("\r\nCopyright (C) 2007-2019 Dan Cahill\r\n\r\n");
-	return;
-}
-
-void do_help(char *arg0) {
-	printf("Usage : %s [-e] [-f] file.ns\r\n", arg0);
-	printf("  -e  execute string\r\n");
-	printf("  -f  execute file\r\n\r\n");
-	return;
-}
-
-void do_preload(nsp_state *N)
-{
-	char sbuf[80];
-#ifdef WIN32
-	char wdbuf[80];
-
-	if (GetWindowsDirectory(wdbuf, sizeof(wdbuf)) == 0) return;
-	_snprintf(sbuf, sizeof(sbuf) - 1, "%s\\NSP\\preload.ns", wdbuf);
-#else
-	snprintf(sbuf, sizeof(sbuf) - 1, "/usr/lib/nsp/preload.ns");
-#endif
-	nsp_execfile(N, sbuf);
 	return;
 }
 
@@ -281,59 +109,23 @@ static void printstate(nsp_state *N, char *fn)
 	return;
 }
 
-
-/*
-https://developer.mozilla.org/en-US/docs/WebAssembly/C_to_wasm
-https://emscripten.org/docs/porting/connecting_cpp_and_javascript/Interacting-with-code.html#calling-compiled-c-functions-from-javascript-using-ccall-cwrap
-https://emscripten.org/docs/tools_reference/emsdk.html#emsdk-install-old-tools
-https://emscripten.org/docs/api_reference/emscripten.h.html
-*/
-
-#include <emscripten/emscripten.h>
-
-void jsinit()
-{
-	EM_ASM(
-		nsp = {
-			runscript: function(target, script) {
-				//document.getElementById("output").textContent = "";
-				//var codetorun = document.getElementById("input").textContent;
-				/* (name of C function), return type, argument types, arguments */
-				var retPtr = Module.ccall("runscript", "number",["string", "string"],[target, script]);
-				//console.log("runscript result = ", retPtr);
-				return retPtr;
-			}
-		};
-	);
-}
-
-
-/* int main(int argc, char *argv[], char *environ[]) */
-int main(int argc, char *argv[])
+int nsp_createstate()
 {
 	char tmpbuf[MAX_OBJNAMELEN + 1];
 	obj_t *tobj;
 	int i;
 	char *p;
-	char c;
-	short intstatus = 0;
-	short preload = 1;
-	char *fn = NULL;
 
-	printf("WebAssembly module loaded\n");
-
-	jsinit();
-
-	setvbuf(stdout, NULL, _IONBF, 0);
-	if (argc < 2) {
-		do_banner();
-		do_help(argv[0]);
+	if (N != NULL) return 0;
+	if ((N = nsp_newstate()) == NULL) {
+		printf("WebAssembly nsp_createstate() failed to create new state\n");
 		return -1;
 	}
-	if ((N = nsp_newstate()) == NULL) return -1;
-	setsigs();
+	//setsigs();
 	N->debug = 0;
-	//nspbase_register_all(N);
+	nsp_setstr(N, nsp_getobj(N, &N->g, "io"), "outputid", "output", -1);
+	nsp_setcfunc(N, nsp_settable(N, &N->g, "io"), "flush", wasm_flush);
+	nspbase_register_all(N);
 	/* add env */
 	tobj = nsp_settable(N, &N->g, "_ENV");
 	for (i = 0; environ[i] != NULL; i++) {
@@ -344,104 +136,18 @@ int main(int argc, char *argv[])
 		p = strchr(environ[i], '=') + 1;
 		nsp_setstr(N, tobj, tmpbuf, p, -1);
 	}
-	/* add args */
-	tobj = nsp_settable(N, &N->g, "_ARGS");
-	for (i = 0; i < argc; i++) {
-		n_ntoa(N, tmpbuf, i, 10, 0);
-		nsp_setstr(N, tobj, tmpbuf, argv[i], -1);
-	}
-	tobj = nsp_settable(N, &N->g, "io");
-	nsp_setcfunc(N, tobj, "gets", (NSP_CFUNC)neslib_io_gets);
-	for (i = 1; i < argc; i++) {
-		if (argv[i] == NULL) break;
-		if (argv[i][0] == '-') {
-			c = argv[i][1];
-			if (!c) {
-				break;
-			} else if ((c == 'd') || (c == 'D')) {
-				N->debug = 1;
-			} else if ((c == 's') || (c == 'S')) {
-				intstatus = 1;
-			} else if ((c == 'b') || (c == 'B')) {
-				preload = 0;
-			} else if ((c == 'e') || (c == 'E')) {
-				if (++i < argc) {
-					if (preload) do_preload(N);
-					nsp_exec(N, argv[i]);
-					if (N->err) goto err;
-				}
-			} else if ((c == 'f') || (c == 'F')) {
-				if (++i < argc) {
-					preppath(N, argv[i]);
-					set_console_title(N);
-					if (preload) do_preload(N);
-					fn = argv[i];
-					nsp_execfile(N, fn);
-					if (N->err) goto err;
-				}
-			} else if ((c == 'v') || (c == 'V')) {
-				printf(NSP_VERSION "\r\n");
-				return 0;
-			} else {
-				do_help(argv[0]);
-				return -1;
-			}
-		} else {
-			preppath(N, argv[i]);
-			set_console_title(N);
-			if (preload) do_preload(N);
-			fn = argv[i];
-			nsp_execfile(N, fn);
-			if (N->err) goto err;
-		}
-	}
-err:
-	if (N->err) printf("%s\r\n", N->errbuf);
-	nsp_freestate(N);
-	if (intstatus || N->allocs != N->frees) printstate(N, fn);
-	nsp_endstate(N);
 	return 0;
 }
 
-//EM_JS(void, jsinit, (), {
-//	nsp = {
-//		runscript: function (script) {
-//			//document.getElementById("output").textContent = "";
-//			//var codetorun = document.getElementById("input").textContent;
-//			/* (name of C function), return type, argument types, arguments */
-//			var retPtr = Module.ccall("runscript", "number", ["string", "string"], ["output", script]);
-//			console.log("runscript result = ", retPtr);
-//		}
-//	};
-//});
-
-// to write to idbfs with stdio:
-//https://stackoverflow.com/questions/54617194/how-to-save-files-from-c-to-browser-storage-with-emscripten
-
-
-
-EM_JS(void, divappend, (const char *div, const char *str), {
-	try {
-		document.getElementById(UTF8ToString(div)).insertAdjacentHTML("beforeend", UTF8ToString(str));
-	}
- catch (ex) {
-      console.warn("divappend() exception: ", ex);
-}
-	});
-
-NSP_FUNCTION(wasm_flush)
+int nsp_destroystate()
 {
-	obj_t *oobj = nsp_getobj(N, &N->g, "io");
-	obj_t *cobj = nsp_getobj(N, oobj, "outputid");
-
-	if (N == NULL || N->outbuflen == 0) return 0;
-	if (!nsp_isstr(cobj)) {
-		cobj = nsp_setstr(N, oobj, "outputid", "output", -1);
-	}
-	N->outbuffer[N->outbuflen] = '\0';
-	divappend(nsp_tostr(N, cobj), N->outbuffer);
-	//write(STDOUT_FILENO, N->outbuffer, N->outbuflen);
-	N->outbuflen = 0;
+	if (N == NULL) return 0;
+	wasm_flush(N);
+	if (N->err) printf("N->err: %s\r\n", N->errbuf);
+	//if (N->err) divappend("output", N->errbuf);
+	nsp_freestate(N);
+	//if (N->allocs != N->frees) printstate(N, fn);
+	N = nsp_endstate(N);
 	return 0;
 }
 
@@ -461,32 +167,35 @@ EMSCRIPTEN_KEEPALIVE int setoutput(const char *id)
 	return 0;
 }
 
-EMSCRIPTEN_KEEPALIVE int docall(const char *id, const char *str)
+EMSCRIPTEN_KEEPALIVE int runscript(const char *id, const char *str)
 {
 	//EM_ASM(
 		//alert('hello world!');
 		//throw 'all done';
 	//);
-	//printf("WebAssembly module function called [...]\n");
-	printf("WebAssembly docall() [%s][%s]\n", id, str);
-	divappend(id, str);
-	return 41;
-}
-
-EMSCRIPTEN_KEEPALIVE int runscript(const char *id, const char *str)
-{
-	if ((N = nsp_newstate()) == NULL) {
-		printf("WebAssembly runscript() failed to create new state\n");
-		return -1;
-	}
-	nsp_setstr(N, nsp_getobj(N, &N->g, "io"), "outputid", "output", -1);
-	nsp_setcfunc(N, nsp_settable(N, &N->g, "io"), "flush", wasm_flush);
+	nsp_createstate();
 	nsp_exec(N, str);
 	wasm_flush(N);
-	if (N->err) printf("N->err: %s\r\n", N->errbuf);
-	//if (N->err) divappend("output", N->errbuf);
-	nsp_freestate(N);
-	//if (intstatus || N->allocs != N->frees) printstate(N, fn);
-	nsp_endstate(N);
-	return 42;
+	//nsp_destroystate();
+	return 0;
+}
+
+EMSCRIPTEN_KEEPALIVE int destroystate(void)
+{
+	nsp_destroystate();
+	return 0;
+}
+
+int main(int argc, char *argv[])
+{
+	setvbuf(stdout, NULL, _IONBF, 0);
+	do_banner();
+	N = NULL;
+	//printf("WebAssembly module loaded\r\n");
+	jsinit();
+	nsp_createstate();
+	nsp_exec(N, "printf('Hello World!');\r\n");
+	wasm_flush(N);
+	//nsp_destroystate();
+	return 0;
 }
