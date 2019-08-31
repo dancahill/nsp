@@ -39,6 +39,7 @@ static_libs: deps
 	@cd src/libs/data    && ../../../$(NSPCLI) -b -e "global _LINKAGE_='static';include('Makefile.ns');" && cd ../../..
 	@cd src/libs/fbsql   && ../../../$(NSPCLI) -b -e "global _LINKAGE_='static';include('Makefile.ns');" && cd ../../..
 	@cd src/libs/ldap    && ../../../$(NSPCLI) -b -e "global _LINKAGE_='static';include('Makefile.ns');" && cd ../../..
+	@cd src/libs/mongodb && ../../../$(NSPCLI) -b -e "global _LINKAGE_='static';include('Makefile.ns');" && cd ../../..
 	@cd src/libs/mysql   && ../../../$(NSPCLI) -b -e "global _LINKAGE_='static';include('Makefile.ns');" && cd ../../..
 	@cd src/libs/net     && ../../../$(NSPCLI) -b -e "global _LINKAGE_='static';include('Makefile.ns');" && cd ../../..
 	@cd src/libs/odbc    && ../../../$(NSPCLI) -b -e "global _LINKAGE_='static';include('Makefile.ns');" && cd ../../..
@@ -55,6 +56,7 @@ shared_libs: deps
 	@cd src/libs/data     && ../../../$(NSPCLI) -b -e "global _LINKAGE_='shared';include('Makefile.ns');" && cd ../../..
 	@cd src/libs/fbsql    && ../../../$(NSPCLI) -b -e "global _LINKAGE_='shared';include('Makefile.ns');" && cd ../../..
 	@cd src/libs/ldap     && ../../../$(NSPCLI) -b -e "global _LINKAGE_='shared';include('Makefile.ns');" && cd ../../..
+	@cd src/libs/mongodb  && ../../../$(NSPCLI) -b -e "global _LINKAGE_='shared';include('Makefile.ns');" && cd ../../..
 	@cd src/libs/mysql    && ../../../$(NSPCLI) -b -e "global _LINKAGE_='shared';include('Makefile.ns');" && cd ../../..
 	@cd src/libs/net      && ../../../$(NSPCLI) -b -e "global _LINKAGE_='shared';include('Makefile.ns');" && cd ../../..
 	@cd src/libs/odbc     && ../../../$(NSPCLI) -b -e "global _LINKAGE_='shared';include('Makefile.ns');" && cd ../../..

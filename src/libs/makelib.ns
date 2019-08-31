@@ -158,6 +158,10 @@ function build_lib(CC, TNAME, OBJECTS, OTYPE, INTDIR) {
 				if (config.have_fbsql==true) liblist+=" -lfbclient";
 			} else if (TNAME=='libnsp_ldap') {
 				if (config.have_ldap==true) liblist+=" -lldap";
+
+			} else if (TNAME=='libnsp_mongodb') {
+				if (config.have_mongodb==true) liblist+=" -I/usr/include/libbson-1.0 -I/usr/include/libmongoc-1.0 -lmongoc-1.0 -lbson-1.0";
+
 			} else if (TNAME=='libnsp_mysql') {
 				if (config.have_mysql==true) liblist+=" -L/usr/lib64/mysql -L/usr/lib/mysql -lmysqlclient";
 			} else if (TNAME=='libnsp_net') {

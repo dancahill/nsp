@@ -14,6 +14,7 @@ function testsub(title, l, c, showfail) {
 	if (ostype=='posix') {
 		file.writeall("conftest.c", c);
 		r1=system(cc+" conftest.c "+l+" -o conftest.out 2>/dev/null");
+		//r1=system(cc+" conftest.c "+l+" -o conftest.out");
 		if (r1==0) r2=file.stat("conftest.out");
 	} else if (ostype=='windows') {
 		file.writeall("conftest.c", c);
@@ -261,6 +262,22 @@ function dotests() {
 			config_ne2+="\thave_mbedtls=true";
 			config.have_mbedtls=true;
 		}
+
+		//gcc -o hello_mongoc hello_mongoc.c \
+		//    -I/usr/local/include/libbson-1.0 -I/usr/local/include/libmongoc-1.0 \
+		//    -lmongoc-1.0 -lbson-1.0
+
+		//cc test.c -I/usr/include/libbson-1.0 -I/usr/include/libmongoc-1.0 -lmongoc-1.0 -lbson-1.0
+		if (testsub("MONGODB", "-lmongoc-1.0 -lbson-1.0 -I/usr/include/libbson-1.0 -I/usr/include/libmongoc-1.0", "#include <libbson-1.0/bson.h>\n#include <libmongoc-1.0/mongoc.h>\nint main() { return 0; }\n")) {
+			config_mak+="CFLAGS  += -DHAVE_MONGODB -I/usr/include/libbson-1.0 -I/usr/include/libmongoc-1.0\n";
+			//if (build_fat) config_mak+="LDFLAGS += -lnsp_mongodb -lmongodb\n\n";
+			config_nsp+="CFLAGS  += \" -DHAVE_MONGODB -I/usr/include/libbson-1.0 -I/usr/include/libmongoc-1.0\";\n";
+			//if (build_fat) config_nsp+="LDFLAGS += \" -lnsp_mongodb -lmongodb\";\n\n";
+			if (config_inc++) config_ne2+=",\n";
+			config_ne2+="\thave_mongodb=true";
+			config.have_mongodb=true;
+		}
+
 		if (testsub("MYSQL", "-lmysqlclient", "#include <mysql/mysql.h>\nint main() { return 0; }\n", false)) {
 			config_mak+="CFLAGS  += -DHAVE_MYSQL\n";
 			if (build_fat) config_mak+="LDFLAGS += -lnsp_mysql -lmysqlclient\n";
@@ -448,6 +465,7 @@ function dotests() {
 	config_h+=sprintf("%s#define CONFIG_HAVE_LDAP 1\r\n",    config.have_ldap    ?"":"// ");
 	config_h+=sprintf("%s#define CONFIG_HAVE_MATH 1\r\n",    config.have_math    ?"":"// ");
 	config_h+=sprintf("%s#define CONFIG_HAVE_MBEDTLS 1\r\n", config.have_mbedtls ?"":"// ");
+	config_h+=sprintf("%s#define CONFIG_HAVE_MONGODB 1\r\n", config.have_mongodb ?"":"// ");
 	config_h+=sprintf("%s#define CONFIG_HAVE_MYSQL 1\r\n",   config.have_mysql   ?"":"// ");
 	config_h+=sprintf("%s#define CONFIG_HAVE_ODBC 1\r\n",    config.have_odbc    ?"":"// ");
 	config_h+=sprintf("%s#define CONFIG_HAVE_OPENSSL 1\r\n", config.have_openssl ?"":"// ");
