@@ -3,10 +3,10 @@
 //include("testlib.ns");
 //testlib.runtests();
 
-
 include("testlib2.ns");
 tests = new testlib2();
-tests.fbsql();
-tests.mysql();
-tests.pgsql();
-tests.sqlite();
+//tests.fbsql();
+//tests.mysql();
+//tests.pgsql();
+//tests.sqlite();
+tests.mongodb();

@@ -1,7 +1,7 @@
 #!/usr/bin/nsp
 
 class testlib2 {
-	function _constructor() {
+	function constructor() {
 	}
 	function shared_sql_tests(db) {
 		db.open();
@@ -24,7 +24,7 @@ class testlib2 {
 		db.endquery();
 		printf("db.changes = %d;\r\n", db.changes);
 		db.close();
-	};
+	}
 	function fbsql() {
 		ci = { host="localhost", port=3050, username="SYSDBA", password="masterkey", database="/tmp/nstest.fdb" };
 		file.unlink(ci.database);
@@ -41,7 +41,7 @@ class testlib2 {
 		}
 		file.unlink(ci.database);
 		return;
-	};
+	}
 	function mysql() {
 		ci = { host="localhost", port=3306, username="root", password="test", database="nstest" };
 		system(sprintf("mysql -u%s -p%s -e \"DROP DATABASE IF EXISTS nstest\"", ci.username, ci.password));
@@ -56,7 +56,7 @@ class testlib2 {
 		}
 		//system(sprintf("mysql -u%s -p%s -e \"DROP DATABASE IF EXISTS nstest\"", ci.username, ci.password));
 		return;
-	};
+	}
 	function pgsql() {
 		ci = { host="localhost", port=5432, username="postgres", password="test", database="nstest" };
 		system(sprintf("export PGPASSWORD=%s && dropdb -h localhost -U %s %s", ci.password, ci.username, ci.database));
@@ -71,7 +71,7 @@ class testlib2 {
 		}
 		system(sprintf("export PGPASSWORD=%s && dropdb -h localhost -U %s %s", ci.password, ci.username, ci.database));
 		return;
-	};
+	}
 	function sqlite() {
 		ci = { database="/tmp/nstest.db" };
 		file.unlink(ci.database);
@@ -84,7 +84,52 @@ class testlib2 {
 			printf("Exception: %s\r\n", ex.description);
 		}
 		file.unlink(ci.database);
-	};
+	}
+	function mongodb() {
+		dl.load("mongodb");
+		conninfo = { url="mongodb://localhost:27017/", database="nulltest", collection="users" };
+		m=new data.mongodb.client();
+		m.open();
+		printf("--beginning clientcommand tests--\r\n");
+		q='{ "hostInfo" : 1 }';
+		r=m.clientcommand(q);
+		printf("q=[[%s]]\r\nr=[[%s]]\r\n\r\n", q, r);
+		q='{ "ping" : 1 }';
+		r=m.clientcommand(q);
+		printf("q=[[%s]]\r\nr=[[%s]]\r\n\r\n", q, r);
+
+		printf("--beginning collectioncommand tests--\r\n");
+		q='{ "collStats" : "users" }';
+		r=m.collectioncommand(q);
+		printf("q=[[%s]]\r\nr=[[%s]]\r\n\r\n", q, r);
+
+		printf("--beginning collectioninsert tests--\r\n");
+		q='{ "name" : { "first" : "Dan", "last" : "Cahill" } }';
+		r=m.collectioninsert(q);
+		printf("q=[[%s]]\r\nr=[[%s]]\r\n\r\n", q, r);
+
+		printf("--beginning collectionremove tests--\r\n");
+		q='{ \"_id\" : { \"$oid\" : \"5d6ad3197c71de503813daa1\" } }';
+		r=m.collectionremove(q);
+		printf("q=[[%s]]\r\nr=[[%s]]\r\n\r\n", q, r);
+
+		printf("--beginning collectionfind tests--\r\n");
+		//m.collectionfind('{"_id":{"$oid":"5d6b12367c71de08fb215601"}}');
+		m.collectionfind("{}");
+		while ((row=m.collectiongetnext())!=null) {
+			printf("\t%s\r\n", row);
+		}
+		m.collectionendfind();
+
+		var todelete = {
+			"5d6b0d357c71de058165c4b1"
+		};
+		foreach (n,v in todelete) {
+			q='{ \"_id\" : { \"$oid\" : \"'+v+'\" } }';
+			r=m.collectionremove(q);
+			printf("q=[[%s]]\r\nr=[[%s]]\r\n\r\n", q, r);
+		}
+	}
 };
 
 //tests = new testlib2();
@@ -92,3 +137,4 @@ class testlib2 {
 //tests.mysql();
 //tests.pgsql();
 //tests.sqlite();
+//tests.mongodb();

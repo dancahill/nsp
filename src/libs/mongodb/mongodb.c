@@ -33,6 +33,7 @@ typedef struct MONGODB_CONN {
 	mongoc_client_t *client;
 	mongoc_database_t *database;
 	mongoc_collection_t *collection;
+	mongoc_cursor_t *cursor;
 } MONGODB_CONN;
 
 static MONGODB_CONN *getconn(nsp_state *N)
@@ -50,6 +51,10 @@ static MONGODB_CONN *getconn(nsp_state *N)
 
 static void mongodb_disconnect(nsp_state *N, MONGODB_CONN *conn)
 {
+	if (conn->cursor) {
+		mongoc_cursor_destroy(conn->cursor);
+		conn->cursor=NULL;
+	}
 	if (conn->collection) {
 		mongoc_collection_destroy(conn->collection);
 		conn->collection=NULL;
@@ -92,6 +97,15 @@ static int mongodb_connect(nsp_state *N, MONGODB_CONN *conn, char *url, char *db
 	return 0;
 #undef __FN__
 }
+
+// static void print_json(const bson_t *bson)
+// {
+// 	char *string;
+
+// 	string = bson_as_json(bson, NULL);
+// 	printf("\t%s\n", string);
+// 	bson_free(string);
+// }
 
 NSP_CLASSMETHOD(libnsp_data_mongodb_open)
 {
@@ -137,6 +151,7 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_open)
 	cobj = nsp_setcdata(N, thisobj, "connection", NULL, 0);
 	cobj->val->d.str = (void *)conn;
 	cobj->val->size = sizeof(MONGODB_CONN) + 1;
+	mongodb_connect(N, conn, url, db, coll);
 	return 0;
 #undef __FN__
 }
@@ -162,133 +177,163 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_close)
 #undef __FN__
 }
 
-NSP_CLASSMETHOD(libnsp_data_mongodb_query)
+NSP_CLASSMETHOD(libnsp_data_mongodb_clientcommand)
 {
-#define __FN__ __FILE__ ":libnsp_data_mongodb_query()"
-/*
+#define __FN__ __FILE__ ":libnsp_data_mongodb_clientcommand()"
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *cobj;
+	MONGODB_CONN *conn = getconn(N);
+	bson_error_t error;
+	bson_t *command;
+	bson_t reply;
+	char *json;
+
+	if (!nsp_istable(thisobj)) n_error(N, NE_SYNTAX, __FN__, "expected a table for 'this'");
+	cobj = nsp_getobj(N, &N->context->l, "1");
+	if (!nsp_isstr(cobj)) n_error(N, NE_SYNTAX, __FN__, "expected a string for arg1");
+	json = cobj->val->d.str;
+	command = bson_new_from_json((const uint8_t *)json, -1, &error);
+	if (mongoc_client_command_simple(conn->client, "admin", command, NULL, &reply, &error)) {
+		char *string = bson_as_json(&reply, NULL);
+		nsp_setstr(N, &N->r, "", string, -1);
+		bson_free(string);
+	} else {
+		nsp_setstr(N, &N->r, "", error.message, -1);
+	}
+	bson_destroy(command);
+	bson_destroy(&reply);
+	return 0;
+#undef __FN__
+}
+
+NSP_CLASSMETHOD(libnsp_data_mongodb_collectioncommand)
+{
+#define __FN__ __FILE__ ":libnsp_data_mongodb_collectioncommand()"
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *cobj;
+	MONGODB_CONN *conn = getconn(N);
+	bson_error_t error;
+	bson_t *command;
+	bson_t reply;
+	char *json;
+
+	if (!nsp_istable(thisobj)) n_error(N, NE_SYNTAX, __FN__, "expected a table for 'this'");
+	cobj = nsp_getobj(N, &N->context->l, "1");
+	if (!nsp_isstr(cobj)) n_error(N, NE_SYNTAX, __FN__, "expected a string for arg1");
+	json = cobj->val->d.str;
+	command = bson_new_from_json((const uint8_t *)json, -1, &error);
+	if (mongoc_collection_command_simple(conn->collection, command, NULL, &reply, &error)) {
+		char *string = bson_as_json(&reply, NULL);
+		nsp_setstr(N, &N->r, "", string, -1);
+		bson_free(string);
+	} else {
+		nsp_setstr(N, &N->r, "", error.message, -1);
+	}
+	bson_destroy(command);
+	bson_destroy(&reply);
+	return 0;
+#undef __FN__
+}
+
+NSP_CLASSMETHOD(libnsp_data_mongodb_collectioninsert)
+{
+#define __FN__ __FILE__ ":libnsp_data_mongodb_collectioninsert()"
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *cobj;
+	MONGODB_CONN *conn = getconn(N);
+	bson_error_t error;
+	bson_t *command;
+	char *json;
+
+	if (!nsp_istable(thisobj)) n_error(N, NE_SYNTAX, __FN__, "expected a table for 'this'");
+	cobj = nsp_getobj(N, &N->context->l, "1");
+	if (!nsp_isstr(cobj)) n_error(N, NE_SYNTAX, __FN__, "expected a string for arg1");
+	json = cobj->val->d.str;
+	command = bson_new_from_json((const uint8_t *)json, -1, &error);
+	if (mongoc_collection_insert(conn->collection, MONGOC_INSERT_NONE, command, NULL, &error)) {
+	} else {
+		nsp_setstr(N, &N->r, "", error.message, -1);
+	}
+	bson_destroy(command);
+	return 0;
+#undef __FN__
+}
+
+NSP_CLASSMETHOD(libnsp_data_mongodb_collectionremove)
+{
+#define __FN__ __FILE__ ":libnsp_data_mongodb_collectionremove()"
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *cobj;
+	MONGODB_CONN *conn = getconn(N);
+	bson_error_t error;
+	bson_t *command;
+	char *json;
+
+	if (!nsp_istable(thisobj)) n_error(N, NE_SYNTAX, __FN__, "expected a table for 'this'");
+	cobj = nsp_getobj(N, &N->context->l, "1");
+	if (!nsp_isstr(cobj)) n_error(N, NE_SYNTAX, __FN__, "expected a string for arg1");
+	json = cobj->val->d.str;
+	command = bson_new_from_json((const uint8_t *)json, -1, &error);
+	if (mongoc_collection_remove(conn->collection, MONGOC_REMOVE_SINGLE_REMOVE, command, NULL, &error)) {
+	} else {
+		nsp_setstr(N, &N->r, "", error.message, -1);
+	}
+	bson_destroy(command);
+	return 0;
+#undef __FN__
+}
+
+NSP_CLASSMETHOD(libnsp_data_mongodb_collectionfind)
+{
+#define __FN__ __FILE__ ":libnsp_data_mongodb_collectionfind()"
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
+	obj_t *cobj;
+	MONGODB_CONN *conn = getconn(N);
+	bson_error_t error;
+	bson_t *command;
+	char *json;
+
+	if (!nsp_istable(thisobj)) n_error(N, NE_SYNTAX, __FN__, "expected a table for 'this'");
+	cobj = nsp_getobj(N, &N->context->l, "1");
+	if (!nsp_isstr(cobj)) n_error(N, NE_SYNTAX, __FN__, "expected a string for arg1");
+	json = cobj->val->d.str;
+	command = bson_new_from_json((const uint8_t *)json, -1, &error);
+	conn->cursor = mongoc_collection_find(conn->collection, MONGOC_QUERY_NONE, 0, 0, 0, command, NULL, NULL);
+	bson_destroy(command);
+	return 0;
+#undef __FN__
+}
+
+NSP_CLASSMETHOD(libnsp_data_mongodb_collectiongetnext)
+{
+#define __FN__ __FILE__ ":libnsp_data_mongodb_collectiongetnext()"
 	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
 	MONGODB_CONN *conn = getconn(N);
-	obj_t *cobj;
-	char *sqlquery = NULL;
-	//short expect_results = 1;
+	const bson_t *doc;
 
-	if (nsp_isstr((cobj = nsp_getobj(N, &N->context->l, "1")))) {
-		sqlquery = cobj->val->d.str;
+	if (!nsp_istable(thisobj)) n_error(N, NE_SYNTAX, __FN__, "expected a table for 'this'");
+	if (mongoc_cursor_next(conn->cursor, &doc)) {
+		char *string = bson_as_json(doc, NULL);
+		nsp_setstr(N, &N->r, "", string, -1);
+		bson_free(string);
 	}
-	else if (nsp_isstr((cobj = nsp_getobj(N, thisobj, "sqlquery")))) {
-		sqlquery = cobj->val->d.str;
-	}
-	else {
-		n_error(N, NE_SYNTAX, __FN__, "expected a string for sqlquery");
-	}
-	//if (nsp_isbool((cobj = nsp_getobj(N, &N->context->l, "2")))) {
-	//	expect_results = nsp_tobool(N, cobj);
-	//}
-	if (mongodb_ping(conn->mysock) != 0) {
-		n_warn(N, __FN__, "connection lost");
-		return -1;
-	}
-	if (mongodb_query(conn->mysock, sqlquery)) {
-		n_warn(N, __FN__, "query error '%s'\r\n%s", mongodb_error(conn->mysock), sqlquery);
-		return -1;
-	}
-	nsp_setstr(N, thisobj, "last_query", sqlquery, -1);
-	nsp_setnum(N, thisobj, "changes", (long)mongodb_affected_rows(&conn->mongodb));
-*/
 	return 0;
 #undef __FN__
 }
 
-NSP_CLASSMETHOD(libnsp_data_mongodb_getnext)
+NSP_CLASSMETHOD(libnsp_data_mongodb_collectionendfind)
 {
-#define __FN__ __FILE__ ":libnsp_data_mongodb_getnext()"
-/*
-	MONGODB_CONN *conn = getconn(N);
-	MONGODB_ROW MYrow;
-	MONGODB_FIELD *MYfield;
-	obj_t tobj;
-	char *p;
-	unsigned int field, numfields;
-
-	if (conn->myres == NULL) {
-		if (!(conn->myres = mongodb_use_result(conn->mysock))) {
-			n_warn(N, __FN__, "mongodb_use_result error '%s'", mongodb_error(conn->mysock));
-		}
-	}
-	if ((MYrow = mongodb_fetch_row(conn->myres)) == NULL) {
-		if (conn->myres != NULL) {
-			mongodb_free_result(conn->myres);
-			conn->myres = NULL;
-		}
-		return 0;
-	}
-	numfields = (int)mongodb_num_fields(conn->myres);
-	nc_memset((void *)&tobj, 0, sizeof(obj_t));
-	tobj.val = n_newval(N, NT_TABLE);
-	tobj.val->attr &= ~NST_AUTOSORT;
-	for (field = 0;field < numfields;field++) {
-		p = MYrow[field] ? MYrow[field] : "NULL";
-		MYfield = mongodb_fetch_field_direct(conn->myres, field);
-		switch (MYfield->type) {
-		case MONGODB_TYPE_DECIMAL:
-		case MONGODB_TYPE_LONG:
-			nsp_setnum(N, &tobj, MYfield->name, atoi(p));
-			break;
-		case MONGODB_TYPE_FLOAT:
-			nsp_setstr(N, &tobj, MYfield->name, p, -1);
-			break;
-		case MONGODB_TYPE_VAR_STRING:
-			nsp_setstr(N, &tobj, MYfield->name, p, -1);
-			break;
-		case MONGODB_TYPE_NULL:
-			nsp_setstr(N, &tobj, MYfield->name, "NULL", -1);
-			break;
-		default:
-			nsp_setstr(N, &tobj, MYfield->name, p, -1);
-			n_warn(N, __FN__, "Unhandled type %d for %s!", MYfield->type, MYfield->name);
-			break;
-		}
-	}
-	nsp_linkval(N, &N->r, &tobj);
-	nsp_unlinkval(N, &tobj);
-*/
-	return 0;
-#undef __FN__
-}
-
-NSP_CLASSMETHOD(libnsp_data_mongodb_endquery)
-{
-#define __FN__ __FILE__ ":libnsp_data_mongodb_endquery()"
-/*
+#define __FN__ __FILE__ ":libnsp_data_mongodb_collectionendfind()"
+	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
 	MONGODB_CONN *conn = getconn(N);
 
-	if (conn->myres != NULL) {
-		mongodb_free_result(conn->myres);
-		conn->myres = NULL;
+	if (!nsp_istable(thisobj)) n_error(N, NE_SYNTAX, __FN__, "expected a table for 'this'");
+	if (conn->cursor) {
+		mongoc_cursor_destroy(conn->cursor);
+		conn->cursor=NULL;
 	}
-*/
 	return 0;
 #undef __FN__
-}
-
-NSP_CLASSMETHOD(libnsp_data_mongodb_version)
-{
-/*
-	char buf[64];
-
-	snprintf(buf, sizeof(buf) - 1, "%s / %s", "SQLITE_VERSION", mongodb_get_client_info());
-	nsp_setstr(N, &N->r, "", buf, -1);
-*/
-	return 0;
-}
-
-static void print_json(const bson_t *bson)
-{
-	char *string;
-
-	string = bson_as_json(bson, NULL);
-	printf("\t%s\n", string);
-	bson_free(string);
 }
 
 NSP_CLASSMETHOD(libnsp_data_mongodb_test)
@@ -305,6 +350,7 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_test)
 	const char  *jsonquery = "db.users.find()";
 	db.adminCommand( { "hostInfo" : 1 } )
 */
+/*
 	MONGODB_CONN *conn = getconn(N);
 	bson_error_t error;
 	bson_t *command;
@@ -312,11 +358,9 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_test)
 	const bson_t *doc;
 	mongoc_cursor_t *cursor;
 	const char *insertjson = "{\"name\": {\"first\":\"Grace\", \"last\":\"Hopper\"}}";
-	bson_oid_t oid;
+//	bson_oid_t oid;
 
-	mongodb_connect(N, conn, "mongodb://localhost:27017/?appname=executing-example", "nulltest", "users");
 	printf("-------------\n");
-
 	// { "ping" : 1 }
 	command = BCON_NEW("ping", BCON_INT32(1));
 	print_json(command);
@@ -328,9 +372,7 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_test)
 	bson_destroy(command);
 	bson_destroy(&reply);
 	printf("-------------\n");
-
 	// db.adminCommand( { "hostInfo" : 1 } )
-	// { "hostInfo" : 1 }
 	command = BCON_NEW("hostInfo", BCON_INT32(1));
 	print_json(command);
 	if (mongoc_client_command_simple(conn->client, "admin", command, NULL, &reply, &error)) {
@@ -341,7 +383,6 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_test)
 	bson_destroy(command);
 	bson_destroy(&reply);
 	printf("-------------\n");
-
 	// { "collStats" : "users" }
 	command = BCON_NEW("collStats", BCON_UTF8("users"));
 	print_json(command);
@@ -364,20 +405,12 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_test)
 	}
 	bson_destroy(command);
 	printf("-------------\n");
-
-	command = bson_new();
-	print_json(command);
-	cursor = mongoc_collection_find(conn->collection, MONGOC_QUERY_NONE, 0, 0, 0, command, NULL, NULL);
-	while (mongoc_cursor_next(cursor, &doc)) {
-		print_json(doc);
-	}
-	bson_destroy(command);
-	printf("-------------\n");
-	mongoc_cursor_destroy(cursor);
-
-	command = bson_new();
-	bson_oid_init_from_string(&oid, "5d6ad3157c71de5036338641");
-	BSON_APPEND_OID(command, "_id", &oid);
+	// { "_id" : { "$oid" : "5d6ad3157c71de5036338641" } }
+	//command = bson_new();
+	//bson_oid_init_from_string(&oid, "5d6ad3157c71de5036338641");
+	//BSON_APPEND_OID(command, "_id", &oid);
+	const char *json_remove = "{ \"_id\" : { \"$oid\" : \"5d6ad3197c71de503813daa1\" } }";
+	command = bson_new_from_json((const uint8_t *)json_remove, -1, &error);
 	print_json(command);
 	if (mongoc_collection_remove(conn->collection, MONGOC_REMOVE_SINGLE_REMOVE, command, NULL, &error)) {
 		printf("deleted?\n");
@@ -386,8 +419,7 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_test)
 	}
 	bson_destroy(command);
 	printf("-------------\n");
-
-	mongodb_disconnect(N, conn);
+*/
 	return 0;
 }
 
@@ -396,11 +428,7 @@ NSP_CLASS(libnsp_data_mongodb_client)
 #define __FN__ __FILE__ ":libnsp_data_mongodb_client()"
 	obj_t *tobj, *cobj;
 
-//client = mongoc_client_new("mongodb://localhost:27017/?appname=executing-example");
-//database = mongoc_client_get_database(client, "nulltest");
-//collection = mongoc_client_get_collection(client, "nulltest", "users");
-
-	nsp_setstr(N, &N->context->l, "url", "mongodb://localhost:27017/?appname=executing-example", -1);
+	nsp_setstr(N, &N->context->l, "url", "mongodb://localhost:27017/", -1);
 	nsp_setstr(N, &N->context->l, "database", "nulltest", -1);
 	nsp_setstr(N, &N->context->l, "collection", "users", -1);
 //	nsp_setstr(N, &N->context->l, "username", "root", 4);
@@ -445,11 +473,14 @@ int nspmongodb_register_all(nsp_state *N)
 	nsp_setcfunc(N, tobj, "client", (NSP_CFUNC)libnsp_data_mongodb_client);
 	nsp_setcfunc(N, tobj, "open", (NSP_CFUNC)libnsp_data_mongodb_open);
 	nsp_setcfunc(N, tobj, "close", (NSP_CFUNC)libnsp_data_mongodb_close);
-	nsp_setcfunc(N, tobj, "test", (NSP_CFUNC)libnsp_data_mongodb_test);
-	nsp_setcfunc(N, tobj, "query", (NSP_CFUNC)libnsp_data_mongodb_query);
-	nsp_setcfunc(N, tobj, "getnext", (NSP_CFUNC)libnsp_data_mongodb_getnext);
-	nsp_setcfunc(N, tobj, "endquery", (NSP_CFUNC)libnsp_data_mongodb_endquery);
-//	nsp_setcfunc(N, tobj, "version", (NSP_CFUNC)libnsp_data_mongodb_version);
+	//nsp_setcfunc(N, tobj, "test", (NSP_CFUNC)libnsp_data_mongodb_test);
+	nsp_setcfunc(N, tobj, "clientcommand", (NSP_CFUNC)libnsp_data_mongodb_clientcommand);
+	nsp_setcfunc(N, tobj, "collectioncommand", (NSP_CFUNC)libnsp_data_mongodb_collectioncommand);
+	nsp_setcfunc(N, tobj, "collectioninsert", (NSP_CFUNC)libnsp_data_mongodb_collectioninsert);
+	nsp_setcfunc(N, tobj, "collectionremove", (NSP_CFUNC)libnsp_data_mongodb_collectionremove);
+	nsp_setcfunc(N, tobj, "collectionfind", (NSP_CFUNC)libnsp_data_mongodb_collectionfind);
+	nsp_setcfunc(N, tobj, "collectiongetnext", (NSP_CFUNC)libnsp_data_mongodb_collectiongetnext);
+	nsp_setcfunc(N, tobj, "collectionendfind", (NSP_CFUNC)libnsp_data_mongodb_collectionendfind);
 	return 0;
 }
 
