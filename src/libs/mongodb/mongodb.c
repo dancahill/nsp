@@ -181,9 +181,11 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_clientcommand)
 	if (command == NULL) n_error(N, NE_SYNTAX, __FN__, "error parsing command");
 	rc = mongoc_client_command_simple(conn->client, "admin", command, NULL, &reply, &error);
 	if (rc) {
-		char *string = bson_as_json(&reply, NULL);
-		nsp_setstr(N, &N->r, "", string, -1);
-		bson_free(string);
+		bsontoret(N, &reply);
+		//char *string = bson_as_json(&reply, NULL);
+		////nsp_setstr(N, &N->r, "", string, -1);
+		//printf("string = [%s]\r\n", string);
+		//bson_free(string);
 	}
 	bson_destroy(command);
 	bson_destroy(&reply);
@@ -207,9 +209,11 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_collectioncommand)
 	if (command == NULL) n_error(N, NE_SYNTAX, __FN__, "error parsing command");
 	rc = mongoc_collection_command_simple(conn->collection, command, NULL, &reply, &error);
 	if (rc) {
-		char *string = bson_as_json(&reply, NULL);
-		nsp_setstr(N, &N->r, "", string, -1);
-		bson_free(string);
+//		char *string = bson_as_json(&reply, NULL);
+		//nsp_setstr(N, &N->r, "", string, -1);
+		//printf("collectioncommand = [%s]\r\n", string);
+//		bson_free(string);
+		bsontoret(N, &reply);
 	}
 	bson_destroy(command);
 	bson_destroy(&reply);

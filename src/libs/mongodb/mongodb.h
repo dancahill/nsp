@@ -25,7 +25,8 @@
 int nspmongodb_register_all(nsp_state *N);
 
 void nsptobson(nsp_state *N, obj_t *tobj, bson_t *command);
-void bsontonsp(nsp_state *N, bson_t *command, obj_t *tobj);
+void bsontonsp(nsp_state *N, bson_iter_t *iter, obj_t *tobj);
 bson_t *paramtobson(nsp_state *N, obj_t *cobj);
+void bsontoret(nsp_state *N, bson_t *command);
 
 #endif /* HAVE_MONGODB */

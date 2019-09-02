@@ -32,11 +32,9 @@ void nsptobson(nsp_state *N, obj_t *tobj, bson_t *command)
 			BSON_APPEND_BOOL(command, cobj->name, nsp_tobool(N, cobj) ? true : false);
 			break;
 		case NT_NUMBER:
-			//printf("[%s][%f]\r\n", cobj->name, nsp_tonum(N, cobj));
 			BSON_APPEND_INT32(command, cobj->name, nsp_tonum(N, cobj));
 			break;
 		case NT_STRING:
-			//printf("[%s][%s]\r\n", cobj->name, nsp_tostr(N, cobj));
 			BSON_APPEND_UTF8(command, cobj->name, nsp_tostr(N, cobj));
 			break;
 		case NT_NFUNC:
@@ -58,15 +56,73 @@ void nsptobson(nsp_state *N, obj_t *tobj, bson_t *command)
 			break;
 		}
 	}
-	char *string = bson_as_json(command, NULL);
-	printf("nsptobson output = [%s];\r\n", string);
-	bson_free(string);
+	//char *string = bson_as_json(command, NULL);
+	//printf("nsptobson output = [%s];\r\n", string);
+	//bson_free(string);
 #undef __FN__
 }
 
-void bsontonsp(nsp_state *N, bson_t *command, obj_t *tobj)
+void bsontonsp(nsp_state *N, bson_iter_t *iter, obj_t *tobj)
 {
-//	char *string = bson_as_json(&reply, NULL);
+	while (bson_iter_next(iter)) {
+		//printf("bsontonsp() Found element key: \"%s\", type = %d\n", bson_iter_key(iter), bson_iter_type(iter));
+		/*
+		typedef enum {
+		   BSON_TYPE_EOD = 0x00,
+		   BSON_TYPE_DOUBLE = 0x01,
+		   BSON_TYPE_UTF8 = 0x02,
+		   BSON_TYPE_DOCUMENT = 0x03,
+		   BSON_TYPE_ARRAY = 0x04,
+		   BSON_TYPE_BINARY = 0x05,
+		   BSON_TYPE_UNDEFINED = 0x06,
+		   BSON_TYPE_OID = 0x07,
+		   BSON_TYPE_BOOL = 0x08,
+		   BSON_TYPE_DATE_TIME = 0x09,
+		   BSON_TYPE_NULL = 0x0A,
+		   BSON_TYPE_REGEX = 0x0B,
+		   BSON_TYPE_DBPOINTER = 0x0C,
+		   BSON_TYPE_CODE = 0x0D,
+		   BSON_TYPE_SYMBOL = 0x0E,
+		   BSON_TYPE_CODEWSCOPE = 0x0F,
+		   BSON_TYPE_INT32 = 0x10,
+		   BSON_TYPE_TIMESTAMP = 0x11,
+		   BSON_TYPE_INT64 = 0x12,
+		   BSON_TYPE_MAXKEY = 0x7F,
+		   BSON_TYPE_MINKEY = 0xFF,
+		} bson_type_t;
+		*/
+		switch (bson_iter_type(iter)) {
+		case BSON_TYPE_DOUBLE:
+			nsp_setnum(N, tobj, (char *)bson_iter_key(iter), bson_iter_double(iter));
+			break;
+		case BSON_TYPE_UTF8:
+			nsp_setstr(N, tobj, (char *)bson_iter_key(iter), (char *)bson_iter_utf8(iter, NULL), -1);
+			break;
+		case BSON_TYPE_DOCUMENT: {
+			bson_iter_t child;
+
+			if (bson_iter_recurse(iter, &child)) {
+				obj_t *cobj = nsp_settable(N, tobj, (char *)bson_iter_key(iter));
+				bsontonsp(N, &child, cobj);
+			}
+			break;
+		}
+		case BSON_TYPE_BOOL:
+			nsp_setbool(N, tobj, (char *)bson_iter_key(iter), bson_iter_bool(iter));
+			break;
+		case BSON_TYPE_DATE_TIME:
+			printf("bsontonsp() don't know how to process dates yet\n");
+			break;
+		case BSON_TYPE_INT32:
+			nsp_setnum(N, tobj, (char *)bson_iter_key(iter), bson_iter_int32(iter));
+			break;
+		case BSON_TYPE_INT64:
+			nsp_setnum(N, tobj, (char *)bson_iter_key(iter), bson_iter_int64(iter));
+			break;
+		default:
+			printf("bsontonsp() \"%s\" unknown type: %d\n", bson_iter_key(iter), bson_iter_type(iter));
+		}
+	}
 }
 
 bson_t *paramtobson(nsp_state *N, obj_t *cobj)
@@ -85,6 +141,24 @@ bson_t *paramtobson(nsp_state *N, obj_t *cobj)
 	}
 	return command;
 #undef __FN__
+}
+
+void bsontoret(nsp_state *N, bson_t *command)
+{
+	obj_t tobj;
+	bson_iter_t iter;
+
+	//char *string = bson_as_json(command, NULL);
+	//printf("bsontoret() [%s]\r\n", string);
+	//bson_free(string);
+	nc_memset((void *)&tobj, 0, sizeof(obj_t));
+	tobj.val = n_newval(N, NT_TABLE);
+	tobj.val->attr &= ~NST_AUTOSORT;
+	if (bson_iter_init(&iter, command)) {
+		bsontonsp(N, &iter, &tobj);
+	}
+	nsp_linkval(N, &N->r, &tobj);
+	nsp_unlinkval(N, &tobj);
 }
 
 #endif

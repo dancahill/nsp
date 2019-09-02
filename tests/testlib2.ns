@@ -87,30 +87,35 @@ class testlib2 {
 	}
 	function mongodb() {
 		try {
-			local function trim(s) { return serialize(s).replace('\t','').replace('\r','').replace('\n',' '); }
+			local function trim(s) {
+				return serialize(s);
+				//return serialize(s).replace('\t','').replace('\r','').replace('\n',' ');
+			}
 			dl.load("mongodb");
 			conninfo = { url="mongodb://localhost:27017/", database="nulltest", collection="users" };
 			m=new data.mongodb.client();
 			m.open();
 			printf("--beginning clientcommand tests--\r\n");
 
-			q = { ping = 1, pong = {a=1, b="2", c=true} };
-			//q = { ping = 1 };
+			//q = { ping = 1, pong = {a=1, b="2", c=true} };
+			q = { ping = 1 };
 			r=m.clientcommand(q);
-			printf("\tq=[[%s]]\r\n\tr=[[%s]]\r\n", trim(q), r);
+			printf("q = %s\r\nr = %s\r\n", trim(q), trim(r));
 
 			q='{ "ping" : 1 }';
 			r=m.clientcommand(q);
-			printf("\tq=[[%s]]\r\n\tr=[[%s]]\r\n", q, r);
-
+			printf("q = %s\r\nr = %s\r\n", trim(q), trim(r));
 			q='{ "hostInfo" : 1 }';
 			r=m.clientcommand(q);
-			printf("\tq=[[%s]]\r\n\tr=[[%s]]\r\n", q, r);
+			printf("q = %s\r\nr = %s\r\n", trim(q), trim(r));
 
 			printf("--beginning collectioncommand tests--\r\n");
-			q='{ "collStats" : "users" }';
+			//q='{ "collStats" : "users" }';
+			q = { collStats = "users" };
 			r=m.collectioncommand(q);
-			printf("\tq=[[%s]]\r\n\tr=[[%s]]\r\n", q, r);
+			printf("q = %s\r\nr = %s\r\n", trim(q), trim(r));
+
+return;
 
 			printf("--beginning collectioninsert tests--\r\n");
 			q='{ "name" : { "first" : "Dan", "last" : "Cahill" }, "time": "'+time.sqltime()+'" }';
