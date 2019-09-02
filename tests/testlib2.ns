@@ -86,48 +86,58 @@ class testlib2 {
 		file.unlink(ci.database);
 	}
 	function mongodb() {
-		dl.load("mongodb");
-		conninfo = { url="mongodb://localhost:27017/", database="nulltest", collection="users" };
-		m=new data.mongodb.client();
-		m.open();
-		printf("--beginning clientcommand tests--\r\n");
-		q='{ "hostInfo" : 1 }';
-		r=m.clientcommand(q);
-		printf("q=[[%s]]\r\nr=[[%s]]\r\n\r\n", q, r);
-		q='{ "ping" : 1 }';
-		r=m.clientcommand(q);
-		printf("q=[[%s]]\r\nr=[[%s]]\r\n\r\n", q, r);
+		try {
+			dl.load("mongodb");
+			conninfo = { url="mongodb://localhost:27017/", database="nulltest", collection="users" };
+			m=new data.mongodb.client();
+			m.open();
+			printf("--beginning clientcommand tests--\r\n");
+			q='{ "ping" : 1 }';
+			r=m.clientcommand(q);
+			printf("\tq=[[%s]]\r\n\tr=[[%s]]\r\n", q, r);
+			q='{ "hostInfo" : 1 }';
+			r=m.clientcommand(q);
+			printf("\tq=[[%s]]\r\n\tr=[[%s]]\r\n", q, r);
 
-		printf("--beginning collectioncommand tests--\r\n");
-		q='{ "collStats" : "users" }';
-		r=m.collectioncommand(q);
-		printf("q=[[%s]]\r\nr=[[%s]]\r\n\r\n", q, r);
+			printf("--beginning collectioncommand tests--\r\n");
+			q='{ "collStats" : "users" }';
+			r=m.collectioncommand(q);
+			printf("\tq=[[%s]]\r\n\tr=[[%s]]\r\n", q, r);
 
-		printf("--beginning collectioninsert tests--\r\n");
-		q='{ "name" : { "first" : "Dan", "last" : "Cahill" } }';
-		r=m.collectioninsert(q);
-		printf("q=[[%s]]\r\nr=[[%s]]\r\n\r\n", q, r);
+			printf("--beginning collectioninsert tests--\r\n");
+			q='{ "name" : { "first" : "Dan", "last" : "Cahill" }, "time": "'+time.sqltime()+'" }';
+			r=m.collectioninsert(q);
+			printf("\tq=[[%s]]\r\n\tr=[[%s]]\r\n", q, r);
 
-		printf("--beginning collectionremove tests--\r\n");
-		q='{ \"_id\" : { \"$oid\" : \"5d6ad3197c71de503813daa1\" } }';
-		r=m.collectionremove(q);
-		printf("q=[[%s]]\r\nr=[[%s]]\r\n\r\n", q, r);
+			printf("--beginning collectionupdate tests--\r\n");
+			q='{ "name":  "Bob" }';
+			d='{ "name":  "Bob", "rating": 2 }';
+			r=m.collectionupdate(q, d);
+			printf("\tq=[[%s]]\r\n\td=[[%s]]\r\n\tr=[[%s]]\r\n", q, d, r);
 
-		printf("--beginning collectionfind tests--\r\n");
-		//m.collectionfind('{"_id":{"$oid":"5d6b12367c71de08fb215601"}}');
-		m.collectionfind("{}");
-		while ((row=m.collectiongetnext())!=null) {
-			printf("\t%s\r\n", row);
-		}
-		m.collectionendfind();
-
-		var todelete = {
-			"5d6b0d357c71de058165c4b1"
-		};
-		foreach (n,v in todelete) {
-			q='{ \"_id\" : { \"$oid\" : \"'+v+'\" } }';
+			printf("--beginning collectionremove tests--\r\n");
+			q='{ \"_id\" : { \"$oid\" : \"5d6ad3197c71de503813daa1\" } }';
 			r=m.collectionremove(q);
-			printf("q=[[%s]]\r\nr=[[%s]]\r\n\r\n", q, r);
+			printf("\tq=[[%s]]\r\n\tr=[[%s]]\r\n", q, r);
+
+			printf("--beginning collectionfind tests--\r\n");
+			m.collectionfind("{}");
+			//m.collectionfind('{"_id":{"$oid":"5d6b12367c71de08fb215601"}}');
+			while ((row=m.collectiongetnext())!=null) {
+				printf("\t%s\r\n", row);
+			}
+			m.collectionendfind();
+
+			var todelete = {
+				"5d6c611c7c71de67607a15e1"
+			};
+			foreach (n,v in todelete) {
+				q='{ \"_id\" : { \"$oid\" : \"'+v+'\" } }';
+				r=m.collectionremove(q);
+				printf("q=[[%s]]\r\nr=[[%s]]\r\n\r\n", q, r);
+			}
+		} catch (ex) {
+			printf("Exception: %s\r\n", ex.description);
 		}
 	}
 };
