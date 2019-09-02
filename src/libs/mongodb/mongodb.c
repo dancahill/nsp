@@ -17,12 +17,9 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "nsp/nsplib.h"
+#include "mongodb.h"
 
-#define HAVE_MONGODB 1
 #ifdef HAVE_MONGODB
-
-#include <libbson-1.0/bson.h>
-#include <libmongoc-1.0/mongoc.h>
 
 void mongodb_murder(nsp_state *N, obj_t *cobj);
 
@@ -173,7 +170,6 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_clientcommand)
 {
 #define __FN__ __FILE__ ":libnsp_data_mongodb_clientcommand()"
 	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
-	obj_t *cobj;
 	MONGODB_CONN *conn = getconn(N);
 	bson_t *command;
 	bson_t reply;
@@ -181,10 +177,8 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_clientcommand)
 	bson_error_t error;
 
 	if (!nsp_istable(thisobj)) n_error(N, NE_SYNTAX, __FN__, "expected a table for 'this'");
-	cobj = nsp_getobj(N, &N->context->l, "1");
-	n_expect_argtype(N, NT_STRING, 1, cobj, 0);
-	command = bson_new_from_json((const uint8_t *)cobj->val->d.str, -1, &error);
-	if (command == NULL) n_error(N, NE_SYNTAX, __FN__, "%s", error.message);
+	command = paramtobson(N, nsp_getobj(N, &N->context->l, "1"));
+	if (command == NULL) n_error(N, NE_SYNTAX, __FN__, "error parsing command");
 	rc = mongoc_client_command_simple(conn->client, "admin", command, NULL, &reply, &error);
 	if (rc) {
 		char *string = bson_as_json(&reply, NULL);
@@ -202,7 +196,6 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_collectioncommand)
 {
 #define __FN__ __FILE__ ":libnsp_data_mongodb_collectioncommand()"
 	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
-	obj_t *cobj;
 	MONGODB_CONN *conn = getconn(N);
 	bson_t *command;
 	bson_t reply;
@@ -210,10 +203,8 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_collectioncommand)
 	bson_error_t error;
 
 	if (!nsp_istable(thisobj)) n_error(N, NE_SYNTAX, __FN__, "expected a table for 'this'");
-	cobj = nsp_getobj(N, &N->context->l, "1");
-	n_expect_argtype(N, NT_STRING, 1, cobj, 0);
-	command = bson_new_from_json((const uint8_t *)cobj->val->d.str, -1, &error);
-	if (command == NULL) n_error(N, NE_SYNTAX, __FN__, "%s", error.message);
+	command = paramtobson(N, nsp_getobj(N, &N->context->l, "1"));
+	if (command == NULL) n_error(N, NE_SYNTAX, __FN__, "error parsing command");
 	rc = mongoc_collection_command_simple(conn->collection, command, NULL, &reply, &error);
 	if (rc) {
 		char *string = bson_as_json(&reply, NULL);
@@ -231,17 +222,14 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_collectioninsert)
 {
 #define __FN__ __FILE__ ":libnsp_data_mongodb_collectioninsert()"
 	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
-	obj_t *cobj;
 	MONGODB_CONN *conn = getconn(N);
 	bson_t *command;
 	bool rc;
 	bson_error_t error;
 
 	if (!nsp_istable(thisobj)) n_error(N, NE_SYNTAX, __FN__, "expected a table for 'this'");
-	cobj = nsp_getobj(N, &N->context->l, "1");
-	n_expect_argtype(N, NT_STRING, 1, cobj, 0);
-	command = bson_new_from_json((const uint8_t *)cobj->val->d.str, -1, &error);
-	if (command == NULL) n_error(N, NE_SYNTAX, __FN__, "%s", error.message);
+	command = paramtobson(N, nsp_getobj(N, &N->context->l, "1"));
+	if (command == NULL) n_error(N, NE_SYNTAX, __FN__, "error parsing command");
 	rc = mongoc_collection_insert(conn->collection, MONGOC_INSERT_NONE, command, NULL, &error);
 	if (rc) { }
 	bson_destroy(command);
@@ -254,7 +242,6 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_collectionupdate)
 {
 #define __FN__ __FILE__ ":libnsp_data_mongodb_collectionupdate()"
 	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
-	obj_t *cobj1, *cobj2;
 	MONGODB_CONN *conn = getconn(N);
 	bson_t *selector;
 	bson_t *update;
@@ -262,16 +249,12 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_collectionupdate)
 	bson_error_t error;
 
 	if (!nsp_istable(thisobj)) n_error(N, NE_SYNTAX, __FN__, "expected a table for 'this'");
-	cobj1 = nsp_getobj(N, &N->context->l, "1");
-	cobj2 = nsp_getobj(N, &N->context->l, "2");
-	n_expect_argtype(N, NT_STRING, 1, cobj1, 0);
-	n_expect_argtype(N, NT_STRING, 2, cobj2, 0);
-	selector = bson_new_from_json((const uint8_t *)cobj1->val->d.str, -1, &error);
-	if (selector == NULL) n_error(N, NE_SYNTAX, __FN__, "%s", error.message);
-	update = bson_new_from_json((const uint8_t *)cobj2->val->d.str, -1, &error);
+	selector = paramtobson(N, nsp_getobj(N, &N->context->l, "1"));
+	if (selector == NULL) n_error(N, NE_SYNTAX, __FN__, "error parsing command");
+	update = paramtobson(N, nsp_getobj(N, &N->context->l, "2"));
 	if (update == NULL) {
 		bson_destroy(selector);
-		n_error(N, NE_SYNTAX, __FN__, "%s", error.message);
+		n_error(N, NE_SYNTAX, __FN__, "error parsing command");
 	}
 	//MONGOC_UPDATE_MULTI_UPDATE
 	rc = mongoc_collection_update(conn->collection, MONGOC_UPDATE_NONE, selector, update, NULL, &error);
@@ -287,17 +270,14 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_collectionremove)
 {
 #define __FN__ __FILE__ ":libnsp_data_mongodb_collectionremove()"
 	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
-	obj_t *cobj;
 	MONGODB_CONN *conn = getconn(N);
 	bson_t *command;
 	bool rc;
 	bson_error_t error;
 
 	if (!nsp_istable(thisobj)) n_error(N, NE_SYNTAX, __FN__, "expected a table for 'this'");
-	cobj = nsp_getobj(N, &N->context->l, "1");
-	n_expect_argtype(N, NT_STRING, 1, cobj, 0);
-	command = bson_new_from_json((const uint8_t *)cobj->val->d.str, -1, &error);
-	if (command == NULL) n_error(N, NE_SYNTAX, __FN__, "%s", error.message);
+	command = paramtobson(N, nsp_getobj(N, &N->context->l, "1"));
+	if (command == NULL) n_error(N, NE_SYNTAX, __FN__, "error parsing command");
 	rc = mongoc_collection_remove(conn->collection, MONGOC_REMOVE_SINGLE_REMOVE, command, NULL, &error);
 	if (rc) { }
 	bson_destroy(command);
@@ -310,16 +290,12 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_collectionfind)
 {
 #define __FN__ __FILE__ ":libnsp_data_mongodb_collectionfind()"
 	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
-	obj_t *cobj;
 	MONGODB_CONN *conn = getconn(N);
 	bson_t *command;
-	bson_error_t error;
 
 	if (!nsp_istable(thisobj)) n_error(N, NE_SYNTAX, __FN__, "expected a table for 'this'");
-	cobj = nsp_getobj(N, &N->context->l, "1");
-	n_expect_argtype(N, NT_STRING, 1, cobj, 0);
-	command = bson_new_from_json((const uint8_t *)cobj->val->d.str, -1, &error);
-	if (command == NULL) n_error(N, NE_SYNTAX, __FN__, "%s", error.message);
+	command = paramtobson(N, nsp_getobj(N, &N->context->l, "1"));
+	if (command == NULL) n_error(N, NE_SYNTAX, __FN__, "error parsing command");
 	conn->cursor = mongoc_collection_find(conn->collection, MONGOC_QUERY_NONE, 0, 0, 0, command, NULL, NULL);
 	bson_destroy(command);
 	return 0;

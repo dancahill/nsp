@@ -87,14 +87,22 @@ class testlib2 {
 	}
 	function mongodb() {
 		try {
+			local function trim(s) { return serialize(s).replace('\t','').replace('\r','').replace('\n',' '); }
 			dl.load("mongodb");
 			conninfo = { url="mongodb://localhost:27017/", database="nulltest", collection="users" };
 			m=new data.mongodb.client();
 			m.open();
 			printf("--beginning clientcommand tests--\r\n");
+
+			q = { ping = 1, pong = {a=1, b="2", c=true} };
+			//q = { ping = 1 };
+			r=m.clientcommand(q);
+			printf("\tq=[[%s]]\r\n\tr=[[%s]]\r\n", trim(q), r);
+
 			q='{ "ping" : 1 }';
 			r=m.clientcommand(q);
 			printf("\tq=[[%s]]\r\n\tr=[[%s]]\r\n", q, r);
+
 			q='{ "hostInfo" : 1 }';
 			r=m.clientcommand(q);
 			printf("\tq=[[%s]]\r\n\tr=[[%s]]\r\n", q, r);
@@ -112,6 +120,10 @@ class testlib2 {
 			printf("--beginning collectionupdate tests--\r\n");
 			q='{ "name":  "Bob" }';
 			d='{ "name":  "Bob", "rating": 2 }';
+			r=m.collectionupdate(q, d);
+			printf("\tq=[[%s]]\r\n\td=[[%s]]\r\n\tr=[[%s]]\r\n", q, d, r);
+			q='{ "_id" : { "$oid" : "5d6c615f7c71de67c00c8161" } }';
+			d='{ "time": "'+time.sqltime()+'" }';
 			r=m.collectionupdate(q, d);
 			printf("\tq=[[%s]]\r\n\td=[[%s]]\r\n\tr=[[%s]]\r\n", q, d, r);
 

@@ -68,6 +68,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bson.c" />
     <ClCompile Include="mongodb.c" />
   </ItemGroup>
   <ItemGroup>

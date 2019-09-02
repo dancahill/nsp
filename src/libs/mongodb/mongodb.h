@@ -16,6 +16,16 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+//#define HAVE_MONGODB 1
 #ifdef HAVE_MONGODB
+
+#include <libbson-1.0/bson.h>
+#include <libmongoc-1.0/mongoc.h>
+
 int nspmongodb_register_all(nsp_state *N);
+
+void nsptobson(nsp_state *N, obj_t *tobj, bson_t *command);
+void bsontonsp(nsp_state *N, bson_t *command, obj_t *tobj);
+bson_t *paramtobson(nsp_state *N, obj_t *cobj);
+
 #endif /* HAVE_MONGODB */

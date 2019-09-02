@@ -5,7 +5,7 @@ CFLAGS  = CFLAGS+" -I../../../include ";
 if (CC=='cl.exe') CFLAGS=CFLAGS+"/c /Fo";
 else if (CC=='tcc.exe') CFLAGS=CFLAGS+"-c -o";
 else CFLAGS=CFLAGS+"-c -o ";
-OBJECTS = "mongodb.o";
+OBJECTS = "mongodb.o bson.o";
 TNAME   = "libnsp_mongodb";
 if (cmd==null) if (_ARGS[2]=='clean') cmd='clean'; else cmd='build';
 if (cmd=='build') {
