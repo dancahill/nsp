@@ -107,6 +107,13 @@ void bsontonsp(nsp_state *N, bson_iter_t *iter, obj_t *tobj)
 			}
 			break;
 		}
+		case BSON_TYPE_OID: {
+			char str[25];
+
+			bson_oid_to_string(bson_iter_oid(iter), str);
+			nsp_setstr(N, tobj, (char *)bson_iter_key(iter), str, -1);
+			break;
+		}
 		case BSON_TYPE_BOOL:
 			nsp_setbool(N, tobj, (char *)bson_iter_key(iter), bson_iter_bool(iter));
 			break;
@@ -120,7 +127,7 @@ void bsontonsp(nsp_state *N, bson_iter_t *iter, obj_t *tobj)
 			nsp_setnum(N, tobj, (char *)bson_iter_key(iter), bson_iter_int64(iter));
 			break;
 		default:
-			printf("bsontonsp() \"%s\" unknown type: %d\n", bson_iter_key(iter), bson_iter_type(iter));
+			n_warn(N, "bsontonsp()", "\"%s\" unknown type: %d\n", bson_iter_key(iter), bson_iter_type(iter));
 		}
 	}
 }
@@ -151,14 +158,14 @@ void bsontoret(nsp_state *N, bson_t *command)
 	//char *string = bson_as_json(command, NULL);
 	//printf("bsontoret() [%s]\r\n", string);
 	//bson_free(string);
-	nc_memset((void *)&tobj, 0, sizeof(obj_t));
-	tobj.val = n_newval(N, NT_TABLE);
-	tobj.val->attr &= ~NST_AUTOSORT;
 	if (bson_iter_init(&iter, command)) {
+		nc_memset((void *)& tobj, 0, sizeof(obj_t));
+		tobj.val = n_newval(N, NT_TABLE);
+		tobj.val->attr &= ~NST_AUTOSORT;
 		bsontonsp(N, &iter, &tobj);
+		nsp_linkval(N, &N->r, &tobj);
+		nsp_unlinkval(N, &tobj);
 	}
-	nsp_linkval(N, &N->r, &tobj);
-	nsp_unlinkval(N, &tobj);
 }
 
 #endif

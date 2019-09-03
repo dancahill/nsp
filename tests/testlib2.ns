@@ -86,75 +86,206 @@ class testlib2 {
 		file.unlink(ci.database);
 	}
 	function mongodb() {
+		function trim(s) {
+			return serialize(s);
+			//return serialize(s).replace('\t','').replace('\r','').replace('\n',' ');
+		}
+		class mongo {
+			function constructor() {
+				dl.load("mongodb");
+
+				/*
+				client = mongoc_client_new("mongodb://localhost:27017/?appname=executing-example");
+				database = mongoc_client_get_database(client, "nulltest");
+				collection = mongoc_client_get_collection(client, "nulltest", "users");
+				"db.users.insertOne( { name: "Bob", age: 42 } )"
+				const char  *json = "{\"name\": {\"first\":\"Grace\", \"last\":\"Hopper\"}}";
+				const char  *jsonquery = "db.users.find()";
+				const char  *jsoninsert = "db.users.insert({\"name\": {\"first\":\"Grace\", \"last\":\"Hopper\"}})";
+				const char  *jsoninsert = "{\"name\": {\"first\":\"Grace\", \"last\":\"Hopper\"}}";
+				const char  *jsonquery = "db.users.find()";
+				db.adminCommand( { "hostInfo" : 1 } )
+
+				connecting to: localhost:27017/test
+				> use admin
+				switched to db admin
+				> db.auth( { user: "root", pwd: "test" } )
+				1
+				> use nulltest
+				switched to db nulltest
+				> db.users.find()
+				{ "_id" : ObjectId("5d6a8af215a72eb40448b8dc"), "name" : "Bob", "rating" : 2 }
+				{ "_id" : ObjectId("5d6c615f7c71de67c00c8161"), "time" : "2019-09-02 14:57:01" }
+				>
+				db.dropDatabase()
+				*/
+
+				//mongo localhost:27017/admin -u "root" -p "test"
+				//mongoc_client_t *client =  mongoc_client_new ("mongodb://user:password@localhost/?authSource=mydb");
+				//conninfo = { url="mongodb://root:test@localhost:27017/admin", database="nulltest", collection="users" };
+				conninfo = { url="mongodb://root:test@localhost:27017/", database="nulltest", collection="users" };
+				//conninfo = { url="mongodb://root:test@localhost:27017/" };
+				this.client = new data.mongodb.client(conninfo);
+				this.client.open();
+				//print("serialize(client) = ",serialize(client));
+				//client.db.use("nulltest2", "users");
+				//io.flush();
+
+				//printf('client.db.use("nulltest2", "users");\r\n');
+				//client.db.use("nulltest3", "users");
+
+				//db=client.db;
+				client.db.use("nulltest2", "users");
+
+/*
+				db.printstuff=function() {
+					printf("[%s][%s]\r\n", typeof(this), this);
+					printf("[%s][%s]\r\n", typeof(this.client), this.client);
+					printf("[%s][%s]\r\n", typeof(this.client.database), this.client.database);
+					printf("[%s][%s]\r\n", typeof(this.client.collection), this.client.collection);
+					printf("data.mongodb.client.db.collection = [%s][%s]\r\n", typeof(data.mongodb.client.db.collection), data.mongodb.client.db.collection);
+					printf("this.client.connection = [%s][%s]\r\n", typeof(this.client.connection), this.client.connection);
+				}
+				printf("[%s][%s]\r\n", typeof(db), db);
+				printf("[%s][%s]\r\n", typeof(db.client), db.client);
+				printf("[%s][%s]\r\n", typeof(db.client.database), db.client.database);
+				printf("[%s][%s]\r\n", typeof(db.client.collection), db.client.collection);
+				printf("db.client.connection = [%s][%s]\r\n", typeof(db.client.connection), db.client.connection);
+				db.printstuff();
+				printf('db.use("nulltest2", "users");\r\n');
+				db.use("nulltest2", "users");
+				io.flush();
+*/
+				printf("client.db.name = [%s][%s]\r\n", typeof(client.db.name), client.db.name);
+				printf("client.collection.name = [%s][%s]\r\n", typeof(client.collection.name), client.collection.name);
+				printf("db.client.db.name = [%s][%s]\r\n", typeof(db.client.db.name), db.client.db.name);
+				printf("db.client.collection.name = [%s][%s]\r\n", typeof(db.client.collection.name), db.client.collection.name);
+
+				q = { ping = 1 };
+				r=client.clientcommand(q);
+				printf("q = %s\r\nr = %s\r\n", trim(q), trim(r));
+			}
+			function destructor() {
+				print("shutting down mongo client\r\n");
+				io.flush();
+				client.close();
+			}
+			function clientcommand() {
+				printf("--beginning clientcommand tests--\r\n");
+
+				//q='{ "db.auth": { "user": "root", "pwd": "test" } }';
+				//r=client.clientcommand(q);
+				//printf("q = %s\r\nr = %s\r\n", trim(q), trim(r));
+
+				printf("client.db.name = [%s][%s]\r\n", typeof(client.db.name), client.db.name);
+				printf("client.collection.name = [%s][%s]\r\n", typeof(client.collection.name), client.collection.name);
+				printf("client.clientcommand = [%s][%s]\r\n", typeof(client.clientcommand), client.clientcommand);
+				printf("this.client.clientcommand = [%s][%s]\r\n", typeof(this.client.clientcommand), this.client.clientcommand);
+
+				//q = { ping = 1, pong = {a=1, b="2", c=true} };
+				q = { ping = 1 };
+				r=client.clientcommand(q);
+				printf("q = %s\r\nr = %s\r\n", trim(q), trim(r));
+
+				q='{ "ping" : 1 }';
+				r=client.clientcommand(q);
+				printf("q = %s\r\nr = %s\r\n", trim(q), trim(r));
+
+				//q='{ "hostInfo" : 1 }';
+				//r=client.clientcommand(q);
+				//printf("q = %s\r\nr = %s\r\n", trim(q), trim(r));
+
+				printf("client.collection = [%s][%s]\r\n", typeof(client.collection), client.collection);
+				printf("client.collection.client = [%s][%s]\r\n", typeof(client.collection.client), client.collection.client);
+				printf("client.collection.client.connection = [%s][%s]\r\n", typeof(client.collection.client.connection), client.collection.client.connection);
+
+				c=client.collection;
+				r=c.insert(q);
+				printf("q = %s\r\nr = %s\r\n", trim(q), trim(r));
+			}
+			function collectioncommand() {
+				printf("--beginning collectioncommand tests--\r\n");
+				//q='{ "collStats" : "users" }';
+				q = { collStats = "users" };
+				try {
+					r=this.client.collectioncommand(q);
+				} catch (ex) {
+					print("client.collectioncommand(q) failed. this is normal the first time\r\n");
+				}
+				printf("q = %s\r\nr = %s\r\n", trim(q), trim(r));
+			}
+			function collectioninsert() {
+				printf("--beginning collectioninsert tests--\r\n");
+				q='{ "name" : { "first" : "Dan", "last" : "Cahill" }, "time": "'+time.sqltime()+'" }';
+				//r=client.collection.insert(q);
+				//c=client.collection;
+				//r=c.insert(q);
+				printf("client.connection = [%s][%s]\r\n", typeof(client.connection), client.connection);
+				printf("client.collection.insert = [%s][%s]\r\n", typeof(client.collection.insert), client.collection.insert);
+				r=client.collection.insert(q);
+				printf("q = %s\r\nr = %s\r\n", trim(q), trim(r));
+			}
+			function collectionupdate() {
+				printf("--beginning collectionupdate tests--\r\n");
+				q='{ "name":  "Bob" }';
+				d='{ "name":  "Bob", "rating": 2 }';
+				r=client.collection.update(q, d);
+				printf("q = %s\r\nd = %s\r\nr = %s\r\n", trim(q), trim(d), trim(r));
+				q='{ "_id" : { "$oid" : "5d6c615f7c71de67c00c8161" } }';
+				d='{ "time": "'+time.sqltime()+'" }';
+				r=client.collection.update(q, d);
+				printf("q = %s\r\nd = %s\r\nr = %s\r\n", trim(q), trim(d), trim(r));
+			}
+			function collectionremove() {
+				printf("--beginning collectionremove tests--\r\n");
+				q='{ \"_id\" : { \"$oid\" : \"5d6ad3197c71de503813daa1\" } }';
+				r=client.collection.remove(q);
+				printf("q = %s\r\nr = %s\r\n", trim(q), trim(r));
+			}
+			function collectionfind() {
+				printf("--beginning collectionfind tests--\r\n");
+
+				//client.collectionfind('{"_id": {"$oid": "5d6ca0987c71de2f1f052dd1"}}');
+				//client.collectionfind('{"name": {"first": "Dan"}}');
+				//client.collectionfind('{ "name.first": "Dan" }');
+				client.collection.find({["name.first"]="Dan"});
+				while ((row=client.collection.getnext())!=null) {
+					printf("\t%s\r\n", trim(row));
+					q='{ \"_id\" : { \"$oid\" : \"'+row._id+'\" } }';
+					r=client.collection.remove(q);
+					printf("q = %s\r\n", trim(q));
+				}
+				//client.collection.endfind();
+
+				client.collection.find("{}");
+				//m.collectionfind('{"_id":{"$oid":"5d6b12367c71de08fb215601"}}');
+				while ((row=client.collection.getnext())!=null) {
+					printf("\t%s\r\n", trim(row));
+				}
+				client.collection.endfind();
+
+				var todelete = {
+					"5d6c611c7c71de67607a15e1"
+				};
+				foreach (n,v in todelete) {
+					q='{ \"_id\" : { \"$oid\" : \"'+v+'\" } }';
+					r=client.collection.remove(q);
+					printf("q=[[%s]]\r\nr=[[%s]]\r\n\r\n", q, r);
+				}
+			}
+		}
 		try {
-			local function trim(s) {
-				return serialize(s);
-				//return serialize(s).replace('\t','').replace('\r','').replace('\n',' ');
-			}
-			dl.load("mongodb");
-			conninfo = { url="mongodb://localhost:27017/", database="nulltest", collection="users" };
-			m=new data.mongodb.client();
-			m.open();
-			printf("--beginning clientcommand tests--\r\n");
-
-			//q = { ping = 1, pong = {a=1, b="2", c=true} };
-			q = { ping = 1 };
-			r=m.clientcommand(q);
-			printf("q = %s\r\nr = %s\r\n", trim(q), trim(r));
-
-			q='{ "ping" : 1 }';
-			r=m.clientcommand(q);
-			printf("q = %s\r\nr = %s\r\n", trim(q), trim(r));
-			q='{ "hostInfo" : 1 }';
-			r=m.clientcommand(q);
-			printf("q = %s\r\nr = %s\r\n", trim(q), trim(r));
-
-			printf("--beginning collectioncommand tests--\r\n");
-			//q='{ "collStats" : "users" }';
-			q = { collStats = "users" };
-			r=m.collectioncommand(q);
-			printf("q = %s\r\nr = %s\r\n", trim(q), trim(r));
-
-return;
-
-			printf("--beginning collectioninsert tests--\r\n");
-			q='{ "name" : { "first" : "Dan", "last" : "Cahill" }, "time": "'+time.sqltime()+'" }';
-			r=m.collectioninsert(q);
-			printf("\tq=[[%s]]\r\n\tr=[[%s]]\r\n", q, r);
-
-			printf("--beginning collectionupdate tests--\r\n");
-			q='{ "name":  "Bob" }';
-			d='{ "name":  "Bob", "rating": 2 }';
-			r=m.collectionupdate(q, d);
-			printf("\tq=[[%s]]\r\n\td=[[%s]]\r\n\tr=[[%s]]\r\n", q, d, r);
-			q='{ "_id" : { "$oid" : "5d6c615f7c71de67c00c8161" } }';
-			d='{ "time": "'+time.sqltime()+'" }';
-			r=m.collectionupdate(q, d);
-			printf("\tq=[[%s]]\r\n\td=[[%s]]\r\n\tr=[[%s]]\r\n", q, d, r);
-
-			printf("--beginning collectionremove tests--\r\n");
-			q='{ \"_id\" : { \"$oid\" : \"5d6ad3197c71de503813daa1\" } }';
-			r=m.collectionremove(q);
-			printf("\tq=[[%s]]\r\n\tr=[[%s]]\r\n", q, r);
-
-			printf("--beginning collectionfind tests--\r\n");
-			m.collectionfind("{}");
-			//m.collectionfind('{"_id":{"$oid":"5d6b12367c71de08fb215601"}}');
-			while ((row=m.collectiongetnext())!=null) {
-				printf("\t%s\r\n", row);
-			}
-			m.collectionendfind();
-
-			var todelete = {
-				"5d6c611c7c71de67607a15e1"
-			};
-			foreach (n,v in todelete) {
-				q='{ \"_id\" : { \"$oid\" : \"'+v+'\" } }';
-				r=m.collectionremove(q);
-				printf("q=[[%s]]\r\nr=[[%s]]\r\n\r\n", q, r);
-			}
+			test = new mongo();
+			test.clientcommand();
+			test.collectioninsert();
+			test.collectionupdate();
+			test.collectionremove();
+			test.collectionfind();
+			test.collectioncommand();
 		} catch (ex) {
 			printf("Exception: %s\r\n", ex.description);
+		} finally {
+			delete test;
 		}
 	}
 };
