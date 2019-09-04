@@ -88,7 +88,6 @@ static int mongodb_connect(nsp_state *N, MONGODB_CONN *conn, char *url, char *db
 {
 #define __FN__ __FILE__ ":mongodbConnect()"
 	mongoc_init();
-	printf("url=%s\r\n", url);
 	conn->client = mongoc_client_new(url);
 	if (!conn->client) n_error(N, NE_SYNTAX, __FN__, "mongoc_client_new() returned NULL");
 	conn->database = mongoc_client_get_database(conn->client, db);
@@ -178,9 +177,9 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_close)
 #undef __FN__
 }
 
-NSP_CLASSMETHOD(libnsp_data_mongodb_use)
+NSP_CLASSMETHOD(libnsp_data_mongodb_db_use)
 {
-#define __FN__ __FILE__ ":libnsp_data_mongodb_use()"
+#define __FN__ __FILE__ ":libnsp_data_mongodb_db_use()"
 	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
 	obj_t *clientobj = nsp_getobj(N, thisobj, "client");
 	obj_t *cobj1, *cobj2;
@@ -221,7 +220,6 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_use)
 #undef __FN__
 }
 
-
 NSP_CLASSMETHOD(libnsp_data_mongodb_clientcommand)
 {
 #define __FN__ __FILE__ ":libnsp_data_mongodb_clientcommand()"
@@ -250,9 +248,9 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_clientcommand)
 #undef __FN__
 }
 
-NSP_CLASSMETHOD(libnsp_data_mongodb_collectioncommand)
+NSP_CLASSMETHOD(libnsp_data_mongodb_collection_command)
 {
-#define __FN__ __FILE__ ":libnsp_data_mongodb_collectioncommand()"
+#define __FN__ __FILE__ ":libnsp_data_mongodb_collection_command()"
 	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
 	obj_t *clientobj = nsp_getobj(N, thisobj, "client");
 	MONGODB_CONN *conn = getconn(N, clientobj);
@@ -279,9 +277,22 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_collectioncommand)
 #undef __FN__
 }
 
-NSP_CLASSMETHOD(libnsp_data_mongodb_collectioninsert)
+NSP_CLASSMETHOD(libnsp_data_mongodb_collection_newoid)
 {
-#define __FN__ __FILE__ ":libnsp_data_mongodb_collectioninsert()"
+#define __FN__ __FILE__ ":libnsp_data_mongodb_collection_newoid()"
+	char str[25];
+	bson_oid_t oid;
+
+	bson_oid_init(&oid, NULL);
+	bson_oid_to_string(&oid, str);
+	nsp_setstr(N, &N->r, "", str, -1);
+	return 0;
+#undef __FN__
+}
+
+NSP_CLASSMETHOD(libnsp_data_mongodb_collection_insert)
+{
+#define __FN__ __FILE__ ":libnsp_data_mongodb_collection_insert()"
 	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
 	obj_t *clientobj = nsp_getobj(N, thisobj, "client");
 	MONGODB_CONN *conn = getconn(N, clientobj);
@@ -297,14 +308,15 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_collectioninsert)
 	rc = mongoc_collection_insert(conn->collection, MONGOC_INSERT_NONE, command, NULL, &error);
 	if (rc) { }
 	bson_destroy(command);
+	nsp_setbool(N, &N->r, "", rc);
 	if (!rc) n_error(N, NE_SYNTAX, __FN__, "%s", error.message);
 	return 0;
 #undef __FN__
 }
 
-NSP_CLASSMETHOD(libnsp_data_mongodb_collectionupdate)
+NSP_CLASSMETHOD(libnsp_data_mongodb_collection_update)
 {
-#define __FN__ __FILE__ ":libnsp_data_mongodb_collectionupdate()"
+#define __FN__ __FILE__ ":libnsp_data_mongodb_collection_update()"
 	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
 	obj_t *clientobj = nsp_getobj(N, thisobj, "client");
 	MONGODB_CONN *conn = getconn(N, clientobj);
@@ -326,14 +338,15 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_collectionupdate)
 	if (rc) {}
 	bson_destroy(selector);
 	bson_destroy(update);
+	nsp_setbool(N, &N->r, "", rc);
 	if (!rc) n_error(N, NE_SYNTAX, __FN__, "%s", error.message);
 	return 0;
 #undef __FN__
 }
 
-NSP_CLASSMETHOD(libnsp_data_mongodb_collectionremove)
+NSP_CLASSMETHOD(libnsp_data_mongodb_collection_remove)
 {
-#define __FN__ __FILE__ ":libnsp_data_mongodb_collectionremove()"
+#define __FN__ __FILE__ ":libnsp_data_mongodb_collection_remove()"
 	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
 	obj_t *clientobj = nsp_getobj(N, thisobj, "client");
 	MONGODB_CONN *conn = getconn(N, clientobj);
@@ -347,14 +360,15 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_collectionremove)
 	rc = mongoc_collection_remove(conn->collection, MONGOC_REMOVE_SINGLE_REMOVE, command, NULL, &error);
 	if (rc) { }
 	bson_destroy(command);
+	nsp_setbool(N, &N->r, "", rc);
 	if (!rc) n_error(N, NE_SYNTAX, __FN__, "%s", error.message);
 	return 0;
 #undef __FN__
 }
 
-NSP_CLASSMETHOD(libnsp_data_mongodb_collectionfind)
+NSP_CLASSMETHOD(libnsp_data_mongodb_collection_find)
 {
-#define __FN__ __FILE__ ":libnsp_data_mongodb_collectionfind()"
+#define __FN__ __FILE__ ":libnsp_data_mongodb_collection_find()"
 	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
 	obj_t *clientobj = nsp_getobj(N, thisobj, "client");
 	MONGODB_CONN *conn = getconn(N, clientobj);
@@ -364,14 +378,15 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_collectionfind)
 	command = paramtobson(N, nsp_getobj(N, &N->context->l, "1"));
 	if (command == NULL) n_error(N, NE_SYNTAX, __FN__, "error parsing command");
 	conn->cursor = mongoc_collection_find(conn->collection, MONGOC_QUERY_NONE, 0, 0, 0, command, NULL, NULL);
+	nsp_setbool(N, &N->r, "", conn->cursor ? 1 : 0);
 	bson_destroy(command);
 	return 0;
 #undef __FN__
 }
 
-NSP_CLASSMETHOD(libnsp_data_mongodb_collectiongetnext)
+NSP_CLASSMETHOD(libnsp_data_mongodb_collection_getnext)
 {
-#define __FN__ __FILE__ ":libnsp_data_mongodb_collectiongetnext()"
+#define __FN__ __FILE__ ":libnsp_data_mongodb_collection_getnext()"
 	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
 	obj_t *clientobj = nsp_getobj(N, thisobj, "client");
 	MONGODB_CONN *conn = getconn(N, clientobj);
@@ -395,9 +410,9 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_collectiongetnext)
 #undef __FN__
 }
 
-NSP_CLASSMETHOD(libnsp_data_mongodb_collectionendfind)
+NSP_CLASSMETHOD(libnsp_data_mongodb_collection_endfind)
 {
-#define __FN__ __FILE__ ":libnsp_data_mongodb_collectionendfind()"
+#define __FN__ __FILE__ ":libnsp_data_mongodb_collection_endfind()"
 	obj_t *thisobj = nsp_getobj(N, &N->context->l, "this");
 	obj_t *clientobj = nsp_getobj(N, thisobj, "client");
 	MONGODB_CONN *conn = getconn(N, clientobj);
@@ -466,17 +481,18 @@ int nspmongodb_register_all(nsp_state *N)
 
 	tobj2 = nsp_settable(N, tobj, "db");
 	tobj2->val->attr |= NST_HIDDEN;
-	nsp_setcfunc(N, tobj2, "use",          (NSP_CFUNC)libnsp_data_mongodb_use);
+	nsp_setcfunc(N, tobj2, "use",          (NSP_CFUNC)libnsp_data_mongodb_db_use);
 
 	tobj2 = nsp_settable(N, tobj, "collection");
 	tobj2->val->attr |= NST_HIDDEN;
-	nsp_setcfunc(N, tobj2, "command",   (NSP_CFUNC)libnsp_data_mongodb_collectioncommand);
-	nsp_setcfunc(N, tobj2, "insert",    (NSP_CFUNC)libnsp_data_mongodb_collectioninsert);
-	nsp_setcfunc(N, tobj2, "update",    (NSP_CFUNC)libnsp_data_mongodb_collectionupdate);
-	nsp_setcfunc(N, tobj2, "remove",    (NSP_CFUNC)libnsp_data_mongodb_collectionremove);
-	nsp_setcfunc(N, tobj2, "find",      (NSP_CFUNC)libnsp_data_mongodb_collectionfind);
-	nsp_setcfunc(N, tobj2, "getnext",   (NSP_CFUNC)libnsp_data_mongodb_collectiongetnext);
-	nsp_setcfunc(N, tobj2, "endfind",   (NSP_CFUNC)libnsp_data_mongodb_collectionendfind);
+	nsp_setcfunc(N, tobj2, "command",   (NSP_CFUNC)libnsp_data_mongodb_collection_command);
+	nsp_setcfunc(N, tobj2, "newoid",    (NSP_CFUNC)libnsp_data_mongodb_collection_newoid);
+	nsp_setcfunc(N, tobj2, "insert",    (NSP_CFUNC)libnsp_data_mongodb_collection_insert);
+	nsp_setcfunc(N, tobj2, "update",    (NSP_CFUNC)libnsp_data_mongodb_collection_update);
+	nsp_setcfunc(N, tobj2, "remove",    (NSP_CFUNC)libnsp_data_mongodb_collection_remove);
+	nsp_setcfunc(N, tobj2, "find",      (NSP_CFUNC)libnsp_data_mongodb_collection_find);
+	nsp_setcfunc(N, tobj2, "getnext",   (NSP_CFUNC)libnsp_data_mongodb_collection_getnext);
+	nsp_setcfunc(N, tobj2, "endfind",   (NSP_CFUNC)libnsp_data_mongodb_collection_endfind);
 	return 0;
 }
 
