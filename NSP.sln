@@ -180,8 +180,14 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WASM", "src\hosts\wasm\WASM.vcxproj", "{02EBD4F5-67F2-4664-9637-ED43375B2FEE}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp_mongodb(dll)", "src\libs\mongodb\libnsp_mongodb(dll).vcxproj", "{1B2640D9-6116-4629-BEAE-E6FB6634B9D4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnsp_mongodb", "src\libs\mongodb\libnsp_mongodb.vcxproj", "{B4AC0F3C-533F-4F49-8EF3-5293238F1F8E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{02EBD4F5-67F2-4664-9637-ED43375B2FED} = {02EBD4F5-67F2-4664-9637-ED43375B2FED}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
