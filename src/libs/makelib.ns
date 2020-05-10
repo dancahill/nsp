@@ -119,11 +119,11 @@ function build_lib(CC, TNAME, OBJECTS, OTYPE, INTDIR) {
 				if (config.have_dns==true) LIBS+=" dnsapi.lib";
 				if (config.have_mbedtls==true) LIBS+=" mbedtls.lib";
 			} else if (TNAME=='libnsp_openssl') {
-				if (config.have_openssl==true) LIBS+=" ssleay32MT.lib libeay32MT.lib";
+				if (config.have_openssl==true) LIBS+=" libcrypto32MT.lib libssl32MT.lib";
 			} else if (TNAME=='libnsp_sqlite') {
 				if (config.have_sqlite==true) LIBS+=" sqlite3.lib";
 			} else if (TNAME=='libnsp_ssh2') {
-				if (config.have_ssh2==true) LIBS+=" ws2_32.lib libssh2.lib zlib.lib ssleay32MT.lib libeay32MT.lib";
+				if (config.have_ssh2==true) LIBS+=" ws2_32.lib libssh2.lib zlib.lib libcrypto32MT.lib libssl32MT.lib";
 			}
 //			system("link.exe /nologo /subsystem:console /pdb:none /machine:I386 /dll /incremental:no "+LIBS+" /out:"+swapslash(LIBDIR+"/shared/"+TNAME+".dll "+liblist));
 //			LIBS="/libpath:"+LIBDIR+" gdi32.lib shell32.lib user32.lib winmm.lib libnsp.lib";

@@ -55,6 +55,10 @@ int _tls_init(nsp_state *N, TCP_SOCKET *sock, short srvmode, char *certfile, cha
 {
 #define __FN__ __FILE__ ":_tls_init()"
 #if defined HAVE_OPENSSL
+// this disappeared from ssl.h in 1.1 - why?!?
+#ifndef SSL_CTRL_OPTIONS
+#define SSL_CTRL_OPTIONS 32
+#endif
 	long options = SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_TLSv1_1;
 
 	SSL_load_error_strings();

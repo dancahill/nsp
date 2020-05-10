@@ -37,8 +37,8 @@
 #define HAVE_OPENSSL
 #endif
 #if defined(WIN32)
-#pragma comment(lib, "libeay32MD.lib")
-#pragma comment(lib, "ssleay32MD.lib")
+#pragma comment(lib, "libcrypto32MD.lib")
+#pragma comment(lib, "libssl32MD.lib")
 #endif
 #elif defined(CONFIG_HAVE_MBEDTLS)
 #if !defined(HAVE_MBEDTLS)

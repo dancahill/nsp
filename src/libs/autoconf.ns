@@ -407,7 +407,7 @@ function dotests() {
 			config.have_odbc=true;
 		}
 		/* OpenSSL doesn't conflict with mbed TLS, but it does override it... */
-		if (testsub("OPENSSL", "", "#include <openssl/ssl.h>\n#pragma comment(lib, \"libeay32MD.lib\")\n#pragma comment(lib, \"ssleay32MD.lib\")\nint main() { return 0; }\n")) {
+		if (testsub("OPENSSL", "", "#include <openssl/ssl.h>\n#pragma comment(lib, \"libcrypto32MD.lib\")\n#pragma comment(lib, \"libssl32MD.lib\")\nint main() { return 0; }\n")) {
 //			config_mak+="CFLAGS  += -DHAVE_OPENSSL\n";
 //			if (build_fat) config_mak+="LDFLAGS += -lcrypto -lssl\n\n";
 //			config_nsp+="CFLAGS  += \" -DHAVE_OPENSSL\";\n";
