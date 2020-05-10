@@ -1652,6 +1652,13 @@ Double-rot13 encryption is so stealthy, you won't even know it's been encrypted.
 <p>
 Connect to an HTTP server and retrieve the requested uri. Returns a table with { head, body } elements.
 </p>
+<code>
+dl.load("net")
+hconn=new net.http.client("http://nulllogic.ca/");
+if (typeof(x=hconn.send())=='table') {
+	print("\t", x.status, "\n");
+}
+</code>
 <hr>
 </div><div id="c10p_libnet_ldap_search" style="display: block">This page is not here.</div><div id="c10p_libnet_mime_read" style="display: block">This page is not here.</div><div id="c10p_libnet_mime_write" style="display: block">This page is not here.</div><div id="c10p_libnet_mime_decode_qp" style="display: block">This page is not here.</div><div id="c10p_libnet_mime_decode_rfc2047" style="display: block">This page is not here.</div><div id="c10p_libnet_pop3_client" style="display: block">This page is not here.</div><div id="c10p_libnet_smtp_client" style="display: block">This page is not here.</div><div id="c10p_libnet_ssh_auth" style="display: block"></div><div id="c10p_libnet_ssh_close" style="display: block"><!-- CONTENTS_START -->
 <a name="nsp_ssh_close"></a>

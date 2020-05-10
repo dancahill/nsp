@@ -64,7 +64,7 @@ NSP_CLASSMETHOD(libnsp_net_http_client_send)
 
 	nc_memset((char *)&sock, 0, sizeof(sock));
 	if ((rc = tcp_connect(N, &sock, host, port, use_tls)) < 0) {
-		nsp_setstr(N, &N->r, "", "tcp error", -1);
+		nsp_setstr(N, &N->r, "", "tcp_connect error", -1);
 		return -1;
 	}
 	/* why does php insert random data when i try to use HTTP/1.1? */
@@ -164,11 +164,13 @@ static void parseurl(nsp_state *N)
 	if (strncasecmp(p1, "http://", 7) == 0) {
 		nsp_setbool(N, thisobj, "use_tls", 0);
 		port = 80;
+		nsp_setnum(N, thisobj, "port", port);
 		p1 += 7;
 	}
 	else if (strncasecmp(p1, "https://", 8) == 0) {
 		nsp_setbool(N, thisobj, "use_tls", 1);
 		port = 443;
+		nsp_setnum(N, thisobj, "port", port);
 		p1 += 8;
 	}
 	else {

@@ -5,7 +5,7 @@ AppVerName=NullLogic NSP Script Parser 0.9.4
 
 AppName=NullLogic NSP Script Parser
 AppID={{8C6107AB-FCB7-42A5-BB18-F136497FDBEE}
-AppCopyright=Copyright 2016 Dan Cahill
+AppCopyright=Copyright 2020 Dan Cahill
 AppPublisher=NullLogic
 AppPublisherURL=https://nulllogic.ca/nsp/
 AppSupportURL=https://nulllogic.ca/nsp/
@@ -31,7 +31,6 @@ Root: HKCR; Subkey: "NSP Script\shell\edit\command"; ValueType: string; ValueNam
 Source: ".\bin\nsp.exe";                    DestDir: "{app}"
 ;Source: ".\bin\nsp-cgi.exe";                DestDir: "{app}"
 Source: ".\bin\nsp.exe";                    DestDir: "{win}"
-Source: ".\bin\nsp-cgi.exe";                DestDir: "{app}"
 Source: ".\bin\nspedit.exe";                DestDir: "{app}"
 Source: ".\bin\nsp.net.dll";                DestDir: "{app}"
 Source: ".\bin\ntray.exe";                  DestDir: "{app}"
@@ -39,6 +38,8 @@ Source: ".\src\hosts\ntray\ntray.conf";     DestDir: "{app}"; DestName: "ntray.c
 Source: ".\include\nsp\nsp*.h";             DestDir: "{app}\include\nsp"
 Source: ".\lib\libnsp.lib";                 DestDir: "{app}\lib"
 Source: ".\lib\shared\*.dll";               DestDir: "{app}\lib"
+;OpenSSL
+Source: "C:\NullLogic\utils\VS2019\lib\lib*.dll"; DestDir: "{app}"
 Source: ".\src\libs\preload.ns";            DestDir: "{app}\lib"; DestName: "preload-sample.ns"
 ;Source: ".\scripts\samples\*.*";            DestDir: "{app}\scripts\samples"; Flags: recursesubdirs;
 Source: ".\tests\*.*";                      DestDir: "{app}\tests"; Flags: recursesubdirs;
