@@ -111,6 +111,7 @@ distclean: clean
 	@chmod 755 `find . -type f \( -name "*.ns" \)`
 #	@setfacl -b `find . -type f \( -name "*.c" -o -name "*.h" -o -name "*.cpp" \)`
 	@rm -rf .vs
+	@rm -rf src/hosts/ntray.net/obj
 	@rm -f NSP.ncb NSP.suo NSP.v12.suo
 	@rm -f include/nsp/config*.h src/config*.mak src/config*.ns
 	@rm -f src/preconf.mak
