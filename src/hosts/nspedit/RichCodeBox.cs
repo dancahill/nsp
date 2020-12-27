@@ -214,6 +214,11 @@ namespace NSPEdit
 			}
 		}
 
+		public void ResumeScript()
+		{
+			scriptThread.Resume();
+		}
+
 		private void WriteBuffer(string outstr)
 		{
 			//this.richTextBox2.Text += outstr;

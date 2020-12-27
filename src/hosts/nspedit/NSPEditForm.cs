@@ -305,6 +305,11 @@ namespace NSPEdit
 			richCodeBox1.RunScript("");
 		}
 
+		private void resumeToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			richCodeBox1.ResumeScript();
+		}
+
 		private void newToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			newToolStripButton_Click(sender, e);

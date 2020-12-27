@@ -34,7 +34,9 @@ using namespace System;
 using namespace System::Runtime::InteropServices;
 
 public delegate void WriteBufferDelegate(String ^outbuf);
+public delegate void SuspendScriptDelegate();
 
+static NSP_FUNCTION(nsp_edit_break);
 static NSP_FUNCTION(nsp_edit_flush);
 
 public ref class NSP {
@@ -49,6 +51,7 @@ protected:
 	}
 public:
 	static WriteBufferDelegate ^WriteBuffer;
+	static SuspendScriptDelegate ^SuspendScript;
 	char *srcfilename;
 
 	int ExecScript(String ^script, String ^filename) {
@@ -128,6 +131,8 @@ private:
 			nsp_setstr(N, tobj, tmpbuf, p, -1);
 		}
 		preppath(N, srcfilename);
+		tobj = nsp_settable(N, &N->g, "debug");
+		nsp_setcfunc(N, tobj, "break", nsp_edit_break);
 		tobj = nsp_settable(N, &N->g, "io");
 		nsp_setcfunc(N, tobj, "flush", nsp_edit_flush);
 		return;
@@ -195,6 +200,12 @@ private:
 		return EXCEPTION_EXECUTE_HANDLER;
 	}
 };
+
+static NSP_FUNCTION(nsp_edit_break)
+{
+	NSP::SuspendScript();
+	return 0;
+}
 
 static NSP_FUNCTION(nsp_edit_flush)
 {

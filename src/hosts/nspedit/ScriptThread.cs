@@ -30,6 +30,7 @@ namespace NSPEdit
 				try
 				{
 					NSP.WriteBuffer = WriteBuffer;
+					NSP.SuspendScript = Suspend;
 					N.ExecScript(ScriptText, SrcFile);
 				}
 				catch (Exception ex)
@@ -49,18 +50,20 @@ namespace NSPEdit
 			return thread.IsAlive;
 		}
 
-		[Obsolete]
 		public void Suspend()
 		{
 			if (thread == null) return;
+#pragma warning disable CS0618 // Type or member is obsolete
 			thread.Suspend();
+#pragma warning restore CS0618 // Type or member is obsolete
 		}
 
-		[Obsolete]
 		public void Resume()
 		{
 			if (thread == null) return;
+#pragma warning disable CS0618 // Type or member is obsolete
 			thread.Resume();
+#pragma warning restore CS0618 // Type or member is obsolete
 		}
 	}
 }
