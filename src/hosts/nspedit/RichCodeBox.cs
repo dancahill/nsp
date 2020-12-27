@@ -195,6 +195,11 @@ namespace NSPEdit
 		{
 			try
 			{
+				if (scriptThread != null && scriptThread.IsAlive())
+				{
+					scriptThread.Resume();
+					return;
+				}
 				Program.MainForm.ClearOutput();
 				if (this.TextLength == 0) throw new Exception("script is empty");
 				string srcfile = Program.MainForm.GetScriptFileName();
@@ -214,8 +219,9 @@ namespace NSPEdit
 			}
 		}
 
-		public void ResumeScript()
+		public void ContinueScript()
 		{
+			if (scriptThread == null) return;
 			scriptThread.Resume();
 		}
 

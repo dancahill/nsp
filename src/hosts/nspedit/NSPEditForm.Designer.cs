@@ -46,6 +46,7 @@
 			this.findNextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.scriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.runToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.resumeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.nSPHomepageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.nSPSyntaxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -68,7 +69,6 @@
 			this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
 			this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
 			this.tabControl1 = new System.Windows.Forms.TabControl();
-			this.resumeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.menuStrip1.SuspendLayout();
 			this.toolStrip1.SuspendLayout();
 			this.statusStrip1.SuspendLayout();
@@ -84,7 +84,7 @@
             this.helpToolStripMenuItem});
 			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip1.Name = "menuStrip1";
-			this.menuStrip1.Size = new System.Drawing.Size(312, 24);
+			this.menuStrip1.Size = new System.Drawing.Size(192, 24);
 			this.menuStrip1.TabIndex = 3;
 			this.menuStrip1.Text = "menuStrip1";
 			// 
@@ -218,6 +218,13 @@
 			this.runToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
 			this.runToolStripMenuItem.Text = "Run";
 			this.runToolStripMenuItem.Click += new System.EventHandler(this.runToolStripMenuItem_Click);
+			// 
+			// resumeToolStripMenuItem
+			// 
+			this.resumeToolStripMenuItem.Name = "resumeToolStripMenuItem";
+			this.resumeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.resumeToolStripMenuItem.Text = "Continue";
+			this.resumeToolStripMenuItem.Click += new System.EventHandler(this.continueToolStripMenuItem_Click);
 			// 
 			// helpToolStripMenuItem
 			// 
@@ -423,13 +430,6 @@
 			this.tabControl1.Size = new System.Drawing.Size(784, 683);
 			this.tabControl1.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
 			this.tabControl1.TabIndex = 6;
-			// 
-			// resumeToolStripMenuItem
-			// 
-			this.resumeToolStripMenuItem.Name = "resumeToolStripMenuItem";
-			this.resumeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-			this.resumeToolStripMenuItem.Text = "Resume";
-			this.resumeToolStripMenuItem.Click += new System.EventHandler(this.resumeToolStripMenuItem_Click);
 			// 
 			// NSPEditForm
 			// 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NSPEdit
@@ -53,9 +54,11 @@ namespace NSPEdit
 		public void Suspend()
 		{
 			if (thread == null) return;
+			new Task(() => MessageBox.Show("debug.break() called\r\nPress F5 to continue", "Script Breakpoint")).Start();
 #pragma warning disable CS0618 // Type or member is obsolete
 			thread.Suspend();
 #pragma warning restore CS0618 // Type or member is obsolete
+
 		}
 
 		public void Resume()
