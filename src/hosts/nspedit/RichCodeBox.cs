@@ -52,7 +52,7 @@ namespace NSPEdit
 		DateTime LastUpdate;
 		Stack<UndoStep> undoList = new Stack<UndoStep>(100);
 		RichTextBox richTextBox2;
-		ScriptThread scriptThread = null;
+		public ScriptThread scriptThread = null;
 
 		public string LastSavedText = "";
 

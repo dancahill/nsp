@@ -299,6 +299,10 @@ public:
 	{
 		return &this->N->g;
 	}
+	obj_t *getT()
+	{
+		return &this->N->context->t;
+	}
 	obj_t *getL()
 	{
 		return &this->N->context->l;

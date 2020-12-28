@@ -310,6 +310,13 @@ namespace NSPEdit
 			richCodeBox1.ContinueScript();
 		}
 
+		private void viewMemoryToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			MemTreeForm form = new MemTreeForm();
+			form.thread = richCodeBox1.scriptThread;
+			form.ShowDialog();
+		}
+
 		private void newToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			newToolStripButton_Click(sender, e);

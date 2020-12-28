@@ -69,6 +69,7 @@
 			this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
 			this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
 			this.tabControl1 = new System.Windows.Forms.TabControl();
+			this.viewMemoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.menuStrip1.SuspendLayout();
 			this.toolStrip1.SuspendLayout();
 			this.statusStrip1.SuspendLayout();
@@ -84,7 +85,7 @@
             this.helpToolStripMenuItem});
 			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip1.Name = "menuStrip1";
-			this.menuStrip1.Size = new System.Drawing.Size(192, 24);
+			this.menuStrip1.Size = new System.Drawing.Size(312, 24);
 			this.menuStrip1.TabIndex = 3;
 			this.menuStrip1.Text = "menuStrip1";
 			// 
@@ -206,7 +207,8 @@
 			// 
 			this.scriptToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.runToolStripMenuItem,
-            this.resumeToolStripMenuItem});
+            this.resumeToolStripMenuItem,
+            this.viewMemoryToolStripMenuItem});
 			this.scriptToolStripMenuItem.Name = "scriptToolStripMenuItem";
 			this.scriptToolStripMenuItem.Size = new System.Drawing.Size(49, 20);
 			this.scriptToolStripMenuItem.Text = "Script";
@@ -431,6 +433,13 @@
 			this.tabControl1.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
 			this.tabControl1.TabIndex = 6;
 			// 
+			// viewMemoryToolStripMenuItem
+			// 
+			this.viewMemoryToolStripMenuItem.Name = "viewMemoryToolStripMenuItem";
+			this.viewMemoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.viewMemoryToolStripMenuItem.Text = "View Memory";
+			this.viewMemoryToolStripMenuItem.Click += new System.EventHandler(this.viewMemoryToolStripMenuItem_Click);
+			// 
 			// NSPEditForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -499,5 +508,6 @@
 		private System.Windows.Forms.ToolStripMenuItem findToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem findNextToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem resumeToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem viewMemoryToolStripMenuItem;
 	}
 }

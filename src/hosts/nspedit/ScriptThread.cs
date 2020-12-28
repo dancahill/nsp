@@ -5,10 +5,10 @@ using System.Windows.Forms;
 
 namespace NSPEdit
 {
-	class ScriptThread
+	public class ScriptThread
 	{
 		public WriteBufferDelegate WriteBuffer;
-		private NSP N = new NSP();
+		public NSP N = new NSP();
 		private Thread thread;
 		private string ScriptText;
 		private string SrcFile;

@@ -39,6 +39,55 @@ public delegate void SuspendScriptDelegate();
 static NSP_FUNCTION(nsp_edit_break);
 static NSP_FUNCTION(nsp_edit_flush);
 
+public ref class NSPObject {
+public:
+	obj_t *obj;
+	unsigned short type;
+	String^ name;
+	String^ value;
+
+	NSPObject() {
+		type = 0;
+		name = gcnew String("");
+		value = gcnew String("");
+	}
+
+	NSPObject(obj_t *o) {
+		obj = o;
+		if (obj && obj->val) {
+			type = obj->val->type;
+			name = gcnew String(obj->name);
+			value = gcnew String(nsp_tostr(NULL, obj));
+		}
+		else {
+			NSPObject();
+		}
+	}
+
+	~NSPObject() {
+	}
+protected:
+	!NSPObject() {
+	}
+public:
+	NSPObject^ GetFirst() {
+		if (obj->val->type == NT_TABLE) {
+			return gcnew NSPObject(obj->val->d.table.f);
+		}
+		else {
+			return gcnew NSPObject();
+		}
+	}
+
+	NSPObject^ GetNext() {
+		return gcnew NSPObject(obj->next);
+	}
+
+	bool IsValid() {
+		return (obj);
+	}
+};
+
 public ref class NSP {
 public:
 	NSP() {
@@ -52,7 +101,20 @@ protected:
 public:
 	static WriteBufferDelegate ^WriteBuffer;
 	static SuspendScriptDelegate ^SuspendScript;
+	NSPState *NState;
 	char *srcfilename;
+
+	NSPObject^ GetGlobal() {
+		return gcnew NSPObject(NState->getG());
+	}
+
+	NSPObject^ GetThis() {
+		return gcnew NSPObject(NState->getT());
+	}
+
+	NSPObject^ GetLocal() {
+		return gcnew NSPObject(NState->getL());
+	}
 
 	int ExecScript(String ^script, String ^filename) {
 		IntPtr ip = Marshal::StringToHGlobalAnsi(script);
@@ -62,7 +124,7 @@ public:
 		srcfilename = static_cast<char*>(ip2.ToPointer());
 		Beep(440, 250);
 		//__try {
-		NSPState *NState = new NSPState();
+		NState = new NSPState();
 		nsp_state *N = NState->getN();
 
 		init_stuff(N);
@@ -118,7 +180,7 @@ private:
 		N->debug = 0;
 		/* add env */
 		tobj = nsp_settable(N, &N->g, "_ENV");
-		for (i = 0;environ[i] != NULL;i++) {
+		for (i = 0; environ[i] != NULL; i++) {
 			strncpy(tmpbuf, environ[i], MAX_OBJNAMELEN);
 			p = strchr(tmpbuf, '=');
 			if (!p) continue;
@@ -161,10 +223,10 @@ private:
 			strcat(buf, "/");
 			strcat(buf, name);
 		}
-		for (j = 0;j < strlen(buf);j++) {
+		for (j = 0; j < strlen(buf); j++) {
 			if (buf[j] == '\\') buf[j] = '/';
 		}
-		for (j = strlen(buf) - 1;j > 0;j--) {
+		for (j = strlen(buf) - 1; j > 0; j--) {
 			if (buf[j] == '/') { buf[j] = '\0'; p = buf + j + 1; break; }
 		}
 		nsp_setstr(N, &N->g, "_filename", p, -1);
