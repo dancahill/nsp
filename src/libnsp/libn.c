@@ -246,15 +246,20 @@ NSP_FUNCTION(nl_write)
 NSP_FUNCTION(nl_break)
 {
 #define __FN__ __FILE__ ":nl_break()"
+	obj_t *cobj = nsp_getobj(N, nsp_getobj(N, &N->g, "debug"), "break2");
+	if (nsp_typeof(cobj) == NT_CFUNC) {
+		cobj->val->d.cfunc(N);
+	} else {
 #if defined(WIN32)
 #if defined(_DEBUG)
-	__debugbreak();
-	//DebugBreak();
+		__debugbreak();
+		//DebugBreak();
 #endif
 #else
-	//__builtin_trap();
-	raise(SIGINT);
+		//__builtin_trap();
+		raise(SIGINT);
 #endif
+	}
 	return 0;
 #undef __FN__
 }

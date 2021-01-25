@@ -190,6 +190,7 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, enum n_execfunctio
 	unsigned short fobjtype;
 	int e = 0;
 	short include = 0;
+	short _break = 0;
 	//short noscopechange = 0;
 	uchar *p = NULL;
 	int psize = 0;
@@ -269,14 +270,18 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, enum n_execfunctio
 	n_execfunction_setargs(N, &listobj);
 	nsp_unlinkval(N, &N->r);
 
-	if (fobjtype == NT_CFUNC && (NSP_CFUNC)(fobj->val->d.cfunc) == (NSP_CFUNC)nl_include) {
-		if (nsp_isstr(nsp_getobj(N, &listobj, "2"))) {
-			include = 2;
-		} else if (nsp_isstr(nsp_getobj(N, &listobj, "1"))) {
-			include = 1;
-		} else {
-			DEBUG_OUT();
-			return &N->r;
+	if (fobjtype == NT_CFUNC) {
+		if ((NSP_CFUNC)(fobj->val->d.cfunc) == (NSP_CFUNC)nl_include) {
+			if (nsp_isstr(nsp_getobj(N, &listobj, "2"))) {
+				include = 2;
+			} else if (nsp_isstr(nsp_getobj(N, &listobj, "1"))) {
+				include = 1;
+			} else {
+				DEBUG_OUT();
+				return &N->r;
+			}
+		} else if ((NSP_CFUNC)(fobj->val->d.cfunc) == (NSP_CFUNC)nl_break) {
+			_break = 1;
 		}
 	}
 	nsp_execcontext *oldctx = N->context;
@@ -294,6 +299,8 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, enum n_execfunctio
 	if (include) {
 		N->context->funcname = "";
 		if (include == 1) N->context->filename = nsp_getstr(N, &listobj, "1");
+		nsp_linkval(N, &N->context->l, &oldctx->l);
+	} else if (_break) {
 		nsp_linkval(N, &N->context->l, &oldctx->l);
 	} else {
 		N->context->funcname = fobj->name;

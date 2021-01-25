@@ -57,9 +57,14 @@ public:
 		if (obj && obj->val) {
 			type = obj->val->type;
 			name = gcnew String(obj->name);
-			value = gcnew String(nsp_tostr(NULL, obj));
-		}
-		else {
+			if (obj->val->type == NT_NUMBER) {
+				char numbuf[128];
+				n_ntoa(NULL, numbuf, obj->val->d.num, -10, 6);
+				value = gcnew String(numbuf);
+			} else {
+				value = gcnew String(nsp_tostr(NULL, obj));
+			}
+		} else {
 			NSPObject();
 		}
 	}
@@ -194,7 +199,7 @@ private:
 		}
 		preppath(N, srcfilename);
 		tobj = nsp_settable(N, &N->g, "debug");
-		nsp_setcfunc(N, tobj, "break", nsp_edit_break);
+		nsp_setcfunc(N, tobj, "break2", nsp_edit_break);
 		tobj = nsp_settable(N, &N->g, "io");
 		nsp_setcfunc(N, tobj, "flush", nsp_edit_flush);
 		return;
