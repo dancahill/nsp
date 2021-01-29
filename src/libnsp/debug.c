@@ -60,7 +60,7 @@ void n_decompile(nsp_state *N, uchar *start, uchar *end, char *errbuf, unsigned 
 	short subchunk;
 
 	settrace();
-	subchunk = (start&&end) ? 1 : 0;
+	subchunk = (start && end) ? 1 : 0;
 	nl_flush(N);
 	if (n_context_blockptr == NULL) { nc_printf(N, " N->blockptr is NULL\n"); return; }
 	if (n_context_blockend == NULL) { nc_printf(N, " N->blockend is NULL\n"); return; }
@@ -75,22 +75,19 @@ void n_decompile(nsp_state *N, uchar *start, uchar *end, char *errbuf, unsigned 
 	if (n_context_readptr > n_context_blockend) {
 		nc_printf(N, " N->readptr is %ld bytes past the end of the block\n\n", (unsigned long)(n_context_readptr - n_context_blockend));
 		n_context_blockptr = n_context_readptr;
-	}
-	else if (n_context_readptr < n_context_blockptr) {
+	} else if (n_context_readptr < n_context_blockptr) {
 		nc_printf(N, " N->readptr is %ld bytes before the block\n\n", (unsigned long)(n_context_blockptr - n_context_readptr));
 		n_context_blockptr = n_context_readptr;
-	}
-	else {
+	} else {
 		offset = n_context_readptr;
 	}
 	if (subchunk) {
 		p = n_context_blockptr;
-	}
-	else {
+	} else {
 		p = n_context_blockptr + readi4((n_context_blockptr + 12));
 	}
 	for (; *p; p++) {
-		if (subchunk&&p > end) break;
+		if (subchunk && p > end) break;
 		showbold = 0;
 		if ((offset) && (p >= offset)) {
 			showbold = 1;
@@ -123,8 +120,7 @@ void n_decompile(nsp_state *N, uchar *start, uchar *end, char *errbuf, unsigned 
 			if (OP_ISPUNC(*p) || OP_ISMATH(*p) || OP_ISEND(*p)) {
 				if (errbuf) nc_snprintf(N, errbuf + nc_strlen(errbuf), errmax - nc_strlen(errbuf), "%s", n_getsym(N, *p));
 				else nc_printf(N, "%s ", n_getsym(N, *p));
-			}
-			else if (OP_ISKEY(*p)) {
+			} else if (OP_ISKEY(*p)) {
 				if (errbuf) nc_snprintf(N, errbuf + nc_strlen(errbuf), errmax - nc_strlen(errbuf), "%s ", n_getsym(N, *p));
 				else nc_printf(N, "%s ", n_getsym(N, *p));
 			}

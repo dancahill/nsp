@@ -32,10 +32,10 @@
 #include <unistd.h>
 #endif
 
-    /*
-     * generate a value for global _ostype_ var
-     * ostype/compilertype
-     */
+/*
+ * generate a value for global _ostype_ var
+ * ostype/compilertype
+ */
 #if defined(WIN32) || defined(WINDOWS)
 #  define _OS_ "Windows"
 #elif defined(linux)
@@ -315,7 +315,7 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, enum n_execfunctio
 		else if (fobjtype == NT_CFUNC) fobj->val->d.cfunc(N);
 		else nsp_exec(N, (char *)n_context_readptr);
 	}
-	n_free(N, (void *)& n_context_savjmp, sizeof(jmp_buf));
+	n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
 	n_context_savjmp = savjmp;
 	if (include) {
 		if (n < 0) n_warn(N, __FN__, "failed to include '%s'", N->context->filename);
@@ -325,7 +325,7 @@ obj_t *n_execfunction(nsp_state *N, obj_t *fobj, obj_t *pobj, enum n_execfunctio
 	}
 	n_freeexeccontext(N, &N->context);
 	N->context = oldctx;
-	if (include == 2 && p) n_free(N, (void *)& p, psize);
+	if (include == 2 && p) n_free(N, (void *)&p, psize);
 	nsp_unlinkval(N, &listobj);
 	if (N->ret) N->ret = 0;
 	if (e && n_context_savjmp != NULL) longjmp(*n_context_savjmp, 1);
@@ -347,7 +347,7 @@ obj_t *n_execbasemethod(nsp_state *N, char *name, obj_t *pobj)
 	//if (N->yielded) {
 	//	int x = 42;
 	//}
-	nc_memset((void *)& tobj, 0, sizeof(obj_t));
+	nc_memset((void *)&tobj, 0, sizeof(obj_t));
 	nsp_setcfunc(N, &tobj, "base_method", (NSP_CFUNC)nl_base_method);
 	nc_strncpy(tobj.name, name, MAX_OBJNAMELEN);
 	savjmp = n_context_savjmp;
@@ -357,7 +357,7 @@ obj_t *n_execbasemethod(nsp_state *N, char *name, obj_t *pobj)
 	} else {
 		nobj = NULL;
 	}
-	n_free(N, (void *)& n_context_savjmp, sizeof(jmp_buf));
+	n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
 	n_context_savjmp = savjmp;
 	nsp_unlinkval(N, &tobj);
 	if (e) {
@@ -490,7 +490,7 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 			if ((ctype == NT_NFUNC || ctype == NT_CFUNC) && n_peekop(N) == OP_POPAREN) {
 				obj_t tobj;
 
-				nc_memset((void *)& tobj, 0, sizeof(obj_t));
+				nc_memset((void *)&tobj, 0, sizeof(obj_t));
 				tobj.val = n_newval(N, NT_TABLE);
 				tobj.val->attr &= ~NST_AUTOSORT;
 				nsp_linkval(N, &tobj, &N->r);
@@ -644,8 +644,8 @@ obj_t *nsp_exec(nsp_state *N, const char *string)
 	}
 end:
 	if (jmp == 0) {
-		n_free(N, (void *)& n_context_savjmp, sizeof(jmp_buf));
-		if (p) n_free(N, (void *)& p, psize);
+		n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
+		if (p) n_free(N, (void *)&p, psize);
 		n_context_blockend = NULL;
 		n_context_readptr = NULL;
 	}
@@ -744,7 +744,7 @@ int nsp_execfile(nsp_state *N, char *file)
 	n_decompose(N, namebuf, n_context_blockptr, &p, &psize);
 	if (p) {
 		/* nsp_writefile(N, o, p); */
-		n_free(N, (void *)& n_context_blockptr, sb.st_size + 2);
+		n_free(N, (void *)&n_context_blockptr, sb.st_size + 2);
 		n_context_blockptr = p;
 		p = NULL;
 	}
@@ -760,13 +760,13 @@ int nsp_execfile(nsp_state *N, char *file)
 	if (N->outbuflen) nl_flush(N);
 	rc = 0;
 end1:
-	n_free(N, (void *)& n_context_blockptr, psize);
+	n_free(N, (void *)&n_context_blockptr, psize);
 	n_context_blockptr = oldbptr;
 	n_context_blockend = oldbend;
 	n_context_readptr = oldrptr;
 end2:
 	if (jmp == 0) {
-		n_free(N, (void *)& n_context_savjmp, sizeof(jmp_buf));
+		n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
 	}
 #if defined(WIN32) && defined(_DEBUG)
 	_RPT1(_CRT_WARN, "done '%s'\r\n", pfile);
@@ -912,7 +912,7 @@ nsp_state *nsp_newstate()
 	new_N->context = n_newexeccontext(new_N);
 	new_N->outbuflen = 0;
 	new_N->outbufmax = MAX_OUTBUFSIZE;
-	new_N->outbuffer = (char *)n_alloc(NULL, new_N->outbufmax + 1, 1);// add one byte for null termination
+	new_N->outbuffer = (char *)n_alloc(NULL, new_N->outbufmax + 1, 1); // add one byte for null termination
 	nc_gettimeofday(&new_N->ttime, NULL);
 	srand(new_N->ttime.tv_usec);
 	new_N->maxwarnings = 500;
@@ -927,9 +927,9 @@ nsp_state *nsp_newstate()
 	new_N->g.val->attr |= NST_AUTOSORT;
 
 	n_setname(new_N, &new_N->r, "!RETVAL!");
-	//	cobj=nsp_settable(new_N, &new_N->g, "_GLOBALS");
+//	cobj=nsp_settable(new_N, &new_N->g, "_GLOBALS");
 	cobj = nsp_setbool(new_N, &new_N->g, "_GLOBALS", 0);
-	//	cobj->val->attr|=NST_HIDDEN;
+//	cobj->val->attr|=NST_HIDDEN;
 	nsp_linkval(new_N, cobj, &new_N->g);
 
 	for (i = 0; list[i].fn_name != NULL; i++) {
@@ -1028,8 +1028,8 @@ void nsp_freestate(nsp_state *N)
 	// if (N->g.val) n_free(N, (void *)&N->g.val, sizeof(val_t));
 	/* AND THIS IS? */
 	// if (N->g.val) { void *x=N->g.val; n_free(N, &x, sizeof(val_t)); }
-	if (N->g.val) n_free(N, (void *)& N->g.val, sizeof(val_t));
-	if (N->r.val) n_free(N, (void *)& N->r.val, sizeof(val_t));
+	if (N->g.val) n_free(N, (void *)&N->g.val, sizeof(val_t));
+	if (N->r.val) n_free(N, (void *)&N->r.val, sizeof(val_t));
 	n_freeexeccontext(N, &N->context);
 	//n_free(N, (void *)&N->context, sizeof(nsp_execcontext));
 #undef __FN__
@@ -1041,8 +1041,8 @@ nsp_state *nsp_endstate(nsp_state *N)
 	if (N != NULL) {
 		settrace();
 		nsp_freestate(N);
-		n_free(N, (void *)& N->outbuffer, N->outbufmax + 1);// one byte added for null termination
-		n_free(N, (void *)& N, sizeof(nsp_t));
+		n_free(N, (void *)&N->outbuffer, N->outbufmax + 1); // one byte added for null termination
+		n_free(N, (void *)&N, sizeof(nsp_t));
 	}
 	return NULL;
 #undef __FN__

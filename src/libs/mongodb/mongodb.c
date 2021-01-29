@@ -78,7 +78,7 @@ void mongodb_murder(nsp_state *N, obj_t *cobj)
 		n_error(N, NE_SYNTAX, __FN__, "expected a mongodb conn");
 	conn = (MONGODB_CONN *)cobj->val->d.str;
 	mongodb_disconnect(N, conn);
-	n_free(N, (void *)& cobj->val->d.str, sizeof(MONGODB_CONN) + 1);
+	n_free(N, (void *)&cobj->val->d.str, sizeof(MONGODB_CONN) + 1);
 	cobj->val->size = 0;
 	return;
 #undef __FN__
@@ -306,7 +306,7 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_collection_insert)
 	// need to use mongoc_collection_insert_one to get result data, but it
 	// doesn't exist in the standard include files that come with CentOS 7
 	rc = mongoc_collection_insert(conn->collection, MONGOC_INSERT_NONE, command, NULL, &error);
-	if (rc) { }
+	if (rc) {}
 	bson_destroy(command);
 	nsp_setbool(N, &N->r, "", rc);
 	if (!rc) n_error(N, NE_SYNTAX, __FN__, "%s", error.message);
@@ -358,7 +358,7 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_collection_remove)
 	command = paramtobson(N, nsp_getobj(N, &N->context->l, "1"));
 	if (command == NULL) n_error(N, NE_SYNTAX, __FN__, "error parsing command");
 	rc = mongoc_collection_remove(conn->collection, MONGOC_REMOVE_SINGLE_REMOVE, command, NULL, &error);
-	if (rc) { }
+	if (rc) {}
 	bson_destroy(command);
 	nsp_setbool(N, &N->r, "", rc);
 	if (!rc) n_error(N, NE_SYNTAX, __FN__, "%s", error.message);
@@ -420,7 +420,7 @@ NSP_CLASSMETHOD(libnsp_data_mongodb_collection_endfind)
 	if (!nsp_istable(thisobj)) n_error(N, NE_SYNTAX, __FN__, "expected a table for 'this'");
 	if (conn->cursor) {
 		mongoc_cursor_destroy(conn->cursor);
-		conn->cursor=NULL;
+		conn->cursor = NULL;
 	}
 	return 0;
 #undef __FN__
@@ -473,26 +473,26 @@ int nspmongodb_register_all(nsp_state *N)
 	tobj->val->attr |= NST_HIDDEN;
 	tobj = nsp_settable(N, tobj, "mongodb");
 	tobj->val->attr |= NST_HIDDEN;
-	nsp_setcfunc(N, tobj, "client",        (NSP_CFUNC)libnsp_data_mongodb_client);
-	nsp_setcfunc(N, tobj, "open",          (NSP_CFUNC)libnsp_data_mongodb_open);
-	nsp_setcfunc(N, tobj, "close",         (NSP_CFUNC)libnsp_data_mongodb_close);
+	nsp_setcfunc(N, tobj, "client", (NSP_CFUNC)libnsp_data_mongodb_client);
+	nsp_setcfunc(N, tobj, "open", (NSP_CFUNC)libnsp_data_mongodb_open);
+	nsp_setcfunc(N, tobj, "close", (NSP_CFUNC)libnsp_data_mongodb_close);
 
 	nsp_setcfunc(N, tobj, "clientcommand", (NSP_CFUNC)libnsp_data_mongodb_clientcommand);
 
 	tobj2 = nsp_settable(N, tobj, "db");
 	tobj2->val->attr |= NST_HIDDEN;
-	nsp_setcfunc(N, tobj2, "use",          (NSP_CFUNC)libnsp_data_mongodb_db_use);
+	nsp_setcfunc(N, tobj2, "use", (NSP_CFUNC)libnsp_data_mongodb_db_use);
 
 	tobj2 = nsp_settable(N, tobj, "collection");
 	tobj2->val->attr |= NST_HIDDEN;
-	nsp_setcfunc(N, tobj2, "command",   (NSP_CFUNC)libnsp_data_mongodb_collection_command);
-	nsp_setcfunc(N, tobj2, "newoid",    (NSP_CFUNC)libnsp_data_mongodb_collection_newoid);
-	nsp_setcfunc(N, tobj2, "insert",    (NSP_CFUNC)libnsp_data_mongodb_collection_insert);
-	nsp_setcfunc(N, tobj2, "update",    (NSP_CFUNC)libnsp_data_mongodb_collection_update);
-	nsp_setcfunc(N, tobj2, "remove",    (NSP_CFUNC)libnsp_data_mongodb_collection_remove);
-	nsp_setcfunc(N, tobj2, "find",      (NSP_CFUNC)libnsp_data_mongodb_collection_find);
-	nsp_setcfunc(N, tobj2, "getnext",   (NSP_CFUNC)libnsp_data_mongodb_collection_getnext);
-	nsp_setcfunc(N, tobj2, "endfind",   (NSP_CFUNC)libnsp_data_mongodb_collection_endfind);
+	nsp_setcfunc(N, tobj2, "command", (NSP_CFUNC)libnsp_data_mongodb_collection_command);
+	nsp_setcfunc(N, tobj2, "newoid", (NSP_CFUNC)libnsp_data_mongodb_collection_newoid);
+	nsp_setcfunc(N, tobj2, "insert", (NSP_CFUNC)libnsp_data_mongodb_collection_insert);
+	nsp_setcfunc(N, tobj2, "update", (NSP_CFUNC)libnsp_data_mongodb_collection_update);
+	nsp_setcfunc(N, tobj2, "remove", (NSP_CFUNC)libnsp_data_mongodb_collection_remove);
+	nsp_setcfunc(N, tobj2, "find", (NSP_CFUNC)libnsp_data_mongodb_collection_find);
+	nsp_setcfunc(N, tobj2, "getnext", (NSP_CFUNC)libnsp_data_mongodb_collection_getnext);
+	nsp_setcfunc(N, tobj2, "endfind", (NSP_CFUNC)libnsp_data_mongodb_collection_endfind);
 	return 0;
 }
 

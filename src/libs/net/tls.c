@@ -263,10 +263,9 @@ int _tls_close(nsp_state *N, TCP_SOCKET *sock)
 #define __FN__ __FILE__ ":_tls_close()"
 #if defined HAVE_OPENSSL
 	if (sock->ssl != NULL) {
-		if (SSL_get_shutdown(sock->ssl)&SSL_RECEIVED_SHUTDOWN) {
+		if (SSL_get_shutdown(sock->ssl) & SSL_RECEIVED_SHUTDOWN) {
 			SSL_shutdown(sock->ssl);
-		}
-		else {
+		} else {
 			SSL_clear(sock->ssl);
 		}
 	}

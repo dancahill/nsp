@@ -78,8 +78,7 @@ public:
 	NSPObject^ GetFirst() {
 		if (obj->val->type == NT_TABLE) {
 			return gcnew NSPObject(obj->val->d.table.f);
-		}
-		else {
+		} else {
 			return gcnew NSPObject();
 		}
 	}
@@ -216,14 +215,12 @@ private:
 		if ((name[0] == '/') || (name[0] == '\\') || (name[1] == ':')) {
 			/* it's an absolute path.... probably... */
 			strncpy(buf, name, sizeof(buf));
-		}
-		else if (name[0] == '.') {
+		} else if (name[0] == '.') {
 			/* looks relative... */
 			getcwd(buf, sizeof(buf) - strlen(name) - 2);
 			strcat(buf, "/");
 			strcat(buf, name);
-		}
-		else {
+		} else {
 			getcwd(buf, sizeof(buf) - strlen(name) - 2);
 			strcat(buf, "/");
 			strcat(buf, name);

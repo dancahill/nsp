@@ -115,7 +115,7 @@ void odbc_murder(nsp_state *N, obj_t *cobj)
 #define __FN__ __FILE__ ":odbc_murder()"
 	ODBC_CONN *conn;
 
-	//	n_warn(N, __FN__, "reaper is claiming another lost soul");
+//	n_warn(N, __FN__, "reaper is claiming another lost soul");
 	if ((cobj->val->type != NT_CDATA) || (cobj->val->d.str == NULL) || (strcmp(cobj->val->d.str, "odbc-conn") != 0))
 		n_error(N, NE_SYNTAX, __FN__, "expected an odbc-conn");
 	conn = (ODBC_CONN *)cobj->val->d.str;
@@ -139,8 +139,7 @@ NSP_CLASSMETHOD(libnsp_data_odbc_open)
 
 	if (nsp_isstr((cobj = nsp_getobj(N, thisobj, "dsn")))) {
 		DSN = cobj->val->d.str;
-	}
-	else {
+	} else {
 		n_error(N, NE_SYNTAX, __FN__, "expected a string for DSN");
 	}
 	conn = n_alloc(N, sizeof(ODBC_CONN) + 1, 1);
@@ -200,11 +199,9 @@ NSP_CLASSMETHOD(libnsp_data_odbc_query)
 
 	if (nsp_isstr((cobj = nsp_getobj(N, &N->context->l, "1")))) {
 		sqlquery = cobj->val->d.str;
-	}
-	else if (nsp_isstr((cobj = nsp_getobj(N, thisobj, "sqlquery")))) {
+	} else if (nsp_isstr((cobj = nsp_getobj(N, thisobj, "sqlquery")))) {
 		sqlquery = cobj->val->d.str;
-	}
-	else {
+	} else {
 		n_error(N, NE_SYNTAX, __FN__, "expected a string for sqlquery");
 	}
 	if (nsp_isbool((cobj = nsp_getobj(N, &N->context->l, "2")))) {
@@ -291,7 +288,7 @@ NSP_CLASSMETHOD(libnsp_data_odbc_getnext)
 	nc_memset((void *)&tobj, 0, sizeof(obj_t));
 	tobj.val = n_newval(N, NT_TABLE);
 	tobj.val->attr &= ~NST_AUTOSORT;
-	for (field = 0;field < conn->numfields;field++) {
+	for (field = 0; field < conn->numfields; field++) {
 		rc = SQLDescribeCol(conn->hSTMT, (SQLSMALLINT)(field + 1), (SQLPOINTER)colname, MAX_OBJNAMELEN, NULL, NULL, NULL, NULL, NULL);
 		cobj = nsp_setstr(N, &tobj, colname, NULL, 0);
 		do {

@@ -45,7 +45,7 @@ static int _base64_encode_send(nsp_state *N, TCP_SOCKET *sock, obj_t *cobj)
 	/* should actually be about 4/3 the size of cobj1->val->size */
 	i = maxline ? (((cobj->val->size + 3) / 3 * 4) / maxline) : 5;
 	i = i * 2 + 5;
-	for (i = 0;i < enclen;i++) {
+	for (i = 0; i < enclen; i++) {
 		a = (cp[0] >> 2);
 		b = (cp[0] << 4) & 0x30;
 		b |= (cp[1] >> 4);
@@ -74,8 +74,7 @@ static int _base64_encode_send(nsp_state *N, TCP_SOCKET *sock, obj_t *cobj)
 		dest[dst + 2] = '=';
 		dest[dst + 3] = '=';
 		dst += 4;
-	}
-	else if (remlen == 2) {
+	} else if (remlen == 2) {
 		a = (cp[0] >> 2);
 		b = (cp[0] << 4) & 0x30;
 		b |= (cp[1] >> 4);
@@ -115,7 +114,7 @@ NSP_CLASSMETHOD(libnsp_net_smtp_client_attach)
 	if (!nsp_istable(tobj)) {
 		tobj = nsp_settable(N, thisobj, "attachments");
 	}
-	for (cobj = tobj->val->d.table.f;cobj;cobj = cobj->next) size++;
+	for (cobj = tobj->val->d.table.f; cobj; cobj = cobj->next) size++;
 	cobj = nsp_settable(N, tobj, n_ntoa(N, N->numbuf, size, 10, 6));
 	nsp_setstr(N, cobj, "name", cobj1->val->d.str, cobj1->val->size);
 	nsp_setstr(N, cobj, "file", cobj2->val->d.str, cobj2->val->size);
@@ -237,10 +236,10 @@ helo:
 
 	nc_gettimeofday(&ttime, &tzone);
 	if (date) ttime.tv_sec = date;
-	/*
-		strftime(msgdate, sizeof(msgdate), "%a, %d %b %Y %H:%M:%S", localtime((time_t *)&ttime.tv_sec));
-		snprintf(msgdate+strlen(msgdate), sizeof(msgdate)-strlen(msgdate), " %+.4d", -tzone.tz_minuteswest/60*100);
-	*/
+/*
+	strftime(msgdate, sizeof(msgdate), "%a, %d %b %Y %H:%M:%S", localtime((time_t *)&ttime.tv_sec));
+	snprintf(msgdate+strlen(msgdate), sizeof(msgdate)-strlen(msgdate), " %+.4d", -tzone.tz_minuteswest/60*100);
+*/
 	strftime(msgdate, sizeof(msgdate), "%a, %d %b %Y %H:%M:%S +0000", gmtime((time_t *)&ttime.tv_sec));
 
 	tcp_fprintf(N, &sock, "Date: %s\r\n", msgdate);
@@ -257,7 +256,7 @@ helo:
 		tcp_fprintf(N, &sock, "Content-Type: %s; charset=utf-8\r\n", ctype);
 		tcp_fprintf(N, &sock, "Content-Transfer-Encoding: 7bit\r\n\r\n");
 		tcp_send(N, &sock, body, blen, 0);
-		for (cobj = aobj->val->d.table.f;cobj;cobj = cobj->next) {
+		for (cobj = aobj->val->d.table.f; cobj; cobj = cobj->next) {
 			tcp_fprintf(N, &sock, "\r\n--%s\r\n", boundary);
 			tcp_fprintf(N, &sock, "Content-Type: application/octet-stream; name=\"%s\"\r\n", nsp_getstr(N, cobj, "name"));
 			tcp_fprintf(N, &sock, "Content-Transfer-Encoding: base64\r\n");
@@ -266,8 +265,7 @@ helo:
 		}
 		tcp_fprintf(N, &sock, "\r\n--%s--\r\n", boundary);
 		tcp_fprintf(N, &sock, "\r\n");
-	}
-	else {
+	} else {
 		tcp_fprintf(N, &sock, "Content-Type: %s\r\n", ctype);
 		tcp_fprintf(N, &sock, "\r\n");
 		tcp_send(N, &sock, body, strlen(body), 0);

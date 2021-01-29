@@ -106,7 +106,7 @@ NSP_FUNCTION(libnsp_net_ldap_search)
 			if ((vals = ldap_get_values(ld, e, a)) != NULL) {
 
 				p = a;
-				for (i = 0;i < MAX_OBJNAMELEN;i++) {
+				for (i = 0; i < MAX_OBJNAMELEN; i++) {
 					if (*p == '\0') { tmpbuf[i] = '\0'; break; }
 					if (*p == '=') { tmpbuf[i] = '\0'; p++; break; }
 					tmpbuf[i] = tolower(*p);

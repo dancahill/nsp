@@ -56,12 +56,12 @@ typedef struct PIPE_CONN {
 void pipe_murder(nsp_state *N, obj_t *cobj)
 {
 #define __FN__ __FILE__ ":pipe_murder()"
-	//	PIPE_CONN *conn;
+//	PIPE_CONN *conn;
 
 	n_warn(N, __FN__, "reaper is claiming another lost soul");
 	if ((cobj->val->type != NT_CDATA) || (cobj->val->d.str == NULL) || (nc_strcmp(cobj->val->d.str, "pipe-conn") != 0))
 		n_error(N, NE_SYNTAX, __FN__, "expected a pipe conn");
-	//	conn=(PIPE_CONN *)cobj->val->d.str;
+//	conn=(PIPE_CONN *)cobj->val->d.str;
 	n_free(N, (void *)&cobj->val->d.str, sizeof(PIPE_CONN) + 1);
 	return;
 #undef __FN__
@@ -99,8 +99,8 @@ NSP_FUNCTION(libnsp_base_pipe_open)
 	conn->obj_term = (NSP_CFREE)pipe_murder;
 	strcpy(conn->obj_type, "pipe-conn");
 
-	//	fixslashes(aspell_loc);
-	//	if (strlen(searchstring)<1) return 0;
+//	fixslashes(aspell_loc);
+//	if (strlen(searchstring)<1) return 0;
 	memset(args, 0, sizeof(args));
 	args[0] = cobj1->val->d.str;
 	if (cobj2->val->type == NT_STRING) args[1] = cobj2->val->d.str;
@@ -155,8 +155,7 @@ NSP_FUNCTION(libnsp_base_pipe_open)
 	if (pid < 0) {
 		n_warn(N, __FN__, "fork() error");
 		return 0;
-	}
-	else if (pid == 0) {
+	} else if (pid == 0) {
 		close(conn->local.in);
 		close(conn->local.out);
 		dup2(conn->remote.in, fileno(stdin));
@@ -164,8 +163,7 @@ NSP_FUNCTION(libnsp_base_pipe_open)
 		execve(args[0], &args[0], NULL);
 		n_warn(N, __FN__, "execve() error [%s]", args[0]);
 		//		exit(0);
-	}
-	else {
+	} else {
 		close(conn->remote.in);
 		close(conn->remote.out);
 	}
@@ -201,8 +199,8 @@ NSP_FUNCTION(libnsp_base_pipe_read)
 		nsp_strcat(N, &N->r, szBuffer, bytesin);
 		if (bytesin < 1) break;
 	} while (0);
-	//	} while (strchr(szBuffer, '\n')==NULL);
-	//	nsp_setstr(N, &N->r, "", szBuffer, bytesin);
+//	} while (strchr(szBuffer, '\n')==NULL);
+//	nsp_setstr(N, &N->r, "", szBuffer, bytesin);
 	return 0;
 #undef __FN__
 }

@@ -78,8 +78,7 @@ int tcp_bind(nsp_state *N, TCP_SOCKET *sock, char *ifname, unsigned short port)
 	sin.sin_family = AF_INET;
 	if (strcasecmp("INADDR_ANY", ifname) == 0) {
 		sin.sin_addr.s_addr = htonl(INADDR_ANY);
-	}
-	else {
+	} else {
 		if ((hp = gethostbyname(ifname)) == NULL) {
 			snprintf(sock->errormsg, sizeof(sock->errormsg) - 1, "Host lookup error for %s", ifname);
 			return -1;
@@ -111,10 +110,10 @@ int tcp_accept(nsp_state *N, TCP_SOCKET *bsock, TCP_SOCKET *asock)
 	int clientsock;
 	socklen_t fromlen;
 
-	/*
-		int lowat=1;
-		struct timeval timeout;
-	*/
+/*
+	int lowat=1;
+	struct timeval timeout;
+*/
 	fromlen = sizeof(addr);
 	clientsock = accept(bsock->socket, &addr, &fromlen);
 	if (clientsock < 0) {
@@ -138,13 +137,13 @@ int tcp_accept(nsp_state *N, TCP_SOCKET *bsock, TCP_SOCKET *asock)
 	getpeername(asock->socket, (struct sockaddr *)&peer, &fromlen);
 	nc_strncpy(asock->RemoteAddr, inet_ntoa(peer.sin_addr), sizeof(asock->RemoteAddr) - 1);
 	asock->RemotePort = ntohs(peer.sin_port);
-	/*
-		n_warn(N, __FN__, "[%s:%d] new connection", asock->RemoteAddr, asock->RemotePort);
-		timeout.tv_sec=1;
-		timeout.tv_usec=0;
-		setsockopt(clientsock, SOL_SOCKET, SO_RCVTIMEO, (void *)&timeout, sizeof(timeout));
-		setsockopt(clientsock, SOL_SOCKET, SO_RCVLOWAT, (void *)&lowat, sizeof(lowat));
-	*/
+/*
+	n_warn(N, __FN__, "[%s:%d] new connection", asock->RemoteAddr, asock->RemotePort);
+	timeout.tv_sec=1;
+	timeout.tv_usec=0;
+	setsockopt(clientsock, SOL_SOCKET, SO_RCVTIMEO, (void *)&timeout, sizeof(timeout));
+	setsockopt(clientsock, SOL_SOCKET, SO_RCVLOWAT, (void *)&lowat, sizeof(lowat));
+*/
 	return clientsock;
 #undef __FN__
 }
@@ -219,8 +218,7 @@ int tcp_recv(nsp_state *N, TCP_SOCKET *socket, char *buffer, int max, int flags)
 #else
 		rc = -1;
 #endif
-	}
-	else {
+	} else {
 		rc = recv(socket->socket, buffer, max, flags);
 	}
 	if (rc < 0) {
@@ -250,8 +248,7 @@ int tcp_recv(nsp_state *N, TCP_SOCKET *socket, char *buffer, int max, int flags)
 		}
 		return -1;
 #endif
-	}
-	else {
+	} else {
 		socket->mtime = time(NULL);
 		socket->bytes_in += rc;
 	}
@@ -276,8 +273,7 @@ int tcp_send(nsp_state *N, TCP_SOCKET *socket, const char *buffer, int len, int 
 #else
 		rc = -1;
 #endif
-	}
-	else {
+	} else {
 		rc = send(socket->socket, buffer, len, flags);
 	}
 	if (rc < 0) {
@@ -287,17 +283,14 @@ int tcp_send(nsp_state *N, TCP_SOCKET *socket, const char *buffer, int len, int 
 		if (errno == EWOULDBLOCK) {
 			errno = 0;
 			msleep(MAXWAIT);
-		}
-		else if (errno) {
+		} else if (errno) {
 			if (N->debug) n_warn(N, __FN__, "[%s:%d] %d%.100s", socket->RemoteAddr, socket->RemotePort, errno, strerror(errno));
 			errno = 0;
 		}
 #endif
-	}
-	else if (rc == 0) {
+	} else if (rc == 0) {
 		msleep(MAXWAIT);
-	}
-	else {
+	} else {
 		socket->mtime = time(NULL);
 		socket->bytes_out += rc;
 	}
@@ -351,8 +344,7 @@ retry:
 		if (x > max) x = max;
 		if ((rc = tcp_recv(N, socket, obuffer, x, 0)) < 0) {
 			return -1;
-		}
-		else if (rc < 1) {
+		} else if (rc < 1) {
 			*pbuffer = '\0';
 			if (N->debug) n_warn(N, __FN__, "[%s:%d] %s", socket->RemoteAddr, socket->RemotePort, buffer);
 			return n;
@@ -378,8 +370,7 @@ retry:
 			nc_memcpy(socket->recvbuf, socket->recvbuf + socket->recvbufoffset, socket->recvbufsize);
 			nc_memset(socket->recvbuf + socket->recvbufsize, 0, sizeof(socket->recvbuf) - socket->recvbufsize);
 			socket->recvbufoffset = 0;
-		}
-		else {
+		} else {
 			nc_memset(socket->recvbuf, 0, sizeof(socket->recvbuf));
 			socket->recvbufoffset = 0;
 			socket->recvbufsize = 0;
@@ -395,8 +386,7 @@ int tcp_close(nsp_state *N, TCP_SOCKET *socket, short int owner_killed)
 {
 	if (!owner_killed) {
 		socket->want_close = 1;
-	}
-	else {
+	} else {
 		socket->want_close = 0;
 #ifdef HAVE_TLS
 		if (socket->use_tls) _tls_close(N, socket);

@@ -179,11 +179,9 @@ NSP_CLASSMETHOD(libnsp_data_sqlite_open)
 
 	if (nsp_isstr((cobj = nsp_getobj(N, &N->context->l, "1")))) {
 		db = cobj->val->d.str;
-	}
-	else if (nsp_isstr((cobj = nsp_getobj(N, thisobj, "database")))) {
+	} else if (nsp_isstr((cobj = nsp_getobj(N, thisobj, "database")))) {
 		db = cobj->val->d.str;
-	}
-	else {
+	} else {
 		n_error(N, NE_SYNTAX, __FN__, "expected a string for database");
 	}
 	conn = n_alloc(N, sizeof(SQLITE_CONN) + 1, 1);
@@ -235,11 +233,9 @@ NSP_CLASSMETHOD(libnsp_data_sqlite_query)
 
 	if (nsp_isstr((cobj = nsp_getobj(N, &N->context->l, "1")))) {
 		sqlquery = cobj->val->d.str;
-	}
-	else if (nsp_isstr((cobj = nsp_getobj(N, thisobj, "sqlquery")))) {
+	} else if (nsp_isstr((cobj = nsp_getobj(N, thisobj, "sqlquery")))) {
 		sqlquery = cobj->val->d.str;
-	}
-	else {
+	} else {
 		n_error(N, NE_SYNTAX, __FN__, "expected a string for sqlquery");
 	}
 	if (nsp_isbool((cobj = nsp_getobj(N, &N->context->l, "2")))) {
@@ -291,7 +287,7 @@ NSP_CLASSMETHOD(libnsp_data_sqlite_getnext)
 	nc_memset((void *)&tobj, 0, sizeof(obj_t));
 	tobj.val = n_newval(N, NT_TABLE);
 	tobj.val->attr &= ~NST_AUTOSORT;
-	for (i = 0;i < numfields;i++) {
+	for (i = 0; i < numfields; i++) {
 		store_field(N, conn->stm, i, &tobj);
 	}
 	nsp_linkval(N, &N->r, &tobj);
