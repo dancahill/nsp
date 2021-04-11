@@ -71,7 +71,7 @@ namespace NSPEdit
 				{
 					if ((NSPObjectTypes)listobj.type == NSPObjectTypes.NT_TABLE)
 					{
-						Trace.WriteLine(string.Format("name: {0}, type: {1}", listobj.name, (NSPObjectTypes)listobj.type));
+						//Trace.WriteLine(string.Format("name: {0}, type: {1}", listobj.name, (NSPObjectTypes)listobj.type));
 						TreeNode node = parentNode.Nodes.Add(listobj.name);
 						node.Tag = listobj;
 						LoadSubBranch(node, listobj, (short)(depth + 1));
@@ -83,7 +83,7 @@ namespace NSPEdit
 				{
 					if ((NSPObjectTypes)listobj.type != NSPObjectTypes.NT_TABLE)
 					{
-						Trace.WriteLine(string.Format("name: {0}, type: {1}", listobj.name, (NSPObjectTypes)listobj.type));
+						//Trace.WriteLine(string.Format("name: {0}, type: {1}", listobj.name, (NSPObjectTypes)listobj.type));
 						string name = listobj.name;
 						if ((NSPObjectTypes)listobj.type == NSPObjectTypes.NT_NFUNC || (NSPObjectTypes)listobj.type == NSPObjectTypes.NT_CFUNC)
 						{

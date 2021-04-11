@@ -47,6 +47,7 @@
 			this.scriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.runToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.resumeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.viewMemoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.nSPHomepageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.nSPSyntaxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -69,7 +70,6 @@
 			this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
 			this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
 			this.tabControl1 = new System.Windows.Forms.TabControl();
-			this.viewMemoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.menuStrip1.SuspendLayout();
 			this.toolStrip1.SuspendLayout();
 			this.statusStrip1.SuspendLayout();
@@ -227,6 +227,14 @@
 			this.resumeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
 			this.resumeToolStripMenuItem.Text = "Continue";
 			this.resumeToolStripMenuItem.Click += new System.EventHandler(this.continueToolStripMenuItem_Click);
+			// 
+			// viewMemoryToolStripMenuItem
+			// 
+			this.viewMemoryToolStripMenuItem.Name = "viewMemoryToolStripMenuItem";
+			this.viewMemoryToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
+			this.viewMemoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.viewMemoryToolStripMenuItem.Text = "View Memory";
+			this.viewMemoryToolStripMenuItem.Click += new System.EventHandler(this.viewMemoryToolStripMenuItem_Click);
 			// 
 			// helpToolStripMenuItem
 			// 
@@ -432,13 +440,6 @@
 			this.tabControl1.Size = new System.Drawing.Size(784, 683);
 			this.tabControl1.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
 			this.tabControl1.TabIndex = 6;
-			// 
-			// viewMemoryToolStripMenuItem
-			// 
-			this.viewMemoryToolStripMenuItem.Name = "viewMemoryToolStripMenuItem";
-			this.viewMemoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-			this.viewMemoryToolStripMenuItem.Text = "View Memory";
-			this.viewMemoryToolStripMenuItem.Click += new System.EventHandler(this.viewMemoryToolStripMenuItem_Click);
 			// 
 			// NSPEditForm
 			// 

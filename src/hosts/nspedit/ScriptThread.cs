@@ -54,7 +54,7 @@ namespace NSPEdit
 		public void Suspend()
 		{
 			if (thread == null) return;
-			new Task(() => MessageBox.Show("debug.break() called\r\nPress F5 to continue", "Script Breakpoint")).Start();
+			new Task(() => MessageBox.Show("debug.break() called\r\n\r\nPress F5 to continue\r\nor F6 view memory", "Script Breakpoint")).Start();
 #pragma warning disable CS0618 // Type or member is obsolete
 			thread.Suspend();
 #pragma warning restore CS0618 // Type or member is obsolete
