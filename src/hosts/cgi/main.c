@@ -243,7 +243,7 @@ int htnsp_runscript(char *file)
 {
 	char *p;
 
-	nsp_setcfunc(N, nsp_settable(N, &N->g, "io"), "flush", nescgi_flush);
+	nsp_setcfunc(N, nsp_settable(N, nsp_settable(N, &N->g, "lib"), "io"), "flush", nescgi_flush);
 	nsp_setcfunc(N, &N->g, "sendfile", nescgi_sendfile);
 	nsp_setcfunc(N, &N->g, "convertnsp", (NSP_CFUNC)htnsp_convertnsp);
 	preppath(N, file);

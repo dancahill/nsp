@@ -347,7 +347,7 @@ int nspodbc_register_all(nsp_state *N)
 {
 	obj_t *tobj;
 
-	tobj = nsp_settable(N, &N->g, "data");
+	tobj = nsp_settable(N, nsp_settable(N, &N->g, "lib"), "data");
 	tobj->val->attr |= NST_HIDDEN;
 	tobj = nsp_settable(N, tobj, "odbc");
 	tobj->val->attr |= NST_HIDDEN;

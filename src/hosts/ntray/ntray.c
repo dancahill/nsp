@@ -253,7 +253,7 @@ void init_stuff(nsp_state *N)
 
 	nsp_setcfunc(N, &N->g, "print", nsp_print);
 
-	tobj = nsp_settable(N, &N->g, "io");
+	tobj = nsp_settable(N, nsp_settable(N, &N->g, "lib"), "io");
 	nsp_setcfunc(N, tobj, "flush", (NSP_CFUNC)nsp_flush);
 
 	nsp_setcfunc(N, &N->g, "TextInput", nsp_textinput);

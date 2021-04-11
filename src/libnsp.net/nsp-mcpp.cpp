@@ -197,9 +197,9 @@ private:
 			nsp_setstr(N, tobj, tmpbuf, p, -1);
 		}
 		preppath(N, srcfilename);
-		tobj = nsp_settable(N, &N->g, "debug");
+		tobj = nsp_settable(N, nsp_settable(N, &N->g, "lib"), "debug");
 		nsp_setcfunc(N, tobj, "break2", nsp_edit_break);
-		tobj = nsp_settable(N, &N->g, "io");
+		tobj = nsp_settable(N, nsp_settable(N, &N->g, "lib"), "io");
 		nsp_setcfunc(N, tobj, "flush", nsp_edit_flush);
 		return;
 	}
@@ -234,7 +234,7 @@ private:
 		nsp_setstr(N, &N->g, "_filename", p, -1);
 		nsp_setstr(N, &N->g, "_filepath", buf, -1);
 #if defined(WIN32) && defined(_DEBUG)
-		nsp_setbool(N, &N->g, "_debug", 1);
+		nsp_setbool(N, nsp_settable(N, nsp_settable(N, &N->g, "lib"), "debug"), "attached", 1);
 #endif
 		return;
 	}

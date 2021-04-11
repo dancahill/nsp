@@ -529,7 +529,7 @@ int nspwingdi_register_all(nsp_state *N)
 #ifdef WIN32
 	obj_t *tobj;
 
-	tobj = nsp_settable(N, &N->g, "win");
+	tobj = nsp_settable(N, nsp_settable(N, &N->g, "lib"), "win");
 	tobj->val->attr |= NST_HIDDEN;
 	tobj = nsp_settable(N, tobj, "gdi");
 	tobj->val->attr |= NST_HIDDEN;

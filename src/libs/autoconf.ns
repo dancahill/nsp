@@ -15,12 +15,12 @@ function testsub(title, l, c, showfail) {
 		file.writeall("conftest.c", c);
 		r1=system(cc+" conftest.c "+l+" -o conftest.out 2>/dev/null");
 		//r1=system(cc+" conftest.c "+l+" -o conftest.out");
-		if (r1==0) r2=file.stat("conftest.out");
+		if (r1==0) r2=lib.file.stat("conftest.out");
 	} else if (ostype=='windows') {
 		file.writeall("conftest.c", c);
 //		r1=system(cc+" -nologo conftest.c "+l+" -o conftest.exe > nul");
 		r1=system(cc+" -nologo conftest.c "+l+" /Feconftest.exe > nul");
-		if (r1==0) r2=file.stat("conftest.exe");
+		if (r1==0) r2=lib.file.stat("conftest.exe");
 	} else {
 		print("unknown ostype '", ostype, "'[", _ENV['OS'], "][", _ENV['OSTYPE'], "]\n");
 		print(serialize(_GLOBALS));
@@ -60,8 +60,8 @@ function dotests() {
 	}
 
 	if (ostype=='windows') {
-		x1=file.stat(_filepath+"/../../include/nsp/config-win.h");
-		x2=file.stat(_filepath+"/../config-win.mak");
+		x1=lib.file.stat(_filepath+"/../../include/nsp/config-win.h");
+		x2=lib.file.stat(_filepath+"/../config-win.mak");
 		if (typeof(x1)!='table') {
 			printf("config-win.h does not exist\r\n");
 		} else if (x1.size<1) {
@@ -75,7 +75,7 @@ function dotests() {
 			return;
 		}
 	} else {
-		x=file.stat("../config.mak");
+		x=lib.file.stat("../config.mak");
 		if (typeof(x)=='table') if (x.size>0) return;
 	}
 

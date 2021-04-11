@@ -380,9 +380,9 @@ namespace testlib1.tests {
 				continue;
 			}
 			expect(f.name, true, dl.load(x[0]));
-			if (dl.last_error) {
-				print("["+dl.last_error+"]\r\n");
-				dl.last_error="";
+			if (lib.dl.last_error) {
+				print("["+lib.dl.last_error+"]\r\n");
+				lib.dl.last_error="";
 			}
 		}
 		//expect("test", true, dl.load("test"));

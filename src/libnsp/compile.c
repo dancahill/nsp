@@ -309,7 +309,7 @@ uchar   *n_decompose(nsp_state *N, char *srcfile, uchar *srctext, uchar **dsttex
 	state.destmax = 1024;
 	state.destbuf = (uchar *)n_alloc(N, state.destmax, 0);
 	n_context_readptr = srctext;
-	tobj = nsp_settable(N, &N->g, "decomped_script");
+	tobj = nsp_settable(N, nsp_settable(N, nsp_settable(N, &N->g, "lib"), "debug"), "decomped_script");
 	nsp_freetable(N, tobj);
 	state.tobj1 = nsp_settable(N, tobj, "code");
 	n_decompose_sub(N, &state);

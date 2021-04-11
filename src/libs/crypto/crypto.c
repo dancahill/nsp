@@ -28,7 +28,7 @@ int nspcrypto_register_all(nsp_state *N)
 {
 	obj_t *tobj;
 
-	tobj = nsp_settable(N, &N->g, "crypto");
+	tobj = nsp_settable(N, nsp_settable(N, &N->g, "lib"), "crypto");
 	tobj->val->attr |= NST_HIDDEN;
 	nsp_setcfunc(N, tobj, "aes_cbc_encrypt", (NSP_CFUNC)libnsp_crypto_aes_encrypt);
 	nsp_setcfunc(N, tobj, "aes_cbc_decrypt", (NSP_CFUNC)libnsp_crypto_aes_decrypt);

@@ -1130,7 +1130,7 @@ int nspssh2_register_all(nsp_state *N)
 	static WSADATA wsaData;
 	if (WSAStartup(0x101, &wsaData)) return -1;
 #endif
-	tobj = nsp_settable(N, &N->g, "net");
+	tobj = nsp_settable(N, nsp_settable(N, &N->g, "lib"), "net");
 	tobj->val->attr |= NST_HIDDEN;
 	tobj = nsp_settable(N, tobj, "ssh");
 	tobj->val->attr |= NST_HIDDEN;

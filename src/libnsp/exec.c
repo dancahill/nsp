@@ -936,24 +936,25 @@ nsp_state *nsp_newstate()
 		nsp_setcfunc(new_N, &new_N->g, list[i].fn_name, list[i].fn_ptr);
 	}
 
-	cobj = nsp_settable(new_N, &new_N->g, "debug");
+	cobj = nsp_settable(new_N, nsp_settable(new_N, &new_N->g, "lib"), "debug");
 	cobj->val->attr |= NST_HIDDEN;
 	for (i = 0; list_debug[i].fn_name != NULL; i++) {
 		nsp_setcfunc(new_N, cobj, list_debug[i].fn_name, list_debug[i].fn_ptr);
 	}
 
-	cobj = nsp_settable(new_N, &new_N->g, "coroutine");
+	cobj = nsp_settable(new_N, nsp_settable(new_N, &new_N->g, "lib"), "coroutine");
 	cobj->val->attr |= NST_HIDDEN;
 	for (i = 0; list_coroutine[i].fn_name != NULL; i++) {
 		nsp_setcfunc(new_N, cobj, list_coroutine[i].fn_name, list_coroutine[i].fn_ptr);
 	}
 
-	cobj = nsp_settable(new_N, &new_N->g, "dl");
+	cobj = nsp_settable(new_N, &new_N->g, "lib");
 	cobj->val->attr |= NST_HIDDEN;
 	for (i = 0; list_dl[i].fn_name != NULL; i++) {
 		nsp_setcfunc(new_N, cobj, list_dl[i].fn_name, list_dl[i].fn_ptr);
 	}
-	cobj = nsp_settable(new_N, cobj, "path");
+	cobj = nsp_settable(new_N, nsp_settable(new_N, nsp_settable(new_N, &new_N->g, "lib"), "dl"), "loaded");
+	cobj = nsp_settable(new_N, nsp_settable(new_N, nsp_settable(new_N, &new_N->g, "lib"), "dl"), "path");
 #ifdef WIN32
 	{
 		char libbuf[MAX_PATH];
@@ -972,32 +973,32 @@ nsp_state *nsp_newstate()
 	nsp_setstr(new_N, cobj, "0", "/usr/lib/nsp", -1);
 #endif
 
-	cobj = nsp_settable(new_N, &new_N->g, "file");
+	cobj = nsp_settable(new_N, nsp_settable(new_N, &new_N->g, "lib"), "file");
 	cobj->val->attr |= NST_HIDDEN;
 	for (i = 0; list_file[i].fn_name != NULL; i++) {
 		nsp_setcfunc(new_N, cobj, list_file[i].fn_name, list_file[i].fn_ptr);
 	}
-	cobj = nsp_settable(new_N, &new_N->g, "io");
+	cobj = nsp_settable(new_N, nsp_settable(new_N, &new_N->g, "lib"), "io");
 	cobj->val->attr |= NST_HIDDEN;
 	for (i = 0; list_io[i].fn_name != NULL; i++) {
 		nsp_setcfunc(new_N, cobj, list_io[i].fn_name, list_io[i].fn_ptr);
 	}
-	cobj = nsp_settable(new_N, &new_N->g, "math");
+	cobj = nsp_settable(new_N, nsp_settable(new_N, &new_N->g, "lib"), "math");
 	cobj->val->attr |= NST_HIDDEN;
 	for (i = 0; list_math[i].fn_name != NULL; i++) {
 		nsp_setcfunc(new_N, cobj, list_math[i].fn_name, list_math[i].fn_ptr);
 	}
-	cobj = nsp_settable(new_N, &new_N->g, "string");
+	cobj = nsp_settable(new_N, nsp_settable(new_N, &new_N->g, "lib"), "string");
 	cobj->val->attr |= NST_HIDDEN;
 	for (i = 0; list_string[i].fn_name != NULL; i++) {
 		nsp_setcfunc(new_N, cobj, list_string[i].fn_name, list_string[i].fn_ptr);
 	}
-	cobj = nsp_settable(new_N, &new_N->g, "table");
+	cobj = nsp_settable(new_N, nsp_settable(new_N, &new_N->g, "lib"), "table");
 	cobj->val->attr |= NST_HIDDEN;
 	for (i = 0; list_table[i].fn_name != NULL; i++) {
 		nsp_setcfunc(new_N, cobj, list_table[i].fn_name, list_table[i].fn_ptr);
 	}
-	cobj = nsp_settable(new_N, &new_N->g, "time");
+	cobj = nsp_settable(new_N, nsp_settable(new_N, &new_N->g, "lib"), "time");
 	cobj->val->attr |= NST_HIDDEN;
 	for (i = 0; list_time[i].fn_name != NULL; i++) {
 		nsp_setcfunc(new_N, cobj, list_time[i].fn_name, list_time[i].fn_ptr);

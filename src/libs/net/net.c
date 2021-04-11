@@ -27,7 +27,7 @@ int nspnet_register_all(nsp_state *N)
 	if (WSAStartup(0x101, &wsaData)) return -1;
 #endif
 
-	tobj = nsp_settable(N, &N->g, "net");
+	tobj = nsp_settable(N, nsp_settable(N, &N->g, "lib"), "net");
 	tobj->val->attr |= NST_HIDDEN;
 #ifdef HAVE_TLS
 	nsp_setbool(N, tobj, "have_tls", 1);

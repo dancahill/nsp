@@ -157,7 +157,7 @@ NSP_FUNCTION(nl_flush)
 	int rc;
 
 	if (N == NULL || N->outbuflen == 0) return 0;
-	cobj = &N->g;
+	cobj = nsp_settable(N, &N->g, "lib");
 	if (!nsp_istable(cobj)) goto flush;
 	for (cobj = cobj->val->d.table.f; cobj; cobj = cobj->next) {
 		if (nc_strcmp(cobj->name, "io") != 0) continue;
@@ -242,7 +242,7 @@ NSP_FUNCTION(nl_write)
 NSP_FUNCTION(nl_break)
 {
 #define __FN__ __FILE__ ":nl_break()"
-	obj_t *cobj = nsp_getobj(N, nsp_getobj(N, &N->g, "debug"), "break2");
+	obj_t *cobj = nsp_getobj(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "debug"), "break2");
 	if (nsp_typeof(cobj) == NT_CFUNC) {
 		cobj->val->d.cfunc(N);
 	} else {
@@ -505,13 +505,13 @@ static char *lib_error(nsp_state *N)
 	rc = GetLastError();
 	if (!rc) return "";
 	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, rc, 0, (LPTSTR)&lpMsgBuf, 0, NULL);
-	nsp_setstr(N, nsp_getobj(N, &N->g, "dl"), "last_error", lpMsgBuf, -1);
+	nsp_setstr(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "dl"), "last_error", lpMsgBuf, -1);
 	LocalFree(lpMsgBuf);
 	SetLastError(0);
-	return nsp_getstr(N, nsp_getobj(N, &N->g, "dl"), "last_error");
+	return nsp_getstr(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "dl"), "last_error");
 #else
-	nsp_setstr(N, nsp_getobj(N, &N->g, "dl"), "last_error", dlerror(), -1);
-	return nsp_getstr(N, nsp_getobj(N, &N->g, "dl"), "last_error");
+	nsp_setstr(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "dl"), "last_error", dlerror(), -1);
+	return nsp_getstr(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "dl"), "last_error");
 #endif
 }
 
@@ -522,6 +522,23 @@ static int lib_close(void *handle)
 #else
 	return dlclose(handle);
 #endif
+}
+
+static unsigned short lib_isloaded(nsp_state *N, char *libname, unsigned short setloaded)
+{
+	obj_t *cobj, *tobj;
+
+	tobj = nsp_settable(N, nsp_settable(N, nsp_settable(N, &N->g, "lib"), "dl"), "loaded");
+	for (cobj = tobj->val->d.table.f; cobj; cobj = cobj->next) {
+		if (!nsp_isstr(cobj)) continue;
+		if (strcmp(cobj->name, libname) == 0) return 1;
+	}
+	if (setloaded) {
+		//nsp_setstr(N, tobj, "last_error", "failed to open library", -1);
+		nsp_setbool(N, tobj, libname, 1);
+		return 1;
+	}
+	return 0;
 }
 
 NSP_FUNCTION(nl_dl_load)
@@ -537,16 +554,16 @@ NSP_FUNCTION(nl_dl_load)
 #endif
 	char namebuf[512];
 
-	nsp_setnull(N, nsp_getobj(N, &N->g, "dl"), "last_error");
+	nsp_setnull(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "dl"), "last_error");
 	nsp_setbool(N, &N->r, "", 0);
 
 	if (!nsp_isstr(cobj1) || cobj1->val->size < 1) {
 		return 0;
 	}
-	tobj = nsp_getobj(N, nsp_getobj(N, &N->g, "dl"), "path");
+	tobj = nsp_getobj(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "dl"), "path");
 	if (!nsp_istable(tobj)) {
-		nsp_setstr(N, nsp_getobj(N, &N->g, "dl"), "last_error", "dl.path not found", -1);
-		n_error(N, NE_SYNTAX, __FN__, "dl.path not found");
+		nsp_setstr(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "dl"), "last_error", "lib.dl.path not found", -1);
+		n_error(N, NE_SYNTAX, __FN__, "lib.dlpath not found");
 		return 0;
 	}
 	nsp_setbool(N, &N->r, "", 0);
@@ -558,18 +575,19 @@ NSP_FUNCTION(nl_dl_load)
 			if ((cfunc = (NSP_CFUNC)lib_sym(l, "nsplib_init")) != NULL) {
 				cfunc(N);
 				nsp_setbool(N, &N->r, "", 1);
+				lib_isloaded(N, cobj1->val->d.str, 1);
 				return 0;
 			} else {
 				lib_error(N);
 				lib_close(l);
-				n_error(N, NE_SYNTAX, __FN__, "%s", nsp_getstr(N, nsp_getobj(N, &N->g, "dl"), "last_error"));
+				n_error(N, NE_SYNTAX, __FN__, "%s", nsp_getstr(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "dl"), "last_error"));
 				return 0;
 			}
 		}
 	}
-	cobj = nsp_getobj(N, nsp_getobj(N, &N->g, "dl"), "last_error");
+	cobj = nsp_getobj(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "dl"), "last_error");
 	if (nsp_isnull(cobj)) {
-		nsp_setstr(N, nsp_getobj(N, &N->g, "dl"), "last_error", "failed to open library", -1);
+		nsp_setstr(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "dl"), "last_error", "failed to open library", -1);
 	}
 	n_error(N, NE_SYNTAX, __FN__, "%s", nsp_tostr(N, cobj));
 	return 0;

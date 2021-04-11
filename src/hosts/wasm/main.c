@@ -123,8 +123,8 @@ int nsp_createstate()
 	}
 	//setsigs();
 	N->debug = 0;
-	nsp_setstr(N, nsp_getobj(N, &N->g, "io"), "outputid", "output", -1);
-	nsp_setcfunc(N, nsp_settable(N, &N->g, "io"), "flush", wasm_flush);
+	nsp_setstr(N, nsp_getobj(N, nsp_settable(N, &N->g, "lib"), "io"), "outputid", "output", -1);
+	nsp_setcfunc(N, nsp_settable(N, nsp_settable(N, &N->g, "lib"), "io"), "flush", wasm_flush);
 	nspbase_register_all(N);
 	/* add env */
 	tobj = nsp_settable(N, &N->g, "_ENV");

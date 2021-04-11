@@ -136,7 +136,7 @@ static void print_warning(nsp_state *N, const ISC_STATUS *pvector, const char *_
 	long int rc;
 	obj_t *cobj;
 
-	cobj = nsp_setstr(N, nsp_settable(N, nsp_settable(N, &N->g, "data"), "firebird"), "last_error", (char *)errstr, -1);
+	cobj = nsp_setstr(N, nsp_settable(N, nsp_settable(N, nsp_getobj(N, &N->g, "lib"), "data"), "firebird"), "last_error", (char *)errstr, -1);
 	while ((rc = fb_interpret(errbuf, sizeof(errbuf), &pvector)) > 0) {
 		nsp_strcat(N, cobj, "\r\n\t", 3);
 		nsp_strcat(N, cobj, errbuf, rc);
@@ -908,7 +908,7 @@ int nspfbsql_register_all(nsp_state *N)
 {
 	obj_t *tobj;
 
-	tobj = nsp_settable(N, &N->g, "data");
+	tobj = nsp_settable(N, nsp_settable(N, &N->g, "lib"), "data");
 	tobj->val->attr |= NST_HIDDEN;
 	tobj = nsp_settable(N, tobj, "fbsql");
 	tobj->val->attr |= NST_HIDDEN;
