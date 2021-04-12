@@ -34,7 +34,7 @@ class testlib1 {
 		print("-------------------------------------------------------------------\n");
 		if (_ENV['HOME']!=null) {
 			var f=_ENV['HOME']+"/test.ns";
-			if (typeof(file.stat(f))=='table') {
+			if (typeof(lib.file.stat(f))=='table') {
 				print("\trunning ", f, "\n");
 				include(f);
 				print("-------------------------------------------------------------------\n");
@@ -57,9 +57,9 @@ class testlib1 {
 	//		print("global _GLOBALS = ",serialize(_GLOBALS),";\n");
 		}
 		//print(serialize(testlist));
-		if (string.sub(_ostype_, 0, 7)=="Windows" && typeof(_SERVER)!='table' && typeof(io.gets)=='function') {
+		if (lib.string.sub(_ostype_, 0, 7)=="Windows" && typeof(_SERVER)!='table' && typeof(lib.io.gets)=='function') {
 			print("\ndone - press enter\n");
-			io.gets();
+			lib.io.gets();
 		}
 		return;
 	}
@@ -71,7 +71,7 @@ class testlib1 {
 		b=b.tostring();
 		if (_SERVER) {
 			md=sizeof(msg);
-			msg=string.replace(msg, '&', '&amp;');
+			msg=lib.string.replace(msg, '&', '&amp;');
 			md=sizeof(msg)-md;
 			colour_emph="<FONT COLOR='BLUE'>";
 			colour_good="<FONT COLOR='GREEN'>";
@@ -92,18 +92,18 @@ class testlib1 {
 		}
 		if (a==b) {
 			if (!quiet) {
-				print("        ", string.sub(msg+sp, 0, 20+md));
-				print(" = ",colour_emph,"",string.sub(b+sp, 0, 27),colour_norm," ");
+				print("        ", lib.string.sub(msg+sp, 0, 20+md));
+				print(" = ",colour_emph,"",lib.string.sub(b+sp, 0, 27),colour_norm," ");
 				print("[",colour_good,"  OK  ",colour_norm,"]\n");
 			}
 		} else {
-			print("        ", string.sub(msg+sp, 0, 20));
-			print(" = ",colour_emph,"",string.sub(b+sp, 0, 27),colour_norm," ");
+			print("        ", lib.string.sub(msg+sp, 0, 20));
+			print(" = ",colour_emph,"",lib.string.sub(b+sp, 0, 27),colour_norm," ");
 			print("[",colour_fail,"FAILED",colour_norm,"] expected [ ", a, " ]\n");
 			global numerrors++;
 		}
 		global numtests++;
-		io.flush();
+		lib.io.flush();
 		return;
 	}
 }
@@ -216,9 +216,9 @@ namespace testlib1.tests {
 		expect("false?(true?1:2):3",  3,  false?(true?1:2):3);
 
 		x=1;
-		expect("?:",              2,  string.tostring(x?(++x):(--x)));
+		expect("?:",              2,  lib.string.tostring(x?(++x):(--x)));
 		x=0;
-		expect("?:",              -1,  string.tostring(x?(++x):(--x)));
+		expect("?:",              -1,  lib.string.tostring(x?(++x):(--x)));
 
 		expect("!true",  false, !true);
 		expect("!false", true,  !false);
@@ -363,29 +363,29 @@ namespace testlib1.tests {
 	};
 	// dl.ns
 	function dl() {
-		if (typeof(dl.load)!='function') return;
+		if (typeof(lib.load)!='function') return;
 		if (typeof(dirlist)!='function') {
 			print("        dirlist doesn't exist\n");
 			return;
 		}
 		if (!quiet) print("        loading libs...\n");
-		io.flush();
-		foreach (f in dirlist(dl.path[0])) {
+		lib.io.flush();
+		foreach (f in dirlist(lib.dl.path[0])) {
 			if (f.name=='.'||f.name=='..') continue;
-			x=string.split(f.name, ".");
+			x=lib.string.split(f.name, ".");
 			if (x[1]!='so') continue;
-			if (string.sub(x[0], 0, 7)=='libnsp_') x[0]=string.sub(x[0], 7);
+			if (lib.string.sub(x[0], 0, 7)=='libnsp_') x[0]=lib.string.sub(x[0], 7);
 			if (x[0]=='zip') {
 				if (!quiet) print("\tskipping zip\r\n");
 				continue;
 			}
-			expect(f.name, true, dl.load(x[0]));
+			expect(f.name, true, lib.load(x[0]));
 			if (lib.dl.last_error) {
 				print("["+lib.dl.last_error+"]\r\n");
 				lib.dl.last_error="";
 			}
 		}
-		//expect("test", true, dl.load("test"));
+		//expect("test", true, lib.load("test"));
 		//if (typeof(dltest)=='function') print("        ",dltest(),"\n");
 		return;
 	};
@@ -469,7 +469,7 @@ namespace testlib1.tests {
 
 		if (!quiet) print("        this is a sample of table indexes.\n\n");
 		for (i=0;i<sizeof(_GLOBALS);i++) {
-			local n=table.iname(_GLOBALS, i);
+			local n=lib.table.iname(_GLOBALS, i);
 			local t=typeof(_GLOBALS[n]);
 			if (t=='function') continue;
 			if (t=='table') continue;
@@ -529,7 +529,7 @@ namespace testlib1.tests {
 	function loop() {
 		local n=10;
 
-		local x=""; while (n>5) { x=x+string.tostring(--n); } expect("while (n>5)", "98765", x);
+		local x=""; while (n>5) { x=x+lib.string.tostring(--n); } expect("while (n>5)", "98765", x);
 		local x=""; for (n=0;n<10;n++) { if (n==5) break; x=x+n.tostring(); }  expect("for (n=0;n<5;n++)", "01234", x);
 		local x=""; for (n=0;n<5;++n)  { x=x+n.tostring(); }  expect("for (n=0;n<5;++n)",  "01234",   x);
 		local x=""; for (n=0;n<5;n+=1) { x=x+n.tostring(); }  expect("for (n=0;n<5;n+=1)", "01234",   x);
@@ -551,7 +551,7 @@ namespace testlib1.tests {
 		// this test will catch the return of a bug with freeing tables returned by ival()
 	//	local n="";
 		for (i=0;i<sizeof(_GLOBALS);i++) {
-			nn=table.iname(_GLOBALS, i);
+			nn=lib.table.iname(_GLOBALS, i);
 			local t=typeof(vv);
 			//if (t=='function') continue;
 			//if (t=='table') continue;
@@ -628,24 +628,24 @@ namespace testlib1.tests {
 		expect("3-1.5",              1.5,        (3-1.5));
 		expect("-4+1.5",             -2.5,       (-4+1.5));
 		expect("-1.5",               -1.5,       -1.5);
-		expect("math.abs(-4.2)",     4.2,        math.abs(-4.2));
-		expect("math.ceil(2.1)",     3,          math.ceil(2.1));
-		expect("math.floor(2.1)",    2,          math.floor(2.1));
+		expect("math.abs(-4.2)",     4.2,        lib.math.abs(-4.2));
+		expect("math.ceil(2.1)",     3,          lib.math.ceil(2.1));
+		expect("math.floor(2.1)",    2,          lib.math.floor(2.1));
 		expect("pi*(2+(1+1))",       "12.56637", pi*(2+(1+1)));
-		if (typeof(math.sqrt)=='function') expect("math.sqrt(2)",       "1.414213", math.sqrt(2));
+		if (typeof(math.sqrt)=='function') expect("math.sqrt(2)",       "1.414213", lib.math.sqrt(2));
 		expect("(pi*(4+(4-1+2)))/9", 3.141592,   (pi*(4+(4-1+2)))/9);
 		if (!quiet) print("          3.141593, actually, but rounding doesn't work\n");
 		if (!quiet) {
-			print("        math.rand()         = ", math.rand());
-			for (i=0;i<4;i++) print(", ", math.rand());
+			print("        math.rand()         = ", lib.math.rand());
+			for (i=0;i<4;i++) print(", ", lib.math.rand());
 			print("\n");
-			print("        math.rand(10)       = ", math.rand(10));
-			for (i=0;i<11;i++) print(", ", math.rand(10));
+			print("        math.rand(10)       = ", lib.math.rand(10));
+			for (i=0;i<11;i++) print(", ", lib.math.rand(10));
 			print("\n");
 		}
 
 	//	print("\nexpect a divided by zero warning and a null return val\n");
-		expect("1/0",                'null',     string.tostring(1/0));
+		expect("1/0",                'null',     lib.string.tostring(1/0));
 		return;
 	};
 	// oo.ns
@@ -655,8 +655,8 @@ namespace testlib1.tests {
 				_constructor = function (val) { this.value = val.tostring(); };
 				_destructor  = function () { this.value = ""; };
 				size  = function () { return sizeof(/*this.*/value); };
-				lower = function () { return string.tolower(this.value); };
-				upper = function () { return string.toupper(this.value); };
+				lower = function () { return lib.string.tolower(this.value); };
+				upper = function () { return lib.string.toupper(this.value); };
 				get   = function () { return this.value; };
 				set   = function (val) { return this.value=val.tostring(); };
 			};
@@ -873,7 +873,7 @@ namespace testlib1.tests {
 			if (sizeof(p[i])==0) break;
 		//	char *re, *str, *ans, *src, *dst;
 //			printf("[%s]\r\n", p[i]);
-			r=string.split(p[i], '\t');
+			r=lib.string.split(p[i], '\t');
 			re=r[0];
 			str=r[1];
 			ans=r[2];
@@ -1013,12 +1013,12 @@ namespace testlib1.tests {
 			B = { c = 3 }
 		};
 		t2=serialize(t1);
-		t2=string.replace(string.replace(string.replace(string.replace(t2,"\r",""),"\n",""),"\t","")," ","");
+		t2=lib.string.replace(lib.string.replace(lib.string.replace(lib.string.replace(t2,"\r",""),"\n",""),"\t","")," ","");
 		expect("", '{A={c="1",t="2"},B={c=3}}', t2);
 		t3=eval(t2);
 		t3['B']['c']=4;
 		t3=serialize(t3);
-		t3=string.replace(string.replace(string.replace(string.replace(t3,"\r",""),"\n",""),"\t","")," ","");
+		t3=lib.string.replace(lib.string.replace(lib.string.replace(lib.string.replace(t3,"\r",""),"\n",""),"\t","")," ","");
 		expect("", '{A={c="1",t="2"},B={c=4}}', t3);
 		return;
 	};
@@ -1034,18 +1034,18 @@ namespace testlib1.tests {
 	};
 	// string.ns
 	function strings() {
-		local x=string.cat(string.cat("Aa", "Bb"), "CcDd");
+		local x=lib.string.cat(lib.string.cat("Aa", "Bb"), "CcDd");
 		expect("x",                     "AaBbCcDd", x);
-		expect("string.sub(x,1,2)",     "aB",     string.sub(x, 1, 2));
-		expect("string.sub(x,4,1)",     "C",      string.sub(x, 4, 1));
-		expect("string.len(x)",         8,        string.len(x));
-		expect("string.cmp(x)",         -32,      string.cmp(x, "aabbccdd"));
-		expect("string.cmp(x)",         32,       string.cmp("aabbccdd", x));
-		expect("string.icmp(x)",        0,        string.icmp(x, "aabbccdd"));
-		expect("string.ncmp(x)",        -32,      string.ncmp(x, "aabb", 4));
-		expect("string.nicmp(x)",       0,        string.nicmp(x, "aabb", 4));
-		expect("string.sub(x)",         "is a",   string.sub("this is a test.", 5, 4));
-		expect("string.sub(x)",         "test",   string.sub("this is a test.", -5, 4));
+		expect("string.sub(x,1,2)",     "aB",     lib.string.sub(x, 1, 2));
+		expect("string.sub(x,4,1)",     "C",      lib.string.sub(x, 4, 1));
+		expect("string.len(x)",         8,        lib.string.len(x));
+		expect("string.cmp(x)",         -32,      lib.string.cmp(x, "aabbccdd"));
+		expect("string.cmp(x)",         32,       lib.string.cmp("aabbccdd", x));
+		expect("string.icmp(x)",        0,        lib.string.icmp(x, "aabbccdd"));
+		expect("string.ncmp(x)",        -32,      lib.string.ncmp(x, "aabb", 4));
+		expect("string.nicmp(x)",       0,        lib.string.nicmp(x, "aabb", 4));
+		expect("string.sub(x)",         "is a",   lib.string.sub("this is a test.", 5, 4));
+		expect("string.sub(x)",         "test",   lib.string.sub("this is a test.", -5, 4));
 
 		expect("x='x'*8",               "xxxxxxxx", 'x'*8);
 		local x='yy';
@@ -1067,34 +1067,34 @@ namespace testlib1.tests {
 		expect("1+\"2\"+3+\"4\"+5",     15,       1+"2"+3+"4"+5);
 		expect("\"a\"+1+\"b\"+2+\"c\"", "a1b2c",  "a"+1+"b"+2+"c");
 		expect("tonumber('123')+1", 124,  tonumber('123')+1);
-		x=string.split("aa|bb|cc|dd", "|");
+		x=lib.string.split("aa|bb|cc|dd", "|");
 		expect("string.split()",  "aa+bb+cc+dd+null", x[0]+'+'+x[1]+'+'+x[2]+'+'+x[3]+'+'+x[4].tostring());
-		x=string.split("aa|bb|cc|dd|", "|");
+		x=lib.string.split("aa|bb|cc|dd|", "|");
 		expect("string.split()",  "aa+bb+cc+dd+", x[0]+'+'+x[1]+'+'+x[2]+'+'+x[3]+'+'+x[4].tostring());
-		x=string.split("aaz|zbbz|zccz|zddz|z", "z|z");
+		x=lib.string.split("aaz|zbbz|zccz|zddz|z", "z|z");
 		expect("string.split()",  "aa+bb+cc+dd+", x[0]+'+'+x[1]+'+'+x[2]+'+'+x[3]+'+'+x[4].tostring());
 
 		var x="1|2|3|4|5";
 		expect("string.str()",  "1|2|3|4|5", x);
-		if ((x=string.str(x, "|"))!=null) x=string.sub(x, 1, 42);
+		if ((x=lib.string.str(x, "|"))!=null) x=lib.string.sub(x, 1, 42);
 		expect("string.str()",  "2|3|4|5", x);
-		if ((x=string.str(x, "|"))!=null) x=string.sub(x, 1, 42);
+		if ((x=lib.string.str(x, "|"))!=null) x=lib.string.sub(x, 1, 42);
 		expect("string.str()",  "3|4|5", x);
-		if ((x=string.str(x, "|"))!=null) x=string.sub(x, 1, 42);
+		if ((x=lib.string.str(x, "|"))!=null) x=lib.string.sub(x, 1, 42);
 		expect("string.str()",  "4|5", x);
-		if ((x=string.str(x, "|"))!=null) x=string.sub(x, 1, 42);
+		if ((x=lib.string.str(x, "|"))!=null) x=lib.string.sub(x, 1, 42);
 		expect("string.str()",  "5", x);
-		if ((x=string.str(x, "|"))!=null) x=string.sub(x, 1, 42);
+		if ((x=lib.string.str(x, "|"))!=null) x=lib.string.sub(x, 1, 42);
 		expect("string.str()",  false, x);
 
-		expect("string.atoi('abc',0)",  97,         string.atoi("abc", 0));
-		expect("string.atoi('abc',1)",  98,         string.atoi("abc", 1));
-		expect("string.atoi('abc',2)",  99,         string.atoi("abc", 2));
-		expect("string.atoi('abc',3)",  -1,         string.atoi("abc", 3));
-		expect("string.itoa(97)",       'a',        string.itoa(97));
-		expect("split..join",           "ab.*.*cd", string.join(string.split("ab--cd", '-'), '.*'));
+		expect("string.atoi('abc',0)",  97,         lib.string.atoi("abc", 0));
+		expect("string.atoi('abc',1)",  98,         lib.string.atoi("abc", 1));
+		expect("string.atoi('abc',2)",  99,         lib.string.atoi("abc", 2));
+		expect("string.atoi('abc',3)",  -1,         lib.string.atoi("abc", 3));
+		expect("string.itoa(97)",       'a',        lib.string.itoa(97));
+		expect("split..join",           "ab.*.*cd", lib.string.join(lib.string.split("ab--cd", '-'), '.*'));
 
-		expect("string.replace",        "ab.*.*cd", string.replace("ab--cd", '-', '.*'));
+		expect("string.replace",        "ab.*.*cd", lib.string.replace("ab--cd", '-', '.*'));
 
 		str="abcdef";
 		expect("s.contains(\"bcd\")",   true,  str.contains("bcd"));
@@ -1109,9 +1109,9 @@ namespace testlib1.tests {
 		expect("s.trim(\"string\")",      "string",  str.trim());
 		expect("s.trimstart(\"string\")", "string ", str.trimstart());
 		expect("s.trimend(\"string\")",   " string", str.trimend());
-		expect("s.trim(\"\")",            "abc",     string.trim(" abc "));
-		expect("s.trim(\"\")",            "",        string.trim(""));
-		expect("s.trim(\"\")",            "",        string.trim("  "));
+		expect("s.trim(\"\")",            "abc",     lib.string.trim(" abc "));
+		expect("s.trim(\"\")",            "",        lib.string.trim(""));
+		expect("s.trim(\"\")",            "",        lib.string.trim("  "));
 
 		x=@"verbatim\r\nstring";
 		if (!quiet) print(""+x+"\r\n");
@@ -1486,16 +1486,16 @@ namespace testlib1.tests {
 		if (!quiet) if (net.tcp.have_tls) print("        net.tcp.tls_type = '",net.tcp.tls_type,"'\n");
 		site_url = "http://nulllogic.ca/nsp/version.php";
 		if (!quiet) print("        sucking "+site_url+"\n");
-		hconn=new net.http.client(site_url);
+		hconn=new lib.net.http.client(site_url);
 	//	print("[",typeof(hconn)," ",serialize(hconn),"]");
 		ht=hconn.send();
 		delete hconn;
 	//	htconn=null;
 		expect("ht.status", "HTTP/1.1 200 OK", ht.status);
 		if (typeof(ht)=='table') {
-			status=string.split(ht.status, " ");
+			status=lib.string.split(ht.status, " ");
 			if (tonumber(status[1])==200) {
-				X=data.xml.read(ht.body);
+				X=lib.data.xml.read(ht.body);
 	//			expect("Latest Version", _version_, X['version'][0]['major'][0]['value']+'.'+X['version'][0]['minor'][0]['value']+'.'+X['version'][0]['point'][0]['value']);
 				expect("Latest Version", _version_, X.version.major.value+'.'+X.version.minor.value+'.'+X.version.point.value);
 	//			print("",ht.body,serialize(X),"\r\n");
@@ -1550,7 +1550,7 @@ namespace testlib1.tests {
 	// try.ns
 	function trycatch() {
 		//print("        This block _will_ cause errors - That's the point.\n\n");
-		io.flush();
+		lib.io.flush();
 		trylog="";
 		try {
 			try {
@@ -1613,7 +1613,7 @@ namespace testlib1.tests {
 		} catch (e) {
 			if (!quiet) printf("        Exception: \"%s\"\n", e.description);
 		}
-		io.flush();
+		lib.io.flush();
 		return;
 	};
 	// types.ns
@@ -1753,7 +1753,7 @@ namespace testlib1.tests {
 		local a={ a=1, b=2, f=f1 };
 		local b={};
 
-		table.zlink(b, a);
+		lib.table.zlink(b, a);
 		expect("a['a']", 1,      a['a']);
 		expect("b['a']", 1,      b['a']);
 		a['c']=3;
@@ -1767,7 +1767,7 @@ namespace testlib1.tests {
 		expect("b.f()",  42,     b.f());
 		b={};
 		expect("b['c']", 'null', b['c'].tostring());
-		table.zlink(b, a);
+		lib.table.zlink(b, a);
 		expect("b['c']", 3,      b['c']);
 		return;
 	};
