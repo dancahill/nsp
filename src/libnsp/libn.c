@@ -531,10 +531,9 @@ static unsigned short lib_isloaded(nsp_state *N, char *libname, unsigned short s
 	tobj = nsp_settable(N, nsp_settable(N, nsp_settable(N, &N->g, "lib"), "dl"), "loaded");
 	for (cobj = tobj->val->d.table.f; cobj; cobj = cobj->next) {
 		if (!nsp_isstr(cobj)) continue;
-		if (strcmp(cobj->name, libname) == 0) return 1;
+		if (nc_strcmp(cobj->name, libname) == 0) return 1;
 	}
 	if (setloaded) {
-		//nsp_setstr(N, tobj, "last_error", "failed to open library", -1);
 		nsp_setbool(N, tobj, libname, 1);
 		return 1;
 	}
@@ -556,10 +555,7 @@ NSP_FUNCTION(nl_dl_load)
 
 	nsp_setnull(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "dl"), "last_error");
 	nsp_setbool(N, &N->r, "", 0);
-
-	if (!nsp_isstr(cobj1) || cobj1->val->size < 1) {
-		return 0;
-	}
+	n_expect_argtype(N, NT_STRING, 1, cobj1, 0);
 	tobj = nsp_getobj(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "dl"), "path");
 	if (!nsp_istable(tobj)) {
 		nsp_setstr(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "dl"), "last_error", "lib.dl.path not found", -1);
@@ -580,9 +576,14 @@ NSP_FUNCTION(nl_dl_load)
 			} else {
 				lib_error(N);
 				lib_close(l);
-				n_error(N, NE_SYNTAX, __FN__, "%s", nsp_getstr(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "dl"), "last_error"));
+				n_error(N, NE_SYNTAX, __FN__, "failed to open library '%s'. %s", cobj1->val->d.str, nsp_getstr(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "dl"), "last_error"));
 				return 0;
 			}
+		} else {
+			lib_error(N);
+			if (l) lib_close(l);
+			n_error(N, NE_SYNTAX, __FN__, "failed to open library '%s'. %s", cobj1->val->d.str, nsp_getstr(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "dl"), "last_error"));
+			return 0;
 		}
 	}
 	cobj = nsp_getobj(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "dl"), "last_error");
@@ -2065,7 +2066,7 @@ NSP_CLASSMETHOD(nl_base_method)
 	nsp_setnum(N, &N->context->l, "basetype", ftype);
 	if (nc_strcmp(fname, "gettype") == 0) return nl_typeof(N);
 	if (ftype == NT_STRING) {
-		obj_t *cobj = nsp_getobj(N, nsp_getobj(N, &N->g, "string"), fname);
+		obj_t *cobj = nsp_getobj(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "string"), fname);
 		if (nsp_typeof(cobj) == NT_CFUNC) {
 			return cobj->val->d.cfunc(N);
 		} else if (nsp_typeof(cobj) == NT_NFUNC) {
