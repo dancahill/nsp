@@ -5,7 +5,7 @@ AppVerName=NullLogic NSP Script Parser 0.9.4
 
 AppName=NullLogic NSP Script Parser
 AppID={{8C6107AB-FCB7-42A5-BB18-F136497FDBEE}
-AppCopyright=Copyright 2020 Dan Cahill
+AppCopyright=Copyright 2021 Dan Cahill
 AppPublisher=NullLogic
 AppPublisherURL=https://nulllogic.ca/nsp/
 AppSupportURL=https://nulllogic.ca/nsp/
