@@ -61,33 +61,37 @@
 		returns = "clone of var",
 		type = "function"
 	},
-	["debug"] = {
+	["lib"] = {
+		desc = "collection of all classes and functions in the NSP libraries",
+		type = "table"
+	},
+	["lib.debug"] = {
 		desc = "misc debugging functions",
 		type = "table"
 	},
-	["debug.break"] = {
+	["lib.debug.break"] = {
 		desc = "break execution for debugging",
 		params = "none",
 		returns = "void",
 		type = "function"
 	},
-	["dirlist"] = {
+	["lib.dirlist"] = {
 		desc = "returns a table of a specified directory\'s contents",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["dl"] = {
+	["lib.dl"] = {
 		desc = "set of functions for loading dynamic libraries",
 		type = "table"
 	},
-	["dl.load"] = {
+	["lib.load"] = {
 		desc = "load specified library",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["dl.path"] = {
+	["lib.dl.path"] = {
 		desc = "array of paths to search for libraries loaded by dl.load()",
 		type = "table"
 	},
@@ -103,59 +107,59 @@
 		returns = "",
 		type = "function"
 	},
-	["file"] = {
+	["lib.file"] = {
 		desc = "collection of functions available for working with files",
 		type = "table"
 	},
-	["file.append"] = {
+	["lib.file.append"] = {
 		desc = "append string data to the specified file",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["file.chdir"] = {
+	["lib.file.chdir"] = {
 		desc = "change to specified directory",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["file.exists"] = {
+	["lib.file.exists"] = {
 		desc = "used to check if a file or directory exists on disk",
 		params = "(string filename)",
 		returns = "true if filename exists, otherwise false",
 		type = "function"
 	},
-	["file.mkdir"] = {
+	["lib.file.mkdir"] = {
 		desc = "create a directory",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["file.readall"] = {
+	["lib.file.readall"] = {
 		desc = "read the entire content of a file and return it as a string (binary-safe)",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["file.rename"] = {
+	["lib.file.rename"] = {
 		desc = "rename a file on disk",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["file.stat"] = {
+	["lib.file.stat"] = {
 		desc = "return a table describing the file",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["file.unlink"] = {
+	["lib.file.unlink"] = {
 		desc = "delete or \'unlink\' a file/directory",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["file.writeall"] = {
+	["lib.file.writeall"] = {
 		desc = "write complete string to file, replacing any existing content of the file",
 		params = "",
 		returns = "",
@@ -167,387 +171,387 @@
 		returns = "",
 		type = "function"
 	},
-	["io"] = {
+	["lib.io"] = {
 		desc = "input/output functions",
 		type = "table"
 	},
-	["io.print"] = {
+	["lib.io.print"] = {
 		desc = "print data to console - accepts one or more comma-separated parameters",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["io.write"] = {
+	["lib.io.write"] = {
 		desc = "write data to console",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["io.flush"] = {
+	["lib.io.flush"] = {
 		desc = "flush any buffered data to console",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["math"] = {
+	["lib.math"] = {
 		desc = "math functions",
 		type = "table"
 	},
-	["math.abs"] = {
+	["lib.math.abs"] = {
 		desc = "get absolute (positive) value of a number",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["math.ceil"] = {
+	["lib.math.ceil"] = {
 		desc = "round a number up to the nearest integer",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["math.floor"] = {
+	["lib.math.floor"] = {
 		desc = "round a number down to the nearest integer",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["math.rand"] = {
+	["lib.math.rand"] = {
 		desc = "return a random number in the requested range",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["math.acos"] = {
+	["lib.math.acos"] = {
 		desc = "return the arc cosine of a value",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["math.asin"] = {
+	["lib.math.asin"] = {
 		desc = "return the arc sine of a value",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["math.atan"] = {
+	["lib.math.atan"] = {
 		desc = "return the arc tangent of a value",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["math.atan2"] = {
+	["lib.math.atan2"] = {
 		desc = "calculates the principal value of the arc tangent of y/x, using the signs of the two arguments to determine the quadrant of the result.",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["math.cos"] = {
+	["lib.math.cos"] = {
 		desc = "returns the cosine of a value",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["math.sin"] = {
+	["lib.math.sin"] = {
 		desc = "returns the sine of a value",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["math.tan"] = {
+	["lib.math.tan"] = {
 		desc = "returns the tangent of a value",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["math.exp"] = {
+	["lib.math.exp"] = {
 		desc = "returns the exponential value of a value",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["math.log"] = {
+	["lib.math.log"] = {
 		desc = "returns the logarithm of a value",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["math.log10"] = {
+	["lib.math.log10"] = {
 		desc = "returns the base 10 logarithm of a value",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["math.cosh"] = {
+	["lib.math.cosh"] = {
 		desc = "returns the hyperbolic cosine of a value",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["math.sinh"] = {
+	["lib.math.sinh"] = {
 		desc = "returns the hyperbolic sine of a value",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["math.tanh"] = {
+	["lib.math.tanh"] = {
 		desc = "returns the hyperbolic tangent of a value",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["math.sqrt"] = {
+	["lib.math.sqrt"] = {
 		desc = "returns the square root of a value",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net"] = {
+	["lib.net"] = {
 		desc = "collection of functions and classes available for working with network connections",
 		type = "table"
 	},
-	["net.have_tls"] = {
+	["lib.net.have_tls"] = {
 		desc = "value is true if TLS (Transport Layer Security, aka. SSL) is available",
 		type = "boolean"
 	},
-	["net.tls_type"] = {
+	["lib.net.tls_type"] = {
 		desc = "name of TLS library in use (if available)",
 		type = "string"
 	},
-	["net.dns"] = {
+	["lib.net.dns"] = {
 		desc = "functions for accessing DNS (Domain Name System) data",
 		type = "table"
 	},
-	["net.dns.name2addr"] = {
+	["lib.net.dns.name2addr"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.dns.addr2name"] = {
+	["lib.net.dns.addr2name"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.ftp"] = {
+	["lib.net.ftp"] = {
 		desc = "FTP classes and functions",
 		type = "table"
 	},
-	["net.ftp.client"] = {
+	["lib.net.ftp.client"] = {
 		desc = "class of functions for accessing FTP servers",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.ftp.client.client"] = {
+	["lib.net.ftp.client.client"] = {
 		desc = "constructor for net.ftp.client class",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.ftp.client.close"] = {
+	["lib.net.ftp.client.close"] = {
 		desc = "method to close an open connection to an FTP server",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.ftp.client.ls"] = {
+	["lib.net.ftp.client.ls"] = {
 		desc = "method to list files in a remote directory",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.ftp.client.open"] = {
+	["lib.net.ftp.client.open"] = {
 		desc = "method to open a connection to an FTP server",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.ftp.client.retr"] = {
+	["lib.net.ftp.client.retr"] = {
 		desc = "method to download a file from a server",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.ftp.client.stor"] = {
+	["lib.net.ftp.client.stor"] = {
 		desc = "method to upload a file to a server",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.http"] = {
+	["lib.net.http"] = {
 		desc = "",
 		type = "table"
 	},
-	["net.http.client"] = {
+	["lib.net.http.client"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.mime"] = {
+	["lib.net.mime"] = {
 		desc = "",
 		type = "table"
 	},
-	["net.mime.read"] = {
+	["lib.net.mime.read"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.mime.write"] = {
+	["lib.net.mime.write"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.mime.decode_qp"] = {
+	["lib.net.mime.decode_qp"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.mime.decode_rfc2047"] = {
+	["lib.net.mime.decode_rfc2047"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.smtp"] = {
+	["lib.net.smtp"] = {
 		desc = "",
 		type = "table"
 	},
-	["net.smtp.client"] = {
+	["lib.net.smtp.client"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.pop3"] = {
+	["lib.net.pop3"] = {
 		desc = "",
 		type = "table"
 	},
-	["net.pop3.client"] = {
+	["lib.net.pop3.client"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.socket"] = {
+	["lib.net.socket"] = {
 		desc = "class of functions available for working with raw TCP/IP connections",
 		type = "table"
 	},
-	["net.socket.accept"] = {
+	["lib.net.socket.accept"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.socket.bind"] = {
+	["lib.net.socket.bind"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.socket.close"] = {
+	["lib.net.socket.close"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.socket.connect"] = {
+	["lib.net.socket.connect"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.socket.gets"] = {
+	["lib.net.socket.gets"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.socket.gettype"] = {
+	["lib.net.socket.gettype"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.socket.info"] = {
+	["lib.net.socket.info"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.socket.read"] = {
+	["lib.net.socket.read"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.socket.setsockopt"] = {
+	["lib.net.socket.setsockopt"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.socket.socket"] = {
+	["lib.net.socket.socket"] = {
 		desc = "constructor for objects of class net.socket",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.socket.tlsaccept"] = {
+	["lib.net.socket.tlsaccept"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.socket.tlsconnect"] = {
+	["lib.net.socket.tlsconnect"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.socket.write"] = {
+	["lib.net.socket.write"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["net.tnef"] = {
+	["lib.net.tnef"] = {
 		desc = "functions available for working with 'Transport Neutral Encapsulation Format' MIME attachments",
 		type = "table"
 	},
-	["net.tnef.debug"] = {
+	["lib.net.tnef.debug"] = {
 		desc = "test function for TNEF decoding",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["pipe"] = {
+	["lib.pipe"] = {
 		desc = "functions for creating and working with pipes",
 		type = "table"
 	},
-	["pipe.open"] = {
+	["lib.pipe.open"] = {
 		desc = "create a process with read/write io pipes",
 		params = "(string exe[, string arg1, string arg2])",
 		returns = "pipe-conn object",
 		type = "function"
 	},
-	["pipe.read"] = {
+	["lib.pipe.read"] = {
 		desc = "reads data from an open pipe",
 		params = "(pipe-conn pipe)",
 		returns = "input data string",
 		type = "function"
 	},
-	["pipe.write"] = {
+	["lib.pipe.write"] = {
 		desc = "writes data to an open pipe",
 		params = "(pipe-conn pipe, string data)",
 		returns = "number of bytes sent",
 		type = "function"
 	},
-	["pipe.close"] = {
+	["lib.pipe.close"] = {
 		desc = "closes pipe-conn",
 		params = "(pipe-conn pipe)",
 		returns = "void",
@@ -565,29 +569,29 @@
 		returns = "total length of output string",
 		type = "function"
 	},
-	["regex"] = {
+	["lib.regex"] = {
 		desc = "functions available for using regular expressions to work with strings",
 		type = "table"
 	},
-	["regex.match"] = {
+	["lib.regex.match"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["regex.replace"] = {
+	["lib.regex.replace"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["rot13"] = {
+	["lib.rot13"] = {
 		desc = "rotate characters in a string by 13 places",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["runtime"] = {
+	["lib.debug.runtime"] = {
 		desc = "get the number of seconds the script has been running",
 		params = "",
 		returns = "",
@@ -611,17 +615,17 @@
 		returns = "void",
 		type = "function"
 	},
-	["sort"] = {
+	["lib.sort"] = {
 		desc = "sort functions for tables",
 		type = "table"
 	},
-	["sort.byname"] = {
+	["lib.sort.byname"] = {
 		desc = "",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["sort.bykey"] = {
+	["lib.sort.bykey"] = {
 		desc = "",
 		params = "",
 		returns = "",
@@ -633,267 +637,267 @@
 		returns = "string with formatting applied",
 		type = "function"
 	},
-	["string"] = {
+	["lib.string"] = {
 		desc = "class of functions available for working with strings",
 		type = "table"
 	},
-	["string.atoi"] = {
+	["lib.string.atoi"] = {
 		desc = "get numeric value of character in a string",
 		params = "(string arg1[, number offset])",
 		returns = "numeric value of character in arg1 at offset",
 		type = "function"
 	},
-	["string.itoa"] = {
+	["lib.string.itoa"] = {
 		desc = "convert number to its ascii character equivalent",
 		params = "(number arg1)",
 		returns = "string ascii value of arg1",
 		type = "function"
 	},
-	["string.cat"] = {
+	["lib.string.cat"] = {
 		desc = "append one string to another",
 		params = "(string arg1, string arg2)",
 		returns = "string with arg1 and arg2 combined",
 		type = "function"
 	},
-	["string.cmp"] = {
+	["lib.string.cmp"] = {
 		desc = "case sensitive string comparison",
 		params = "(string str1, string str2)",
 		returns = "number - 0 if matches, or index of first non-matching character",
 		type = "function"
 	},
-	["string.contains"] = {
+	["lib.string.contains"] = {
 		desc = "case sensitive substring search",
 		params = "(string str1, string str2)",
 		returns = "true if str1 contains an instance of str2",
 		type = "function"
 	},
-	["string.endswith"] = {
+	["lib.string.endswith"] = {
 		desc = "case sensitive substring search",
 		params = "(string str1, string str2)",
 		returns = "true if the end of str1 matches str2",
 		type = "function"
 	},
-	["string.icmp"] = {
+	["lib.string.icmp"] = {
 		desc = "case insensitive string",
 		params = "(string str1, string str2)",
 		returns = "number",
 		type = "function"
 	},
-	["string.ncmp"] = {
+	["lib.string.ncmp"] = {
 		desc = "case sensitive substring comparison up to len characters",
 		params = "(string str1, string str2, number len)",
 		returns = "number",
 		type = "function"
 	},
-	["string.nicmp"] = {
+	["lib.string.nicmp"] = {
 		desc = "case insensitive substring comparison up to len characters",
 		params = "(string str1, string str2, number len)",
 		returns = "number",
 		type = "function"
 	},
-	["string.join"] = {
+	["lib.string.join"] = {
 		desc = "merge the table str into a single string separated by sep",
 		params = "(table str, string sep)",
 		returns = "table",
 		type = "function"
 	},
-	["string.len"] = {
+	["lib.string.len"] = {
 		desc = "get length of string (binary safe)",
 		params = "(string str)",
 		returns = "number",
 		type = "function"
 	},
-	["string.replace"] = {
+	["lib.string.replace"] = {
 		desc = "replace occurences in of arg2 with arg3",
 		params = "(string arg1, string arg2, string arg3)",
 		returns = "string result of arg1 with arg2 replaced",
 		type = "function"
 	},
-	["string.split"] = {
+	["lib.string.split"] = {
 		desc = "split a string into substring",
 		params = "(string str, string sep)",
 		returns = "table of substrings in str separated by sep",
 		type = "function"
 	},
-	["string.startswith"] = {
+	["lib.string.startswith"] = {
 		desc = "case sensitive substring search",
 		params = "(string str1, string str2)",
 		returns = "true if the start of str1 matches str2",
 		type = "function"
 	},
-	["string.str"] = {
+	["lib.string.str"] = {
 		desc = "case sensitive substring search",
 		params = "(string stack, string needle)",
 		returns = "string stack starting where needle was found, or null if not found",
 		type = "function"
 	},
-	["string.istr"] = {
+	["lib.string.istr"] = {
 		desc = "case insensitive substring search",
 		params = "(string stack, string needle)",
 		returns = "string stack starting where needle was found, or null if not found",
 		type = "function"
 	},
-	["string.sub"] = {
+	["lib.string.sub"] = {
 		desc = "get a substring of str, starting at arg2 and ending at arg3.\r\nif arg2 is negative it will be read as an index counting back from the end of the string.\r\narg3 is implicitly the end of the string",
 		params = "(string str, number arg2[, number arg3])",
 		returns = "string starting at arg2 and ending at arg3",
 		type = "function"
 	},
-	["string.tostring"] = {
+	["lib.string.tostring"] = {
 		desc = "generic method for objects to convert data to a string",
 		params = "(object arg1)",
 		returns = "string format of arg1",
 		type = "function"
 	},
-	["string.tolower"] = {
+	["lib.string.tolower"] = {
 		desc = "get lowercase version of string",
 		params = "(string str)",
 		returns = "string",
 		type = "function"
 	},
-	["string.toupper"] = {
+	["lib.string.toupper"] = {
 		desc = "get uppercase version of string",
 		params = "(string str)",
 		returns = "string",
 		type = "function"
 	},
-	["system"] = {
+	["lib.system"] = {
 		desc = "execute a system function",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["table"] = {
+	["lib.table"] = {
 		desc = "class of functions for working with tables",
 		type = "table"
 	},
-	["table.iname"] = {
+	["lib.table.iname"] = {
 		desc = "Returns the name of a table entry at a given index.",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["table.ival"] = {
+	["lib.table.ival"] = {
 		desc = "Returns a pointer to the value of a table entry at a given index.",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["table.sortbyname"] = {
+	["lib.table.sortbyname"] = {
 		desc = "function for sorting table contents by name",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["table.sortbykey"] = {
+	["lib.table.sortbykey"] = {
 		desc = "function for sorting table by each item's subkey",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["table.zlink"] = {
+	["lib.table.zlink"] = {
 		desc = "link one table to another in an overlapping manner, i.e. class inheritance",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["thread"] = {
+	["lib.thread"] = {
 		desc = "class of functions for working with threads (experimental)",
 		type = "table"
 	},
-	["thread.thread"] = {
+	["lib.thread.thread"] = {
 		desc = "constructor for new threads",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["thread.start"] = {
+	["lib.thread.start"] = {
 		desc = "begin execution of thread function 'this.fn'",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["thread.finish"] = {
+	["lib.thread.finish"] = {
 		desc = "called by the thread to finish execution",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["thread.mutex"] = {
+	["lib.thread.mutex"] = {
 		desc = "class of functions for working with thread mutexes (experimental)",
 		type = "table"
 	},
-	["thread.mutex.mutex"] = {
+	["lib.thread.mutex.mutex"] = {
 		desc = "constructor for new thread mutexes",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["thread.mutex.lock"] = {
+	["lib.thread.mutex.lock"] = {
 		desc = "acquire a lock",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["thread.mutex.unlock"] = {
+	["lib.thread.mutex.unlock"] = {
 		desc = "release a lock",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["thread.mutex.free"] = {
+	["lib.thread.mutex.free"] = {
 		desc = "destroy the mutex",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["time"] = {
+	["lib.time"] = {
 		desc = "functions for dealing with time",
 		type = "table"
 	},
-	["time.gmtime"] = {
+	["lib.time.gmtime"] = {
 		desc = "get detailed structure describing a given time in seconds (or now) since 1970-01-01",
 		params = "([number seconds])",
 		returns = "table describing requested time in format\r\n { tm_sec, tm_min, tm_hour, tm_mday, tm_mon, tm_year, tm_wday, tm_yday, tm_isdst }",
 		type = "function"
 	},
-	["time.gettimeofday"] = {
+	["lib.time.gettimeofday"] = {
 		desc = "get seconds and milliseconds since 1970-01-01 (aka unix time)",
 		params = "",
 		returns = "table representing time in format { tv_sec, tv_usec }",
 		type = "function"
 	},
-	["time.localtime"] = {
+	["lib.time.localtime"] = {
 		desc = "get detailed structure describing a given time in seconds (or now) since 1970-01-01",
 		params = "([number seconds])",
 		returns = "table describing requested time in format\r\n { tm_sec, tm_min, tm_hour, tm_mday, tm_mon, tm_year, tm_wday, tm_yday, tm_isdst }",
 		type = "function"
 	},
-	["time.sqldate"] = {
+	["lib.time.sqldate"] = {
 		desc = "output date as a string from time.gmtime data or seconds since 1970-01-01",
 		params = "([table time]||[number time])",
 		returns = "string representing requested time in yyyy-MM-dd format",
 		type = "function"
 	},
-	["time.sqltime"] = {
+	["lib.time.sqltime"] = {
 		desc = "output time as a string from time.gmtime data or seconds since 1970-01-01",
 		params = "([table time]||[number time])",
 		returns = "string representing requested time in HH:mm:ss format",
 		type = "function"
 	},
-	["time.sqldatetime"] = {
+	["lib.time.sqldatetime"] = {
 		desc = "output date and time as a string from time.gmtime data or seconds since 1970-01-01",
 		params = "([table time]||[number time])",
 		returns = "string representing requested time in yyyy-MM-dd HH:mm:ss format",
 		type = "function"
 	},
-	["time.sqltounix"] = {
+	["lib.time.sqltounix"] = {
 		desc = "get unix time from sql formatted time",
 		params = "(string sqltime)",
 		returns = "number of seconds since 1970-01-01",
 		type = "function"
 	},
-	["time.now"] = {
+	["lib.time.now"] = {
 		desc = "get seconds since 1970-01-01 (aka unix time)",
 		params = "none",
 		returns = "number of seconds from 1970-01-01 to now",
@@ -911,35 +915,35 @@
 		returns = "string with the name of the base object type",
 		type = "function"
 	},
-	["win"] = {
+	["lib.win"] = {
 		desc = "collection of functions for Windows UI",
 		type = "table"
 	},
-	["win.Beep"] = {
+	["lib.win.Beep"] = {
 		desc = "beep at the requested frequency for the requested duratin (in milliseconds)",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["win.CreateProcess"] = {
+	["lib.win.CreateProcess"] = {
 		desc = "function to execute a program",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["win.MessageBox"] = {
+	["lib.win.MessageBox"] = {
 		desc = "native windows function to display a messagebox",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["win.PlaySound"] = {
+	["lib.win.PlaySound"] = {
 		desc = "plays a sound file",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["win.ShellExecute"] = {
+	["lib.win.ShellExecute"] = {
 		desc = "native windows function for opening a file with its associated application",
 		params = "",
 		returns = "",
