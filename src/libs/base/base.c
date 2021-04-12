@@ -23,15 +23,14 @@ int nspbase_register_all(nsp_state *N)
 {
 	obj_t *tobj, *tobj2;
 
-	tobj = nsp_settable(N, &N->g, "base64");
+	tobj = nsp_settable(N, nsp_settable(N, &N->g, "lib"), "base64");
 	tobj->val->attr |= NST_HIDDEN;
 	nsp_setcfunc(N, tobj, "decode", (NSP_CFUNC)libnsp_base_base64_decode);
 	nsp_setcfunc(N, tobj, "encode", (NSP_CFUNC)libnsp_base_base64_encode);
 
-	nsp_setcfunc(N, &N->g, "dirlist", (NSP_CFUNC)libnsp_base_dirlist);
+	nsp_setcfunc(N, nsp_settable(N, &N->g, "lib"), "dirlist", (NSP_CFUNC)libnsp_base_dirlist);
 
-	tobj = nsp_getobj(N, &N->g, "file");
-	if (!nsp_istable(tobj)) tobj = nsp_settable(N, &N->g, "file");
+	tobj = nsp_settable(N, nsp_settable(N, &N->g, "lib"), "file");
 	tobj->val->attr |= NST_HIDDEN;
 	//nsp_setcfunc(N, tobj, "append", (NSP_CFUNC)libnsp_base_file_writeall);
 	//nsp_setcfunc(N, tobj, "chdir", (NSP_CFUNC)libnsp_base_file_chdir);
@@ -43,7 +42,7 @@ int nspbase_register_all(nsp_state *N)
 	//nsp_setcfunc(N, tobj, "writeall", (NSP_CFUNC)libnsp_base_file_writeall);
 
 #ifdef HAVE_PIPE
-	tobj = nsp_settable(N, &N->g, "pipe");
+	tobj = nsp_settable(N, nsp_settable(N, &N->g, "lib"), "pipe");
 	tobj->val->attr |= NST_HIDDEN;
 	nsp_setcfunc(N, tobj, "open", (NSP_CFUNC)libnsp_base_pipe_open);
 	nsp_setcfunc(N, tobj, "read", (NSP_CFUNC)libnsp_base_pipe_read);
@@ -51,21 +50,21 @@ int nspbase_register_all(nsp_state *N)
 	nsp_setcfunc(N, tobj, "close", (NSP_CFUNC)libnsp_base_pipe_close);
 #endif
 
-	nsp_setcfunc(N, &N->g, "rot13", (NSP_CFUNC)libnsp_base_rot13);
+	nsp_setcfunc(N, nsp_settable(N, &N->g, "lib"), "rot13", (NSP_CFUNC)libnsp_base_rot13);
 
-	tobj = nsp_settable(N, &N->g, "regex");
+	tobj = nsp_settable(N, nsp_settable(N, &N->g, "lib"), "regex");
 	tobj->val->attr |= NST_HIDDEN;
 	nsp_setcfunc(N, tobj, "match", (NSP_CFUNC)libnsp_regex_match);
 	nsp_setcfunc(N, tobj, "replace", (NSP_CFUNC)libnsp_regex_replace);
 
 
-	tobj = nsp_settable(N, &N->g, "table");
+	tobj = nsp_settable(N, nsp_settable(N, &N->g, "lib"), "table");
 	tobj->val->attr |= NST_HIDDEN;
 	nsp_setcfunc(N, tobj, "sortbyname", (NSP_CFUNC)libnsp_base_sort_byname);
 	nsp_setcfunc(N, tobj, "sortbykey", (NSP_CFUNC)libnsp_base_sort_bykey);
 
 #ifdef HAVE_THREADS
-	tobj = nsp_settable(N, &N->g, "thread");
+	tobj = nsp_settable(N, nsp_settable(N, &N->g, "lib"), "thread");
 	tobj->val->attr |= NST_HIDDEN;
 	nsp_setcfunc(N, tobj, "thread", (NSP_CFUNC)libnsp_base_thread_thread);
 	nsp_setcfunc(N, tobj, "start", (NSP_CFUNC)libnsp_base_thread_start);
@@ -79,7 +78,7 @@ int nspbase_register_all(nsp_state *N)
 #endif
 
 #ifdef WIN32
-	tobj = nsp_settable(N, &N->g, "win");
+	tobj = nsp_settable(N, nsp_settable(N, &N->g, "lib"), "win");
 	tobj->val->attr |= NST_HIDDEN;
 	nsp_setcfunc(N, tobj, "Beep", (NSP_CFUNC)libnsp_winapi_beep);
 	nsp_setcfunc(N, tobj, "CreateProcess", (NSP_CFUNC)libnsp_winapi_createprocess);

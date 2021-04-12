@@ -576,7 +576,7 @@ NSP_FUNCTION(nl_dl_load)
 			} else {
 				lib_error(N);
 				lib_close(l);
-				n_error(N, NE_SYNTAX, __FN__, "failed to open library '%s'. %s", cobj1->val->d.str, nsp_getstr(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "dl"), "last_error"));
+				n_error(N, NE_SYNTAX, __FN__, "failed to open library '%s'. Missing nsplib_init", cobj1->val->d.str);
 				return 0;
 			}
 		} else {
