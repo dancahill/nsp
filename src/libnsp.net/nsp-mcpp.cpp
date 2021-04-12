@@ -109,14 +109,17 @@ public:
 	char *srcfilename;
 
 	NSPObject^ GetGlobal() {
+		if (!NState) return nullptr;
 		return gcnew NSPObject(NState->getG());
 	}
 
 	NSPObject^ GetThis() {
+		if (!NState) return nullptr;
 		return gcnew NSPObject(NState->getT());
 	}
 
 	NSPObject^ GetLocal() {
+		if (!NState) return nullptr;
 		return gcnew NSPObject(NState->getL());
 	}
 
@@ -140,6 +143,7 @@ public:
 		nsp_freestate(N);
 		printstate(N);
 		nsp_endstate(N);
+		NState = NULL;
 		//}
 		//__except (do_filter(GetExceptionInformation())) {
 		//}
