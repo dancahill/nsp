@@ -1,23 +1,23 @@
 #!../../bin/nsp -b
 
 function expect(msg, a, b) {
-	print("  ", string.sub(msg+"                      ", 0, 20), " ");
+	print("  ", lib.string.sub(msg+"                      ", 0, 20), " ");
 	if (b==true) print("pass\n"); else print("fail\n");
 	return;
 }
 
 function testsub(title, l, c, showfail) {
-	file.unlink("conftest.c");
-	file.unlink("conftest.exe");
-	file.unlink("conftest.out");
-	file.unlink("conftest.obj");
+	lib.file.unlink("conftest.c");
+	lib.file.unlink("conftest.exe");
+	lib.file.unlink("conftest.out");
+	lib.file.unlink("conftest.obj");
 	if (ostype=='posix') {
-		file.writeall("conftest.c", c);
+		lib.file.writeall("conftest.c", c);
 		r1=system(cc+" conftest.c "+l+" -o conftest.out 2>/dev/null");
 		//r1=system(cc+" conftest.c "+l+" -o conftest.out");
 		if (r1==0) r2=lib.file.stat("conftest.out");
 	} else if (ostype=='windows') {
-		file.writeall("conftest.c", c);
+		lib.file.writeall("conftest.c", c);
 //		r1=system(cc+" -nologo conftest.c "+l+" -o conftest.exe > nul");
 		r1=system(cc+" -nologo conftest.c "+l+" /Feconftest.exe > nul");
 		if (r1==0) r2=lib.file.stat("conftest.exe");
@@ -27,10 +27,10 @@ function testsub(title, l, c, showfail) {
 		expect("testing "+title, true, false);
 		return 0;
 	}
-	file.unlink("conftest.c");
-	file.unlink("conftest.exe");
-	file.unlink("conftest.out");
-	file.unlink("conftest.obj");
+	lib.file.unlink("conftest.c");
+	lib.file.unlink("conftest.exe");
+	lib.file.unlink("conftest.out");
+	lib.file.unlink("conftest.obj");
 	if ((r1==0)&&(typeof(r2)=='table')) {
 		expect("testing "+title, true, true);
 		return 1;
@@ -479,13 +479,13 @@ function dotests() {
 	config_h+=sprintf("%s#define CONFIG_MISSING_SOCKLEN 1\r\n", config.missing_socklen ?"":"// ");
 
 	if (ostype=='windows') {
-		file.writeall(_filepath+"/../config-win.mak", config_mak);
-		file.writeall(_filepath+"/../config-win.ns", config_ne2+config_nsp);
-		file.writeall(_filepath+"/../../include/nsp/config-win.h", config_h);
+		lib.file.writeall(_filepath+"/../config-win.mak", config_mak);
+		lib.file.writeall(_filepath+"/../config-win.ns", config_ne2+config_nsp);
+		lib.file.writeall(_filepath+"/../../include/nsp/config-win.h", config_h);
 	} else {
-		file.writeall(_filepath+"/../config.mak", config_mak);
-		file.writeall(_filepath+"/../config.ns", config_ne2+config_nsp);
-		file.writeall(_filepath+"/../../include/nsp/config.h", config_h);
+		lib.file.writeall(_filepath+"/../config.mak", config_mak);
+		lib.file.writeall(_filepath+"/../config.ns", config_ne2+config_nsp);
+		lib.file.writeall(_filepath+"/../../include/nsp/config.h", config_h);
 	}
 	print("\n");
 	return;

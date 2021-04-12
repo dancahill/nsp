@@ -75,7 +75,7 @@ cli: libnsp
 	@cd src/hosts/cli     && $(MAKE) -s && cd ../../..
 	@echo
 	@echo -n "Interpreter built"
-	@./bin/nsp -b -e "var x='gnikrow dna ';for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));"
+	@./bin/nsp -b -e "var x='gnikrow dna ';for (i=lib.string.len(x);i>=0;i--) print(lib.string.sub(x, i, 1));"
 	@echo
 	@echo
 

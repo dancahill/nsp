@@ -19,12 +19,12 @@ if (CC=='cl.exe') {
 
 function swapslash(OLDSTR) {
 	if (ostype=='posix') return OLDSTR;
-	return string.join(string.split(OLDSTR, "/"), "\\");
+	return lib.string.join(lib.string.split(OLDSTR, "/"), "\\");
 }
 
 function newer(file1, file2) {
-	s1=file.stat(file1);
-	s2=file.stat(file2);
+	s1=lib.file.stat(file1);
+	s2=lib.file.stat(file2);
 	if (typeof(s1)!='table') {
 		print("missing source ",file1,"?\n");
 		return -1;
@@ -35,29 +35,29 @@ function newer(file1, file2) {
 }
 
 function newer2(OBJECTS, _LINKAGE_, TNAME) {
-	OLIST=string.split(OBJECTS, " ");
+	OLIST=lib.string.split(OBJECTS, " ");
 	if (CC=='tcc.exe') {
-		if (string.sub(TNAME, 0, 7)=='libnsp_') TNAME=string.sub(TNAME, 8);
-		s3=file.stat(swapslash(LIBDIR+"/"+TNAME+".lib"));
+		if (lib.string.sub(TNAME, 0, 7)=='libnsp_') TNAME=lib.string.sub(TNAME, 8);
+		s3=lib.file.stat(swapslash(LIBDIR+"/"+TNAME+".lib"));
 	} else if (CC=='cl.exe') {
 		if (_LINKAGE_=='shared') {
-			s3=file.stat(swapslash(LIBDIR+"/shared/"+TNAME+".dll"));
+			s3=lib.file.stat(swapslash(LIBDIR+"/shared/"+TNAME+".dll"));
 		} else {
-			s3=file.stat(swapslash(LIBDIR+"/"+TNAME+".lib"));
+			s3=lib.file.stat(swapslash(LIBDIR+"/"+TNAME+".lib"));
 		}
 	} else {
 		if (_LINKAGE_=='shared') {
-			s3=file.stat(swapslash(LIBDIR+"/shared/"+TNAME+".so"));
+			s3=lib.file.stat(swapslash(LIBDIR+"/shared/"+TNAME+".so"));
 		} else {
-			s3=file.stat(swapslash(LIBDIR+"/"+TNAME+".a"));
+			s3=lib.file.stat(swapslash(LIBDIR+"/"+TNAME+".a"));
 		}
 	}
 	if (typeof(s3)!='table') return 1;
 	for (i=0;i<sizeof(OLIST);i++) {
-		ONAME=string.split(OLIST[i], ".");
+		ONAME=lib.string.split(OLIST[i], ".");
 		if (ONAME[1]!='o') continue;
-		s1=file.stat(ONAME[0]+".c");
-		s2=file.stat(swapslash(OBJDIR+"/"+TNAME+"/"+_LINKAGE_+"/"+ONAME[0]+".o"));
+		s1=lib.file.stat(ONAME[0]+".c");
+		s2=lib.file.stat(swapslash(OBJDIR+"/"+TNAME+"/"+_LINKAGE_+"/"+ONAME[0]+".o"));
 		if (typeof(s1)!='table') {
 			print("missing source ",file1,"?\n");
 			return -1;
@@ -72,16 +72,16 @@ function newer2(OBJECTS, _LINKAGE_, TNAME) {
 
 function build_objs(CC, CFLAGS, OBJECTS, OTYPE, INTDIR) {
 	if (CC=='tcc.exe') {
-		if (string.sub(INTDIR, 0, 7)=='libnsp_') INTDIR=string.sub(INTDIR, 8);
+		if (lib.string.sub(INTDIR, 0, 7)=='libnsp_') INTDIR=lib.string.sub(INTDIR, 8);
 	}
-	OLIST=string.split(OBJECTS, " ");
+	OLIST=lib.string.split(OBJECTS, " ");
 //	if (string.sub(_ostype_, 0, 7)=="Windows") 
 	for (i=0;i<sizeof(OLIST);i++) {
-		s1=file.stat(swapslash(OBJDIR+"/"+INTDIR));
-		if (typeof(s1)!='table') file.mkdir(swapslash(OBJDIR+"/"+INTDIR));
-		s1=file.stat(swapslash(OBJDIR+"/"+INTDIR+"/"+OTYPE));
-		if (typeof(s1)!='table') file.mkdir(swapslash(OBJDIR+"/"+INTDIR+"/"+OTYPE));
-		ONAME=string.split(OLIST[i], ".");
+		s1=lib.file.stat(swapslash(OBJDIR+"/"+INTDIR));
+		if (typeof(s1)!='table') lib.file.mkdir(swapslash(OBJDIR+"/"+INTDIR));
+		s1=lib.file.stat(swapslash(OBJDIR+"/"+INTDIR+"/"+OTYPE));
+		if (typeof(s1)!='table') lib.file.mkdir(swapslash(OBJDIR+"/"+INTDIR+"/"+OTYPE));
+		ONAME=lib.string.split(OLIST[i], ".");
 		if (ONAME[1]!='o') continue;
 		if (newer(ONAME[0]+".c", swapslash(OBJDIR+"/"+INTDIR+"/"+OTYPE+"/"+ONAME[0]+".o"))) {
 			// print("  "+CC+" "+ONAME[0]+".o\n");
@@ -95,10 +95,10 @@ function build_objs(CC, CFLAGS, OBJECTS, OTYPE, INTDIR) {
 }
 
 function build_lib(CC, TNAME, OBJECTS, OTYPE, INTDIR) {
-	OLIST=string.split(OBJECTS, " ");
+	OLIST=lib.string.split(OBJECTS, " ");
 	if (CC=='tcc.exe') {
-		if (string.sub(TNAME, 0, 7)=='libnsp_') TNAME=string.sub(TNAME, 8);
-		if (string.sub(INTDIR, 0, 7)=='libnsp_') INTDIR=string.sub(INTDIR, 8);
+		if (lib.string.sub(TNAME, 0, 7)=='libnsp_') TNAME=lib.string.sub(TNAME, 8);
+		if (lib.string.sub(INTDIR, 0, 7)=='libnsp_') INTDIR=lib.string.sub(INTDIR, 8);
 		file.unlink(TNAME+".lib");
 		for (i=0;i<sizeof(OLIST);i++) {
 //			print("tlib.exe "+swapslash(LIBDIR+"/"+TNAME+".lib +"+OBJDIR+"/"+INTDIR+"/"+OTYPE+"/"+OLIST[i])+"\n");
@@ -138,7 +138,7 @@ function build_lib(CC, TNAME, OBJECTS, OTYPE, INTDIR) {
 	} else {
 		liblist="";
 		for (i=0;i<sizeof(OLIST);i++) {
-			ONAME=string.split(OLIST[i], ".");
+			ONAME=lib.string.split(OLIST[i], ".");
 			if (ONAME[1]=='o') {
 				liblist+=" "+swapslash(OBJDIR+"/"+INTDIR+"/"+OTYPE+"/"+OLIST[i]);
 			} else {
@@ -193,9 +193,9 @@ function build_clean(TNAME, OBJECTS) {
 	file.unlink(swapslash(LIBDIR+"/shared/"+TNAME+".dll"));
 	file.unlink(swapslash(LIBDIR+"/"+TNAME+".a"));
 	file.unlink(swapslash(LIBDIR+"/"+TNAME+".lib"));
-	OLIST=string.split(OBJECTS, " ");
+	OLIST=lib.string.split(OBJECTS, " ");
 	for (i=0;i<sizeof(OLIST);i++) {
-		ONAME=string.split(OLIST[i], ".");
+		ONAME=lib.string.split(OLIST[i], ".");
 		file.unlink(swapslash(OBJDIR+"/"+INTDIR+"/shared/"+ONAME[0]+".o"));
 		file.unlink(swapslash(OBJDIR+"/"+INTDIR+"/static/"+ONAME[0]+".o"));
 		file.unlink(swapslash(OBJDIR+"/"+INTDIR+"/shared/"+ONAME[0]+".obj"));

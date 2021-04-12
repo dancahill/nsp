@@ -3,7 +3,7 @@
 function inno_build() {
 	if (string.sub(_ostype_, 0, 7)!="Windows") return;
 	innoexe=""+ProgramFiles+"\\Inno Setup 5\\Compil32.exe";
-	if (typeof(file.stat(innoexe))=='table') {
+	if (typeof(lib.file.stat(innoexe))=='table') {
 		system("\""+innoexe+"\" /cc nsp.iss");
 	}
 	return;
@@ -38,19 +38,8 @@ function win_make(vcver, private_inc, private_lib) {
 		break;
 	case 16:
 		print("Visual Studio 2019 (Version 16)\r\n");
-		//%comspec% /k "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
-		//@call "%~dp0vcvarsall.bat" x64 %*
-
-	//INCLUDE=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\ATLMFC\include;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\include;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\include\um;C:\Program Files (x86)\Windows Kits\10\include\10.0.18362.0\ucrt;C:\Program Files (x86)\Windows Kits\10\include\10.0.18362.0\shared;C:\Program Files (x86)\Windows Kits\10\include\10.0.18362.0\um;C:\Program Files (x86)\Windows Kits\10\include\10.0.18362.0\winrt;C:\Program Files (x86)\Windows Kits\10\include\10.0.18362.0\cppwinrt
-	//JAVA_HOME=C:\Program Files (x86)\Java\jdk1.8.0_172
-	//LIB=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\ATLMFC\lib\x86;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\lib\x86;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\lib\um\x86;C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\ucrt\x86;C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\um\x86;
-	//LIBPATH=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\ATLMFC\lib\x86;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\lib\x86;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\lib\x86\store\references;C:\Program Files (x86)\Windows Kits\10\UnionMetadata\10.0.18362.0;C:\Program Files (x86)\Windows Kits\10\References\10.0.18362.0;C:\WINDOWS\Microsoft.NET\Framework\v4.0.30319;
-
-
-
-		env="@SET INCLUDE="+private_inc+""+ProgramFiles+"\\Microsoft Visual Studio 9.0\\VC\\include;"+ProgramFiles+"\\Microsoft SDKs\\Windows\\v6.0A\\Include\r\n"
-		+"@SET LIB="+private_lib+""+ProgramFiles+"\\Microsoft Visual Studio 9.0\\VC\\lib;"+ProgramFiles+"\\Microsoft SDKs\\Windows\\v6.0A\\Lib\r\n"
-		+"@SET PATH="+ProgramFiles+"\\Microsoft Visual Studio 9.0\\VC\\bin;"+ProgramFiles+"\\Microsoft Visual Studio 9.0\\Common7\\IDE;"+ProgramFiles+"\\Microsoft SDKs\\Windows\\v6.0A\\bin;%PATH%\r\n";
+		env = "call \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvars32.bat\"\r\n";
+		env += "@SET INCLUDE=" + private_inc + ";%INCLUDE%\r\n";
 		env_set=true;
 		break;
 	default:
@@ -69,14 +58,15 @@ function win_make(vcver, private_inc, private_lib) {
 }
 if (_ostype_=="Windows/msvc") {
 	global ProgramFiles="C:\\Program Files (x86)";
-	win_make(6, "C:\\NullLogic\\utils\\VC6\\include;", "C:\\NullLogic\\utils\\VC6\\lib;");
+//	win_make(6, "C:\\NullLogic\\utils\\VC6\\include;", "C:\\NullLogic\\utils\\VC6\\lib;");
 //	win_make(9, "C:\\NullLogic\\utils\\VC6\\include;", "C:\\NullLogic\\utils\\VC6\\lib;");
 //	win_make(9, "C:\\null\\VC6\\include;", "C:\\null\\VC6\\lib;");
+	win_make(16, @"C:\NullLogic\utils\VS2019\include;", @"C:\NullLogic\utils\VS2019\lib;");
 }
 
 print("ostype="+_ostype_+"\n");
 if (_ostype_=="Windows/msvc") {
-	cmd="nmake -f Makefile.vc";
+	cmd="nmake -d -f Makefile.vc";
 } else if (_ostype_=="Windows/borlandc") {
 	cmd="make -f Makefile.bc";
 } else if (_ostype_=="DOS/turboc") {

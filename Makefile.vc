@@ -5,9 +5,9 @@
 CC      = cl.exe
 LINK    = link.exe
 MAKE    = nmake.exe /C /S /Y /F
-NSPLITE = .\bin\nsplite.exe
+NSPLITE = .\bin\nsp.exe
 
-all: _libnsp lite deps static_libs cli nestray nspedit cgi
+all: _libnsp cli deps #ntray nspedit cgi
 	@echo Run 'make targets' to list more options.
 
 deps:
@@ -171,7 +171,7 @@ cli: _libnsp
 	@cd src\hosts\cli
 	@$(MAKE) Makefile.vc
 	@cd ..\..\..
-	@$(NSPLITE) -e "print('\nStandard Interpreter built');var x='gnikrow dna ';for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));print('\n\n');"
+	@$(NSPLITE) -e "print('\nStandard Interpreter built');var x='gnikrow dna ';for (i=lib.string.len(x);i>=0;i--) print(lib.string.sub(x, i, 1));print('\n\n');"
 
 ctest: _libnsp
 	@cd src\hosts\ctest
@@ -184,8 +184,8 @@ lite: _libnsp
 	@cd ..\..\..
 	@$(NSPLITE) -e "print('\nMinimal Interpreter built');var x='gnikrow dna ';for (i=string.len(x);i>=0;i--) print(string.sub(x, i, 1));print('\n\n');"
 
-nestray: _libnsp
-	@cd src\hosts\nestray
+ntray: _libnsp
+	@cd src\hosts\ntray
 	@$(MAKE) Makefile.vc
 	@cd ..\..\..
 
@@ -261,7 +261,7 @@ clean: lite
 	@cd src\hosts\lite
 	@$(MAKE) MAKEFILE.VC clean
 	@cd ..\..\..
-	@cd src\hosts\nestray
+	@cd src\hosts\ntray
 	@$(MAKE) MAKEFILE.VC clean
 	@cd ..\..\..
 	@cd src\hosts\nspedit
