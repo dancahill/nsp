@@ -312,9 +312,16 @@ namespace NSPEdit
 
 		private void viewMemoryToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			MemTreeForm form = new MemTreeForm();
-			form.thread = richCodeBox1.scriptThread;
-			form.ShowDialog();
+			try
+			{
+				MemTreeForm form = new MemTreeForm();
+				form.thread = richCodeBox1.scriptThread;
+				form.ShowDialog();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(string.Format("Exception: {0}", ex.Message));
+			}
 		}
 
 		private void newToolStripMenuItem_Click(object sender, EventArgs e)

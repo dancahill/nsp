@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace NSPEdit
@@ -28,7 +27,6 @@ namespace NSPEdit
 
 		private void MemTreeForm_Load(object sender, EventArgs e)
 		{
-
 			treeView1.BeginUpdate();
 			treeView1.Nodes.Clear();
 			TreeNode globalNode = treeView1.Nodes.Add("Globals");
@@ -64,6 +62,7 @@ namespace NSPEdit
 		void LoadSubBranch(TreeNode parentNode, NSPObject parent, short depth)
 		{
 			if (depth > 10) return;
+			if (parent == null) return;
 			if (parent.type == (short)NSPObjectTypes.NT_TABLE)
 			{
 				NSPObject listobj = parent.GetFirst();
