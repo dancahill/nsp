@@ -1,7 +1,7 @@
 // output nsp namespace to an xml file
 
 namespace nsp {
-	class ns2xml{
+	class ns2xml {
 		namespacename="NSPNameSpace";
 		inputfilename="";
 		outputfilename="";
@@ -27,7 +27,7 @@ namespace nsp {
 			// done loading libs
 			this.inputfilename=this.namespacename+".dat.ns";
 			this.outputfilename=this.namespacename+".xml";
-			this.namespacedescriptions = eval(lib.file.readall(this.inputfilename));
+			this.namespacedescriptions = lib.eval(lib.file.readall(this.inputfilename));
 			this.output="";
 		};
 
@@ -126,3 +126,5 @@ x.printdepth({true=true, false=false, this={}, null=false}, 1, "");
 x.printdepth(_GLOBALS, 1, "");
 x.end();
 x.writefiles();
+lib.io.flush();
+lib.debug.break();

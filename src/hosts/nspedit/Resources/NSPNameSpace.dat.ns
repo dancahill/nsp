@@ -1,20 +1,4 @@
 {
-	["false"] = {
-		desc = "false (special variable)",
-		type = "boolean"
-	},
-	["null"] = {
-		desc = "null (special variable)",
-		type = "null"
-	},
-	["this"] = {
-		desc = "this (special variable)",
-		type = "table"
-	},
-	["true"] = {
-		desc = "true (special variable)",
-		type = "boolean"
-	},
 	["_ENV"] = {
 		desc = "table of environment variables",
 		type = "table"
@@ -39,32 +23,158 @@
 		desc = "NSP version",
 		type = "string"
 	},
-	["base64"] = {
-		desc = "functions for working with base64 data",
-		type = "table"
-	},
-	["base64.decode"] = {
-		desc = "returns decoded string of provided base64 data",
-		params = "",
-		returns = "",
-		type = "function"
-	},
-	["base64.encode"] = {
-		desc = "returns base64 encoded version of provided string",
-		params = "",
-		returns = "",
-		type = "function"
-	},
 	["copy"] = {
 		desc = "creates and returns a clone of var (including tables)",
 		params = "(object var)",
 		returns = "clone of var",
 		type = "function"
 	},
+	["false"] = {
+		desc = "false (special variable)",
+		type = "boolean"
+	},
+	["include"] = {
+		desc = "load a script",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["null"] = {
+		desc = "null (special variable)",
+		type = "null"
+	},
+	["print"] = {
+		desc = "print one or more objects to console",
+		params = "([object])",
+		returns = "total length of output",
+		type = "function"
+	},
+	["printf"] = {
+		desc = "print to console with formatting similar to the c function of the same name",
+		params = "(string format[, ...])",
+		returns = "total length of output string",
+		type = "function"
+	},
+	["sizeof"] = {
+		desc = "returns size of object",
+		params = "(object arg1)",
+		returns = "size of object based on type. for strings, it's the length of a string. for tables, it's the number of items in the table.",
+		type = "function"
+	},
+	["sprintf"] = {
+		desc = "print to buffer with formatting similar to the c function of the same name",
+		params = "(string format[, ...])",
+		returns = "string with formatting applied",
+		type = "function"
+	},
+	["this"] = {
+		desc = "this (special variable)",
+		type = "table"
+	},
+	["tonumber"] = {
+		desc = "convert a string to its numeric value",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["true"] = {
+		desc = "true (special variable)",
+		type = "boolean"
+	},
+	["typeof"] = {
+		desc = "get the type of a variable",
+		params = "(object arg1)",
+		returns = "string with the name of the base object type",
+		type = "function"
+	},
+	["write"] = {
+		desc = "write a single unformatted string to console",
+		params = "(string arg1)",
+		returns = "number of bytes written",
+		type = "function"
+	},
+
 	["lib"] = {
 		desc = "collection of all classes and functions in the NSP libraries",
 		type = "table"
 	},
+	["lib.dirlist"] = {
+		desc = "returns a table of a specified directory\'s contents",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["lib.eval"] = {
+		desc = "Evaluates a supplied expression.",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["lib.exec"] = {
+		desc = "Evaluates a supplied expression.",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["lib.load"] = {
+		desc = "load specified library",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["lib.sleep"] = {
+		desc = "causes script to sleep for a number of seconds (with millisecond precision)",
+		params = "(number seconds)",
+		returns = "void",
+		type = "function"
+	},
+	["lib.system"] = {
+		desc = "execute a system function",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+
+	["lib.Windows"] = {
+		desc = "collection of functions for Windows UI",
+		type = "table"
+	},
+	["lib.Windows.Beep"] = {
+		desc = "beep at the requested frequency for the requested duratin (in milliseconds)",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["lib.Windows.CreateProcess"] = {
+		desc = "function to execute a program",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["lib.Windows.MessageBox"] = {
+		desc = "native windows function to display a messagebox",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["lib.Windows.PlaySound"] = {
+		desc = "plays a sound file",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["lib.Windows.ShellExecute"] = {
+		desc = "native windows function for opening a file with its associated application",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+
+	["lib.coroutine"] = {
+		desc = "coroutine class",
+		type = "table"
+	},
+
 	["lib.debug"] = {
 		desc = "misc debugging functions",
 		type = "table"
@@ -75,38 +185,26 @@
 		returns = "void",
 		type = "function"
 	},
-	["lib.dirlist"] = {
-		desc = "returns a table of a specified directory\'s contents",
+	["lib.debug.runtime"] = {
+		desc = "get the number of seconds the script has been running",
 		params = "",
 		returns = "",
 		type = "function"
 	},
+
 	["lib.dl"] = {
-		desc = "set of functions for loading dynamic libraries",
+		desc = "settings for loading dynamic libraries",
 		type = "table"
 	},
-	["lib.load"] = {
-		desc = "load specified library",
-		params = "",
-		returns = "",
-		type = "function"
+	["lib.dl.loaded"] = {
+		desc = "array of library names loaded by lib.load()",
+		type = "table"
 	},
 	["lib.dl.path"] = {
-		desc = "array of paths to search for libraries loaded by dl.load()",
+		desc = "array of paths to search for libraries loaded by lib.load()",
 		type = "table"
 	},
-	["eval"] = {
-		desc = "Evaluates a supplied expression.",
-		params = "",
-		returns = "",
-		type = "function"
-	},
-	["exec"] = {
-		desc = "Evaluates a supplied expression.",
-		params = "",
-		returns = "",
-		type = "function"
-	},
+
 	["lib.file"] = {
 		desc = "collection of functions available for working with files",
 		type = "table"
@@ -165,12 +263,7 @@
 		returns = "",
 		type = "function"
 	},
-	["include"] = {
-		desc = "load a script",
-		params = "",
-		returns = "",
-		type = "function"
-	},
+
 	["lib.io"] = {
 		desc = "input/output functions",
 		type = "table"
@@ -193,30 +286,13 @@
 		returns = "",
 		type = "function"
 	},
+
 	["lib.math"] = {
 		desc = "math functions",
 		type = "table"
 	},
 	["lib.math.abs"] = {
 		desc = "get absolute (positive) value of a number",
-		params = "",
-		returns = "",
-		type = "function"
-	},
-	["lib.math.ceil"] = {
-		desc = "round a number up to the nearest integer",
-		params = "",
-		returns = "",
-		type = "function"
-	},
-	["lib.math.floor"] = {
-		desc = "round a number down to the nearest integer",
-		params = "",
-		returns = "",
-		type = "function"
-	},
-	["lib.math.rand"] = {
-		desc = "return a random number in the requested range",
 		params = "",
 		returns = "",
 		type = "function"
@@ -245,26 +321,32 @@
 		returns = "",
 		type = "function"
 	},
+	["lib.math.ceil"] = {
+		desc = "round a number up to the nearest integer",
+		params = "",
+		returns = "",
+		type = "function"
+	},
 	["lib.math.cos"] = {
 		desc = "returns the cosine of a value",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["lib.math.sin"] = {
-		desc = "returns the sine of a value",
-		params = "",
-		returns = "",
-		type = "function"
-	},
-	["lib.math.tan"] = {
-		desc = "returns the tangent of a value",
+	["lib.math.cosh"] = {
+		desc = "returns the hyperbolic cosine of a value",
 		params = "",
 		returns = "",
 		type = "function"
 	},
 	["lib.math.exp"] = {
 		desc = "returns the exponential value of a value",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["lib.math.floor"] = {
+		desc = "round a number down to the nearest integer",
 		params = "",
 		returns = "",
 		type = "function"
@@ -281,8 +363,14 @@
 		returns = "",
 		type = "function"
 	},
-	["lib.math.cosh"] = {
-		desc = "returns the hyperbolic cosine of a value",
+	["lib.math.rand"] = {
+		desc = "return a random number in the requested range",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["lib.math.sin"] = {
+		desc = "returns the sine of a value",
 		params = "",
 		returns = "",
 		type = "function"
@@ -293,18 +381,25 @@
 		returns = "",
 		type = "function"
 	},
-	["lib.math.tanh"] = {
-		desc = "returns the hyperbolic tangent of a value",
-		params = "",
-		returns = "",
-		type = "function"
-	},
 	["lib.math.sqrt"] = {
 		desc = "returns the square root of a value",
 		params = "",
 		returns = "",
 		type = "function"
 	},
+	["lib.math.tan"] = {
+		desc = "returns the tangent of a value",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["lib.math.tanh"] = {
+		desc = "returns the hyperbolic tangent of a value",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+
 	["lib.net"] = {
 		desc = "collection of functions and classes available for working with network connections",
 		type = "table"
@@ -529,9 +624,16 @@
 		returns = "",
 		type = "function"
 	},
+
 	["lib.pipe"] = {
 		desc = "functions for creating and working with pipes",
 		type = "table"
+	},
+	["lib.pipe.close"] = {
+		desc = "closes pipe-conn",
+		params = "(pipe-conn pipe)",
+		returns = "void",
+		type = "function"
 	},
 	["lib.pipe.open"] = {
 		desc = "create a process with read/write io pipes",
@@ -551,92 +653,7 @@
 		returns = "number of bytes sent",
 		type = "function"
 	},
-	["lib.pipe.close"] = {
-		desc = "closes pipe-conn",
-		params = "(pipe-conn pipe)",
-		returns = "void",
-		type = "function"
-	},
-	["print"] = {
-		desc = "print one or more objects to console",
-		params = "([object])",
-		returns = "total length of output",
-		type = "function"
-	},
-	["printf"] = {
-		desc = "print to console with formatting similar to the c function of the same name",
-		params = "(string format[, ...])",
-		returns = "total length of output string",
-		type = "function"
-	},
-	["lib.regex"] = {
-		desc = "functions available for using regular expressions to work with strings",
-		type = "table"
-	},
-	["lib.regex.match"] = {
-		desc = "",
-		params = "",
-		returns = "",
-		type = "function"
-	},
-	["lib.regex.replace"] = {
-		desc = "",
-		params = "",
-		returns = "",
-		type = "function"
-	},
-	["lib.rot13"] = {
-		desc = "rotate characters in a string by 13 places",
-		params = "",
-		returns = "",
-		type = "function"
-	},
-	["lib.debug.runtime"] = {
-		desc = "get the number of seconds the script has been running",
-		params = "",
-		returns = "",
-		type = "function"
-	},
-	["serialize"] = {
-		desc = "returns the contents of a table in string format (with subtable)",
-		params = "(object arg1)",
-		returns = "string representation of arg1",
-		type = "function"
-	},
-	["sizeof"] = {
-		desc = "returns size of object",
-		params = "(object arg1)",
-		returns = "size of object based on type. for strings, it's the length of a string. for tables, it's the number of items in the table.",
-		type = "function"
-	},
-	["sleep"] = {
-		desc = "causes script to sleep for a number of seconds (with millisecond precision)",
-		params = "(number seconds)",
-		returns = "void",
-		type = "function"
-	},
-	["lib.sort"] = {
-		desc = "sort functions for tables",
-		type = "table"
-	},
-	["lib.sort.byname"] = {
-		desc = "",
-		params = "",
-		returns = "",
-		type = "function"
-	},
-	["lib.sort.bykey"] = {
-		desc = "",
-		params = "",
-		returns = "",
-		type = "function"
-	},
-	["sprintf"] = {
-		desc = "print to buffer with formatting similar to the c function of the same name",
-		params = "(string format[, ...])",
-		returns = "string with formatting applied",
-		type = "function"
-	},
+
 	["lib.string"] = {
 		desc = "class of functions available for working with strings",
 		type = "table"
@@ -645,12 +662,6 @@
 		desc = "get numeric value of character in a string",
 		params = "(string arg1[, number offset])",
 		returns = "numeric value of character in arg1 at offset",
-		type = "function"
-	},
-	["lib.string.itoa"] = {
-		desc = "convert number to its ascii character equivalent",
-		params = "(number arg1)",
-		returns = "string ascii value of arg1",
 		type = "function"
 	},
 	["lib.string.cat"] = {
@@ -683,16 +694,16 @@
 		returns = "number",
 		type = "function"
 	},
-	["lib.string.ncmp"] = {
-		desc = "case sensitive substring comparison up to len characters",
-		params = "(string str1, string str2, number len)",
-		returns = "number",
+	["lib.string.istr"] = {
+		desc = "case insensitive substring search",
+		params = "(string stack, string needle)",
+		returns = "string stack starting where needle was found, or null if not found",
 		type = "function"
 	},
-	["lib.string.nicmp"] = {
-		desc = "case insensitive substring comparison up to len characters",
-		params = "(string str1, string str2, number len)",
-		returns = "number",
+	["lib.string.itoa"] = {
+		desc = "convert number to its ascii character equivalent",
+		params = "(number arg1)",
+		returns = "string ascii value of arg1",
 		type = "function"
 	},
 	["lib.string.join"] = {
@@ -704,6 +715,18 @@
 	["lib.string.len"] = {
 		desc = "get length of string (binary safe)",
 		params = "(string str)",
+		returns = "number",
+		type = "function"
+	},
+	["lib.string.ncmp"] = {
+		desc = "case sensitive substring comparison up to len characters",
+		params = "(string str1, string str2, number len)",
+		returns = "number",
+		type = "function"
+	},
+	["lib.string.nicmp"] = {
+		desc = "case insensitive substring comparison up to len characters",
+		params = "(string str1, string str2, number len)",
 		returns = "number",
 		type = "function"
 	},
@@ -731,22 +754,10 @@
 		returns = "string stack starting where needle was found, or null if not found",
 		type = "function"
 	},
-	["lib.string.istr"] = {
-		desc = "case insensitive substring search",
-		params = "(string stack, string needle)",
-		returns = "string stack starting where needle was found, or null if not found",
-		type = "function"
-	},
 	["lib.string.sub"] = {
 		desc = "get a substring of str, starting at arg2 and ending at arg3.\r\nif arg2 is negative it will be read as an index counting back from the end of the string.\r\narg3 is implicitly the end of the string",
 		params = "(string str, number arg2[, number arg3])",
 		returns = "string starting at arg2 and ending at arg3",
-		type = "function"
-	},
-	["lib.string.tostring"] = {
-		desc = "generic method for objects to convert data to a string",
-		params = "(object arg1)",
-		returns = "string format of arg1",
 		type = "function"
 	},
 	["lib.string.tolower"] = {
@@ -755,18 +766,38 @@
 		returns = "string",
 		type = "function"
 	},
+	["lib.string.tostring"] = {
+		desc = "generic method for objects to convert data to a string",
+		params = "(object arg1)",
+		returns = "string format of arg1",
+		type = "function"
+	},
 	["lib.string.toupper"] = {
 		desc = "get uppercase version of string",
 		params = "(string str)",
 		returns = "string",
 		type = "function"
 	},
-	["lib.system"] = {
-		desc = "execute a system function",
-		params = "",
-		returns = "",
+
+	["lib.string.trim"] = {
+		desc = "trim whitespace from start and end of string",
+		params = "(string str)",
+		returns = "string",
 		type = "function"
 	},
+	["lib.string.trimend"] = {
+		desc = "trim whitespace from end of string",
+		params = "(string str)",
+		returns = "string",
+		type = "function"
+	},
+	["lib.string.trimstart"] = {
+		desc = "trim whitespace from start of string",
+		params = "(string str)",
+		returns = "string",
+		type = "function"
+	},
+
 	["lib.table"] = {
 		desc = "class of functions for working with tables",
 		type = "table"
@@ -783,14 +814,14 @@
 		returns = "",
 		type = "function"
 	},
-	["lib.table.sortbyname"] = {
-		desc = "function for sorting table contents by name",
+	["lib.table.sortbykey"] = {
+		desc = "function for sorting table by each item's subkey",
 		params = "",
 		returns = "",
 		type = "function"
 	},
-	["lib.table.sortbykey"] = {
-		desc = "function for sorting table by each item's subkey",
+	["lib.table.sortbyname"] = {
+		desc = "function for sorting table contents by name",
 		params = "",
 		returns = "",
 		type = "function"
@@ -801,6 +832,56 @@
 		returns = "",
 		type = "function"
 	},
+
+	["lib.text"] = {
+		desc = "functions for working with text data",
+		type = "table"
+	},
+	["lib.text.base64"] = {
+		desc = "functions for working with base64 data",
+		type = "table"
+	},
+	["lib.text.base64.decode"] = {
+		desc = "returns decoded string of provided base64 data",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["lib.text.base64.encode"] = {
+		desc = "returns base64 encoded version of provided string",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["lib.text.regex"] = {
+		desc = "functions available for using regular expressions to work with strings",
+		type = "table"
+	},
+	["lib.text.regex.match"] = {
+		desc = "",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["lib.text.regex.replace"] = {
+		desc = "",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["lib.text.rot13"] = {
+		desc = "rotate characters in a string by 13 places",
+		params = "",
+		returns = "",
+		type = "function"
+	},
+	["lib.text.serialize"] = {
+		desc = "returns the contents of a table in string format (with subtable)",
+		params = "(object arg1)",
+		returns = "string representation of arg1",
+		type = "function"
+	},
+
 	["lib.thread"] = {
 		desc = "class of functions for working with threads (experimental)",
 		type = "table"
@@ -851,6 +932,7 @@
 		returns = "",
 		type = "function"
 	},
+
 	["lib.time"] = {
 		desc = "functions for dealing with time",
 		type = "table"
@@ -901,58 +983,6 @@
 		desc = "get seconds since 1970-01-01 (aka unix time)",
 		params = "none",
 		returns = "number of seconds from 1970-01-01 to now",
-		type = "function"
-	},
-	["tonumber"] = {
-		desc = "convert a string to its numeric value",
-		params = "",
-		returns = "",
-		type = "function"
-	},
-	["typeof"] = {
-		desc = "get the type of a variable",
-		params = "(object arg1)",
-		returns = "string with the name of the base object type",
-		type = "function"
-	},
-	["lib.win"] = {
-		desc = "collection of functions for Windows UI",
-		type = "table"
-	},
-	["lib.win.Beep"] = {
-		desc = "beep at the requested frequency for the requested duratin (in milliseconds)",
-		params = "",
-		returns = "",
-		type = "function"
-	},
-	["lib.win.CreateProcess"] = {
-		desc = "function to execute a program",
-		params = "",
-		returns = "",
-		type = "function"
-	},
-	["lib.win.MessageBox"] = {
-		desc = "native windows function to display a messagebox",
-		params = "",
-		returns = "",
-		type = "function"
-	},
-	["lib.win.PlaySound"] = {
-		desc = "plays a sound file",
-		params = "",
-		returns = "",
-		type = "function"
-	},
-	["lib.win.ShellExecute"] = {
-		desc = "native windows function for opening a file with its associated application",
-		params = "",
-		returns = "",
-		type = "function"
-	},
-	["write"] = {
-		desc = "write a single unformatted string to console",
-		params = "(string arg1)",
-		returns = "number of bytes written",
 		type = "function"
 	}
 }
