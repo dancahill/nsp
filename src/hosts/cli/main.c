@@ -274,7 +274,7 @@ static void printstate(nsp_state *N, char *fn)
 	printf("\r\nINTERNAL STATE REPORT %s\r\n", fn);
 	if (N->allocs)   printf("\tallocs   = %s (%s bytes)\r\n", printcommas(N->allocs, buf1, 1), printcommas(N->allocmem, buf2, 1));
 	if (N->frees)    printf("\tfrees    = %s (%s bytes)\r\n", printcommas(N->frees, buf1, 1), printcommas(N->freemem, buf2, 1));
-	if (N->allocs)   printf("\tdiff     = %s (%s bytes)\r\n", printcommas(abs(N->allocs - N->frees), buf1, 1), printcommas(abs(N->allocmem - N->freemem), buf2, 1));
+	if (N->allocs)   printf("\tdiff     = %s (%s bytes)\r\n", printcommas(labs(N->allocs - N->frees), buf1, 1), printcommas(labs(N->allocmem - N->freemem), buf2, 1));
 	if (N->peakmem)  printf("\tpeak     = %s bytes\r\n", printcommas(N->peakmem, buf1, 1));
 	if (N->counter1) printf("\tcounter1 = %s\r\n", printcommas(N->counter1, buf1, 1));
 	printf("\tsizeof(nsp_state)  = %d\r\n", (int)sizeof(nsp_state));
