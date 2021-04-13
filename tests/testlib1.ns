@@ -4,7 +4,7 @@ class testlib1 {
 	function constructor() {
 		printf("running testlib1 constructor\r\n");
 		if (_ostype_=="wasm/emcc") global _SERVER={ dummy=true };
-		this.starttime=runtime();
+		this.starttime=lib.debug.runtime();
 	}
 	function destructor() {
 		printf("running testlib1 destructor\r\n");
@@ -41,7 +41,7 @@ class testlib1 {
 			}
 		}
 		if (typeof(sqlquery)=='function') Q=sqlquery("SELECT * FROM nullg_sessions");
-		if (typeof(dirlist)=='function' && _ostype_!="wasm/emcc") D=dirlist(_filepath);
+		if (typeof(lib.dirlist)=='function' && _ostype_!="wasm/emcc") D=lib.dirlist(_filepath);
 		x=quiet;
 		global quiet=false;
 		expect("tests passed/total", sprintf("%d/%d", numtests, numtests), sprintf("%d/%d", numtests-numerrors, numtests));
@@ -49,7 +49,7 @@ class testlib1 {
 		global quiet=x;
 		numtests--;
 		print("-------------------------------------------------------------------\n");
-		if (!quiet) print("        FINISHED TESTS       = "+(runtime()-this.starttime)+" seconds\n");
+		if (!quiet) print("        FINISHED TESTS       = "+(lib.debug.runtime()-this.starttime)+" seconds\n");
 		global decomped_script=null;
 	//	global _ARGS={};
 		global _ENV={};
@@ -257,26 +257,26 @@ namespace testlib1.tests {
 		if (typeof(file.md5)!='function') {
 			print("file.md5() missing\n");
 		} else {
-			expect("string.md5", "a9a47b7d0802b313924900ad1baa6eb0", string.md5("string.md5"));
+			expect("string.md5", "a9a47b7d0802b313924900ad1baa6eb0", lib.string.md5("string.md5"));
 	/*
 			if (typeof(filestat)!='table') {
 				print("test file ", filename, " does not exist.\n");
 			} else {
 				print(file.md5(filename), " *",filename,"\n");
-				system("md5sum \""+filename+"\"");
+				lib.system("md5sum \""+filename+"\"");
 			}
 	*/
 		}
-		if (typeof(file.sha1)!='function') {
+		if (typeof(lib.file.sha1)!='function') {
 			print("file.sha1() missing\n");
 		} else {
-			expect("string.sha1", "2973a33e464d6b792720e9242e8b521eaf37e19a", string.sha1("string.sha1"));
+			expect("string.sha1", "2973a33e464d6b792720e9242e8b521eaf37e19a", lib.string.sha1("string.sha1"));
 	/*
 			if (typeof(filestat)!='table') {
 				print("test file ", filename, " does not exist.\n");
 			} else {
 				print(file.sha1(filename), " *",filename,"\n");
-				system("sha1sum \""+filename+"\"");
+				lib.system("sha1sum \""+filename+"\"");
 			}
 	*/
 		}
@@ -364,13 +364,13 @@ namespace testlib1.tests {
 	// dl.ns
 	function dl() {
 		if (typeof(lib.load)!='function') return;
-		if (typeof(dirlist)!='function') {
-			print("        dirlist doesn't exist\n");
+		if (typeof(lib.dirlist)!='function') {
+			print("        lib.dirlist doesn't exist\n");
 			return;
 		}
 		if (!quiet) print("        loading libs...\n");
 		lib.io.flush();
-		foreach (f in dirlist(lib.dl.path[0])) {
+		foreach (f in lib.dirlist(lib.dl.path[0])) {
 			if (f.name=='.'||f.name=='..') continue;
 			x=lib.string.split(f.name, ".");
 			if (x[1]!='so') continue;
@@ -479,7 +479,7 @@ namespace testlib1.tests {
 		/* this will list all available string functions stored in table 'string' */
 	/*
 		for (i=0;;i++) {
-			local n=iname(string, i);
+			local n=lib.table.iname(string, i);
 			local t=typeof(string[n]);
 			if (t=='null') break;
 			print("        ", i, "\t", t, "\tstring.", n, "\n");
@@ -664,7 +664,7 @@ namespace testlib1.tests {
 				var sp="                              ";
 				print("        ",sizeof(obj)," members\r\n");
 				for (i=0;i<sizeof(obj);i++) {
-					local n=iname(obj, i);
+					local n=lib.table.iname(obj, i);
 					local t=typeof(obj[n]);
 					print("        ",string.sub(t+sp,0,10),string.sub(n+sp,0,13),obj[n],"\n");
 				}
@@ -1012,12 +1012,12 @@ namespace testlib1.tests {
 			A = { c = "1", t = "2" },
 			B = { c = 3 }
 		};
-		t2=serialize(t1);
+		t2=lib.text.serialize(t1);
 		t2=lib.string.replace(lib.string.replace(lib.string.replace(lib.string.replace(t2,"\r",""),"\n",""),"\t","")," ","");
 		expect("", '{A={c="1",t="2"},B={c=3}}', t2);
-		t3=eval(t2);
+		t3=lib.eval(t2);
 		t3['B']['c']=4;
-		t3=serialize(t3);
+		t3=lib.text.serialize(t3);
 		t3=lib.string.replace(lib.string.replace(lib.string.replace(lib.string.replace(t3,"\r",""),"\n",""),"\t","")," ","");
 		expect("", '{A={c="1",t="2"},B={c=4}}', t3);
 		return;
@@ -1281,7 +1281,7 @@ namespace testlib1.tests {
 	function tcp() {
 		local test_tcpserv = function () {
 			/* requires _tcpserv.ns to be running */
-			sock=new net.tcp.socket("localhost", 1234, 0);
+			sock=new lib.net.tcp.socket("localhost", 1234, 0);
 			if (typeof(sock)!='sock4') {
 				print("can't connect to test server - try running _tcpserv.ns first\n");
 				return;
@@ -1444,7 +1444,7 @@ namespace testlib1.tests {
 			return;
 		}
 		local test_smtp = function () {
-			sock=net.tcp.open("localhost", 25, 0);
+			sock=lib.net.tcp.open("localhost", 25, 0);
 			if (typeof(sock)!='sock4') {
 				print("can't connect to smtp server\n");
 				return;
@@ -1478,12 +1478,12 @@ namespace testlib1.tests {
 			return;
 		}
 
-		if (typeof(net)!='table') {
+		if (typeof(lib.net)!='table') {
 			if (!quiet) print("SKIPPING TCP TESTS\n");
 			return;
 		}
-		if (!quiet) print("        runtime = ", string.tostring(runtime(), 3), " seconds\n");
-		if (!quiet) if (net.tcp.have_tls) print("        net.tcp.tls_type = '",net.tcp.tls_type,"'\n");
+		if (!quiet) print("        runtime = ", lib.string.tostring(runtime(), 3), " seconds\n");
+		if (!quiet) if (lib.net.tcp.have_tls) print("        lib.net.tcp.tls_type = '",lib.net.tcp.tls_type,"'\n");
 		site_url = "http://nulllogic.ca/nsp/version.php";
 		if (!quiet) print("        sucking "+site_url+"\n");
 		hconn=new lib.net.http.client(site_url);

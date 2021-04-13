@@ -50,6 +50,8 @@
 #  define _OS_ "Solaris"
 #elif defined(__EMSCRIPTEN__)
 #  define _OS_ "wasm"
+#elif defined(__APPLE__)
+#  define _OS_ "MacOS"
 #else
 #  define _OS_ "unknown"
 #endif
@@ -785,24 +787,28 @@ nsp_state *nsp_newstate()
 {
 	FUNCTION list[] = {
 		{ "copy", (NSP_CFUNC)nl_copy },
-		{ "eval", (NSP_CFUNC)nl_eval },
-		{ "exec", (NSP_CFUNC)nl_exec },
 		{ "include", (NSP_CFUNC)nl_include },
 		{ "print", (NSP_CFUNC)nl_print },
 		{ "printf", (NSP_CFUNC)nl_printf },
-		{ "runtime", (NSP_CFUNC)nl_runtime },
-		{ "serialize", (NSP_CFUNC)nl_serialize },
 		{ "sizeof", (NSP_CFUNC)nl_sizeof },
-		{ "sleep", (NSP_CFUNC)nl_sleep },
 		{ "sprintf", (NSP_CFUNC)nl_printf },
-		{ "system", (NSP_CFUNC)nl_system },
 		{ "tonumber", (NSP_CFUNC)nl_tonumber },
 		{ "typeof", (NSP_CFUNC)nl_typeof },
 		{ "write", (NSP_CFUNC)nl_write },
 		{ NULL, NULL }
 	};
+	FUNCTION list_lib[] = {
+		{ "eval", (NSP_CFUNC)nl_eval },
+		{ "exec", (NSP_CFUNC)nl_exec },
+		{ "load", (NSP_CFUNC)nl_dl_load },
+		{ "sleep", (NSP_CFUNC)nl_sleep },
+		{ "system", (NSP_CFUNC)nl_system },
+		//{ "loadlib", (NSP_CFUNC)nl_dl_load },// deprecated
+		{ NULL, NULL }
+	};
 	FUNCTION list_debug[] = {
 		{ "break", (NSP_CFUNC)nl_break },
+		{ "runtime", (NSP_CFUNC)nl_runtime },
 		{ NULL, NULL }
 	};
 	FUNCTION list_coroutine[] = {
@@ -810,11 +816,6 @@ nsp_state *nsp_newstate()
 		{ "resume", (NSP_CFUNC)nl_coroutine },
 		{ "yield", (NSP_CFUNC)nl_coroutine },
 		{ "status", (NSP_CFUNC)nl_coroutine },
-		{ NULL, NULL }
-	};
-	FUNCTION list_dl[] = {
-		{ "load", (NSP_CFUNC)nl_dl_load },
-		//{ "loadlib", (NSP_CFUNC)nl_dl_load },// deprecated
 		{ NULL, NULL }
 	};
 	FUNCTION list_file[] = {
@@ -894,6 +895,10 @@ nsp_state *nsp_newstate()
 		{ "zlink", (NSP_CFUNC)nl_zlink },
 		{ NULL, NULL }
 	};
+	FUNCTION list_text[] = {
+		{ "serialize", (NSP_CFUNC)nl_serialize },
+		{ NULL, NULL }
+	};
 	FUNCTION list_time[] = {
 		{ "asctime", (NSP_CFUNC)nl_asctime },
 		{ "gettimeofday", (NSP_CFUNC)nl_gettimeofday },
@@ -937,8 +942,7 @@ nsp_state *nsp_newstate()
 	}
 
 	lobj = nsp_settable(new_N, &new_N->g, "lib");
-	lobj->val->attr |= NST_AUTOSORT;
-	lobj->val->attr |= NST_HIDDEN;
+	lobj->val->attr |= NST_AUTOSORT | NST_HIDDEN;
 
 	cobj = nsp_settable(new_N, lobj, "debug");
 	cobj->val->attr |= NST_HIDDEN;
@@ -952,8 +956,8 @@ nsp_state *nsp_newstate()
 		nsp_setcfunc(new_N, cobj, list_coroutine[i].fn_name, list_coroutine[i].fn_ptr);
 	}
 
-	for (i = 0; list_dl[i].fn_name != NULL; i++) {
-		nsp_setcfunc(new_N, lobj, list_dl[i].fn_name, list_dl[i].fn_ptr);
+	for (i = 0; list_lib[i].fn_name != NULL; i++) {
+		nsp_setcfunc(new_N, lobj, list_lib[i].fn_name, list_lib[i].fn_ptr);
 	}
 	cobj = nsp_settable(new_N, nsp_settable(new_N, lobj, "dl"), "loaded");
 	cobj = nsp_settable(new_N, nsp_settable(new_N, lobj, "dl"), "path");
@@ -999,6 +1003,11 @@ nsp_state *nsp_newstate()
 	cobj->val->attr |= NST_HIDDEN;
 	for (i = 0; list_table[i].fn_name != NULL; i++) {
 		nsp_setcfunc(new_N, cobj, list_table[i].fn_name, list_table[i].fn_ptr);
+	}
+	cobj = nsp_settable(new_N, lobj, "text");
+	cobj->val->attr |= NST_AUTOSORT | NST_HIDDEN;
+	for (i = 0; list_text[i].fn_name != NULL; i++) {
+		nsp_setcfunc(new_N, cobj, list_text[i].fn_name, list_text[i].fn_ptr);
 	}
 	cobj = nsp_settable(new_N, lobj, "time");
 	cobj->val->attr |= NST_HIDDEN;

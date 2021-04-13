@@ -13,13 +13,13 @@ function testsub(title, l, c, showfail) {
 	lib.file.unlink("conftest.obj");
 	if (ostype=='posix') {
 		lib.file.writeall("conftest.c", c);
-		r1=system(cc+" conftest.c "+l+" -o conftest.out 2>/dev/null");
-		//r1=system(cc+" conftest.c "+l+" -o conftest.out");
+		r1=lib.system(cc+" conftest.c "+l+" -o conftest.out 2>/dev/null");
+		//r1=lib.system(cc+" conftest.c "+l+" -o conftest.out");
 		if (r1==0) r2=lib.file.stat("conftest.out");
 	} else if (ostype=='windows') {
 		lib.file.writeall("conftest.c", c);
-//		r1=system(cc+" -nologo conftest.c "+l+" -o conftest.exe > nul");
-		r1=system(cc+" -nologo conftest.c "+l+" /Feconftest.exe > nul");
+//		r1=lib.system(cc+" -nologo conftest.c "+l+" -o conftest.exe > nul");
+		r1=lib.system(cc+" -nologo conftest.c "+l+" /Feconftest.exe > nul");
 		if (r1==0) r2=lib.file.stat("conftest.exe");
 	} else {
 		print("unknown ostype '", ostype, "'[", _ENV['OS'], "][", _ENV['OSTYPE'], "]\n");
@@ -85,7 +85,7 @@ function dotests() {
 	config_inc=0;
 	config={};
 	if (ostype=='dos') {
-		if ((x=system("tcc.exe 1>nul 2>nul"))==0) {
+		if ((x=lib.system("tcc.exe 1>nul 2>nul"))==0) {
 			print("  found TurboC++ on DOS\n");
 			global cc="tcc.exe";
 			memmodel="l";
@@ -107,8 +107,8 @@ function dotests() {
 		}
 	}
 	if (ostype=='windows') {
-		if (system("cl.exe 1>nul 2>nul")==0) {
-			//system("cl.exe");
+		if (lib.system("cl.exe 1>nul 2>nul")==0) {
+			//lib.system("cl.exe");
 			print("  found VC on Win32 OS\n");
 			global cc="cl.exe";
 			config_mak+="CC     = "+cc+"\n";
@@ -119,7 +119,7 @@ function dotests() {
 			config_nsp+="global CFLAGS  = \"/nologo /W3 /O2 /MD /EHsc /DWIN32 /DNDEBUG /D_MBCS /D_LIB /FD\";\n";
 			config_nsp+="if (_LINKAGE_==='shared') CFLAGS+=\" /DPIC\";\n";
 			config_nsp+="global LDFLAGS = \"\";\n\n";
-		} else if (system("gcc --version > nul")==0) {
+		} else if (lib.system("gcc --version > nul")==0) {
 			print("  found GCC on Win32 OS (MinGW?)\n");
 			global cc="gcc";
 			// not a good hack, but i'm lazy
@@ -130,7 +130,7 @@ function dotests() {
 		}
 	}
 	if (ostype=='posix') {
-		if (system("gcc --version 1>/dev/null 2>/dev/null")==0) {
+		if (lib.system("gcc --version 1>/dev/null 2>/dev/null")==0) {
 			print("  found GCC on posix OS\n");
 			global cc="gcc";
 			config_mak+="CC = "+cc+"\n";

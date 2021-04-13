@@ -4,7 +4,7 @@ function inno_build() {
 	if (string.sub(_ostype_, 0, 7)!="Windows") return;
 	innoexe=""+ProgramFiles+"\\Inno Setup 5\\Compil32.exe";
 	if (typeof(lib.file.stat(innoexe))=='table') {
-		system("\""+innoexe+"\" /cc nsp.iss");
+		lib.system("\""+innoexe+"\" /cc nsp.iss");
 	}
 	return;
 }
@@ -49,7 +49,7 @@ function win_make(vcver, private_inc, private_lib) {
 		cmd="@nmake -f Makefile.vc all shared_libs";
 		batchfile=_ENV['TEMP']+"\\win_make.cmd";
 		file.writeall(batchfile, env+cmd+"\r\n");
-		system(batchfile);
+		lib.system(batchfile);
 		inno_build();
 	}
 	print("\ndone - press enter\n");
@@ -76,18 +76,18 @@ if (_ostype_=="Windows/msvc") {
 }
 tcount=0;
 for (i=2;i<10;i++) {
-	var x=iname(_ARGS, i);
+	var x=lib.table.iname(_ARGS, i);
 	if (typeof(x)!='string') break;
-	if (string.len(_ARGS[x])<1) break;
+	if (lib.string.len(_ARGS[x])<1) break;
 	print("["+cmd+" "+_ARGS[x]+"]\r\n");
-	rc=system(cmd+" "+_ARGS[x]);
+	rc=lib.system(cmd+" "+_ARGS[x]);
 	tcount++;
 	if (rc) break;
 }
 if (tcount<1) {
-	rc=system(cmd);
+	rc=lib.system(cmd);
 	if (_ostype_=="Windows/msvc") {
-		rc=system("nmake -f Makefile.vc shared_libs");
+		rc=lib.system("nmake -f Makefile.vc shared_libs");
 	}
 }
 inno_build();

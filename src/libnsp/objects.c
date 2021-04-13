@@ -19,7 +19,9 @@
 #ifndef _NSPLIB_H
 #include "nsp/nsplib.h"
 #endif
+#ifndef __APPLE__
 #include <malloc.h>
+#endif
 #include <stdlib.h>
 #define RECORD_MEMUSAGE 1
 

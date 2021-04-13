@@ -88,7 +88,7 @@ function build_objs(CC, CFLAGS, OBJECTS, OTYPE, INTDIR) {
 			if (CC!='cl.exe') print ("  CC "+ONAME[0]+".o\n");
 			cmd=sprintf("%s %s%s%s %s.c", CC, (OTYPE=='shared'?DLFLAGS:""), CFLAGS, swapslash(OBJDIR+"/"+INTDIR+"/"+OTYPE+"/"+ONAME[0]+".o"), ONAME[0]);
 			//printf("%s\r\n", cmd);
-			system(cmd+HIDDEN);
+			lib.system(cmd+HIDDEN);
 		}
 	}
 	return;
@@ -102,7 +102,7 @@ function build_lib(CC, TNAME, OBJECTS, OTYPE, INTDIR) {
 		file.unlink(TNAME+".lib");
 		for (i=0;i<sizeof(OLIST);i++) {
 //			print("tlib.exe "+swapslash(LIBDIR+"/"+TNAME+".lib +"+OBJDIR+"/"+INTDIR+"/"+OTYPE+"/"+OLIST[i])+"\n");
-			system("tlib.exe "+swapslash(LIBDIR+"/"+TNAME+".lib +"+OBJDIR+"/"+INTDIR+"/"+OTYPE+"/"+OLIST[i]));
+			lib.system("tlib.exe "+swapslash(LIBDIR+"/"+TNAME+".lib +"+OBJDIR+"/"+INTDIR+"/"+OTYPE+"/"+OLIST[i]));
 		}
 		file.unlink(swapslash(LIBDIR+"/"+TNAME+".bak"));
 	} else if (CC=='cl.exe') {
@@ -125,15 +125,15 @@ function build_lib(CC, TNAME, OBJECTS, OTYPE, INTDIR) {
 			} else if (TNAME=='libnsp_ssh2') {
 				if (config.have_ssh2==true) LIBS+=" ws2_32.lib libssh2.lib zlib.lib libcrypto32MT.lib libssl32MT.lib";
 			}
-//			system("link.exe /nologo /subsystem:console /pdb:none /machine:I386 /dll /incremental:no "+LIBS+" /out:"+swapslash(LIBDIR+"/shared/"+TNAME+".dll "+liblist));
+//			lib.system("link.exe /nologo /subsystem:console /pdb:none /machine:I386 /dll /incremental:no "+LIBS+" /out:"+swapslash(LIBDIR+"/shared/"+TNAME+".dll "+liblist));
 //			LIBS="/libpath:"+LIBDIR+" gdi32.lib shell32.lib user32.lib winmm.lib libnsp.lib";
 //			if (TNAME=='libnsp_ssh' && config.have_ssh2==true)  LIBS+=" libssh2.lib";
 //			if (TNAME=='libnsp_net' && config.have_mbedtls==true) LIBS+=" mbedtls.lib";
-			system("link.exe /nologo /subsystem:console /pdb:none /machine:I386 /dll /incremental:no "+LIBS+" /def:\"dlldefs.def\" /out:"+swapslash(LIBDIR+"/shared/"+TNAME+".dll "+liblist));
+			lib.system("link.exe /nologo /subsystem:console /pdb:none /machine:I386 /dll /incremental:no "+LIBS+" /def:\"dlldefs.def\" /out:"+swapslash(LIBDIR+"/shared/"+TNAME+".dll "+liblist));
 			file.unlink(swapslash(LIBDIR+"/shared/"+TNAME+".exp"));
 			file.unlink(swapslash(LIBDIR+"/shared/"+TNAME+".lib"));
 		} else {
-			system("link.exe -lib /nologo /out:"+swapslash(LIBDIR+"/"+TNAME+".lib "+liblist));
+			lib.system("link.exe -lib /nologo /out:"+swapslash(LIBDIR+"/"+TNAME+".lib "+liblist));
 		}
 	} else {
 		liblist="";
@@ -180,10 +180,10 @@ function build_lib(CC, TNAME, OBJECTS, OTYPE, INTDIR) {
 				if (config.have_openssl==true) liblist+=" -lcrypto -lssl";
 				liblist+=" -lssh2";
 			}
-			system("gcc -shared -o "+swapslash(LIBDIR+"/shared/"+TNAME+".so "+liblist));
+			lib.system("gcc -shared -o "+swapslash(LIBDIR+"/shared/"+TNAME+".so "+liblist));
 		} else {
-			system("ar cru "+swapslash(LIBDIR+"/"+TNAME+".a "+liblist));
-			system("ranlib "+swapslash(LIBDIR+"/"+TNAME+".a"));
+			lib.system("ar cru "+swapslash(LIBDIR+"/"+TNAME+".a "+liblist));
+			lib.system("ranlib "+swapslash(LIBDIR+"/"+TNAME+".a"));
 		}
 	}
 }
@@ -202,8 +202,8 @@ function build_clean(TNAME, OBJECTS) {
 		file.unlink(swapslash(OBJDIR+"/"+INTDIR+"/static/"+ONAME[0]+".obj"));
 	}
 	if (ostype=='windows') {
-		system("del *.idb *.def *~ 2>nul");
+		lib.system("del *.idb *.def *~ 2>nul");
 	} else if (ostype=='posix') {
-		system("rm -f *.idb *.def *~");
+		lib.system("rm -f *.idb *.def *~");
 	}
 }
