@@ -155,7 +155,7 @@ static int dns_lookup(nsp_state *N, obj_t *tobj, const char *domain)
 	obj_t *stobj;
 
 	/* Query the nameserver to retrieve mx records for the given domain. */
-	n = res_search(domain, C_ANY, T_ANY, (u_char *)&answer, sizeof(answer));
+	n = res_search(domain, C_ANY, T_ANY, (uchar *)&answer, sizeof(answer));
 	if (n < 0) {
 		if (N->debug) n_warn(N, __FN__, "res_search failed");
 		return -1;
@@ -167,9 +167,9 @@ static int dns_lookup(nsp_state *N, obj_t *tobj, const char *domain)
 	hp = (HEADER *)&answer;
 	qdcount = ntohs((u_short)hp->qdcount);
 	ancount = ntohs((u_short)hp->ancount);
-	msg = (u_char *)&answer;
-	eom = (u_char *)&answer + n;
-	cp = (u_char *)&answer + HFIXEDSZ;
+	msg = (uchar *)&answer;
+	eom = (uchar *)&answer + n;
+	cp = (uchar *)&answer + HFIXEDSZ;
 	while (qdcount-- > 0 && cp < eom) {
 		n = dn_skipname(cp, eom);
 		if (n < 0) return -1;

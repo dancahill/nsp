@@ -61,7 +61,7 @@ typedef struct DBF_CONN {
 	unsigned long recbufoffset;
 } DBF_CONN;
 
-static short get_short(u_char *cp)
+static short get_short(uchar *cp)
 {
 	short ret;
 
@@ -70,7 +70,7 @@ static short get_short(u_char *cp)
 	return ret;
 }
 
-static long get_long(u_char *cp)
+static long get_long(uchar *cp)
 {
 	long ret;
 
@@ -81,13 +81,13 @@ static long get_long(u_char *cp)
 	return ret;
 }
 /*
-static void put_short(u_char *cp, short sval)
+static void put_short(uchar *cp, short sval)
 {
 	cp[0] = sval & 0xff;
 	cp[1] = (sval >> 8) & 0xff;
 }
 
-static void put_long(u_char *cp, long lval)
+static void put_long(uchar *cp, long lval)
 {
 	cp[0] = lval & 0xff;
 	cp[1] = (lval >> 8) & 0xff;
