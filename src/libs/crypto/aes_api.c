@@ -448,7 +448,7 @@ int cipherUpdateRounds(cipherInstance *cipher, keyInstance *key,
 
 /*
     NESLA NullLogic Embedded Scripting Language
-    Copyright (C) 2007-2020 Dan Cahill
+    Copyright (C) 2007-2021 Dan Cahill
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
