@@ -945,13 +945,13 @@ nsp_state *nsp_newstate()
 	lobj->val->attr |= NST_AUTOSORT | NST_HIDDEN;
 
 	cobj = nsp_settable(new_N, lobj, "debug");
-	cobj->val->attr |= NST_HIDDEN;
+	cobj->val->attr |= NST_AUTOSORT | NST_HIDDEN;
 	for (i = 0; list_debug[i].fn_name != NULL; i++) {
 		nsp_setcfunc(new_N, cobj, list_debug[i].fn_name, list_debug[i].fn_ptr);
 	}
 
 	cobj = nsp_settable(new_N, lobj, "coroutine");
-	cobj->val->attr |= NST_HIDDEN;
+	cobj->val->attr |= NST_AUTOSORT | NST_HIDDEN;
 	for (i = 0; list_coroutine[i].fn_name != NULL; i++) {
 		nsp_setcfunc(new_N, cobj, list_coroutine[i].fn_name, list_coroutine[i].fn_ptr);
 	}
@@ -980,27 +980,27 @@ nsp_state *nsp_newstate()
 #endif
 
 	cobj = nsp_settable(new_N, lobj, "file");
-	cobj->val->attr |= NST_HIDDEN;
+	cobj->val->attr |= NST_AUTOSORT | NST_HIDDEN;
 	for (i = 0; list_file[i].fn_name != NULL; i++) {
 		nsp_setcfunc(new_N, cobj, list_file[i].fn_name, list_file[i].fn_ptr);
 	}
 	cobj = nsp_settable(new_N, lobj, "io");
-	cobj->val->attr |= NST_HIDDEN;
+	cobj->val->attr |= NST_AUTOSORT | NST_HIDDEN;
 	for (i = 0; list_io[i].fn_name != NULL; i++) {
 		nsp_setcfunc(new_N, cobj, list_io[i].fn_name, list_io[i].fn_ptr);
 	}
 	cobj = nsp_settable(new_N, lobj, "math");
-	cobj->val->attr |= NST_HIDDEN;
+	cobj->val->attr |= NST_AUTOSORT | NST_HIDDEN;
 	for (i = 0; list_math[i].fn_name != NULL; i++) {
 		nsp_setcfunc(new_N, cobj, list_math[i].fn_name, list_math[i].fn_ptr);
 	}
 	cobj = nsp_settable(new_N, lobj, "string");
-	cobj->val->attr |= NST_HIDDEN;
+	cobj->val->attr |= NST_AUTOSORT | NST_HIDDEN;
 	for (i = 0; list_string[i].fn_name != NULL; i++) {
 		nsp_setcfunc(new_N, cobj, list_string[i].fn_name, list_string[i].fn_ptr);
 	}
 	cobj = nsp_settable(new_N, lobj, "table");
-	cobj->val->attr |= NST_HIDDEN;
+	cobj->val->attr |= NST_AUTOSORT | NST_HIDDEN;
 	for (i = 0; list_table[i].fn_name != NULL; i++) {
 		nsp_setcfunc(new_N, cobj, list_table[i].fn_name, list_table[i].fn_ptr);
 	}
@@ -1010,7 +1010,7 @@ nsp_state *nsp_newstate()
 		nsp_setcfunc(new_N, cobj, list_text[i].fn_name, list_text[i].fn_ptr);
 	}
 	cobj = nsp_settable(new_N, lobj, "time");
-	cobj->val->attr |= NST_HIDDEN;
+	cobj->val->attr |= NST_AUTOSORT | NST_HIDDEN;
 	for (i = 0; list_time[i].fn_name != NULL; i++) {
 		nsp_setcfunc(new_N, cobj, list_time[i].fn_name, list_time[i].fn_ptr);
 	}
