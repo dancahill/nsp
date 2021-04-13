@@ -220,7 +220,7 @@ NSP_FUNCTION(libnsp_net_tnef_debug)
 				n_warn(N, __FN__, "... = %d", readi4((&p[i])));
 				i += 4; bl -= 4;
 				if (pattr_type == 0x1F) {
-					if (pattr_id == PidTagAttachExtension || pattr_id == PidTagAttachLongFilename || PidTagAttachMimeTag) {
+					if (pattr_id == PidTagAttachExtension || pattr_id == PidTagAttachLongFilename || pattr_id == PidTagAttachMimeTag) {
 						// * Length * /
 						n_warn(N, __FN__, "check");
 						if (bl < 4) {

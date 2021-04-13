@@ -55,7 +55,9 @@
 #else
 #  define _OS_ "unknown"
 #endif
-#if defined(__GNUC__)
+#if defined(__clang__)
+#  define _COMPILER_ "clang"
+#elif defined(__GNUC__)
 #  if defined(__CYGWIN__)
 #    undef _OS_
 #    define _OS_ "Windows"

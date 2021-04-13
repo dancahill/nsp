@@ -178,7 +178,9 @@ NSP_CLASSMETHOD(libnsp_net_smtp_client_send)
 		rc = tcp_fgets(N, &sock, tmpbuf, sizeof(tmpbuf) - 1);
 	} while (rc > 0 && tmpbuf[3] != ' ' && tmpbuf[3] != '\0');
 	if (nc_strncmp(tmpbuf, "220", 3) != 0) goto err;
+#ifdef HAVE_TLS
 helo:
+#endif
 	tcp_fprintf(N, &sock, "EHLO <%s>\r\n", sock.LocalAddr);
 	do {
 		rc = tcp_fgets(N, &sock, tmpbuf, sizeof(tmpbuf) - 1);

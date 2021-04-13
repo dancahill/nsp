@@ -7,6 +7,11 @@ function expect(msg, a, b) {
 }
 
 function testsub(title, l, c, showfail) {
+	if (_ostype_.startswith("MacOS") && (title=="DNS" || title=="LDAP")) {
+		printf("autofailing %s on %s\r\n", title, _ostype_);
+		expect("testing "+title, true, false);
+		return 0;
+	}
 	lib.file.unlink("conftest.c");
 	lib.file.unlink("conftest.exe");
 	lib.file.unlink("conftest.out");
@@ -45,7 +50,8 @@ function dotests() {
 	//if (_ARGS[3]!=null) global ostype=_ARGS[3];
 	if (_ARGS[3]!=null) global cctype=_ARGS[3];
 	if (_ARGS[4]!=null) global ostype=_ARGS[4];
-	// print("\t[", cctype, "][", ostype, "]\n");
+	//print("\t[", cctype, "][", ostype, "]\n");
+	//printf("[_ostype_=%s]\r\n", _ostype_);
 	if (ostype==null) {
 		if (_ENV['OS']=='Windows_NT') {
 			if (_ENV['MAKE_MODE']=='unix') {

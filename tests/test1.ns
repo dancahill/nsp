@@ -1,4 +1,12 @@
 #!/usr/bin/nsp
 include("testlib1.ns");
+lib.dl.path = { "./lib/shared" };
+try {
+	foreach (l in { "base", "crypto", "data", "net" }) {
+		if (!lib.dl.loaded[l]) lib.load(l);
+	}
+} catch (ex) {
+	printf("Exception: %s\r\n", ex.description);
+}
 tests = new testlib1();
 tests.runtests();

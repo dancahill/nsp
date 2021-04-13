@@ -471,8 +471,11 @@ NSP_FUNCTION(nl_coroutine)
 #ifdef HAVE_DL
 
  //#include "libdl.h"
-#ifdef WIN32
+#if defined(WIN32)
 #define LIBEXT "dll"
+#elif defined(__APPLE__)
+#include <dlfcn.h>
+#define LIBEXT "bundle"
 #else
 #include <dlfcn.h>
 #define LIBEXT "so"
@@ -480,7 +483,7 @@ NSP_FUNCTION(nl_coroutine)
 
 static void *lib_open(const char *file)
 {
-#ifdef WIN32
+#if defined WIN32
 	return LoadLibraryA(file);
 #else
 	return dlopen(file, RTLD_NOW);

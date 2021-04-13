@@ -45,6 +45,12 @@ function newer2(OBJECTS, _LINKAGE_, TNAME) {
 		} else {
 			s3=lib.file.stat(swapslash(LIBDIR+"/"+TNAME+".lib"));
 		}
+	} else if (_ostype_.startswith("MacOS")) {
+		if (_LINKAGE_=='shared') {
+			s3=lib.file.stat(swapslash(LIBDIR+"/shared/"+TNAME+".bundle"));
+		} else {
+			s3=lib.file.stat(swapslash(LIBDIR+"/"+TNAME+".a"));
+		}
 	} else {
 		if (_LINKAGE_=='shared') {
 			s3=lib.file.stat(swapslash(LIBDIR+"/shared/"+TNAME+".so"));
@@ -180,7 +186,11 @@ function build_lib(CC, TNAME, OBJECTS, OTYPE, INTDIR) {
 				if (config.have_openssl==true) liblist+=" -lcrypto -lssl";
 				liblist+=" -lssh2";
 			}
-			lib.system("gcc -shared -o "+swapslash(LIBDIR+"/shared/"+TNAME+".so "+liblist));
+			if (_ostype_.startswith("MacOS")) {
+				lib.system("cc -flat_namespace -bundle -undefined suppress -o "+swapslash(LIBDIR+"/shared/"+TNAME+".bundle "+liblist));
+			} else {
+				lib.system("gcc -shared -o "+swapslash(LIBDIR+"/shared/"+TNAME+".so "+liblist));
+			}
 		} else {
 			lib.system("ar cru "+swapslash(LIBDIR+"/"+TNAME+".a "+liblist));
 			lib.system("ranlib "+swapslash(LIBDIR+"/"+TNAME+".a"));
