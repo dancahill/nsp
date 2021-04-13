@@ -117,7 +117,7 @@ namespace testlib1.tests {
 	/*
 		local s_table = {
 			toUpper = function (s) {
-				return string.toupper(s);
+				return lib.string.toupper(s);
 			};
 			zz = function (s) {
 				return "zz";
@@ -142,17 +142,17 @@ namespace testlib1.tests {
 	};
 	// b64.ns
 	function b64() {
-		if (typeof(base64)!='table') {
+		if (typeof(lib.text.base64)!='table') {
 			print("SKIPPING BASE64 TESTS\n");
 			return;
 		}
 		local bx = { p="stuff:null", e="c3R1ZmY6bnVsbA==" };
 		local by = { p="null:stuff", e="bnVsbDpzdHVmZg==" };
-		expect("base64.decode(bx.e)", "stuff:null",       base64.decode(bx.e));
-		expect("base64.decode(by.e)", "null:stuff",       base64.decode(by.e));
-		expect("base64.encode(bx.p)", "c3R1ZmY6bnVsbA==", base64.encode(bx.p));
-		expect("base64.encode(by.p)", "bnVsbDpzdHVmZg==", base64.encode(by.p));
-	//	print("\n", base64.decode("UTogV2hhdCdzIHRoZSBkaWZmZXJlbmNlIGJldHdlZW4gYSBjb2NrZXIgc3BhbmllbCBhbmQgYSBwaXRidWxsIGh1bXBpbmcgeW91ciBsZWc/CkE6IFlvdSBsZXQgdGhlIHBpdGJ1bGwgZmluaXNoLg=="), "\n");
+		expect("lib.text.base64.decode(bx.e)", "stuff:null",       lib.text.base64.decode(bx.e));
+		expect("lib.text.base64.decode(by.e)", "null:stuff",       lib.text.base64.decode(by.e));
+		expect("lib.text.base64.encode(bx.p)", "c3R1ZmY6bnVsbA==", lib.text.base64.encode(bx.p));
+		expect("lib.text.base64.encode(by.p)", "bnVsbDpzdHVmZg==", lib.text.base64.encode(by.p));
+	//	print("\n", lib.text.base64.decode("UTogV2hhdCdzIHRoZSBkaWZmZXJlbmNlIGJldHdlZW4gYSBjb2NrZXIgc3BhbmllbCBhbmQgYSBwaXRidWxsIGh1bXBpbmcgeW91ciBsZWc/CkE6IFlvdSBsZXQgdGhlIHBpdGJ1bGwgZmluaXNoLg=="), "\n");
 		return;
 	};
 	// cmp.ns
@@ -248,114 +248,114 @@ namespace testlib1.tests {
 	//	local key="hex:E76B2413958B00E1930000000000000000000000000000000000000000000000";
 		local key="hex:40507649a9581e95d503367fe3c90fa1439122d5a55a2218c97b5994b71df243";
 
-		if (typeof(crypto)!='table') {
+		if (typeof(lib.crypto)!='table') {
 			if (!quiet) print("SKIPPING CRYPTO TESTS\n");
 			return;
 		}
 		filename=_filepath+'/'+_filename;
-		filestat=file.stat(filename);
-		if (typeof(file.md5)!='function') {
-			print("file.md5() missing\n");
+		filestat=lib.file.stat(filename);
+		if (typeof(lib.file.md5)!='function') {
+			print("lib.file.md5() missing\n");
 		} else {
-			expect("string.md5", "a9a47b7d0802b313924900ad1baa6eb0", lib.string.md5("string.md5"));
+			expect("lib.string.md5", "5fce853b116dcf02c6151d4c10a49d6a", lib.string.md5("lib.string.md5"));
 	/*
 			if (typeof(filestat)!='table') {
 				print("test file ", filename, " does not exist.\n");
 			} else {
-				print(file.md5(filename), " *",filename,"\n");
+				print(lib.file.md5(filename), " *",filename,"\n");
 				lib.system("md5sum \""+filename+"\"");
 			}
 	*/
 		}
 		if (typeof(lib.file.sha1)!='function') {
-			print("file.sha1() missing\n");
+			print("lib.file.sha1() missing\n");
 		} else {
-			expect("string.sha1", "2973a33e464d6b792720e9242e8b521eaf37e19a", lib.string.sha1("string.sha1"));
+			expect("lib.string.sha1", "42c2daecd60c6955ebde90314469fec9f1ad60ae", lib.string.sha1("lib.string.sha1"));
 	/*
 			if (typeof(filestat)!='table') {
 				print("test file ", filename, " does not exist.\n");
 			} else {
-				print(file.sha1(filename), " *",filename,"\n");
+				print(lib.file.sha1(filename), " *",filename,"\n");
 				lib.system("sha1sum \""+filename+"\"");
 			}
 	*/
 		}
 		if (_ostype_=="DOS/turboc") return;
-		if (typeof(crypto.aes_ecb_encrypt)=='function') {
-			x="crypto.aes_ecb_encrypt";
-			x=base64.encode(crypto.aes_ecb_encrypt(x, key));
-			x=crypto.aes_ecb_decrypt(base64.decode(x), key);
-			expect("crypto.aes_ecb_encrypt", "crypto.aes_ecb_encrypt", x);
+		if (typeof(lib.crypto.aes_ecb_encrypt)=='function') {
+			x="lib.crypto.aes_ecb_encrypt";
+			x=lib.text.base64.encode(lib.crypto.aes_ecb_encrypt(x, key));
+			x=lib.crypto.aes_ecb_decrypt(lib.text.base64.decode(x), key);
+			expect("lib.crypto.aes_ecb_encrypt", "lib.crypto.aes_ecb_encrypt", x);
 		}
-		if (typeof(crypto.aes_cbc_encrypt)=='function') {
+		if (typeof(lib.crypto.aes_cbc_encrypt)=='function') {
 			/* an IV (Initialization Vector) is 16 bytes.
 			 * that means a 32 byte string of hex.  no more and no less.
 			 */
 			iv='a9a47b7d0802b313924900ad1baa6eb0';
 
-			x="crypto.aes_cbc_encrypt";
-			x=base64.encode(crypto.aes_cbc_encrypt(x, key));
+			x="lib.crypto.aes_cbc_encrypt";
+			x=lib.text.base64.encode(lib.crypto.aes_cbc_encrypt(x, key));
 	//		print(x,"\n");
-			x=crypto.aes_cbc_decrypt(base64.decode(x), key);
-			expect("crypto.aes_cbc_encrypt", "crypto.aes_cbc_encrypt", x);
+			x=lib.crypto.aes_cbc_decrypt(lib.text.base64.decode(x), key);
+			expect("lib.crypto.aes_cbc_encrypt", "lib.crypto.aes_cbc_encrypt", x);
 
-			x="crypto.aes_cbc_encrypt"; // same as ^^^^^^
-			x=base64.encode(crypto.aes_cbc_encrypt(x, key), 128, "");
+			x="lib.crypto.aes_cbc_encrypt"; // same as ^^^^^^
+			x=lib.text.base64.encode(lib.crypto.aes_cbc_encrypt(x, key), 128, "");
 	//		print(x,"\n");
-			x=crypto.aes_cbc_decrypt(base64.decode(x), key, 128, "");
-			expect("crypto.aes_cbc_encrypt", "crypto.aes_cbc_encrypt", x);
+			x=lib.crypto.aes_cbc_decrypt(lib.text.base64.decode(x), key, 128, "");
+			expect("lib.crypto.aes_cbc_encrypt", "lib.crypto.aes_cbc_encrypt", x);
 
 			/* extra tests */
-			x="crypto.aes_cbc_encrypt";
-			x=base64.encode(crypto.aes_cbc_encrypt(x, key, 128, iv));
+			x="lib.crypto.aes_cbc_encrypt";
+			x=lib.text.base64.encode(lib.crypto.aes_cbc_encrypt(x, key, 128, iv));
 	//		print(x,"\n");
-			x=crypto.aes_cbc_decrypt(base64.decode(x), key, 128, iv);
-			expect("crypto.aes_cbc_encrypt", "crypto.aes_cbc_encrypt", x);
+			x=lib.crypto.aes_cbc_decrypt(lib.text.base64.decode(x), key, 128, iv);
+			expect("lib.crypto.aes_cbc_encrypt", "lib.crypto.aes_cbc_encrypt", x);
 
-			x="crypto.aes_cbc_encrypt";
-			x=base64.encode(crypto.aes_cbc_encrypt(x, key, 192, iv));
+			x="lib.crypto.aes_cbc_encrypt";
+			x=lib.text.base64.encode(lib.crypto.aes_cbc_encrypt(x, key, 192, iv));
 	//		print(x,"\n");
-			x=crypto.aes_cbc_decrypt(base64.decode(x), key, 192, iv);
-			expect("crypto.aes_cbc_encrypt", "crypto.aes_cbc_encrypt", x);
+			x=lib.crypto.aes_cbc_decrypt(lib.text.base64.decode(x), key, 192, iv);
+			expect("lib.crypto.aes_cbc_encrypt", "lib.crypto.aes_cbc_encrypt", x);
 
-			x="crypto.aes_cbc_encrypt";
-			x=base64.encode(crypto.aes_cbc_encrypt(x, key, 256, iv));
+			x="lib.crypto.aes_cbc_encrypt";
+			x=lib.text.base64.encode(lib.crypto.aes_cbc_encrypt(x, key, 256, iv));
 	//		print(x,"\n");
-			x=crypto.aes_cbc_decrypt(base64.decode(x), key, 256, iv);
-			expect("crypto.aes_cbc_encrypt", "crypto.aes_cbc_encrypt", x);
+			x=lib.crypto.aes_cbc_decrypt(lib.text.base64.decode(x), key, 256, iv);
+			expect("lib.crypto.aes_cbc_encrypt", "lib.crypto.aes_cbc_encrypt", x);
 
 		}
-		if (typeof(crypto.aes_ecb_encrypt)!='function') {
-			print("crypto.aes_ecb_encrypt() missing\n");
+		if (typeof(lib.crypto.aes_ecb_encrypt)!='function') {
+			print("lib.crypto.aes_ecb_encrypt() missing\n");
 		} else {
 			if (typeof(filestat)!='table') {
 				print("test file ", filename, " does not exist.\n");
 			} else {
-				x=file.readall(filename);
-				mx=string.md5(x);
-	//			print("x=[",mx=string.md5(x),"]\n");
-				y=crypto.aes_ecb_encrypt(x, key);
-	//			print("y=[",string.md5(y),"]\n");
-				z=crypto.aes_ecb_decrypt(y, key);
-				mz=string.md5(z);
-	//			print("z=[",mz=string.md5(z),"]\n");
+				x=lib.file.readall(filename);
+				mx=lib.string.md5(x);
+	//			print("x=[",mx=lib.string.md5(x),"]\n");
+				y=lib.crypto.aes_ecb_encrypt(x, key);
+	//			print("y=[",lib.string.md5(y),"]\n");
+				z=lib.crypto.aes_ecb_decrypt(y, key);
+				mz=lib.string.md5(z);
+	//			print("z=[",mz=lib.string.md5(z),"]\n");
 				expect(mx, mz, mx);
 			}
 		}
-		if (typeof(crypto.aes_cbc_encrypt)!='function') {
-			print("crypto.aes_cbc_encrypt() missing\n");
+		if (typeof(lib.crypto.aes_cbc_encrypt)!='function') {
+			print("lib.crypto.aes_cbc_encrypt() missing\n");
 		} else {
 			if (typeof(filestat)!='table') {
 				print("test file ", filename, " does not exist.\n");
 			} else {
-				x=file.readall(filename);
-				mx=string.md5(x);
-	//			print("x=[",mx=string.md5(x),"]\n");
-				y=crypto.aes_cbc_encrypt(x, key);
-	//			print("y=[",string.md5(y),"]\n");
-				z=crypto.aes_cbc_decrypt(y, key);
-				mz=string.md5(z);
-	//			print("z=[",mz=string.md5(z),"]\n");
+				x=lib.file.readall(filename);
+				mx=lib.string.md5(x);
+	//			print("x=[",mx=lib.string.md5(x),"]\n");
+				y=lib.crypto.aes_cbc_encrypt(x, key);
+	//			print("y=[",lib.string.md5(y),"]\n");
+				z=lib.crypto.aes_cbc_decrypt(y, key);
+				mz=lib.string.md5(z);
+	//			print("z=[",mz=lib.string.md5(z),"]\n");
 				expect(mx, mz, mx);
 			}
 		}
@@ -473,8 +473,8 @@ namespace testlib1.tests {
 			local t=typeof(_GLOBALS[n]);
 			if (t=='function') continue;
 			if (t=='table') continue;
-			//print("        ",string.sub(t+sp,0,10),string.sub(n+sp,0,13),_GLOBALS[n],"\n");
-			//print("        ",string.sub(t+sp,0,10),string.sub(n+sp,0,13),ival(_GLOBALS,i),"\n");
+			//print("        ",lib.string.sub(t+sp,0,10),lib.string.sub(n+sp,0,13),_GLOBALS[n],"\n");
+			//print("        ",lib.string.sub(t+sp,0,10),lib.string.sub(n+sp,0,13),ival(_GLOBALS,i),"\n");
 		}
 		/* this will list all available string functions stored in table 'string' */
 	/*
@@ -482,7 +482,7 @@ namespace testlib1.tests {
 			local n=lib.table.iname(string, i);
 			local t=typeof(string[n]);
 			if (t=='null') break;
-			print("        ", i, "\t", t, "\tstring.", n, "\n");
+			print("        ", i, "\t", t, "\tlib.string.", n, "\n");
 		}
 	*/
 		return;
@@ -557,7 +557,7 @@ namespace testlib1.tests {
 			//if (t=='table') continue;
 			//vv=ival(_GLOBALS, i);
 			vv=_GLOBALS[n];
-			//printf("\t%d %d\t%s%s%s\n", sizeof(_GLOBALS), i, string.sub(t+sp,0,10), string.sub(n+sp,0,13), v);
+			//printf("\t%d %d\t%s%s%s\n", sizeof(_GLOBALS), i, lib.string.sub(t+sp,0,10), lib.string.sub(n+sp,0,13), v);
 			//io.flush();
 		}
 
@@ -666,7 +666,7 @@ namespace testlib1.tests {
 				for (i=0;i<sizeof(obj);i++) {
 					local n=lib.table.iname(obj, i);
 					local t=typeof(obj[n]);
-					print("        ",string.sub(t+sp,0,10),string.sub(n+sp,0,13),obj[n],"\n");
+					print("        ",lib.string.sub(t+sp,0,10),lib.string.sub(n+sp,0,13),obj[n],"\n");
 				}
 				return;
 			};
@@ -713,28 +713,28 @@ namespace testlib1.tests {
 	// regex.ns
 	function regex() {
 		if (_ostype_=="DOS/turboc") return;
-		if (typeof(regex)!='table') {
+		if (typeof(lib.text.regex)!='table') {
 			print("SKIPPING REGEX TESTS\n");
 			return;
 		}
 	#	print("REGEX TEST\n\n");
 	/*
-		x=regex.match("\\((.*), (.*)\\)", "(a, b)");
+		x=lib.text.regex.match("\\((.*), (.*)\\)", "(a, b)");
 		print("match x=",x,"\n");
-		x=regex.match("\\((.*), (.*)\\)", "(a  b)");
+		x=lib.text.regex.match("\\((.*), (.*)\\)", "(a  b)");
 		print("match x=",x,"\n");
 
 	//	\((.*), (.*)\)	(a, b)	y	(\2, \1)	(b, a)
-		x=regex.replace("\\((.*), (.*)\\)", "(\\2, \\1)", "(a, b)");
+		x=lib.text.regex.replace("\\((.*), (.*)\\)", "(\\2, \\1)", "(a, b)");
 		print("replace x=",x,"\n");
 
-		x=regex.replace("(bc+d$|ef*g.|h?i(j|k))", "&-\\1-\\2", "reffgz");
+		x=lib.text.regex.replace("(bc+d$|ef*g.|h?i(j|k))", "&-\\1-\\2", "reffgz");
 		print("replace x=",x,"\n");
 
-		x=regex.replace("(.*) is (.*)", "[&]\\1 was \\2", "This is a test.");
+		x=lib.text.regex.replace("(.*) is (.*)", "[&]\\1 was \\2", "This is a test.");
 		print("replace x=",x,"\n");
 	*/
-	//	p=file.readall(_filepath+'/_regex.txt');
+	//	p=lib.file.readall(_filepath+'/_regex.txt');
 		p={
 		//	char *re, *str, *ans, *src, *dst;
 			@"abc	abc	y	&	abc";
@@ -868,7 +868,7 @@ namespace testlib1.tests {
 
 
 //		if (typeof(p)!='string') { print("can't find _regex.txt\n"); return; }
-//		p=string.split(p, '\n');
+//		p=lib.string.split(p, '\n');
 		for (i=0;p[i]!=null;i++) {
 			if (sizeof(p[i])==0) break;
 		//	char *re, *str, *ans, *src, *dst;
@@ -888,8 +888,8 @@ namespace testlib1.tests {
 
 		//	if (i<100) { p[i]=null; continue; }
 		//	if (i==95) continue; // test 95 seems broken
-//			if (string.sub(p[i], sizeof(p[i])-1)=='\r') {
-//				p[i]=string.sub(p[i], 0, sizeof(p[i])-1);
+//			if (lib.string.sub(p[i], sizeof(p[i])-1)=='\r') {
+//				p[i]=lib.string.sub(p[i], 0, sizeof(p[i])-1);
 //			}
 /*
 			if (ans=='c') {
@@ -897,12 +897,12 @@ namespace testlib1.tests {
 				continue;
 			} else if (ans=='n') {
 				// n should fail to exec?
-				x=regex.match(re, str);
+				x=lib.text.regex.match(re, str);
 				if (dst=='-') want=0; else want=dst;
-				expect("regex.match   "+i.tostring(), want,       x);
+				expect("lib.text.regex.match   "+i.tostring(), want,       x);
 			} else if (ans=='y') {
-				x=regex.replace(re, src, str);
-				expect("regex.replace "+i.tostring(), dst,       x);
+				x=lib.text.regex.replace(re, src, str);
+				expect("lib.text.regex.replace "+i.tostring(), dst,       x);
 			} else {
 				printf("burp %d [%s]\n", i, ans);
 			}
@@ -911,21 +911,21 @@ namespace testlib1.tests {
 				// c should fail to compile?
 				fail=false;
 				try {
-					x=regex.match(str, re);
+					x=lib.text.regex.match(str, re);
 				} catch (ex) {
 					fail=true;
 				}
 				//printf("[%s]should fail .. %s\r\n", re, fail);
 				expect(re+" should fail",  "true", fail);
 			} else if (ans=='n') {
-				x=regex.match(str, re);
+				x=lib.text.regex.match(str, re);
 				expect(re,  "0", x);
 				//printf("n[%s]\r\n", p[i]);
 			} else {
-				x=regex.match(str, re);
+				x=lib.text.regex.match(str, re);
 				expect(re,  "1", x);
 				//@"\((.*), (.*)\)	(a, b)	y	(\2, \1)	(b, a)";
-				x=regex.replace(str, re, src);
+				x=lib.text.regex.replace(str, re, src);
 				expect(re,  dst, x);
 			}
 		}
@@ -934,17 +934,17 @@ namespace testlib1.tests {
 	};
 	// rot13.ns
 	function rot13() {
-		if (typeof(rot13)!='function') {
+		if (typeof(lib.text.rot13)!='function') {
 			print("SKIPPING ROT13 TESTS\n");
 			return;
 		}
 		local rx = { p="123ABCKLMNOPXYZ", e="123NOPXYZABCKLM" };
 		local ry = { p="123abcklmnopxyz", e="123nopxyzabcklm" };
-		expect("rot13(rx.e)", "123ABCKLMNOPXYZ", rot13(rx.e));
-		expect("rot13(rx.p)", "123NOPXYZABCKLM", rot13(rx.p));
-		expect("rot13(ry.e)", "123abcklmnopxyz", rot13(ry.e));
-		expect("rot13(ry.p)", "123nopxyzabcklm", rot13(ry.p));
-	//	print(rot13("\nNakvrgl, a.: Gur svefg gvzr lbh pna'g qb vg n frpbaq gvzr.\nCnavp, a.  : Gur frpbaq gvzr lbh pna'g qb vg gur svefg gvzr.\n"));
+		expect("lib.text.rot13(rx.e)", "123ABCKLMNOPXYZ", lib.text.rot13(rx.e));
+		expect("lib.text.rot13(rx.p)", "123NOPXYZABCKLM", lib.text.rot13(rx.p));
+		expect("lib.text.rot13(ry.e)", "123abcklmnopxyz", lib.text.rot13(ry.e));
+		expect("lib.text.rot13(ry.p)", "123nopxyzabcklm", lib.text.rot13(ry.p));
+	//	print(lib.text.rot13("\nNakvrgl, a.: Gur svefg gvzr lbh pna'g qb vg n frpbaq gvzr.\nCnavp, a.  : Gur frpbaq gvzr lbh pna'g qb vg gur svefg gvzr.\n"));
 		return;
 	};
 	// scope.ns
@@ -1304,12 +1304,12 @@ namespace testlib1.tests {
 			}
 			o=sock.write("GET /nsp/version.php HTTP/1.0\r\n\r\n");
 			i=sock.gets();
-			x=string.str(i, " ");
-			p=string.sub(i, 0, sizeof(i)-sizeof(x));
-			c=string.sub(x, 1, sizeof(x));
-			x=string.str(c, " ");
-			c=string.sub(c, 0, sizeof(c)-sizeof(x));
-			x=string.sub(x, 1, sizeof(x));
+			x=lib.string.str(i, " ");
+			p=lib.string.sub(i, 0, sizeof(i)-sizeof(x));
+			c=lib.string.sub(x, 1, sizeof(x));
+			x=lib.string.str(c, " ");
+			c=lib.string.sub(c, 0, sizeof(c)-sizeof(x));
+			x=lib.string.sub(x, 1, sizeof(x));
 			printf("[%s][%s][%s]\n", p, c, x);
 			while (1) {
 				i=sock.gets();
@@ -1340,14 +1340,14 @@ namespace testlib1.tests {
 				i=sock.gets();
 				if (typeof(i)!='string') break;
 				if (i=="") break;
-				i=string.join(string.split(i, "<"), "&lt;");
+				i=lib.string.join(lib.string.split(i, "<"), "&lt;");
 			}
 			io.flush();
 			while (1) {
 				i=sock.read();
 				if (typeof(i)!='string') break;
 				if (sizeof(i)==0) break;
-				i=string.join(string.split(i, "<"), "&lt;");
+				i=lib.string.join(lib.string.split(i, "<"), "&lt;");
 			}
 			//print(serialize(sock.info(sock)));
 			sock.close();
@@ -1375,8 +1375,8 @@ namespace testlib1.tests {
 			while (1) {
 				i=net.tcp.gets(sock);
 				print("read: ", i, "\n");
-				if (string.sub(i, 0, 4)=="211 ") break;
-				if (string.cmp(i, "211")==0) break;
+				if (lib.string.sub(i, 0, 4)=="211 ") break;
+				if (lib.string.cmp(i, "211")==0) break;
 			}
 			o=net.tcp.write(sock, "PWD\r\n");
 			i=net.tcp.gets(sock);
@@ -1387,9 +1387,9 @@ namespace testlib1.tests {
 			o=net.tcp.write(sock, "PASV\r\n");
 			i=net.tcp.gets(sock);
 			print("read: ", i, "\n");
-			i=string.split(i, "(");
-			y=string.split(i[1], ")");
-			addr=string.split(y[0], ",");
+			i=lib.string.split(i, "(");
+			y=lib.string.split(i[1], ")");
+			addr=lib.string.split(y[0], ",");
 			if (sizeof(addr)!=6) {
 				print("couldn't parse the host address\n");
 				print(serialize(addr));
@@ -1404,8 +1404,8 @@ namespace testlib1.tests {
 			while (1) {
 				i=net.tcp.gets(sock);
 				print("read: ", i, "\n");
-				if (string.sub(i, 0, 4)=="226 ") break;
-				if (string.cmp(i, "226")==0) break;
+				if (lib.string.sub(i, 0, 4)=="226 ") break;
+				if (lib.string.cmp(i, "226")==0) break;
 			}
 			o=net.tcp.write(sock, "REST 0\r\n");
 			i=net.tcp.gets(sock);
@@ -1431,7 +1431,7 @@ namespace testlib1.tests {
 			o=net.tcp.write(sock, "pass secret\r\n");
 			i=net.tcp.gets(sock);
 			print("read: ", i, "\n");
-			if (string.sub(i, 0, 3)=="+OK") {
+			if (lib.string.sub(i, 0, 3)=="+OK") {
 				o=net.tcp.write(sock, "list\r\n");
 				i=net.tcp.gets(sock);
 				print("read: ", i, "\n");
@@ -1482,7 +1482,7 @@ namespace testlib1.tests {
 			if (!quiet) print("SKIPPING TCP TESTS\n");
 			return;
 		}
-		if (!quiet) print("        runtime = ", lib.string.tostring(runtime(), 3), " seconds\n");
+		if (!quiet) print("        runtime = ", lib.string.tostring(lib.debug.runtime(), 3), " seconds\n");
 		if (!quiet) if (lib.net.tcp.have_tls) print("        lib.net.tcp.tls_type = '",lib.net.tcp.tls_type,"'\n");
 		site_url = "http://nulllogic.ca/nsp/version.php";
 		if (!quiet) print("        sucking "+site_url+"\n");
@@ -1504,15 +1504,15 @@ namespace testlib1.tests {
 	//	print("[[[", ht.head, "]]]\n");
 	//	print("[[[", ht.body, "]]]\n");
 	//	print(serialize(ht));
-		if (typeof(net.tcp.socket)=='function') {
-	//		print("        runtime = ", string.tostring(runtime(), 3), " seconds\n");
+		if (typeof(lib.net.tcp.socket)=='function') {
+	//		print("        runtime = ", lib.string.tostring(lib.debug.runtime(), 3), " seconds\n");
 	//		test_tcpserv();
 			test_http();
-			if (net.tcp.have_tls) test_https();
+			if (lib.net.tcp.have_tls) test_https();
 	//		test_ftp();
 	//		test_pop3();
 	//		test_smtp();
-			if (!quiet) print("        runtime = ", string.tostring(runtime(), 3), " seconds\n");
+			if (!quiet) print("        runtime = ", lib.string.tostring(lib.debug.runtime(), 3), " seconds\n");
 		}
 		return;
 	};
@@ -1584,7 +1584,7 @@ namespace testlib1.tests {
 			//print("        finally...\n");
 		}
 		try {
-			x=string.split();
+			x=lib.string.split();
 		} catch (e) {
 			if (!quiet) printf("        Exception: \"%s\"\n", e.description);
 		}
