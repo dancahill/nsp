@@ -49,27 +49,27 @@ tested on:
 
 function test(title, code) {
 	print("\e[01;37;40m",title,"\e[00m\t");
-	oldtime=runtime();
-	system(code);
-	t=runtime()-oldtime;
+	oldtime=lib.debug.runtime();
+	lib.system(code);
+	t=lib.debug.runtime()-oldtime;
 	if (besttimes[title]==null || tonumber(besttimes[title])>t) besttimes[title]=t;
 //	print("\ttime = ", tostring(t, 3), " (", tostring(t/basetime, 1), "xC)\n");
-	print("\t", string.sub("   "+math.floor(t*1000), -4), "ms (", string.tostring(t/basetime, 1), "xC)\n");
+	print("\t", lib.string.sub("   "+lib.math.floor(t*1000), -4), "ms (", lib.string.tostring(t/basetime, 1), "xC)\n");
 	return;
 }
 
 function dotests(nloops, rounds) {
-	nstats=math.floor(nloops/5);
+	nstats=lib.math.floor(nloops/5);
 	for (round=0;round<rounds;round++) {
-		file.writeall("timetest.c", "#include <stdio.h>\nint main()\n{\n\tunsigned int i;\n\tfor (i=1;i<"+nloops+";i++) if (i%"+nstats+"==0) printf(\"%d\", i/"+nstats+");\n\treturn 0;\n}\n");
-//		system("cc -O2 -s -static timetest.c -o timetest.bin");
-		system("cc -O2 -s timetest.c -o timetest.bin");
+		lib.file.writeall("timetest.c", "#include <stdio.h>\nint main()\n{\n\tunsigned int i;\n\tfor (i=1;i<"+nloops+";i++) if (i%"+nstats+"==0) printf(\"%d\", i/"+nstats+");\n\treturn 0;\n}\n");
+//		lib.system("cc -O2 -s -static timetest.c -o timetest.bin");
+		lib.system("cc -O2 -s timetest.c -o timetest.bin");
 		print("\n\e[01;37;40mC\e[00m\t");
-		oldtime=runtime();
-		system("./timetest.bin");
-		global basetime=runtime()-oldtime;
-		file.unlink("timetest.c", "timetest.bin");
-		print("\t", string.sub("   "+math.floor(basetime*1000), -4), "ms\n");
+		oldtime=lib.debug.runtime();
+		lib.system("./timetest.bin");
+		global basetime=lib.debug.runtime()-oldtime;
+		lib.file.unlink("timetest.c", "timetest.bin");
+		print("\t", lib.string.sub("   "+lib.math.floor(basetime*1000), -4), "ms\n");
 		if (besttimes['C']==null || tonumber(besttimes['C'])>basetime) besttimes['C']=basetime;
 
 		test("LUA",    "lua    -e \"for i=1,"+nloops+" do if  math.mod(i,"+nstats+")==0 then io.write(i/"+nstats+") end end\"");

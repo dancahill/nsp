@@ -187,7 +187,8 @@ function build_lib(CC, TNAME, OBJECTS, OTYPE, INTDIR) {
 				liblist+=" -lssh2";
 			}
 			if (_ostype_.startswith("MacOS")) {
-				lib.system("cc -flat_namespace -bundle -undefined suppress -o "+swapslash(LIBDIR+"/shared/"+TNAME+".bundle "+liblist));
+				// lib.system("cc -bundle -flat_namespace -undefined suppress -o "+swapslash(LIBDIR+"/shared/"+TNAME+".bundle "+liblist));
+				lib.system("clang -dynamiclib -flat_namespace -undefined suppress -o "+swapslash(LIBDIR+"/shared/"+TNAME+".dylib "+liblist));
 			} else {
 				lib.system("gcc -shared -o "+swapslash(LIBDIR+"/shared/"+TNAME+".so "+liblist));
 			}

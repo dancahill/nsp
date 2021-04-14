@@ -475,7 +475,7 @@ NSP_FUNCTION(nl_coroutine)
 #define LIBEXT "dll"
 #elif defined(__APPLE__)
 #include <dlfcn.h>
-#define LIBEXT "bundle"
+#define LIBEXT "dylib"
 #else
 #include <dlfcn.h>
 #define LIBEXT "so"
