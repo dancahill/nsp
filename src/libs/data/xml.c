@@ -19,7 +19,7 @@
 #include "nsp/nsplib.h"
 #include "data.h"
 #include <string.h>
-#ifdef WIN32
+#ifdef _WIN32
 #define strcasecmp stricmp
 #endif
 #ifdef __TURBOC__

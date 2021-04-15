@@ -18,7 +18,7 @@
 */
 #include "nsp/nsplib.h"
 #include "net.h"
-#ifdef WIN32
+#ifdef _WIN32
 #include <io.h>
 #else
 #include <unistd.h>

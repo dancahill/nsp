@@ -19,7 +19,7 @@
 #include "nsp/nsplib.h"
 #include "net.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 #define sleep(x) Sleep(x*1000)
 #define msleep(x) Sleep(x)
 #define strcasecmp stricmp
@@ -222,7 +222,7 @@ int tcp_recv(nsp_state *N, TCP_SOCKET *socket, char *buffer, int max, int flags)
 		rc = recv(socket->socket, buffer, max, flags);
 	}
 	if (rc < 0) {
-#ifdef WIN32
+#ifdef _WIN32
 		int ec = WSAGetLastError();
 		switch (ec) {
 		case 0:
@@ -277,7 +277,7 @@ int tcp_send(nsp_state *N, TCP_SOCKET *socket, const char *buffer, int len, int 
 		rc = send(socket->socket, buffer, len, flags);
 	}
 	if (rc < 0) {
-#ifdef WIN32
+#ifdef _WIN32
 		return rc;
 #else
 		if (errno == EWOULDBLOCK) {

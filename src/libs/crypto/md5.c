@@ -21,7 +21,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <sys/stat.h>
-#ifdef WIN32
+#ifdef _WIN32
 #include <io.h>
 #else
 #ifdef __TURBOC__

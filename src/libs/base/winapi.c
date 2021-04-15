@@ -18,7 +18,7 @@
 */
 #include "nsp/nsplib.h"
 #include "base.h"
-#ifdef WIN32
+#ifdef _WIN32
 #include <mmsystem.h>
 #include <shellapi.h>
 #include <stdio.h>

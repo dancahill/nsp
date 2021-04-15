@@ -17,7 +17,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#if defined(WIN32)
+#if defined(_WIN32)
 #include "nsp/config-win.h"
 #else
 #include "nsp/config.h"
@@ -36,7 +36,7 @@
 #if !defined(HAVE_OPENSSL)
 #define HAVE_OPENSSL
 #endif
-#if defined(WIN32)
+#if defined(_WIN32)
 #pragma comment(lib, "libcrypto32MD.lib")
 #pragma comment(lib, "libssl32MD.lib")
 #endif
@@ -50,14 +50,14 @@
 extern "C" {
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #  pragma comment(lib, "ws2_32.lib")
 #  ifdef __CYGWIN__
 #    include <ws2tcpip.h>
 #  endif
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #else
 #include <sys/socket.h>
 #endif

@@ -20,7 +20,7 @@
 // libbase->base.c
 //int nspbase_register_all(nsp_state *N);
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <direct.h>
 #endif
 #include <fcntl.h>
@@ -231,7 +231,7 @@ static void setsigs()
 
 	if (numsigs > 16) numsigs = 16;
 	for (i = 0;i < numsigs;i++) signal(i, sig_catchint);
-#ifdef WIN32
+#ifdef _WIN32
 	SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX);
 #else
 	signal(SIGALRM, sig_timeout);
@@ -311,7 +311,7 @@ int main(int argc, char *argv[])
 	config_read();
 	setsigs();
 	setvbuf(stdout, NULL, _IONBF, 0);
-#ifdef WIN32
+#ifdef _WIN32
 	_setmode(_fileno(stdin), _O_BINARY);
 	_setmode(_fileno(stdout), _O_BINARY);
 #else

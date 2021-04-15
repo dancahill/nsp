@@ -21,7 +21,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
-#ifdef WIN32
+#ifdef _WIN32
 #define snprintf _snprintf
 #define strcasecmp stricmp
 #define strncasecmp strnicmp

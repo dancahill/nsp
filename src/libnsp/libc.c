@@ -237,7 +237,7 @@ void n_error(nsp_state *N, short int err, const char *fname, const char *format,
 	va_start(ap, format);
 	len += nc_vsnprintf(N, N->errbuf + len, sizeof(N->errbuf) - len - 1, format, ap);
 	va_end(ap);
-#if defined(WIN32) && defined(_DEBUG)
+#if defined(_WIN32) && defined(_DEBUG)
 	_RPT1(_CRT_WARN, "NSP Exception: %s\r\n", N->errbuf);
 #endif
 	nl_flush(N);
@@ -303,7 +303,7 @@ void n_warn(nsp_state *N, const char *fname, const char *format, ...)
 	len = nc_vsnprintf(N, N->outbuffer + N->outbuflen, N->outbufmax - N->outbuflen, format, ap);
 	va_end(ap);
 
-#if defined(WIN32) && defined(_DEBUG)
+#if defined(_WIN32) && defined(_DEBUG)
 	_RPT1(_CRT_WARN, "NSP Warning: %s : line %d, [%s]\r\n", p, N->context->linenum, N->outbuffer + N->outbuflen);
 #endif
 	N->outbuflen += len;

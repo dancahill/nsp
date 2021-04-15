@@ -154,7 +154,7 @@ NSP_FUNCTION(libnsp_base_file_stat)
 	settrace();
 	if (cobj1->val->type != NT_STRING || cobj1->val->size < 1) n_error(N, NE_SYNTAX, __FN__, "expected a string for arg1");
 	file = cobj1->val->d.str;
-#if defined(WIN32) || defined(__TURBOC__)
+#if defined(_WIN32) || defined(__TURBOC__)
 	rc = stat(file, &sb);
 	if (rc != 0) {
 		nsp_setnum(N, &N->r, "", rc);

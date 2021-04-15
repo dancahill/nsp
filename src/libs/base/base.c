@@ -75,7 +75,7 @@ int nspbase_register_all(nsp_state *N)
 	nsp_setcfunc(N, tobj2, "unlock", (NSP_CFUNC)libnsp_base_thread_mutex_unlock);
 	nsp_setcfunc(N, tobj2, "free", (NSP_CFUNC)libnsp_base_thread_mutex_free);
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 	tobj = nsp_settable(N, nsp_settable(N, &N->g, "lib"), "Windows");
 	tobj->val->attr |= NST_HIDDEN;
 	nsp_setcfunc(N, tobj, "Beep", (NSP_CFUNC)libnsp_winapi_beep);

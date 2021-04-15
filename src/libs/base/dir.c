@@ -18,7 +18,7 @@
 */
 #include "nsp/nsplib.h"
 #include "base.h"
-#ifdef WIN32
+#ifdef _WIN32
 #include <io.h>
 #else
 #include <dirent.h>
@@ -35,7 +35,7 @@ static char *fixslashes(char *s)
 
 static int n_dirlist(nsp_state *N, obj_t *dobj, const char *dirname)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	struct  _finddata_t dentry;
 	long    handle;
 #else
@@ -56,7 +56,7 @@ static int n_dirlist(nsp_state *N, obj_t *dobj, const char *dirname)
 	if (dir[len - 1] == '/') dir[len - 1] = '\0';
 	if (stat(dir, &sb) != 0) return -1;
 	if (!(sb.st_mode & S_IFDIR)) return 0;
-#ifdef WIN32
+#ifdef _WIN32
 	nc_snprintf(N, file, sizeof(file) - 1, "%s/*.*", dir);
 	if ((handle = _findfirst(file, &dentry)) < 0) return 0;
 	do {
@@ -93,7 +93,7 @@ static int n_dirlist(nsp_state *N, obj_t *dobj, const char *dirname)
 			nsp_setnum(N, tobj2, "size", sb.st_size);
 			nsp_setstr(N, tobj2, "type", sym ? "filep" : "file", sym ? 5 : 4);
 		}
-#ifdef WIN32
+#ifdef _WIN32
 	} while (_findnext(handle, &dentry) == 0);
 	_findclose(handle);
 #else

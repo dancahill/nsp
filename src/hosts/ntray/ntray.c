@@ -16,7 +16,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#ifdef WIN32
+#ifdef _WIN32
 #include "nsp/nsplib.h"
 
 // libbase->base.c
@@ -53,7 +53,7 @@
 #define vsnprintf _vsnprintf
 
 #pragma comment(lib, "winmm.lib")
-#define CONFFILE "ntray.conf"
+#define CONFFILE "ntray-config.ns"
 
 #define TITLE_PREFIX "NTray: "
 
@@ -162,10 +162,10 @@ void new_menu(nsp_state *N)
 {
 	char *newmenutext =
 		"global MENUITEMS = {\r\n"\
-		"\t{ name=\"NullLogic &Nesla\", type=\"ShellExecute\",  command=\"http://nulllogic.ca/nsp/\"                  };\r\n"\
-		"\t{ name=\"separator\",        type=\"separator\"                                                          };\r\n"\
-		"\t{ name=\"&Configuration\",   type=\"CreateProcess\", command=\"rundll32 shell32,OpenAs_RunDLL ntray.conf\" };\r\n"\
-		"\t{ name=\"E&xit\",            type=\"Exit\",          command=\"Exit\"                                      };\r\n"\
+		"\t{ name=\"NullLogic &NSP\",  type=\"ShellExecute\",  command=\"https://nulllogic.ca/nsp/\"                      };\r\n"\
+		"\t{ name=\"separator\",       type=\"separator\"                                                                 };\r\n"\
+		"\t{ name=\"&Configuration\",  type=\"CreateProcess\", command=\"rundll32 shell32,OpenAs_RunDLL ntray-config.ns\" };\r\n"\
+		"\t{ name=\"E&xit\",           type=\"Exit\",          command=\"Exit\"                                           };\r\n"\
 		"};\r\n\r\n"\
 		"class NTrayClass {\r\n"\
 		"\tfunction onload() {\r\n\t\treturn;\r\n\t};\r\n"\
@@ -991,4 +991,4 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	}
 	return 0;
 }
-#endif //WIN32
+#endif //_WIN32

@@ -50,7 +50,7 @@ typedef struct {
 #include <unistd.h>
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #define snprintf _snprintf
 #define sleep(x) Sleep(x*1000)
 #define msleep(x) Sleep(x)
@@ -136,7 +136,7 @@ static void ssh_warn(nsp_state *N, const char *__FN__, SSH_CONN *sshconn)
 
 static int setfiletime(nsp_state *N, char *fname, time_t ftime)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	static int isWinNT = -1;
 	SYSTEMTIME st;
 	FILETIME locft, modft;
@@ -1126,7 +1126,7 @@ NSP_CLASS(libnsp_net_ssh_client)
 int nspssh2_register_all(nsp_state *N)
 {
 	obj_t *tobj;
-#ifdef WIN32
+#ifdef _WIN32
 	static WSADATA wsaData;
 	if (WSAStartup(0x101, &wsaData)) return -1;
 #endif

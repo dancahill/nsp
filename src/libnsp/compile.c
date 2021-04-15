@@ -41,10 +41,10 @@ typedef struct cstate {
 	long offset;
 } cstate;
 
-static long n_unescape(nsp_state *N, char *src, char *dst, long len, cstate *state)
+static long n_unescape(nsp_state *N, char *src, char *dst, unsigned long len, cstate *state)
 {
 #define __FN__ __FILE__ ":n_unescape()"
-	long i, n;
+	unsigned long i, n;
 	short e = 0;
 
 	settrace();

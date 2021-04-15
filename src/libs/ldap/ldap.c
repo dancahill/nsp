@@ -21,7 +21,7 @@
 
 #ifdef HAVE_LDAP
 
-#ifdef WIN32
+#ifdef _WIN32
 #  pragma comment(lib, "ws2_32.lib")
 #  ifdef __CYGWIN__
 #    include <ws2tcpip.h>
@@ -135,7 +135,7 @@ NSP_FUNCTION(libnsp_net_ldap_search)
 int nspldap_register_all(nsp_state *N)
 {
 	obj_t *tobj, *tobj2;
-#ifdef WIN32
+#ifdef _WIN32
 	static WSADATA wsaData;
 
 	if (WSAStartup(0x101, &wsaData)) return -1;

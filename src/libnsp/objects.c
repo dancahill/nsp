@@ -632,7 +632,7 @@ obj_t *nsp_appendobj(nsp_state *N, obj_t *tobj, char *name)
 	return cobj;
 }
 
-void nsp_strcat(nsp_state *N, obj_t *cobj, char *str, long len)
+void nsp_strcat(nsp_state *N, obj_t *cobj, char *str, unsigned long len)
 {
 #define __FN__ __FILE__ ":nsp_strcat()"
 	unsigned short ctype = nsp_typeof(cobj);

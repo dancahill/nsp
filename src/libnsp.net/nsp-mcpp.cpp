@@ -237,7 +237,7 @@ private:
 		}
 		nsp_setstr(N, &N->g, "_filename", p, -1);
 		nsp_setstr(N, &N->g, "_filepath", buf, -1);
-#if defined(WIN32) && defined(_DEBUG)
+#if defined(_WIN32) && defined(_DEBUG)
 		nsp_setbool(N, nsp_settable(N, nsp_settable(N, &N->g, "lib"), "debug"), "attached", 1);
 #endif
 		return;

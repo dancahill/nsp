@@ -321,7 +321,7 @@ NSP_FUNCTION(libnsp_net_socket_setsockopt)
 	if (nc_strcmp(opt, "SO_RCVTIMEO") == 0) {
 		if (!nsp_isnum(cobj2)) n_error(N, NE_SYNTAX, __FN__, "expected a number for arg2");
 		{
-#ifdef WIN32
+#ifdef _WIN32
 			DWORD timeout = (long)(cobj2->val->d.num);
 			setsockopt(sock->socket, SOL_SOCKET, SO_RCVTIMEO, (void *)&timeout, sizeof(timeout));
 #else

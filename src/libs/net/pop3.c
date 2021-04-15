@@ -19,7 +19,7 @@
 #include "nsp/nsplib.h"
 #include "net.h"
 #include <stdlib.h>
-#ifdef WIN32
+#ifdef _WIN32
 #endif
 
 static void pop3_lasterr(nsp_state *N, char *msg)

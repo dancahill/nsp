@@ -173,7 +173,7 @@ flush:
 	if (N->outbuflen == 0) return 0;
 	N->outbuffer[N->outbuflen] = '\0';
 	if ((rc = write(STDOUT_FILENO, N->outbuffer, N->outbuflen)) != N->outbuflen) {
-#if defined(WIN32) && defined(_DEBUG)
+#if defined(_WIN32) && defined(_DEBUG)
 		_RPT1(_CRT_WARN, "nl_flush write() wrote less bytes than expected\r\n", "");
 #endif
 		N->outbuflen = 0;
@@ -246,7 +246,7 @@ NSP_FUNCTION(nl_break)
 	if (nsp_typeof(cobj) == NT_CFUNC) {
 		cobj->val->d.cfunc(N);
 	} else {
-#if defined(WIN32)
+#if defined(_WIN32)
 #if defined(_DEBUG)
 		__debugbreak();
 		//DebugBreak();
@@ -463,7 +463,7 @@ NSP_FUNCTION(nl_coroutine)
  */
 
 #include <stdio.h>
-#ifdef WIN32
+#ifdef _WIN32
 #define snprintf _snprintf
 #endif
 
@@ -471,7 +471,7 @@ NSP_FUNCTION(nl_coroutine)
 #ifdef HAVE_DL
 
  //#include "libdl.h"
-#if defined(WIN32)
+#if defined(_WIN32)
 #define LIBEXT "dll"
 #elif defined(__APPLE__)
 #include <dlfcn.h>
@@ -492,7 +492,7 @@ static void *lib_open(const char *file)
 
 static void *lib_sym(void *handle, const char *name)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	return GetProcAddress(handle, name);
 #else
 	return dlsym(handle, name);
@@ -501,7 +501,7 @@ static void *lib_sym(void *handle, const char *name)
 
 static char *lib_error(nsp_state *N)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	LPTSTR lpMsgBuf;
 	DWORD rc;
 
@@ -520,7 +520,7 @@ static char *lib_error(nsp_state *N)
 
 static int lib_close(void *handle)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	return FreeLibrary(handle);
 #else
 	return dlclose(handle);
@@ -549,7 +549,7 @@ NSP_FUNCTION(nl_dl_load)
 	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
 	obj_t *cobj, *tobj;
 	NSP_CFUNC cfunc;
-#ifdef WIN32
+#ifdef _WIN32
 	HINSTANCE l;
 #else
 	void *l;
@@ -629,7 +629,7 @@ NSP_FUNCTION(nl_fileexists)
 	settrace();
 	n_expect_argtype(N, NT_STRING, 1, cobj1, 0);
 	file = cobj1->val->d.str;
-#if defined(WIN32) || defined(__TURBOC__)
+#if defined(_WIN32) || defined(__TURBOC__)
 	rc = stat(file, &sb);
 #else
 	rc = lstat(file, &sb);
@@ -746,7 +746,7 @@ NSP_FUNCTION(nl_filestat)
 	//if (cobj1->val->type != NT_STRING || cobj1->val->size < 1) n_error(N, NE_SYNTAX, __FN__, "expected a string for arg1");
 	n_expect_argtype(N, NT_STRING, 1, cobj1, 0);
 	file = cobj1->val->d.str;
-#if defined(WIN32) || defined(__TURBOC__)
+#if defined(_WIN32) || defined(__TURBOC__)
 	rc = stat(file, &sb);
 	if (rc != 0) {
 		nsp_setnum(N, &N->r, "", rc);
@@ -1684,7 +1684,7 @@ NSP_FUNCTION(nl_sleep)
 	if (cobj1->val->type == NT_NUMBER) n = cobj1->val->d.num;
 #if defined(__BORLANDC__)
 	sleep(n);
-#elif defined(WIN32)
+#elif defined(_WIN32)
 	Sleep((DWORD)(n * 1000.0));
 #else
 	usleep(n * 1000000.0);

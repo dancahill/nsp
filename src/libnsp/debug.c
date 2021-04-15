@@ -71,12 +71,12 @@ void n_decompile(nsp_state *N, uchar *start, uchar *end, char *errbuf, unsigned 
 		n_context_readptr = start;
 	}
 	if (!subchunk) nc_printf(N, "\n----\nrecomposed source is:\n\n");
-	if (!subchunk) nc_printf(N, " 0x%08lX\n 0x%08lX <-you are here\n 0x%08lX\n\n", (unsigned long)n_context_blockptr, (unsigned long)n_context_readptr, (unsigned long)n_context_blockend);
+	if (!subchunk) nc_printf(N, " 0x%08lX\n 0x%08lX <-you are here\n 0x%08lX\n\n", (uint64)n_context_blockptr, (uint64)n_context_readptr, (uint64)n_context_blockend);
 	if (n_context_readptr > n_context_blockend) {
-		nc_printf(N, " N->readptr is %ld bytes past the end of the block\n\n", (unsigned long)(n_context_readptr - n_context_blockend));
+		nc_printf(N, " N->readptr is %ld bytes past the end of the block\n\n", (uint64)(n_context_readptr - n_context_blockend));
 		n_context_blockptr = n_context_readptr;
 	} else if (n_context_readptr < n_context_blockptr) {
-		nc_printf(N, " N->readptr is %ld bytes before the block\n\n", (unsigned long)(n_context_blockptr - n_context_readptr));
+		nc_printf(N, " N->readptr is %ld bytes before the block\n\n", (uint64)(n_context_blockptr - n_context_readptr));
 		n_context_blockptr = n_context_readptr;
 	} else {
 		offset = n_context_readptr;

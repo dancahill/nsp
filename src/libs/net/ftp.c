@@ -20,7 +20,7 @@
 #include "net.h"
 #include <stdlib.h>
 #include <string.h>
-#ifdef WIN32
+#ifdef _WIN32
 #if _MSC_VER>=1900
 #define STDC99
 #else

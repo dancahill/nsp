@@ -21,7 +21,7 @@
 
 #ifdef HAVE_ODBC
 
-#ifdef WIN32
+#ifdef _WIN32
 #  pragma comment(lib, "odbc32.lib")
 #endif
 #include <sql.h>

@@ -36,7 +36,7 @@
  * generate a value for global _ostype_ var
  * ostype/compilertype
  */
-#if defined(WIN32) || defined(WINDOWS)
+#if defined(_WIN32) || defined(WINDOWS)
 #  define _OS_ "Windows"
 #elif defined(linux)
 #  define _OS_ "Linux"
@@ -756,7 +756,7 @@ int nsp_execfile(nsp_state *N, char *file)
 	n_context_readptr = n_context_blockptr + readi4((n_context_blockptr + 12));
 
 
-#if defined(WIN32) && defined(_DEBUG)
+#if defined(_WIN32) && defined(_DEBUG)
 	_RPT1(_CRT_WARN, "execing '%s'\r\n", pfile);
 #endif
 	N->context->filename = pfile;
@@ -772,7 +772,7 @@ end2:
 	if (jmp == 0) {
 		n_free(N, (void *)&n_context_savjmp, sizeof(jmp_buf));
 	}
-#if defined(WIN32) && defined(_DEBUG)
+#if defined(_WIN32) && defined(_DEBUG)
 	_RPT1(_CRT_WARN, "done '%s'\r\n", pfile);
 #endif
 	N->context->filename = oldfname;
@@ -963,7 +963,7 @@ nsp_state *nsp_newstate()
 	}
 	cobj = nsp_settable(new_N, nsp_settable(new_N, lobj, "dl"), "loaded");
 	cobj = nsp_settable(new_N, nsp_settable(new_N, lobj, "dl"), "path");
-#ifdef WIN32
+#ifdef _WIN32
 	{
 		char libbuf[MAX_PATH];
 

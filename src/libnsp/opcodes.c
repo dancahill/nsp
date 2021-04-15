@@ -423,7 +423,7 @@ uchar n_skip_ws(nsp_state *N)
 	settrace();
 	while (*n_context_readptr == OP_LINENUM) {
 		N->context->linenum = readi4((n_context_readptr + 1)); n_context_readptr += 5;
-#if defined(WIN32) && defined(_DEBUG)
+#if defined(_WIN32) && defined(_DEBUG)
 		// this is useful -> http://www.cprogramming.com/tutorial/visual_studio_trace_log_messages.html
 		char *f = NULL;
 		if (N->context->filename && N->context->filename[0] != '\0') {

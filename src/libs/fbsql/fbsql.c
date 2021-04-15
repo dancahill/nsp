@@ -32,7 +32,7 @@
 #include <ctype.h>
 #include <firebird/ibase.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #define snprintf _snprintf
 #define vsnprintf _vsnprintf
 #define strcasecmp stricmp
@@ -104,7 +104,7 @@ typedef struct FBSQL_CONN {
 #define FB_ALIGN(n,b)          ((n + b - 1) & ~(b - 1))
 #endif
 
-#if (defined(_MSC_VER) && defined(WIN32)) || (defined(__BORLANDC__) && defined(__WIN32__))
+#if (defined(_MSC_VER) && defined(_WIN32)) || (defined(__BORLANDC__) && defined(__WIN32__))
 #define FB_ALIGN(n,b)          ((n + b - 1) & ~(b - 1))
 #endif
 
@@ -123,7 +123,7 @@ typedef struct vary {
 /* Define a format string for printf.  Printing of 64-bit integers
    is not standard between platforms */
 #ifndef ISC_INT64_FORMAT
-#if (defined(_MSC_VER) && defined(WIN32)) || (defined(__BORLANDC__) && defined(__WIN32__))
+#if (defined(_MSC_VER) && defined(_WIN32)) || (defined(__BORLANDC__) && defined(__WIN32__))
 #define	ISC_INT64_FORMAT	"I64"
 #else
 #define	ISC_INT64_FORMAT	"ll"

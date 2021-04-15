@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#ifdef WIN32
+#ifdef _WIN32
 #define snprintf _snprintf
 #endif
 

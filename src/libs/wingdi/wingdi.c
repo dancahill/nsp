@@ -18,7 +18,7 @@
 */
 #include "nsp/nsplib.h"
 #include "wingdi.h"
-#ifdef WIN32
+#ifdef _WIN32
 //#include <mmsystem.h>
 //#include <shellapi.h>
 #include <wingdi.h>
@@ -526,7 +526,7 @@ NSP_CLASS(libnsp_wingdi_window)
 
 int nspwingdi_register_all(nsp_state *N)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	obj_t *tobj;
 
 	tobj = nsp_settable(N, nsp_settable(N, &N->g, "lib"), "win");

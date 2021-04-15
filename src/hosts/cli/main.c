@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#ifdef WIN32
+#ifdef _WIN32
 #include <direct.h>
 #include <io.h>
 #include <process.h>
@@ -56,7 +56,7 @@ static int flush(nsp_state *N)
 {
 	if (N == NULL || N->outbuflen == 0) return 0;
 	N->outbuffer[N->outbuflen] = '\0';
-#if defined(WIN32) && defined(_DEBUG)
+#if defined(_WIN32) && defined(_DEBUG)
 	OutputDebugStringA(N->outbuffer);
 #endif
 	if (write(STDOUT_FILENO, N->outbuffer, N->outbuflen) != N->outbuflen) {
@@ -72,7 +72,7 @@ static void sig_trap(int sig)
 	switch (sig) {
 	case 11:
 		printf("Segmentation Violation\r\n");
-#ifdef WIN32
+#ifdef _WIN32
 		{
 			DWORD rc;
 
@@ -115,7 +115,7 @@ static void sig_trap(int sig)
 
 static void setsigs(void)
 {
-#if defined(WIN32)
+#if defined(_WIN32)
 	signal(SIGSEGV, sig_trap);
 #elif !defined(__TURBOC__)
 	struct sigaction sa;
@@ -135,7 +135,7 @@ static void timeout(int i) {
 static NSP_FUNCTION(neslib_io_gets)
 {
 	obj_t *cobj1 = nsp_getobj(N, &N->context->l, "1");
-#if !defined(WIN32)&&!defined(__TURBOC__)
+#if !defined(_WIN32)&&!defined(__TURBOC__)
 	struct sigaction sa;
 	int err = 0;
 #endif
@@ -148,14 +148,14 @@ static NSP_FUNCTION(neslib_io_gets)
 	}
 
 	flush(N);
-#if !defined(WIN32)&&!defined(__TURBOC__)
+#if !defined(_WIN32)&&!defined(__TURBOC__)
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_handler = timeout;
 	sigaction(SIGALRM, &sa, NULL);
 	alarm(t);
 #endif
 	ret = fgets(buf, sizeof(buf) - 1, stdin);
-#if !defined(WIN32)&&!defined(__TURBOC__)
+#if !defined(_WIN32)&&!defined(__TURBOC__)
 	err = errno;
 	alarm(0);
 	if (ret == NULL) {
@@ -210,7 +210,7 @@ static void preppath(nsp_state *N, char *name)
 	}
 	nsp_setstr(N, &N->g, "_filename", p, -1);
 	nsp_setstr(N, &N->g, "_filepath", buf, -1);
-#if defined(WIN32) && defined(_DEBUG)
+#if defined(_WIN32) && defined(_DEBUG)
 	nsp_setbool(N, nsp_settable(N, nsp_settable(N, &N->g, "lib"), "debug"), "attached", 1);
 #endif
 	return;
@@ -218,7 +218,7 @@ static void preppath(nsp_state *N, char *name)
 
 void set_console_title(nsp_state *N)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	char tmpbuf[80];
 
 	nc_memset((void *)&tmpbuf, 0, sizeof(tmpbuf));
@@ -244,7 +244,7 @@ void do_help(char *arg0) {
 void do_preload(nsp_state *N)
 {
 	char sbuf[80];
-#ifdef WIN32
+#ifdef _WIN32
 	char wdbuf[80];
 
 	if (GetWindowsDirectory(wdbuf, sizeof(wdbuf)) == 0) return;

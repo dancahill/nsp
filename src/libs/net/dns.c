@@ -21,7 +21,7 @@
 
 #ifdef HAVE_DNS
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <stdio.h>
 #include <stdlib.h>
 #include <windns.h>
@@ -51,7 +51,7 @@ typedef union {
 static int dns_lookup(nsp_state *N, obj_t *tobj, const char *domain)
 {
 #define __FN__ __FILE__ ":dns_lookup()"
-#ifdef WIN32
+#ifdef _WIN32
 	DNS_FREE_TYPE freetype;
 	DNS_STATUS status;
 	PDNS_RECORD pDnsRecord;
