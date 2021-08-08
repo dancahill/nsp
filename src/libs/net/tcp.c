@@ -101,7 +101,7 @@ int tcp_bind(nsp_state *N, TCP_SOCKET *sock, char *ifname, unsigned short port)
 		closesocket(bindsock);
 		return -1;
 	}
-	return 0;
+	return bindsock;
 #undef __FN__
 }
 
