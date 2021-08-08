@@ -36,8 +36,8 @@ static char *fixslashes(char *s)
 static int n_dirlist(nsp_state *N, obj_t *dobj, const char *dirname)
 {
 #ifdef _WIN32
-	struct  _finddata_t dentry;
-	long    handle;
+	struct   _finddata_t dentry;
+	intptr_t handle;
 #else
 	struct dirent *dentry;
 	DIR    *handle;

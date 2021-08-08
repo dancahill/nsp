@@ -24,8 +24,8 @@
 //void pipe_murder(nsp_state *N, obj_t *cobj);
 
 typedef struct {
-	int in;
-	int out;
+	long long in;
+	long long out;
 } pipe_fd;
 
 typedef struct PIPE_CONN {
