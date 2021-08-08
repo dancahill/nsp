@@ -188,24 +188,22 @@ static void preppath(nsp_state *N, char *name)
 	if ((name[0] == '/') || (name[0] == '\\') || (name[1] == ':')) {
 		/* it's an absolute path.... probably... */
 		strncpy(buf, name, sizeof(buf) - 1);
-	}
-	else if (name[0] == '.') {
+	} else if (name[0] == '.') {
 		/* looks relative... */
-		if (getcwd(buf, sizeof(buf) - strlen(name) - 2) != NULL) {
+		if (getcwd(buf, (unsigned long)(sizeof(buf) - strlen(name) - 2)) != NULL) {
+			strncat(buf, "/", sizeof(buf) - strlen(buf) - 1);
+			strncat(buf, name, sizeof(buf) - strlen(buf) - 1);
+		}
+	} else {
+		if (getcwd(buf, (unsigned long)(sizeof(buf) - strlen(name) - 2)) != NULL) {
 			strncat(buf, "/", sizeof(buf) - strlen(buf) - 1);
 			strncat(buf, name, sizeof(buf) - strlen(buf) - 1);
 		}
 	}
-	else {
-		if (getcwd(buf, sizeof(buf) - strlen(name) - 2) != NULL) {
-			strncat(buf, "/", sizeof(buf) - strlen(buf) - 1);
-			strncat(buf, name, sizeof(buf) - strlen(buf) - 1);
-		}
-	}
-	for (j = 0;j < strlen(buf);j++) {
+	for (j = 0; j < strlen(buf); j++) {
 		if (buf[j] == '\\') buf[j] = '/';
 	}
-	for (j = strlen(buf) - 1;j > 0;j--) {
+	for (j = (unsigned long)strlen(buf) - 1; j > 0; j--) {
 		if (buf[j] == '/') { buf[j] = '\0'; p = buf + j + 1; break; }
 	}
 	nsp_setstr(N, &N->g, "_filename", p, -1);
@@ -293,7 +291,7 @@ int main(int argc, char *argv[])
 	char c;
 	short intstatus = 0;
 	short preload = 1;
-	char *fn=NULL;
+	char *fn = NULL;
 
 	setvbuf(stdout, NULL, _IONBF, 0);
 	if (argc < 2) {
@@ -307,7 +305,7 @@ int main(int argc, char *argv[])
 	//nspbase_register_all(N);
 	/* add env */
 	tobj = nsp_settable(N, &N->g, "_ENV");
-	for (i = 0;environ[i] != NULL;i++) {
+	for (i = 0; environ[i] != NULL; i++) {
 		strncpy(tmpbuf, environ[i], MAX_OBJNAMELEN);
 		p = strchr(tmpbuf, '=');
 		if (!p) continue;
@@ -317,59 +315,51 @@ int main(int argc, char *argv[])
 	}
 	/* add args */
 	tobj = nsp_settable(N, &N->g, "_ARGS");
-	for (i = 0;i < argc;i++) {
+	for (i = 0; i < argc; i++) {
 		n_ntoa(N, tmpbuf, i, 10, 0);
 		nsp_setstr(N, tobj, tmpbuf, argv[i], -1);
 	}
 	tobj = nsp_settable(N, &N->g, "io");
 	nsp_setcfunc(N, tobj, "gets", (NSP_CFUNC)neslib_io_gets);
-	for (i = 1;i < argc;i++) {
+	for (i = 1; i < argc; i++) {
 		if (argv[i] == NULL) break;
 		if (argv[i][0] == '-') {
 			c = argv[i][1];
 			if (!c) {
 				break;
-			}
-			else if ((c == 'd') || (c == 'D')) {
+			} else if ((c == 'd') || (c == 'D')) {
 				N->debug = 1;
-			}
-			else if ((c == 's') || (c == 'S')) {
+			} else if ((c == 's') || (c == 'S')) {
 				intstatus = 1;
-			}
-			else if ((c == 'b') || (c == 'B')) {
+			} else if ((c == 'b') || (c == 'B')) {
 				preload = 0;
-			}
-			else if ((c == 'e') || (c == 'E')) {
+			} else if ((c == 'e') || (c == 'E')) {
 				if (++i < argc) {
 					if (preload) do_preload(N);
 					nsp_exec(N, argv[i]);
 					if (N->err) goto err;
 				}
-			}
-			else if ((c == 'f') || (c == 'F')) {
+			} else if ((c == 'f') || (c == 'F')) {
 				if (++i < argc) {
 					preppath(N, argv[i]);
 					set_console_title(N);
 					if (preload) do_preload(N);
-					fn=argv[i];
+					fn = argv[i];
 					nsp_execfile(N, fn);
 					if (N->err) goto err;
 				}
-			}
-			else if ((c == 'v') || (c == 'V')) {
+			} else if ((c == 'v') || (c == 'V')) {
 				printf(NSP_VERSION "\r\n");
 				return 0;
-			}
-			else {
+			} else {
 				do_help(argv[0]);
 				return -1;
 			}
-		}
-		else {
+		} else {
 			preppath(N, argv[i]);
 			set_console_title(N);
 			if (preload) do_preload(N);
-			fn=argv[i];
+			fn = argv[i];
 			nsp_execfile(N, fn);
 			if (N->err) goto err;
 		}

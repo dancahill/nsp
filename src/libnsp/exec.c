@@ -974,7 +974,7 @@ nsp_state *nsp_newstate()
 		//CSIDL_PROGRAM_FILESX86
 		SHGetSpecialFolderPathA(0, libbuf, CSIDL_PROGRAM_FILES, FALSE);
 		//_snprintf(libbuf + strlen(libbuf), sizeof(libbuf) - strlen(libbuf) - 1, "\\NSP");
-		nc_snprintf(new_N, libbuf + strlen(libbuf), sizeof(libbuf) - strlen(libbuf) - 1, "\\NSP\\LIB");
+		nc_snprintf(new_N, libbuf + strlen(libbuf), (unsigned long)(sizeof(libbuf) - strlen(libbuf) - 1), "\\NSP\\LIB");
 		nsp_setstr(new_N, cobj, "0", libbuf, -1);
 	}
 #else

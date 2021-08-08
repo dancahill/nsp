@@ -221,18 +221,18 @@ private:
 			strncpy(buf, name, sizeof(buf));
 		} else if (name[0] == '.') {
 			/* looks relative... */
-			getcwd(buf, sizeof(buf) - strlen(name) - 2);
+			getcwd(buf, (unsigned long)(sizeof(buf) - strlen(name) - 2));
 			strcat(buf, "/");
 			strcat(buf, name);
 		} else {
-			getcwd(buf, sizeof(buf) - strlen(name) - 2);
+			getcwd(buf, (unsigned long)(sizeof(buf) - strlen(name) - 2));
 			strcat(buf, "/");
 			strcat(buf, name);
 		}
 		for (j = 0; j < strlen(buf); j++) {
 			if (buf[j] == '\\') buf[j] = '/';
 		}
-		for (j = strlen(buf) - 1; j > 0; j--) {
+		for (j = (unsigned long)strlen(buf) - 1; j > 0; j--) {
 			if (buf[j] == '/') { buf[j] = '\0'; p = buf + j + 1; break; }
 		}
 		nsp_setstr(N, &N->g, "_filename", p, -1);
@@ -254,13 +254,13 @@ private:
 			_snprintf(errbuf, sizeof(errbuf) - 1, "Unknown C++ exception thrown. 0x%08X", er.ExceptionCode);
 			break;
 		case EXCEPTION_ACCESS_VIOLATION:
-			_snprintf(errbuf, sizeof(errbuf) - 1, "EXCEPTION_ACCESS_VIOLATION (0x%08X): ExceptionAddress=0x%08X", er.ExceptionCode, (unsigned int)er.ExceptionAddress);
+			_snprintf(errbuf, sizeof(errbuf) - 1, "EXCEPTION_ACCESS_VIOLATION (0x%08X): ExceptionAddress=0x%p", er.ExceptionCode, er.ExceptionAddress);
 			break;
 		case EXCEPTION_STACK_OVERFLOW:
-			_snprintf(errbuf, sizeof(errbuf) - 1, "EXCEPTION_STACK_OVERFLOW (0x%08X): ExceptionAddress=0x%08X", er.ExceptionCode, (unsigned int)er.ExceptionAddress);
+			_snprintf(errbuf, sizeof(errbuf) - 1, "EXCEPTION_STACK_OVERFLOW (0x%08X): ExceptionAddress=0x%p", er.ExceptionCode, er.ExceptionAddress);
 			break;
 		default:
-			_snprintf(errbuf, sizeof(errbuf) - 1, "SEH Exception (0x%08X): ExceptionAddress=0x%08X", er.ExceptionCode, (unsigned int)er.ExceptionAddress);
+			_snprintf(errbuf, sizeof(errbuf) - 1, "SEH Exception (0x%08X): ExceptionAddress=0x%p", er.ExceptionCode, er.ExceptionAddress);
 			break;
 		}
 		/*log_error(N, "SEH Exception [%s]", errbuf);*/

@@ -75,7 +75,7 @@ void n_free(nsp_state *N, void **p, int osize)
 {
 #define __FN__ __FILE__ ":n_free()"
 	settrace();
-	if ((long int)p == 0x10) {
+	if ((long long)p == 0x10) {
 		n_error(N, NE_MEM, __FN__, "ptr is invalid 0x%08X", p);
 		return;
 	}
@@ -595,7 +595,7 @@ obj_t *nsp_setobj(nsp_state *N, obj_t *tobj, char *oname, unsigned short otype, 
 	case NT_CFUNC: cobj->val->d.cfunc = _fptr; break;
 	case NT_STRING:
 	case NT_NFUNC:
-	case NT_CDATA: nsp_strcat(N, cobj, _str, _slen); break;
+	case NT_CDATA: nsp_strcat(N, cobj, _str, (unsigned long)_slen); break;
 	}
 	return cobj;
 #undef __FN__

@@ -1229,15 +1229,15 @@ NSP_FUNCTION(nl_strrep)
 	l2 = cobj2->val->size;
 	for (; *se; se++) {
 		if (nc_strncmp(se, s2, l2) != 0) continue;
-		nsp_strcat(N, &N->r, ss, se - ss);
+		nsp_strcat(N, &N->r, ss, (unsigned long)(se - ss));
 		nsp_strcat(N, &N->r, cobj3->val->d.str, cobj3->val->size);
 		ss = se += l2;
 		if (*se) { --se; continue; }
-		nsp_strcat(N, &N->r, ss, se - ss);
+		nsp_strcat(N, &N->r, ss, (unsigned long)(se - ss));
 		break;
 	}
 	if (se > ss) {
-		nsp_strcat(N, &N->r, ss, se - ss);
+		nsp_strcat(N, &N->r, ss, (unsigned long)(se - ss));
 	}
 	return 0;
 #undef __FN__
@@ -1968,7 +1968,7 @@ NSP_FUNCTION(nl_printf)
 		if (!esc) {
 			if (*s == '%') {
 				esc = 1;
-				nsp_strcat(N, &N->r, ss, s - ss);
+				nsp_strcat(N, &N->r, ss, (unsigned long)(s - ss));
 				ss = s;
 			}
 			continue;
@@ -2000,7 +2000,7 @@ NSP_FUNCTION(nl_printf)
 		ss = s + 1;
 		esc = 0;
 	}
-	nsp_strcat(N, &N->r, ss, s - ss);
+	nsp_strcat(N, &N->r, ss, (unsigned long)(s - ss));
 	if (nc_strcmp(fname, "printf") == 0) {
 		writestr(N, robj);
 		nsp_setnum(N, robj, "", robj->val->size);

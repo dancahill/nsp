@@ -270,7 +270,7 @@ helo:
 	} else {
 		tcp_fprintf(N, &sock, "Content-Type: %s\r\n", ctype);
 		tcp_fprintf(N, &sock, "\r\n");
-		tcp_send(N, &sock, body, strlen(body), 0);
+		tcp_send(N, &sock, body, (int)strlen(body), 0);
 		tcp_fprintf(N, &sock, "\r\n");
 	}
 	tcp_fprintf(N, &sock, ".\r\n");

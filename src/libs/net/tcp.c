@@ -71,7 +71,11 @@ int tcp_bind(nsp_state *N, TCP_SOCKET *sock, char *ifname, unsigned short port)
 	struct hostent *hp;
 	struct sockaddr_in sin;
 	int option;
+#ifdef _WIN64
+	uint64 bindsock;
+#else
 	int bindsock;
+#endif
 
 	nc_memset((char *)&sin, 0, sizeof(sin));
 	bindsock = socket(AF_INET, SOCK_STREAM, 0);
@@ -97,7 +101,7 @@ int tcp_bind(nsp_state *N, TCP_SOCKET *sock, char *ifname, unsigned short port)
 		closesocket(bindsock);
 		return -1;
 	}
-	return bindsock;
+	return 0;
 #undef __FN__
 }
 
@@ -107,7 +111,11 @@ int tcp_accept(nsp_state *N, TCP_SOCKET *bsock, TCP_SOCKET *asock)
 	struct sockaddr addr;
 	struct sockaddr_in host;
 	struct sockaddr_in peer;
+#ifdef _WIN64
+	uint64 clientsock;
+#else
 	int clientsock;
+#endif
 	socklen_t fromlen;
 
 /*
@@ -144,7 +152,7 @@ int tcp_accept(nsp_state *N, TCP_SOCKET *bsock, TCP_SOCKET *asock)
 	setsockopt(clientsock, SOL_SOCKET, SO_RCVTIMEO, (void *)&timeout, sizeof(timeout));
 	setsockopt(clientsock, SOL_SOCKET, SO_RCVLOWAT, (void *)&lowat, sizeof(lowat));
 */
-	return clientsock;
+	return 0;
 #undef __FN__
 }
 
@@ -315,7 +323,7 @@ int tcp_fprintf(nsp_state *N, TCP_SOCKET *socket, const char *format, ...)
 	nc_vsnprintf(N, buffer, 2047, format, ap);
 	va_end(ap);
 	if (N->debug) n_warn(N, __FN__, "[%s:%d] %s", socket->RemoteAddr, socket->RemotePort, buffer);
-	rc = tcp_send(N, socket, buffer, strlen(buffer), 0);
+	rc = tcp_send(N, socket, buffer, (int)strlen(buffer), 0);
 	free(buffer);
 	return rc;
 #undef __FN__

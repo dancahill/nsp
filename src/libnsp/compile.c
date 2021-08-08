@@ -205,7 +205,7 @@ static obj_t *n_extractquote(nsp_state *N, cstate *state, unsigned short verbati
 	} else {
 		nc_memset((void *)&tobj, 0, sizeof(obj_t));
 		nsp_setstr(N, &tobj, "", NULL, qe - qs - 1);
-		n = n_unescape(N, qs, tobj.val->d.str, qe - qs - 1, state);
+		n = n_unescape(N, qs, tobj.val->d.str, (unsigned long)(qe - qs - 1), state);
 		cobj = nsp_setstr(N, &N->r, "", tobj.val->d.str, n);
 		nsp_unlinkval(N, &tobj);
 	}

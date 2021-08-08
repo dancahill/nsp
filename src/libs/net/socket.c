@@ -26,7 +26,7 @@ NSP_FUNCTION(libnsp_net_socket_accept)
 	obj_t *cobj;
 	obj_t tobj;
 	TCP_SOCKET *asock, *bsock;
-	int rc;
+	uint64 rc;
 
 	if (!nsp_istable(thisobj)) n_error(N, NE_SYNTAX, __FN__, "expected a table for 'this'");
 	cobj = nsp_getobj(N, thisobj, "_socket");

@@ -362,12 +362,12 @@ NSP_CLASS(libnsp_data_sqlite_client)
 			nsp_setstr(N, &N->context->l, "database", cobj->val->d.str, cobj->val->size);
 		}
 	}
-	cobj = nsp_getobj(N, nsp_getobj(N, &N->g, "data"), "sqlite");
+	cobj = nsp_getobj(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "data"), "sqlite");
 	if (nsp_istable(cobj)) nsp_zlink(N, &N->context->l, cobj);
-	else n_warn(N, __FN__, "data.sqlite not found");
-	cobj = nsp_getobj(N, nsp_getobj(N, nsp_getobj(N, &N->g, "data"), "sql"), "common");
+	else n_warn(N, __FN__, "lib.data.sqlite not found");
+	cobj = nsp_getobj(N, nsp_getobj(N, nsp_getobj(N, nsp_getobj(N, &N->g, "lib"), "data"), "sql"), "common");
 	if (nsp_istable(cobj)) nsp_zlink(N, &N->context->l, cobj);
-	else n_warn(N, __FN__, "data.sql.common not found");
+	else n_warn(N, __FN__, "lib.data.sql.common not found");
 	return 0;
 #undef __FN__
 }

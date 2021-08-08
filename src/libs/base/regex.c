@@ -769,7 +769,7 @@ char *val;
 	for (scan = p; (temp = regnext(scan)) != NULL; scan = temp)
 		continue;
 
-	offset = (OP(scan) == BACK) ? scan - val : val - scan;
+	offset = (OP(scan) == BACK) ? (unsigned long)(scan - val) : (unsigned long)(val - scan);
 	*(scan + 1) = (offset >> 8) & 0177;
 	*(scan + 2) = offset & 0377;
 }

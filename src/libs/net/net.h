@@ -93,7 +93,11 @@ typedef struct {
 	/* now begin the stuff that's socket-specific */
 	/* mbedtls dies a horrible and stupid death when using short ints.. */
 //	short int socket;
+#if defined _WIN32 && !defined _WIN64
 	int socket;
+#else
+	uint64 socket;
+#endif
 	short use_tls;
 #if defined(HAVE_OPENSSL)
 	SSL *ssl;

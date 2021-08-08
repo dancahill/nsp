@@ -182,7 +182,7 @@ static char *mime_read_head(nsp_state *N, obj_t *tobj, char *inptr)
 			p = inptr;
 			while (*inptr && *inptr != '\r' && *inptr != '\n') inptr++;
 			if (cobj) nsp_strcat(N, cobj, " ", 1);
-			if (cobj) nsp_strcat(N, cobj, p, inptr - p);
+			if (cobj) nsp_strcat(N, cobj, p, (unsigned long)(inptr - p));
 			if (*inptr == '\r') inptr++;
 			if (*inptr == '\n') inptr++;
 		} else if (*inptr != '\r' && *inptr != '\n' && *inptr != '\0') {

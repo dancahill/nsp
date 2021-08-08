@@ -141,7 +141,7 @@ int _nc_strlen(const char *s)
 	char *p = (char *)s;
 
 	while (*p) p++;
-	return p - (char *)s;
+	return (unsigned long)(p - (char *)s);
 }
 
 char *_nc_strchr(const char *s, int c)

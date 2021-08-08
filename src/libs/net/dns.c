@@ -122,7 +122,7 @@ static int dns_lookup(nsp_state *N, obj_t *tobj, const char *domain)
 			cobj = nsp_setstr(N, stobj, "text", NULL, 0);
 			for (i = 0; i < pDnsCur->Data.TXT.dwStringCount; i++) {
 				if (i > 0) nsp_strcat(N, cobj, "\r\n", -1);
-				nsp_strcat(N, cobj, pDnsCur->Data.TXT.pStringArray[i], strlen(pDnsCur->Data.TXT.pStringArray[i]));
+				nsp_strcat(N, cobj, pDnsCur->Data.TXT.pStringArray[i], (unsigned long)strlen(pDnsCur->Data.TXT.pStringArray[i]));
 			}
 			break;
 		}
