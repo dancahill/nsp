@@ -23,6 +23,21 @@
 #include "nsp/config.h"
 #endif
 
+#ifdef _WIN32
+#define msleep(x) Sleep(x)
+#define strcasecmp stricmp
+//#define snprintf _snprintf
+//#define vsnprintf _vsnprintf
+typedef int socklen_t;
+#else
+#include <unistd.h>
+#define closesocket close
+#define msleep(x) usleep(x*1000)
+#ifdef MISSING_SOCKLEN
+typedef int socklen_t;
+#endif
+#endif
+
 #if defined(CONFIG_HAVE_DNS) && !defined(HAVE_DNS)
 #define HAVE_DNS
 #endif
@@ -169,6 +184,10 @@ NSP_CLASSMETHOD(libnsp_net_ftp_client_stor);
 /* http.c */
 NSP_CLASSMETHOD(libnsp_net_http_client_client);
 NSP_CLASSMETHOD(libnsp_net_http_client_send);
+/* httpd.c */
+NSP_CLASSMETHOD(libnsp_net_http_server_constructor);
+NSP_CLASSMETHOD(libnsp_net_http_server_start);
+NSP_CLASSMETHOD(libnsp_net_http_server_stop);
 /* mime.c */
 NSP_FUNCTION(libnsp_net_mime_read);
 NSP_FUNCTION(libnsp_net_mime_write);

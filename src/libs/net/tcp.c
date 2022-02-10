@@ -385,7 +385,7 @@ retry:
 		}
 		goto retry;
 	}
-	if (N->debug) n_warn(N, __FN__, "[%s:%d] %s", socket->RemoteAddr, socket->RemotePort, buffer);
+	if (N && N->debug) n_warn(N, __FN__, "[%s:%d] %s", socket->RemoteAddr, socket->RemotePort, buffer);
 	return n;
 #undef __FN__
 }

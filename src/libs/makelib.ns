@@ -176,6 +176,11 @@ function build_lib(CC, TNAME, OBJECTS, OTYPE, INTDIR) {
 				if (config.have_mbedtls==true) liblist+=" -lmbedtls -lmbedcrypto -lmbedx509";
 				else if (config.have_openssl==true) liblist+=" -lcrypto -lssl";
 
+				if (config.have_pthread) {
+					liblist+=" -pthread";
+				} else if (config.have_lpthread) {
+					liblist+=" -lpthread";
+				}
 			} else if (TNAME=='libnsp_odbc') {
 				if (config.have_odbc==true) liblist+=" -lodbc";
 			} else if (TNAME=='libnsp_pgsql') {

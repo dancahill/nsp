@@ -61,10 +61,15 @@ int nspnet_register_all(nsp_state *N)
 
 	tobj2 = nsp_settable(N, tobj, "http");
 	tobj2->val->attr |= NST_HIDDEN;
-	tobj2 = nsp_settable(N, tobj2, "client");
-	tobj2->val->attr |= NST_HIDDEN;
-	nsp_setcfunc(N, tobj2, "client", (NSP_CFUNC)libnsp_net_http_client_client);
-	nsp_setcfunc(N, tobj2, "send", (NSP_CFUNC)libnsp_net_http_client_send);
+	tobj3 = nsp_settable(N, tobj2, "client");
+	tobj3->val->attr |= NST_HIDDEN;
+	nsp_setcfunc(N, tobj3, "client", (NSP_CFUNC)libnsp_net_http_client_client);
+	nsp_setcfunc(N, tobj3, "send", (NSP_CFUNC)libnsp_net_http_client_send);
+	tobj3 = nsp_settable(N, tobj2, "server");
+	tobj3->val->attr |= NST_HIDDEN;
+	nsp_setcfunc(N, tobj3, "server", (NSP_CFUNC)libnsp_net_http_server_constructor);
+	nsp_setcfunc(N, tobj3, "start", (NSP_CFUNC)libnsp_net_http_server_start);
+	nsp_setcfunc(N, tobj3, "stop", (NSP_CFUNC)libnsp_net_http_server_stop);
 
 	tobj2 = nsp_settable(N, tobj, "mime");
 	tobj2->val->attr |= NST_HIDDEN;
