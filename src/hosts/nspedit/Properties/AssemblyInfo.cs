@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("NSPEdit")]
-[assembly: AssemblyCopyright("Copyright © Dan Cahill 2021")]
+[assembly: AssemblyCopyright("Copyright © Dan Cahill 2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
