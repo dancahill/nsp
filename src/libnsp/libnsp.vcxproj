@@ -138,6 +138,8 @@
     </ClCompile>
     <Lib>
       <OutputFile>$(OutDir)libnsp.lib</OutputFile>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>

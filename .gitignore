@@ -13,7 +13,12 @@ src/config-win.ns
 *.exe
 *.dll
 *.lib
+*.obj
 *.o
 *.suo
+*.pdb
+*.exp
+*.ilk
+*.tlog
 ~AutoRecover.*.vcxproj
 /.vs

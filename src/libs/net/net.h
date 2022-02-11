@@ -52,8 +52,8 @@ typedef int socklen_t;
 #define HAVE_OPENSSL
 #endif
 #if defined(_WIN32)
-#pragma comment(lib, "libcrypto32MD.lib")
-#pragma comment(lib, "libssl32MD.lib")
+#pragma comment(lib, "libcrypto64MD.lib")
+#pragma comment(lib, "libssl64MD.lib")
 #endif
 #elif defined(CONFIG_HAVE_MBEDTLS)
 #if !defined(HAVE_MBEDTLS)
