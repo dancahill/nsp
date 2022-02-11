@@ -481,10 +481,15 @@ namespace NSPEdit
 			//splitContainer1.ResumeLayout(false);
 			//tabPage1.ResumeLayout(false);
 
-			int p2height = splitContainer1.Height - this.OutputHeight;
-			if (p2height < 0) p2height = 0;
-			if (p2height > splitContainer1.Height) p2height = splitContainer1.Height;
-			splitContainer1.SplitterDistance = p2height;
+			try
+			{
+				int p2height = splitContainer1.Height - this.OutputHeight;
+				if (p2height < 0) p2height = 0;
+				if (p2height > splitContainer1.Height) p2height = splitContainer1.Height;
+				if (splitContainer1.SplitterDistance < p2height) splitContainer1.SplitterDistance = p2height;
+				splitContainer1.SplitterDistance = p2height;
+			}
+			catch { }
 			splitContainer1.Panel2.SizeChanged += Panel2_SizeChanged;
 
 			TabControl1_SelectedIndexChanged(null, null);
