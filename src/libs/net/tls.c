@@ -55,19 +55,9 @@ int _tls_init(nsp_state *N, TCP_SOCKET *sock, short srvmode, char *certfile, cha
 {
 #define __FN__ __FILE__ ":_tls_init()"
 #if defined HAVE_OPENSSL
-// this disappeared from ssl.h in 1.1 - why?!?
-//#ifndef SSL_CTRL_OPTIONS
-//#define SSL_CTRL_OPTIONS 32
-//#endif
-	long options = SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_TLSv1_1;
-
 	SSL_load_error_strings();
 	SSLeay_add_ssl_algorithms();
-	sock->ssl_meth = srvmode ? SSLv23_server_method() : SSLv23_client_method();
-	sock->ssl_ctx = SSL_CTX_new(sock->ssl_meth);
-	//SSL_CTX_ctrl(sock->ssl_ctx, SSL_CTRL_OPTIONS, options, NULL);
-	SSL_CTX_set_options(sock->ssl_ctx, options);
-
+	sock->ssl_ctx = SSL_CTX_new(TLS_client_method());
 	if (!sock->ssl_ctx) {
 		n_warn(N, __FN__, "SSL Error");
 		return -1;

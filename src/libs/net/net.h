@@ -117,7 +117,6 @@ typedef struct {
 #if defined(HAVE_OPENSSL)
 	SSL *ssl;
 	SSL_CTX *ssl_ctx;
-	const SSL_METHOD *ssl_meth;
 #elif defined(HAVE_MBEDTLS)
 	mbedtls_ssl_context ssl;
 	mbedtls_ssl_config conf;
