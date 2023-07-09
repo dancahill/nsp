@@ -104,7 +104,7 @@ clean:
 	@rm -rf bin int lib obj Debug
 
 distclean: clean
-	@chown root.root * -R
+	@chown root:root * -R
 	@setfacl -b `find . -name "*"`
 	@chmod 755 `find . -type d`
 	@chmod 644 `find . -type f`
