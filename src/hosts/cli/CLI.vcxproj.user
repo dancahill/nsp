@@ -15,5 +15,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LocalDebuggerCommandArguments>-f N:\work\tests\test.ns</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommandArgumentsHistory>-f N:\work\tests\test.ns|</LocalDebuggerCommandArgumentsHistory>
   </PropertyGroup>
 </Project>

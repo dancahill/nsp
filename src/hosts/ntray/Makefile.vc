@@ -73,7 +73,7 @@ BSC32_SBRS= \
 LINK32=link.exe
 LINK32_FLAGS=/libpath:../../../lib/ gdi32.lib shell32.lib user32.lib \
 	libnsp.lib libnsp_dl.lib libnsp_ext.lib libnsp_math.lib $(LDFLAGS) \
-	/nologo /subsystem:windows /pdb:none /machine:I386 /out:"$(OUTDIR)\nestray.exe" 
+	/nologo /subsystem:windows /pdb:none /machine:X64 /out:"$(OUTDIR)\nestray.exe" 
 
 LINK32_OBJS= \
 	"$(INTDIR)\nestray.obj" \

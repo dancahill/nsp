@@ -1,16 +1,16 @@
 #!/usr/bin/nsp
 
 function inno_build() {
-	if (string.sub(_ostype_, 0, 7)!="Windows") return;
-	innoexe=""+ProgramFiles+"\\Inno Setup 5\\Compil32.exe";
-	if (typeof(lib.file.stat(innoexe))=='table') {
-		lib.system("\""+innoexe+"\" /cc nsp.iss");
+	if (lib.string.sub(_ostype_, 0, 7) != "Windows") return;
+	innoexe = "" + ProgramFiles + "\\Inno Setup 5\\Compil32.exe";
+	if (typeof(lib.file.stat(innoexe)) == 'table') {
+		lib.system("\"" + innoexe + "\" /cc nsp.iss");
 	}
 	return;
 }
 
 function win_make(vcver, private_inc, private_lib) {
-	if (string.sub(_ostype_, 0, 7)!="Windows") return;
+	if (lib.string.sub(_ostype_, 0, 7) != "Windows") return;
 	switch (vcver) {
 	case 6:
 		print("Visual Studio 6 (98)\r\n");
@@ -42,13 +42,25 @@ function win_make(vcver, private_inc, private_lib) {
 		env += "@SET INCLUDE=" + private_inc + ";%INCLUDE%\r\n";
 		env_set=true;
 		break;
+	case 17:
+		print("Visual Studio 2022 (Version 17)\r\n");
+		env = "call \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars32.bat\"\r\n";
+		env += "@SET INCLUDE=" + private_inc + ";%INCLUDE%\r\n";
+		env_set=true;
+		break;
+	case 18:
+		print("Visual Studio 2026 (Version 18)\r\n");
+		env = "call \"C:\\Program Files\\Microsoft Visual Studio\\18\\Professional\\VC\\Auxiliary\\Build\\vcvars64.bat\"\r\n";
+		env += "@SET INCLUDE=" + private_inc + ";%INCLUDE%\r\n";
+		env_set = true;
+		break;
 	default:
 		print("fail\r\n");
 	}
 	if (env_set) {
 		cmd="@nmake -f Makefile.vc all shared_libs";
 		batchfile=_ENV['TEMP']+"\\win_make.cmd";
-		file.writeall(batchfile, env+cmd+"\r\n");
+		lib.file.writeall(batchfile, env+cmd+"\r\n");
 		lib.system(batchfile);
 		inno_build();
 	}
@@ -57,11 +69,12 @@ function win_make(vcver, private_inc, private_lib) {
 	exit;
 }
 if (_ostype_=="Windows/msvc") {
-	global ProgramFiles="C:\\Program Files (x86)";
+	global ProgramFiles = "C:\\Program Files (x86)";
 //	win_make(6, "C:\\NullLogic\\utils\\VC6\\include;", "C:\\NullLogic\\utils\\VC6\\lib;");
 //	win_make(9, "C:\\NullLogic\\utils\\VC6\\include;", "C:\\NullLogic\\utils\\VC6\\lib;");
 //	win_make(9, "C:\\null\\VC6\\include;", "C:\\null\\VC6\\lib;");
-	win_make(16, @"C:\NullLogic\utils\VS2019\include;", @"C:\NullLogic\utils\VS2019\lib;");
+//	win_make(16, @"C:\NullLogic\utils\VS2019\include;", @"C:\NullLogic\utils\VS2019\lib;");
+	win_make(18, @"C:\NullLogic\utils\VS2026\include;", @"C:\NullLogic\utils\VS2026\lib;");
 }
 
 print("ostype="+_ostype_+"\n");

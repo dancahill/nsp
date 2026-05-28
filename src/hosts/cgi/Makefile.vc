@@ -10,8 +10,8 @@ LINK          = link.exe /nologo
 MAKE          = nmake.exe /C /S /Y /F
 
 BIN_CFLAGS    = /W3 /O2 /MD /I "../../../include" $(CFLAGS) /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /FD /c
-BIN_LDFLAGS   = /subsystem:console /pdb:none /machine:I386 /libpath:../../../lib/ libnsp.lib $(LDFLAGS) \
-	libnsp_dl.lib libnsp_ext.lib libnsp_math.lib
+BIN_LDFLAGS   = /subsystem:console /pdb:none /machine:X64 /libpath:../../../lib/ libnsp.lib $(LDFLAGS) \
+	libnsp_base.lib
 BIN_TARGETDIR = ..\..\..\bin
 
 #CFLAGS  = $(BIN_CFLAGS)

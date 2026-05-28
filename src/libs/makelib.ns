@@ -131,11 +131,11 @@ function build_lib(CC, TNAME, OBJECTS, OTYPE, INTDIR) {
 			} else if (TNAME=='libnsp_ssh2') {
 				if (config.have_ssh2==true) LIBS+=" ws2_32.lib libssh2.lib zlib.lib libcrypto32MT.lib libssl32MT.lib";
 			}
-//			lib.system("link.exe /nologo /subsystem:console /pdb:none /machine:I386 /dll /incremental:no "+LIBS+" /out:"+swapslash(LIBDIR+"/shared/"+TNAME+".dll "+liblist));
+//			lib.system("link.exe /nologo /subsystem:console /pdb:none /machine:X64 /dll /incremental:no "+LIBS+" /out:"+swapslash(LIBDIR+"/shared/"+TNAME+".dll "+liblist));
 //			LIBS="/libpath:"+LIBDIR+" gdi32.lib shell32.lib user32.lib winmm.lib libnsp.lib";
 //			if (TNAME=='libnsp_ssh' && config.have_ssh2==true)  LIBS+=" libssh2.lib";
 //			if (TNAME=='libnsp_net' && config.have_mbedtls==true) LIBS+=" mbedtls.lib";
-			lib.system("link.exe /nologo /subsystem:console /pdb:none /machine:I386 /dll /incremental:no "+LIBS+" /def:\"dlldefs.def\" /out:"+swapslash(LIBDIR+"/shared/"+TNAME+".dll "+liblist));
+			lib.system("link.exe /nologo /subsystem:console /pdb:none /machine:X64 /dll /incremental:no "+LIBS+" /def:\"dlldefs.def\" /out:"+swapslash(LIBDIR+"/shared/"+TNAME+".dll "+liblist));
 			file.unlink(swapslash(LIBDIR+"/shared/"+TNAME+".exp"));
 			file.unlink(swapslash(LIBDIR+"/shared/"+TNAME+".lib"));
 		} else {
