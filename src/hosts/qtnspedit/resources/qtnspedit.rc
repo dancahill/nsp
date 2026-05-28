@@ -1,0 +1,30 @@
+IDI_ICON   ICON    "qtnspedit.ico"
+
+1 VERSIONINFO
+FILEVERSION     0,9,5,0
+PRODUCTVERSION  0,9,5,0
+FILEFLAGSMASK   0x3fL
+FILEFLAGS      0x0L
+FILEOS         0x4L
+FILETYPE       0x1L
+FILESUBTYPE     0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "NullLogic"
+            VALUE "FileDescription", "NSP Script Editor"
+            VALUE "FileVersion", "0.9.5"
+            VALUE "InternalName", "qtnspedit"
+            VALUE "LegalCopyright", "Copyright (C) 2007-2026 Dan Cahill"
+            VALUE "OriginalFilename", "qtnspedit.exe"
+            VALUE "ProductName", "qtnspedit"
+            VALUE "ProductVersion", "0.9.5"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 0x04B0
+    END
+END

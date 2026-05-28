@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/resources">
+        <file>example1.ns</file>
+        <file>NSPNameSpace.xml</file>
+        <file alias="app.ico">qtnspedit.ico</file>
+    </qresource>
+</RCC>
