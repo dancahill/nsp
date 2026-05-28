@@ -23,12 +23,17 @@ dirs:
 
 # rules for libs
 
-static_libs: _libnspcrypto _libnspdata _libnspdl _libnspext _libnspfbsql _libnspmath _libnspmysql _libnspnet _libnspodbc _libnsppgsql _libnspregex _libnspsqlite3 _libnspssh2 _libnspwinapi _libnspwingdi _libnspzip
+static_libs: _libnspbase _libnspcrypto _libnspdata _libnspfbsql _libnspmysql _libnspnet _libnspodbc _libnsppgsql _libnspsqlite _libnspssh2 _libnspwingdi
 
 _libnsp: dirs
 	@cd src\libnsp
 	@$(MAKE) Makefile.vc
 	@cd ..\..
+
+_libnspbase:
+	@cd src\libs\base
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
+	@cd ..\..\..
 
 _libnspcrypto:
 	@cd src\libs\crypto
@@ -40,23 +45,8 @@ _libnspdata:
 	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
-_libnspdl:
-	@cd src\libs\dl
-	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
-	@cd ..\..\..
-
-_libnspext:
-	@cd src\libs\ext
-	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
-	@cd ..\..\..
-
 _libnspfbsql:
 	@cd src\libs\fbsql
-	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
-	@cd ..\..\..
-
-_libnspmath:
-	@cd src\libs\math
 	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
@@ -80,13 +70,8 @@ _libnsppgsql:
 	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
-_libnspregex:
-	@cd src\libs\regex
-	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
-	@cd ..\..\..
-
-_libnspsqlite3:
-	@cd src\libs\sqlite3
+_libnspsqlite:
+	@cd src\libs\sqlite
 	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
@@ -95,35 +80,22 @@ _libnspssh2:
 	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
-_libnspwinapi:
-	@cd src\libs\winapi
-	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
-	@cd ..\..\..
-
 _libnspwingdi:
 	@cd src\libs\wingdi
 	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
 	@cd ..\..\..
 
-_libnspzip:
-	@cd src\libs\zip
-	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='static';include('Makefile.ns');"
-	@cd ..\..\..
-
 shared_libs:
+	@cd src\libs\base
+	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
+	@cd ..\..\..
 	@cd src\libs\crypto
 	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\data
 	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
-	@cd src\libs\ext
-	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
-	@cd ..\..\..
 	@cd src\libs\fbsql
-	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
-	@cd ..\..\..
-	@cd src\libs\math
 	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\mysql
@@ -138,25 +110,13 @@ shared_libs:
 	@cd src\libs\pgsql
 	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
-	@cd src\libs\regex
-	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
-	@cd ..\..\..
-	@cd src\libs\sqlite3
+	@cd src\libs\sqlite
 	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 	@cd src\libs\ssh2
 	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
-	@cd src\libs\test
-	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
-	@cd ..\..\..
-	@cd src\libs\winapi
-	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
-	@cd ..\..\..
 	@cd src\libs\wingdi
-	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
-	@cd ..\..\..
-	@cd src\libs\zip
 	@..\..\..\$(NSPLITE) -e "global _LINKAGE_='shared';include('Makefile.ns');"
 	@cd ..\..\..
 
@@ -198,22 +158,16 @@ nspedit: _libnsp
 
 clean: lite
 #	@touch src\config.mak
+	@cd src\libs\base
+	@..\..\..\$(NSPLITE) Makefile.ns clean
+	@cd ..\..\..
 	@cd src\libs\crypto
 	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\data
 	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
-	@cd src\libs\dl
-	@..\..\..\$(NSPLITE) Makefile.ns clean
-	@cd ..\..\..
-	@cd src\libs\ext
-	@..\..\..\$(NSPLITE) Makefile.ns clean
-	@cd ..\..\..
 	@cd src\libs\fbsql
-	@..\..\..\$(NSPLITE) Makefile.ns clean
-	@cd ..\..\..
-	@cd src\libs\math
 	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\mysql
@@ -228,25 +182,13 @@ clean: lite
 	@cd src\libs\pgsql
 	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
-	@cd src\libs\regex
-	@..\..\..\$(NSPLITE) Makefile.ns clean
-	@cd ..\..\..
-	@cd src\libs\sqlite3
+	@cd src\libs\sqlite
 	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\libs\ssh2
 	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
-	@cd src\libs\test
-	@..\..\..\$(NSPLITE) Makefile.ns clean
-	@cd ..\..\..
-	@cd src\libs\winapi
-	@..\..\..\$(NSPLITE) Makefile.ns clean
-	@cd ..\..\..
 	@cd src\libs\wingdi
-	@..\..\..\$(NSPLITE) Makefile.ns clean
-	@cd ..\..\..
-	@cd src\libs\zip
 	@..\..\..\$(NSPLITE) Makefile.ns clean
 	@cd ..\..\..
 	@cd src\hosts\cgi

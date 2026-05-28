@@ -20,5 +20,8 @@ src/config-win.ns
 *.exp
 *.ilk
 *.tlog
+*.def
+*.idb
 ~AutoRecover.*.vcxproj
 /.vs
+.vs

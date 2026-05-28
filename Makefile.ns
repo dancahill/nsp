@@ -1,7 +1,7 @@
 #!/usr/bin/nsp
 
 function inno_build() {
-	if (lib.string.sub(_ostype_, 0, 7) != "Windows") return;
+	if (!_ostype_.startswith("Windows")) return;
 	innoexe = "" + ProgramFiles + "\\Inno Setup 5\\Compil32.exe";
 	if (typeof(lib.file.stat(innoexe)) == 'table') {
 		lib.system("\"" + innoexe + "\" /cc nsp.iss");
@@ -10,7 +10,7 @@ function inno_build() {
 }
 
 function win_make(vcver, private_inc, private_lib) {
-	if (lib.string.sub(_ostype_, 0, 7) != "Windows") return;
+	if (!_ostype_.startswith("Windows")) return;
 	switch (vcver) {
 	case 6:
 		print("Visual Studio 6 (98)\r\n");

@@ -27,10 +27,10 @@ class testlib2 {
 	}
 	function fbsql() {
 		ci = { host="localhost", port=3050, username="SYSDBA", password="masterkey", database="/tmp/nstest.fdb" };
-		file.unlink(ci.database);
+		lib.file.unlink(ci.database);
 		file.writeall("/tmp/nstest.sql", sprintf("SET SQL DIALECT 3;\r\nCREATE DATABASE '%s'\r\nUSER '%s' PASSWORD '%s'\r\nPAGE_SIZE 16384;\r\n", ci.database, ci.username, ci.password));
 		system("isql-fb -input /tmp/nstest.sql 2> /dev/null");
-		file.unlink("/tmp/nstest.sql");
+		lib.file.unlink("/tmp/nstest.sql");
 		try {
 			dl.load("data");
 			dl.load("fbsql");
@@ -39,7 +39,7 @@ class testlib2 {
 		} catch (ex) {
 			printf("Exception: %s\r\n", ex.description);
 		}
-		file.unlink(ci.database);
+		lib.file.unlink(ci.database);
 		return;
 	}
 	function mysql() {
@@ -74,7 +74,7 @@ class testlib2 {
 	}
 	function sqlite() {
 		ci = { database="/tmp/nstest.db" };
-		file.unlink(ci.database);
+		lib.file.unlink(ci.database);
 		try {
 			dl.load("data");
 			dl.load("sqlite");
@@ -83,7 +83,7 @@ class testlib2 {
 		} catch (ex) {
 			printf("Exception: %s\r\n", ex.description);
 		}
-		file.unlink(ci.database);
+		lib.file.unlink(ci.database);
 	}
 	function mongodb() {
 		function trim(s) {

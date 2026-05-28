@@ -25,7 +25,7 @@ io.flush();
 print("compiling...");
 if (_ostype_=="Windows/msvc") {
 	system("cl.exe -nologo /W3 /O2 /MD -DWIN32 nsp.c -Fensp.exe");
-	file.unlink("nsp.obj");
+	lib.file.unlink("nsp.obj");
 } else {
 	// best runtime results
 //	system("gcc -O3 -s -static nsp.c -march=pentium2 -o nsp");

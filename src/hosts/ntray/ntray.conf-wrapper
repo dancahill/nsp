@@ -12,7 +12,7 @@ if (typeof(file.stat(cfilename))!='table') {
 	x=file.readall(rfilename);
 	x=crypto.aes_cbc_encrypt(x, key);
 	x=base64.encode(x, 76);
-	file.writeall(cfilename, x);
+	lib.file.writeall(cfilename, x);
 }
 if (typeof(file.stat(cfilename))=='table') {
 	for (i=0;i<3;i++) {
@@ -26,7 +26,7 @@ if (typeof(file.stat(cfilename))=='table') {
 	}
 	if (typeof(x)=='string') {
 //		win.MessageBox(tostring(x));
-//		file.writeall(rfilename+".txt", x);
+//		lib.file.writeall(rfilename+".txt", x);
 		exec(x);
 	} else {
 		win.MessageBox("Go away", "Bad Password");
