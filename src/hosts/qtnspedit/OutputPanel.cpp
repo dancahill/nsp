@@ -24,9 +24,13 @@ OutputPanel::OutputPanel(QWidget *parent)
 }
 
 // Appends text and auto-scrolls to the bottom so the latest output is visible.
+// Uses insertPlainText instead of append to avoid the extra newline that
+// QTextBrowser::append() prepends.
 void OutputPanel::appendOutput(const QString &text)
 {
-    append(text);
+    QTextCursor cursor = textCursor();
+    cursor.movePosition(QTextCursor::End);
+    cursor.insertText(text);
     verticalScrollBar()->setValue(verticalScrollBar()->maximum());
 }
 

@@ -524,24 +524,20 @@ QString NspFormatter::format(const QString &code)
             int remainingBraceNet = countBraces(normalized, false, QChar());
 
             bool rStartsWithCloseBrace = normalized.startsWith('}');
-            bool rStartsWithElse = false;
-            bool rStartsWithCaseOrDefault = false;
             QString rLower = normalized.toLower();
-            if (rLower.startsWith("else") && (rLower.length() == 4 || !rLower[4].isLetterOrNumber()))
-                rStartsWithElse = true;
-            else if (rLower.startsWith("} else") || rLower.startsWith("}else"))
-                rStartsWithElse = true;
+            bool rStartsWithCloseBraceAndElse = rLower.startsWith("} else") || rLower.startsWith("}else");
+            bool rStartsWithCaseOrDefault = false;
             if (rLower.startsWith("case") && (rLower.length() == 4 || !rLower[4].isLetterOrNumber()))
                 rStartsWithCaseOrDefault = true;
             if (rLower.startsWith("default") && (rLower.length() == 7 || !rLower[7].isLetterOrNumber()))
                 rStartsWithCaseOrDefault = true;
 
             int rLineIndent = indent;
-            if (rStartsWithCloseBrace || rStartsWithElse || rStartsWithCaseOrDefault)
+            if (rStartsWithCloseBrace || rStartsWithCaseOrDefault)
                 rLineIndent = qMax(0, indent - 1);
 
             int rNet = remainingBraceNet;
-            if (rStartsWithCloseBrace || rStartsWithElse)
+            if (rStartsWithCloseBraceAndElse)
                 rNet++;
             if (rStartsWithCaseOrDefault && remainingBraceNet == 0)
                 rNet++;
@@ -559,11 +555,19 @@ QString NspFormatter::format(const QString &code)
             continue;
         }
 
-        // Inside a block comment: preserve as-is, end when */ is found
+        // Inside a block comment: preserve lines verbatim (no trimming,
+        // no re-indentation). End when */ is found.
         if (inBlockComment) {
-            output << QString(indent, '\t') + raw;
-            if (raw.contains("*/"))
-                inBlockComment = false;
+            const QString &origLine = input[i];
+            int closePos = origLine.indexOf("*/");
+            if (closePos < 0) {
+                // Comment doesn't close on this line — output verbatim
+                output << origLine;
+                continue;
+            }
+            // Comment closes on this line — output verbatim
+            inBlockComment = false;
+            output << origLine;
             continue;
         }
 
@@ -579,11 +583,58 @@ QString NspFormatter::format(const QString &code)
             continue;
         }
 
-        // Block comment start: preserve as-is, mark if unterminated
+        // Block comment start on this line
         if (raw.startsWith("/*")) {
+            int closePos = raw.indexOf("*/", 2);
+            if (closePos >= 0) {
+                // Inline block comment: /* ... */ on one line
+                // Check for code after the closing */
+                QString afterComment = raw.mid(closePos + 2).trimmed();
+                if (afterComment.isEmpty()) {
+                    // Just the comment — output as-is with current indentation
+                    output << QString(indent, '\t') + raw;
+                    continue;
+                }
+                // Code after the comment — output comment portion as-is, then normalize the rest
+                QString commentPart = raw.left(closePos + 2);
+                output << QString(indent, '\t') + commentPart + " " + normalizeLine(afterComment);
+                // Count braces in the code after the comment for indentation tracking
+                int afterBraces = countBraces(afterComment, false, QChar());
+                bool afterStartsWithCloseBrace = afterComment.startsWith('}');
+                QString afterLower = afterComment.toLower();
+                bool afterStartsWithCloseBraceAndElse = afterLower.startsWith("} else") || afterLower.startsWith("}else");
+                bool afterStartsWithCaseOrDefault = false;
+                if (afterLower.startsWith("case") && (afterLower.length() == 4 || !afterLower[4].isLetterOrNumber()))
+                    afterStartsWithCaseOrDefault = true;
+                if (afterLower.startsWith("default") && (afterLower.length() == 7 || !afterLower[7].isLetterOrNumber()))
+                    afterStartsWithCaseOrDefault = true;
+
+                int lineIndent = indent;
+                if (afterStartsWithCloseBrace || afterStartsWithCaseOrDefault)
+                    lineIndent = qMax(0, indent - 1);
+
+                int net = afterBraces;
+                if (afterStartsWithCloseBraceAndElse)
+                    net++;
+                if (afterStartsWithCaseOrDefault && afterBraces == 0)
+                    net++;
+
+                indent = lineIndent + qMax(0, net);
+                if (indent < 0) indent = 0;
+
+                bool afterIn = false;
+                QChar afterChar;
+                lineOpensString(afterComment, afterIn, afterChar);
+                if (afterIn) {
+                    inMultilineString = true;
+                    mlStringChar = afterChar;
+                }
+                continue;
+            }
+            // Unterminated block comment — output as-is with current indentation,
+            // subsequent lines will be preserved verbatim
             output << QString(indent, '\t') + raw;
-            if (!raw.contains("*/"))
-                inBlockComment = true;
+            inBlockComment = true;
             continue;
         }
 
@@ -594,31 +645,34 @@ QString NspFormatter::format(const QString &code)
         int braceNet = countBraces(trimmed, false, QChar());
 
         // Determine if this line should be outdented (closing brace, else, case/default)
+        // Note: bare "else"/"else if" (without preceding }) stays at current indent,
+        // while "} else" outdents by one because the } already reduced depth.
         bool startsWithCloseBrace = trimmed.startsWith('}');
-        bool startsWithElse = false;
-        bool startsWithCaseOrDefault = false;
         QString lower = trimmed.toLower();
-        if (lower.startsWith("else") && (lower.length() == 4 || !lower[4].isLetterOrNumber()))
-            startsWithElse = true;
-        else if (lower.startsWith("} else") || lower.startsWith("}else"))
-            startsWithElse = true;
+        bool startsWithCloseBraceAndElse = lower.startsWith("} else") || lower.startsWith("}else");
+        bool startsWithCaseOrDefault = false;
         if (lower.startsWith("case") && (lower.length() == 4 || !lower[4].isLetterOrNumber()))
             startsWithCaseOrDefault = true;
         if (lower.startsWith("default") && (lower.length() == 7 || !lower[7].isLetterOrNumber()))
             startsWithCaseOrDefault = true;
 
-        // Outdent lines that start with }, else, case, or default
+        // Outdent lines starting with } (including } else), case, or default.
+        // Bare else/else if stays at current indent (same level as its if).
         int lineIndent = indent;
-        if (startsWithCloseBrace || startsWithElse || startsWithCaseOrDefault)
+        if (startsWithCloseBrace || startsWithCaseOrDefault)
             lineIndent = qMax(0, indent - 1);
 
         output << QString(lineIndent, '\t') + trimmed;
 
         // Adjust indentation for the next line
         int net = braceNet;
-        // } else { and similar: the } already reduced indent, so compensate
-        if (startsWithCloseBrace || startsWithElse)
+        // } catch (e) { and } else { and similar: the } outdented this line,
+        // so compensate to put the body back at the correct depth.
+        // This applies to any } line that also opens a new block (net brace
+        // change >= 0 with a { on the line), as well as } else / } else if.
+        if (startsWithCloseBrace && (startsWithCloseBraceAndElse || braceNet >= 0))
             net++;
+
         // case/default with no braces: indent the body one level deeper
         if (startsWithCaseOrDefault && braceNet == 0)
             net++;
