@@ -9,7 +9,7 @@
 #include "OutputPanel.h"
 #include "ScriptRunner.h"
 #include "FindBar.h"
-#include "MemTreeView.h"
+#include "DebugPanel.h"
 #include "Settings.h"
 #include "NspFormatter.h"
 #include "FileBrowser.h"
@@ -29,7 +29,6 @@
 #include <QDir>
 #include <QTextStream>
 #include <QFont>
-#include <QShortcut>
 #include <QIcon>
 #include <QSize>
 #include <QPixmap>
@@ -79,14 +78,14 @@ MainWindow::MainWindow(QWidget *parent)
     m_mainSplitter->setStretchFactor(1, 1);  // tabs stretch to fill
     m_mainSplitter->setSizes(QList<int>() << 200 << 600);
 
-    // Memory viewer — initially hidden; slides in to the right of the editor area
-    m_memView = new MemTreeView(this);
-    m_memView->setVisible(false);
+    // Debug panel — initially hidden; slides in to the right of the editor area
+    m_debugPanel = new DebugPanel(this);
+    m_debugPanel->setVisible(false);
 
-    // Outer horizontal splitter: editor area (left) | memory viewer (right)
+    // Outer horizontal splitter: editor area (left) | debug panel (right)
     QSplitter *horzSplitter = new QSplitter(Qt::Horizontal, this);
     horzSplitter->addWidget(m_mainSplitter);
-    horzSplitter->addWidget(m_memView);
+    horzSplitter->addWidget(m_debugPanel);
     horzSplitter->setStretchFactor(0, 1);
     horzSplitter->setStretchFactor(1, 0);
     setCentralWidget(horzSplitter);
@@ -103,15 +102,15 @@ MainWindow::MainWindow(QWidget *parent)
     // Connect file browser double-click
     connect(m_fileBrowser, &FileBrowser::fileActivated, this, &MainWindow::openFileFromBrowser);
 
+    // Connect debug panel Run/Stop buttons
+    connect(m_debugPanel, &DebugPanel::runClicked, this, &MainWindow::runScript);
+    connect(m_debugPanel, &DebugPanel::stopClicked, this, &MainWindow::stopScript);
+
     // Restore saved output panel height
     m_outputHeight = Settings::loadOutputHeight();
 
     // Start with one untitled tab
     newFile();
-
-    // Global shortcut for Find Next (F3) — also used when find bar is not focused
-    QShortcut *findNextShortcut = new QShortcut(QKeySequence(Qt::Key_F3), this);
-    connect(findNextShortcut, &QShortcut::activated, this, &MainWindow::findNext);
 }
 
 // ---------------------------------------------------------------------------
@@ -134,10 +133,10 @@ void MainWindow::createMenus()
     // File menu: New, Open File, Open Folder, Save, Save as HTML, Close Tab, Exit
     QMenu *fileMenu = menuBar()->addMenu("&File");
     fileMenu->addAction("&New", this, &MainWindow::newFile, QKeySequence::New);
-    fileMenu->addAction("&Open File...", this, &MainWindow::openFile, QKeySequence::Open);
-    fileMenu->addAction("Open &Folder...", this, &MainWindow::openFolder);
+    fileMenu->addAction("&Open File", this, &MainWindow::openFile, QKeySequence::Open);
+    fileMenu->addAction("Open &Folder", this, &MainWindow::openFolder);
     fileMenu->addAction("&Save", this, &MainWindow::saveFile, QKeySequence::Save);
-    fileMenu->addAction("Save as &HTML...", this, &MainWindow::saveFileAsHTML);
+    fileMenu->addAction("Save as &HTML", this, &MainWindow::saveFileAsHTML);
     fileMenu->addSeparator();
     fileMenu->addAction("&Close Tab", this, [this]() {
         int idx = m_tabWidget->currentIndex();
@@ -151,15 +150,16 @@ void MainWindow::createMenus()
     editMenu->addAction("&Format Code", this, &MainWindow::formatCode, QKeySequence("Ctrl+I"));
     editMenu->addAction("Toggle &Comment", this, &MainWindow::toggleComment, QKeySequence("Ctrl+/"));
     editMenu->addSeparator();
-    editMenu->addAction("&Find...", this, &MainWindow::showFindBar, QKeySequence::Find);
+    editMenu->addAction("&Find", this, &MainWindow::showFindBar, QKeySequence::Find);
     editMenu->addAction("Find &Next", this, &MainWindow::findNext, QKeySequence("F3"));
     editMenu->addAction("Find &Previous", this, &MainWindow::findPrev, QKeySequence("Shift+F3"));
 
-    // Script menu: Run, Continue (after breakpoint), View Memory
+    // Script menu: Run (F5 also resumes from breakpoint), Stop, View Debug Panel
     QMenu *scriptMenu = menuBar()->addMenu("&Script");
-    scriptMenu->addAction("&Run", this, &MainWindow::runScript, QKeySequence("F5"));
-    scriptMenu->addAction("&Continue", this, &MainWindow::continueScript);
-    scriptMenu->addAction("View &Memory", this, &MainWindow::viewMemory, QKeySequence("F6"));
+    m_runAction = scriptMenu->addAction("&Run", this, &MainWindow::runScript, QKeySequence("F5"));
+    m_stopAction = scriptMenu->addAction("&Stop", this, &MainWindow::stopScript);
+    m_stopAction->setEnabled(false);
+    scriptMenu->addAction("View &Debug Panel", this, &MainWindow::viewDebugPanel, QKeySequence("F6"));
 
     // Help menu: NSP Online, NSP Syntax, About
     QMenu *helpMenu = menuBar()->addMenu("&Help");
@@ -193,6 +193,27 @@ static QPixmap GetRunIcon()
     return QPixmap(run_xpm);
 }
 
+// Returns a red square QPixmap used as the Stop button icon.
+static QPixmap GetStopIcon()
+{
+    // XPM definition: 22x22 pixels, 2 colors (transparent, red)
+    static const char *stop_xpm[] = {
+        "22 22 2 1", "  c None", ". c #CC0000",
+        "                      ", "                      ",
+        "                      ", "                      ",
+        "      ..........      ", "      ..........      ",
+        "      ..........      ", "      ..........      ",
+        "      ..........      ", "      ..........      ",
+        "      ..........      ", "      ..........      ",
+        "      ..........      ", "      ..........      ",
+        "      ..........      ", "      ..........      ",
+        "      ..........      ", "      ..........      ",
+        "      ..........      ", "      ..........      ",
+        "                      ", "                      "
+    };
+    return QPixmap(stop_xpm);
+}
+
 // ---------------------------------------------------------------------------
 // Creates the icon-only toolbar with New, Open, Save, and Run buttons.
 // Uses QStyle::StandardPixmap for the first three, and the custom XPM for Run.
@@ -210,6 +231,9 @@ void MainWindow::createToolBar()
     toolbar->addSeparator();
     QAction *runAction = toolbar->addAction("Run", this, &MainWindow::runScript);
     runAction->setIcon(QIcon(GetRunIcon()));
+    m_toolbarStopAction = toolbar->addAction("Stop", this, &MainWindow::stopScript);
+    m_toolbarStopAction->setIcon(QIcon(GetStopIcon()));
+    m_toolbarStopAction->setEnabled(false);
 }
 
 // ---------------------------------------------------------------------------
@@ -664,26 +688,41 @@ void MainWindow::runScript()
     connect(m_scriptRunner, &ScriptRunner::scriptFinished, this, &MainWindow::onScriptFinished);
     connect(m_scriptRunner, &ScriptRunner::breakpointHit, this, &MainWindow::onBreakpointHit);
     m_scriptRunner->start();
+
+    // Update Run button text to Resume while script is running
+    m_runAction->setText("&Resume");
+    m_debugPanel->setRunning(true);
+    m_stopAction->setEnabled(true);
+    m_toolbarStopAction->setEnabled(true);
 }
 
-// Resumes a paused script (e.g., after inspecting memory at a breakpoint)
-void MainWindow::continueScript()
+// ---------------------------------------------------------------------------
+// Stops a running script. Called from the debug panel Stop button.
+// ---------------------------------------------------------------------------
+void MainWindow::stopScript()
+{
+    if (m_scriptRunner && m_scriptRunner->isRunning()) {
+        m_scriptRunner->stop();
+        delete m_scriptRunner;
+        m_scriptRunner = nullptr;
+        setStatus("Script stopped");
+        m_runAction->setText("&Run");
+        m_debugPanel->setRunning(false);
+        m_stopAction->setEnabled(false);
+        m_toolbarStopAction->setEnabled(false);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Toggles the debug panel visibility. Always accessible via F6.
+// If a script is running, populates the tree with the current NSP state.
+// ---------------------------------------------------------------------------
+void MainWindow::viewDebugPanel()
 {
     if (m_scriptRunner && m_scriptRunner->isRunning())
-        m_scriptRunner->resume();
-}
+        m_debugPanel->setNspState(m_scriptRunner->nspState());
 
-// ---------------------------------------------------------------------------
-// Toggles the memory viewer panel visibility. Only works while a script
-// is running (the NSP state is needed to populate the tree).
-// ---------------------------------------------------------------------------
-void MainWindow::viewMemory()
-{
-    if (!m_scriptRunner || !m_scriptRunner->isRunning())
-        return;
-
-    m_memView->setNspState(m_scriptRunner->nspState());
-    m_memView->setVisible(!m_memView->isVisible());
+    m_debugPanel->setVisible(!m_debugPanel->isVisible());
 }
 
 // Shows the inline find bar on the active editor, pre-filling with selected text
@@ -693,18 +732,26 @@ void MainWindow::showFindBar()
     if (bar) bar->showFind();
 }
 
-// Advances to the next search match in the active find bar
+// Advances to the next search match in the active find bar.
+// Shows the find bar first if it's not currently visible.
 void MainWindow::findNext()
 {
     FindBar *bar = activeFindBar();
-    if (bar) bar->findNext();
+    if (bar) {
+        if (!bar->isVisible()) bar->showFind();
+        bar->findNext();
+    }
 }
 
-// Advances to the previous search match in the active find bar
+// Advances to the previous search match in the active find bar.
+// Shows the find bar first if it's not currently visible.
 void MainWindow::findPrev()
 {
     FindBar *bar = activeFindBar();
-    if (bar) bar->findPrev();
+    if (bar) {
+        if (!bar->isVisible()) bar->showFind();
+        bar->findPrev();
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -762,18 +809,23 @@ void MainWindow::onScriptFinished(bool error, const QString &errbuf)
     setStatus(error ? QString("%1 — finished with errors").arg(QFileInfo(m_scriptRunner->filename()).fileName()) : QString("%1 — done").arg(QFileInfo(m_scriptRunner->filename()).fileName()));
     m_scriptRunner->deleteLater();
     m_scriptRunner = nullptr;
+
+    // Reset Run button text
+    m_runAction->setText("&Run");
+    m_debugPanel->setRunning(false);
+    m_stopAction->setEnabled(false);
+    m_toolbarStopAction->setEnabled(false);
 }
 
 // ---------------------------------------------------------------------------
-// Called when debug.break() is hit inside a script. Opens the memory viewer
-// panel, populates it with the current NSP state, and shows a status message
+// Called when debug.break() is hit inside a script. Opens the debug panel,
+// populates it with the current NSP state, and shows a status message
 // indicating the script is paused at a breakpoint.
-// ---------------------------------------------------------------------------
 void MainWindow::onBreakpointHit()
 {
-    m_memView->setNspState(m_scriptRunner->nspState());
-    m_memView->setVisible(true);
-    setStatus("Paused at breakpoint — press F5 to continue, F6 to view memory");
+    m_debugPanel->setNspState(m_scriptRunner->nspState());
+    m_debugPanel->setVisible(true);
+    setStatus("Paused at breakpoint — press F5 to continue, F6 to view debug panel");
 }
 
 // ---------------------------------------------------------------------------

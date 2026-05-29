@@ -23,7 +23,8 @@ static bool isSpaceBeforeParenKeyword(const QString &result)
     static const QStringList keywords = {
         "if", "else", "for", "foreach", "while", "do",
         "switch", "case", "catch", "finally", "return",
-        "throw", "new", "delete", "typeof", "sizeof"
+        "throw", "new", "delete", "typeof", "sizeof",
+        "function", "class", "namespace"
     };
     for (const QString &kw : keywords) {
         if (result.endsWith(kw)) {
@@ -73,8 +74,8 @@ static QString normalizeLine(const QString &line)
             continue;
         }
 
-        // Start of a quoted string
-        if (ch == '"' || ch == '\'') {
+        // Start of a quoted string (double, single, or backtick)
+        if (ch == '"' || ch == '\'' || ch == '`') {
             inString = true;
             stringChar = ch;
             result += ch;
@@ -163,6 +164,21 @@ static QString normalizeLine(const QString &line)
             continue;
         }
 
+        // Compound assignment operators: +=, -=, *=, /=
+        // Space before and after (e.g., "x += 5")
+        if ((ch == '+' || ch == '-' || ch == '*' || ch == '/')
+            && i + 1 < line.size() && line[i + 1] == '=') {
+            if (!result.isEmpty() && result.back() != ' ') result += ' ';
+            result += ch;
+            result += '=';
+            i++;
+            if (i + 1 < line.size() && line[i + 1] != ' ' && line[i + 1] != ')'
+                && line[i + 1] != ']' && line[i + 1] != ';'
+                && line[i + 1] != ',' && line[i + 1] != '}')
+                result += ' ';
+            continue;
+        }
+
         // ++ increment operator: treat as compound, no space inside
         if (ch == '+' && i + 1 < line.size() && line[i + 1] == '+') {
             result += "++";
@@ -189,14 +205,20 @@ static QString normalizeLine(const QString &line)
         // Detect unary +/- (after operators, brackets, commas, or at start of expression)
         bool isUnaryMinus = false;
         if (ch == '-' || ch == '+') {
-            if (result.isEmpty() || result.back() == '(' || result.back() == '['
-                || result.back() == ',' || result.back() == '!'
-                || result.back() == '=' || result.back() == '<' || result.back() == '>'
-                || result.back() == '&' || result.back() == '|'
-                || result.back() == '+' || result.back() == '-'
-                || result.back() == '*' || result.back() == '/'
-                || result.back() == '%'
-                || result.back() == '{' || result.back() == '}') {
+            // Look back past any spaces to find the preceding meaningful character
+            int j = result.size() - 1;
+            while (j >= 0 && result[j] == ' ')
+                j--;
+            QChar prevCh = (j >= 0) ? result[j] : QChar();
+            if (j < 0 || prevCh == '(' || prevCh == '['
+                || prevCh == ',' || prevCh == '!'
+                || prevCh == '=' || prevCh == '<' || prevCh == '>'
+                || prevCh == '&' || prevCh == '|'
+                || prevCh == '+' || prevCh == '-'
+                || prevCh == '*' || prevCh == '/'
+                || prevCh == '%' || prevCh == '^'
+                || prevCh == '{' || prevCh == '}'
+                || prevCh == ':') {
                 isUnaryMinus = true;
             }
         }
@@ -218,6 +240,17 @@ static QString normalizeLine(const QString &line)
             continue;
         }
 
+        // === strict equality operator: space before and after
+        if (ch == '=' && i + 2 < line.size() && line[i + 1] == '=' && line[i + 2] == '=') {
+            if (!result.isEmpty() && result.back() != ' ') result += ' ';
+            result += "===";
+            i += 2;
+            if (i + 1 < line.size() && line[i + 1] != ' ' && line[i + 1] != ')'
+                && line[i + 1] != ']' && line[i + 1] != ';' && line[i + 1] != ',')
+                result += ' ';
+            continue;
+        }
+
         // == operator: space before and after
         if (ch == '=' && i + 1 < line.size() && line[i + 1] == '=') {
             if (!result.isEmpty() && result.back() != ' ') result += ' ';
@@ -225,6 +258,26 @@ static QString normalizeLine(const QString &line)
             i++;
             if (i + 1 < line.size() && line[i + 1] != ' ' && line[i + 1] != ')'
                 && line[i + 1] != ']' && line[i + 1] != ';' && line[i + 1] != ',')
+                result += ' ';
+            continue;
+        }
+
+        // << shift-left operator: space before and after
+        if (ch == '<' && i + 1 < line.size() && line[i + 1] == '<') {
+            if (!result.isEmpty() && result.back() != ' ') result += ' ';
+            result += "<<";
+            i++;
+            if (i + 1 < line.size() && line[i + 1] != ' ' && line[i + 1] != '=')
+                result += ' ';
+            continue;
+        }
+
+        // >> shift-right operator: space before and after
+        if (ch == '>' && i + 1 < line.size() && line[i + 1] == '>') {
+            if (!result.isEmpty() && result.back() != ' ') result += ' ';
+            result += ">>";
+            i++;
+            if (i + 1 < line.size() && line[i + 1] != ' ' && line[i + 1] != '=')
                 result += ' ';
             continue;
         }
@@ -270,14 +323,14 @@ static QString normalizeLine(const QString &line)
         }
 
         // Single-character binary operators: = < > + - * / % ^
-        // Space before and after, unless the next char is = (handled by
-        // the compound operators above).
+        // Space before and after. Compound operators (+=, -=, *=, /=, ==, ===,
+        // !=, <=, >=, &&, ||, <<, >>) are handled above.
         if (ch == '=' || ch == '<' || ch == '>' || ch == '+'
             || ch == '-' || ch == '*' || ch == '/' || ch == '%'
             || ch == '^') {
             if (!result.isEmpty() && result.back() != ' ') result += ' ';
             result += ch;
-            if (i + 1 < line.size() && line[i + 1] != ' ' && line[i + 1] != '=')
+            if (i + 1 < line.size() && line[i + 1] != ' ')
                 result += ' ';
             continue;
         }
@@ -355,8 +408,8 @@ static int countBraces(const QString &line, bool inString, QChar stringChar)
             if (ch == localStringChar) localInString = false;
             continue;
         }
-        // Start of a string literal
-        if (ch == '"' || ch == '\'') {
+        // Start of a string literal (double, single, or backtick)
+        if (ch == '"' || ch == '\'' || ch == '`') {
             localInString = true;
             localStringChar = ch;
             continue;
@@ -403,7 +456,7 @@ static bool lineOpensString(const QString &line, bool &inString, QChar &stringCh
             // Unterminated block comment on this line
             return false;
         }
-        if (ch == '"' || ch == '\'') {
+        if (ch == '"' || ch == '\'' || ch == '`') {
             inString = true;
             stringChar = ch;
             continue;
@@ -430,14 +483,78 @@ QString NspFormatter::format(const QString &code)
     for (int i = 0; i < input.size(); i++) {
         QString raw = input[i].trimmed();
 
-        // Inside a multiline string: preserve content as-is, just add indentation
+        // Inside a multiline string: preserve content verbatim (no trimming,
+        // no indentation changes). If the string closes mid-line, process the
+        // remaining code after the closing quote for indentation tracking.
         if (inMultilineString) {
-            output << QString(indent, '\t') + raw;
+            const QString &origLine = input[i];
             bool esc = false;
-            for (int c = 0; c < raw.size(); c++) {
+            int closePos = -1;
+            for (int c = 0; c < origLine.size(); c++) {
                 if (esc) { esc = false; continue; }
-                if (raw[c] == '\\' && c + 1 < raw.size()) { esc = true; continue; }
-                if (raw[c] == mlStringChar) { inMultilineString = false; break; }
+                if (origLine[c] == '\\' && c + 1 < origLine.size()) { esc = true; continue; }
+                if (origLine[c] == mlStringChar) {
+                    closePos = c;
+                    break;
+                }
+            }
+
+            if (closePos < 0) {
+                // String doesn't close on this line — output verbatim
+                output << origLine;
+                continue;
+            }
+
+            // String closes on this line — output string portion verbatim,
+            // then process remaining code after the closing quote
+            inMultilineString = false;
+            QString stringPart = origLine.left(closePos + 1);
+            QString remaining = origLine.mid(closePos + 1).trimmed();
+
+            if (remaining.isEmpty()) {
+                output << stringPart;
+                continue;
+            }
+
+            // Normalize the remaining code and combine on the same line
+            QString normalized = normalizeLine(remaining);
+            output << stringPart + normalized;
+
+            // Count braces in the remaining code for indentation tracking
+            int remainingBraceNet = countBraces(normalized, false, QChar());
+
+            bool rStartsWithCloseBrace = normalized.startsWith('}');
+            bool rStartsWithElse = false;
+            bool rStartsWithCaseOrDefault = false;
+            QString rLower = normalized.toLower();
+            if (rLower.startsWith("else") && (rLower.length() == 4 || !rLower[4].isLetterOrNumber()))
+                rStartsWithElse = true;
+            else if (rLower.startsWith("} else") || rLower.startsWith("}else"))
+                rStartsWithElse = true;
+            if (rLower.startsWith("case") && (rLower.length() == 4 || !rLower[4].isLetterOrNumber()))
+                rStartsWithCaseOrDefault = true;
+            if (rLower.startsWith("default") && (rLower.length() == 7 || !rLower[7].isLetterOrNumber()))
+                rStartsWithCaseOrDefault = true;
+
+            int rLineIndent = indent;
+            if (rStartsWithCloseBrace || rStartsWithElse || rStartsWithCaseOrDefault)
+                rLineIndent = qMax(0, indent - 1);
+
+            int rNet = remainingBraceNet;
+            if (rStartsWithCloseBrace || rStartsWithElse)
+                rNet++;
+            if (rStartsWithCaseOrDefault && remainingBraceNet == 0)
+                rNet++;
+
+            indent = rLineIndent + qMax(0, rNet);
+            if (indent < 0) indent = 0;
+
+            bool rIn = false;
+            QChar rChar;
+            lineOpensString(normalized, rIn, rChar);
+            if (rIn) {
+                inMultilineString = true;
+                mlStringChar = rChar;
             }
             continue;
         }
@@ -517,6 +634,12 @@ QString NspFormatter::format(const QString &code)
             inMultilineString = true;
             mlStringChar = sChar;
         }
+    }
+
+    // Strip trailing whitespace from all lines
+    for (int i = 0; i < output.size(); i++) {
+        while (!output[i].isEmpty() && (output[i].back() == ' ' || output[i].back() == '\t'))
+            output[i].chop(1);
     }
 
     // Remove trailing blank lines, then add exactly one trailing newline

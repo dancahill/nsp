@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QAction>
 
 // Forward declarations — avoids pulling in full headers for types only used as pointers
 class QTabWidget;
@@ -12,7 +13,7 @@ class ScriptRunner;
 class FindBar;
 class NspCompleter;
 class FileBrowser;
-class MemTreeView;
+class DebugPanel;
 class QLabel;
 
 // MainWindow is the main application window for qtnspedit (NSP script editor).
@@ -56,9 +57,9 @@ private slots:
     void closeTab(int index);        // Closes and deletes the tab at the given index; creates a new tab if none remain
 
     // Script menu slots
-    void runScript();                // Runs the active script in a ScriptRunner thread; resumes if already paused at breakpoint
-    void continueScript();           // Resumes execution after a breakpoint
-    void viewMemory();               // Toggles the memory viewer panel visibility
+    void runScript();                // Runs the active script; resumes if paused at breakpoint
+    void stopScript();               // Stops a running script
+    void viewDebugPanel();           // Toggles the debug panel visibility
 
     // Edit menu slots
     void showFindBar();              // Shows the inline find bar on the active editor
@@ -75,7 +76,7 @@ private slots:
     // ScriptRunner signal handlers
     void onOutputReady(const QString &text);         // Appends script stdout/stderr to the output panel
     void onScriptFinished(bool error, const QString &errbuf); // Updates status bar when script ends; shows errors if any
-    void onBreakpointHit();                          // Opens memory viewer and shows breakpoint status when debug.break() is hit
+    void onBreakpointHit();                          // Opens debug panel and shows breakpoint status when debug.break() is hit
 
 private:
     // UI setup helpers called from the constructor
@@ -102,8 +103,8 @@ private:
     QSplitter *m_mainSplitter;
     // Left-side file tree browser (QTreeView + QFileSystemModel)
     FileBrowser *m_fileBrowser;
-    // Right-side memory viewer panel (hidden until F6 or breakpoint)
-    MemTreeView *m_memView;
+    // Right-side debug panel (hidden until F6 or breakpoint)
+    DebugPanel *m_debugPanel;
     // Background thread that executes NSP scripts
     ScriptRunner *m_scriptRunner;
     // Most-recently-activated NSP autocompleter (switched in switchTab)
@@ -114,6 +115,11 @@ private:
     QLabel *m_lineLabel;
     // Saved output panel height for persistence across sessions
     int m_outputHeight;
+    // Script menu Run action (text changes between "Run" and "Resume")
+    QAction *m_runAction;
+    // Script menu and toolbar Stop actions (enabled only when a script is running)
+    QAction *m_stopAction;
+    QAction *m_toolbarStopAction;
 };
 
 #endif // MAINWINDOW_H

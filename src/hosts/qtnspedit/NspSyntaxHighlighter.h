@@ -13,9 +13,9 @@
 //   .nsp mode (m_nspMode=true):  HTML template with <?nsp ... ?> blocks
 //
 // Block state tracking uses composite states:
-//   0=Normal, 1=InBlockComment, 2=InString, 3=InChar (outside NSP block)
+//   0=Normal, 1=InBlockComment, 2=InString, 3=InChar, 8=InBacktick (outside NSP block)
 //   4=InNspBlock (inside NSP block, no multi-line construct)
-//   5=InBlockComment+nsp, 6=InString+nsp, 7=InChar+nsp (inside NSP block)
+//   5=InBlockComment+nsp, 6=InString+nsp, 7=InChar+nsp, 9=InBacktick+nsp (inside NSP block)
 //
 // IMPORTANT: Do NOT add setCurrentBlockState(Normal) at the end of
 // highlightNsBlock/highlightNspBlock — it would overwrite multi-line states.

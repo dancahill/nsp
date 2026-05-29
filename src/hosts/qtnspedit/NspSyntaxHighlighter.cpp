@@ -65,7 +65,7 @@ void NspSyntaxHighlighter::initFormats()
         m_numberFormat.setForeground(QColor(0x80, 0xB8, 0xF0));
         m_operatorFormat.setForeground(QColor(0xE0, 0x60, 0x60));
         m_operatorFormat.setFontWeight(QFont::Bold);
-        m_memberFormat.setForeground(QColor(0xDC, 0xDC, 0xAA));
+        m_memberFormat.setForeground(QColor(0x9D, 0xD0, 0xFA));
         m_tagFormat.setForeground(QColor(0x56, 0x9C, 0xD6));
         m_tagFormat.setFontWeight(QFont::Bold);
     } else {
@@ -138,8 +138,8 @@ void NspSyntaxHighlighter::initFormats()
     rule.format = m_operatorFormat;
     m_rules.append(rule);
 
-    // Member access (.identifier)
-    rule.pattern = QRegularExpression(QStringLiteral("\\.([a-zA-Z_][a-zA-Z0-9_]*)"));
+    // Dotted member chain (identifier.identifier.identifier...) — colors all parts
+    rule.pattern = QRegularExpression(QStringLiteral("[a-zA-Z_][a-zA-Z0-9_]*(\\.[a-zA-Z_][a-zA-Z0-9_]*)+"));
     rule.format = m_memberFormat;
     m_rules.append(rule);
 }
@@ -149,7 +149,7 @@ void NspSyntaxHighlighter::initFormats()
 // (and, in .nsp mode, excluding positions outside <?nsp ... ?> blocks).
 void NspSyntaxHighlighter::highlightBlock(const QString &text)
 {
-    enum State { Normal = 0, InBlockComment = 1, InString = 2, InChar = 3, InNspBlock = 4 };
+    enum State { Normal = 0, InBlockComment = 1, InString = 2, InChar = 3, InNspBlock = 4, InBacktick = 8 };
 
     int state = previousBlockState();
     if (state < 0) state = Normal;
@@ -208,7 +208,7 @@ void NspSyntaxHighlighter::highlightBlock(const QString &text)
 void NspSyntaxHighlighter::highlightNsBlock(const QString &text, int len, int state, int &pos,
     QList<QPair<int, int>> &stringRanges, QList<QPair<int, int>> &commentRanges)
 {
-    enum State { Normal = 0, InBlockComment = 1, InString = 2, InChar = 3 };
+    enum State { Normal = 0, InBlockComment = 1, InString = 2, InChar = 3, InBacktick = 8 };
 
     // Handle continuation from previous block
     if (state == InBlockComment) {
@@ -268,6 +268,29 @@ void NspSyntaxHighlighter::highlightNsBlock(const QString &text, int len, int st
             stringRanges.append(qMakePair(0, len));
             setFormat(0, len, m_stringFormat);
             setCurrentBlockState(InChar);
+            pos = len;
+        }
+    } else if (state == InBacktick) {
+        int i = 0;
+        bool escape = false;
+        bool closed = false;
+        while (i < len) {
+            if (escape) { escape = false; i++; continue; }
+            if (text[i] == '\\' && i + 1 < len) { escape = true; i++; continue; }
+            if (text[i] == '`') {
+                stringRanges.append(qMakePair(0, i));
+                setFormat(0, i + 1, m_stringFormat);
+                setCurrentBlockState(Normal);
+                pos = i + 1;
+                closed = true;
+                break;
+            }
+            i++;
+        }
+        if (!closed) {
+            stringRanges.append(qMakePair(0, len));
+            setFormat(0, len, m_stringFormat);
+            setCurrentBlockState(InBacktick);
             pos = len;
         }
     }
@@ -364,6 +387,33 @@ void NspSyntaxHighlighter::highlightNsBlock(const QString &text, int len, int st
             continue;
         }
 
+        // Backtick-quoted string
+        if (text[pos] == '`') {
+            int start = pos;
+            pos++;
+            bool escape = false;
+            bool closed = false;
+            while (pos < len) {
+                if (escape) { escape = false; pos++; continue; }
+                if (text[pos] == '\\' && pos + 1 < len) { escape = true; pos++; continue; }
+                if (text[pos] == '`') {
+                    stringRanges.append(qMakePair(start, pos));
+                    setFormat(start, pos - start + 1, m_stringFormat);
+                    setCurrentBlockState(Normal);
+                    pos++;
+                    closed = true;
+                    break;
+                }
+                pos++;
+            }
+            if (!closed) {
+                stringRanges.append(qMakePair(start, len - 1));
+                setFormat(start, len - start, m_stringFormat);
+                setCurrentBlockState(InBacktick);
+            }
+            continue;
+        }
+
         pos++;
     }
 }
@@ -371,16 +421,16 @@ void NspSyntaxHighlighter::highlightNsBlock(const QString &text, int len, int st
 // First-pass scanner for .nsp mode (HTML template with <?nsp ... ?> blocks).
 // In addition to string/char/comment tracking, this handles the <?nsp and ?>
 // tag delimiters and tracks whether we're inside an NSP block or in plain HTML.
-// Composite states 4-7 ensure multi-line constructs inside NSP blocks revert
+// Composite states 4-7 and 9 ensure multi-line constructs inside NSP blocks revert
 // to InNspBlock (4) rather than Normal (0).
 void NspSyntaxHighlighter::highlightNspBlock(const QString &text, int len, int state, int &pos,
     QList<QPair<int, int>> &stringRanges, QList<QPair<int, int>> &commentRanges,
     QList<QPair<int, int>> &nspRanges)
 {
-    // States 0-3: outside NSP block; States 4-7: inside NSP block
-    // 0=Normal, 1=InBlockComment, 2=InString, 3=InChar
-    // 4=InNspBlock, 5=InBlockComment+nsp, 6=InString+nsp, 7=InChar+nsp
-    const int Normal = 0, InBlockComment = 1, InString = 2, InChar = 3, InNspBlock = 4;
+    // States 0-3, 8: outside NSP block; States 4-7, 9: inside NSP block
+    // 0=Normal, 1=InBlockComment, 2=InString, 3=InChar, 8=InBacktick
+    // 4=InNspBlock, 5=InBlockComment+nsp, 6=InString+nsp, 7=InChar+nsp, 9=InBacktick+nsp
+    const int Normal = 0, InBlockComment = 1, InString = 2, InChar = 3, InNspBlock = 4, InBacktick = 8;
 
     bool inNsp = (state >= InNspBlock);
 
@@ -475,6 +525,44 @@ void NspSyntaxHighlighter::highlightNspBlock(const QString &text, int len, int s
                 stringRanges.append(qMakePair(0, len - 1));
                 setFormat(0, len, m_stringFormat);
                 setCurrentBlockState(InChar);
+                pos = len;
+                return;
+            }
+        }
+    } else if (state == InBacktick || state == 9) {
+        int i = 0;
+        bool escape = false;
+        bool closed = false;
+        while (i < len) {
+            if (escape) { escape = false; i++; continue; }
+            if (text[i] == '\\' && i + 1 < len) { escape = true; i++; continue; }
+            if (text[i] == '`') {
+                stringRanges.append(qMakePair(0, i));
+                setFormat(0, i + 1, m_stringFormat);
+                pos = i + 1;
+                closed = true;
+                break;
+            }
+            i++;
+        }
+        if (inNsp) {
+            nspRanges.append(qMakePair(0, len - 1));
+            if (closed) {
+                setCurrentBlockState(InNspBlock);
+            } else {
+                stringRanges.append(qMakePair(0, len - 1));
+                setFormat(0, len, m_stringFormat);
+                setCurrentBlockState(9);
+                pos = len;
+                return;
+            }
+        } else {
+            if (closed) {
+                setCurrentBlockState(Normal);
+            } else {
+                stringRanges.append(qMakePair(0, len - 1));
+                setFormat(0, len, m_stringFormat);
+                setCurrentBlockState(InBacktick);
                 pos = len;
                 return;
             }
@@ -633,6 +721,34 @@ void NspSyntaxHighlighter::highlightNspBlock(const QString &text, int len, int s
                     stringRanges.append(qMakePair(start, len - 1));
                     setFormat(start, len - start, m_stringFormat);
                     setCurrentBlockState(inNsp ? 7 : InChar);
+                    pos = len;
+                    continue;
+                }
+                continue;
+            }
+
+            // Backtick-quoted string inside NSP block
+            if (text[pos] == '`') {
+                int start = pos;
+                pos++;
+                bool escape = false;
+                bool closed = false;
+                while (pos < len) {
+                    if (escape) { escape = false; pos++; continue; }
+                    if (text[pos] == '\\' && pos + 1 < len) { escape = true; pos++; continue; }
+                    if (text[pos] == '`') {
+                        stringRanges.append(qMakePair(start, pos));
+                        setFormat(start, pos - start + 1, m_stringFormat);
+                        pos++;
+                        closed = true;
+                        break;
+                    }
+                    pos++;
+                }
+                if (!closed) {
+                    stringRanges.append(qMakePair(start, len - 1));
+                    setFormat(start, len - start, m_stringFormat);
+                    setCurrentBlockState(inNsp ? 9 : InBacktick);
                     pos = len;
                     continue;
                 }

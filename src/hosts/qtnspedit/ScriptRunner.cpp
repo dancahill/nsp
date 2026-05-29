@@ -109,6 +109,21 @@ void ScriptRunner::resume()
     m_breakCondition.wakeAll();
 }
 
+// ScriptRunner::stop
+// Terminates the script thread immediately.
+void ScriptRunner::stop()
+{
+    if (!isRunning()) return;
+
+    // Wake the thread if it's blocked at a breakpoint so it can exit
+    m_breakCondition.wakeAll();
+
+    terminate();
+    wait(1000);
+
+    m_nsp = nullptr;
+}
+
 // ScriptRunner::nspQtFlush
 // Static callback registered as lib.io.flush in the NSP interpreter.
 // Reads the NSP output buffer and emits the outputReady signal so

@@ -2,6 +2,7 @@
 #include "NspSyntaxHighlighter.h"
 #include "NspCompleter.h"
 #include "NspNameSpace.h"
+#include "FindBar.h"
 
 #include <QPainter>
 #include <QTextBlock>
@@ -186,6 +187,80 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
             e->accept();
             return;
         }
+    }
+
+    // Tab/Shift+Tab: indent/outdent selected lines, or insert tab at cursor
+    if (e->key() == Qt::Key_Tab || e->key() == Qt::Key_Backtab) {
+        QTextCursor cursor = textCursor();
+        if (cursor.hasSelection()) {
+            int startBlock = document()->findBlock(cursor.selectionStart()).blockNumber();
+            int endBlock = document()->findBlock(cursor.selectionEnd()).blockNumber();
+            // If selection ends at column 0, the last line isn't actually selected
+            if (cursor.selectionEnd() == document()->findBlock(cursor.selectionEnd()).position())
+                endBlock--;
+            cursor.beginEditBlock();
+            for (int i = startBlock; i <= endBlock; i++) {
+                QTextBlock block = document()->findBlockByNumber(i);
+                cursor.setPosition(block.position());
+                if (e->key() == Qt::Key_Tab) {
+                    cursor.insertText("\t");
+                } else {
+                    QString text = block.text();
+                    if (!text.isEmpty() && text[0] == '\t') {
+                        cursor.deleteChar();
+                    } else if (!text.isEmpty() && text.startsWith("    ")) {
+                        cursor.deleteChar();
+                        cursor.deleteChar();
+                        cursor.deleteChar();
+                        cursor.deleteChar();
+                    }
+                }
+            }
+            cursor.endEditBlock();
+            // Re-select the full range of lines
+            QTextBlock firstBlock = document()->findBlockByNumber(startBlock);
+            QTextBlock lastBlock = document()->findBlockByNumber(endBlock);
+            cursor.setPosition(firstBlock.position());
+            cursor.setPosition(lastBlock.position() + lastBlock.length() - 1, QTextCursor::KeepAnchor);
+            setTextCursor(cursor);
+            e->accept();
+            return;
+        } else if (e->key() == Qt::Key_Tab) {
+            cursor.insertText("\t");
+            e->accept();
+            return;
+        }
+        // Shift+Tab with no selection: outdent current line
+        QTextBlock block = cursor.block();
+        QString text = block.text();
+        cursor.beginEditBlock();
+        if (!text.isEmpty() && text[0] == '\t') {
+            cursor.setPosition(block.position());
+            cursor.deleteChar();
+        } else if (!text.isEmpty() && text.startsWith("    ")) {
+            cursor.setPosition(block.position());
+            cursor.deleteChar();
+            cursor.deleteChar();
+            cursor.deleteChar();
+            cursor.deleteChar();
+        }
+        cursor.endEditBlock();
+        e->accept();
+        return;
+    }
+
+    // F3/Shift+F3: find next/previous via the find bar
+    if (e->key() == Qt::Key_F3) {
+        FindBar *bar = findChild<FindBar *>();
+        if (bar) {
+            if (!bar->isVisible()) bar->showFind();
+            if (e->modifiers() & Qt::ShiftModifier)
+                bar->findPrev();
+            else
+                bar->findNext();
+        }
+        e->accept();
+        return;
     }
 
     // Zoom shortcuts
@@ -537,6 +612,20 @@ static QVector<QPair<int, int>> scanRanges(const QString &text, int prevState)
                 }
                 continue;
             }
+            // Backtick-quoted string
+            if (text[pos] == '`') {
+                int start = pos;
+                pos++;
+                while (pos < len) {
+                    if (text[pos] == '\\' && pos + 1 < len) { pos += 2; continue; }
+                    if (text[pos] == '`') { pos++; ranges.append(qMakePair(start, pos - 1)); break; }
+                    pos++;
+                }
+                if (pos >= len && (ranges.isEmpty() || ranges.last().second != len - 1)) {
+                    ranges.append(qMakePair(start, len - 1));
+                }
+                continue;
+            }
             pos++;
         } else if (state == 1) {
             // Inside a multi-line block comment continuation
@@ -572,7 +661,8 @@ int CodeEditor::findMatchingBrace(const QTextBlock &startBlock) const
     while (block.isValid()) {
         int prevState = block.previous().userState();
         bool inMultiLine = (prevState == 1 || prevState == 2 || prevState == 3 ||
-                            prevState == 5 || prevState == 6 || prevState == 7);
+                            prevState == 5 || prevState == 6 || prevState == 7 ||
+                            prevState == 8 || prevState == 9);
         if (!inMultiLine) {
             QString text = block.text();
             auto ranges = scanRanges(text, 0);
@@ -602,7 +692,7 @@ bool CodeEditor::isFoldable(const QTextBlock &block) const
 
     // Block is inside a multi-line string/char/comment → not foldable
     int prevState = block.previous().userState();
-    if (prevState == 1 || prevState == 2 || prevState == 3 || prevState == 5 || prevState == 6 || prevState == 7)
+    if (prevState == 1 || prevState == 2 || prevState == 3 || prevState == 5 || prevState == 6 || prevState == 7 || prevState == 8 || prevState == 9)
         return false;
 
     // Already folded → still considered foldable (so arrow is shown)
@@ -614,6 +704,7 @@ bool CodeEditor::isFoldable(const QTextBlock &block) const
     // Skip inline strings and chars to find real brace/comment starts
     bool inString = false;
     bool inChar = false;
+    bool inBacktick = false;
     for (int i = 0; i < text.length(); i++) {
         if (inString) {
             if (text[i] == '\\' && i + 1 < text.length()) { i++; continue; }
@@ -625,8 +716,14 @@ bool CodeEditor::isFoldable(const QTextBlock &block) const
             if (text[i] == '\'') inChar = false;
             continue;
         }
+        if (inBacktick) {
+            if (text[i] == '\\' && i + 1 < text.length()) { i++; continue; }
+            if (text[i] == '`') inBacktick = false;
+            continue;
+        }
         if (text[i] == '"') { inString = true; continue; }
         if (text[i] == '\'') { inChar = true; continue; }
+        if (text[i] == '`') { inBacktick = true; continue; }
         if (i + 1 < text.length() && text[i] == '/' && text[i + 1] == '/') break;
         if (i + 1 < text.length() && text[i] == '/' && text[i + 1] == '*') {
             int closePos = text.indexOf("*/", i + 2);

@@ -23,7 +23,10 @@ public:
 
     // Resumes execution after a breakpoint hit (debug.break() in script).
     void resume();
-    // Returns the NSP state pointer for memory inspection (used by MemTreeView).
+    // Requests the script thread to stop. Terminates the thread if it doesn't
+    // finish within the timeout, then emits scriptFinished.
+    void stop();
+    // Returns the NSP state pointer for memory inspection (used by DebugPanel).
     nsp_state *nspState() const { return m_nsp; }
     // Returns the filename of the running script.
     QString filename() const { return m_filename; }

@@ -26,6 +26,8 @@ public:
 protected:
     // Handles Escape to close the bar and return focus to the editor.
     void keyPressEvent(QKeyEvent *event) override;
+    // Intercepts Enter/Return and F3 on the search edit to prevent propagation.
+    bool eventFilter(QObject *obj, QEvent *event) override;
     // Focuses the search input when the bar becomes visible.
     void showEvent(QShowEvent *event) override;
 

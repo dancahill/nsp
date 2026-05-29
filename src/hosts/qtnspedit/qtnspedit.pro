@@ -31,7 +31,7 @@ SOURCES += main.cpp \
            ScriptRunner.cpp \
            OutputPanel.cpp \
            FindBar.cpp \
-           MemTreeView.cpp \
+           DebugPanel.cpp \
            Settings.cpp \
            NspFormatter.cpp \
            FileBrowser.cpp
@@ -44,7 +44,7 @@ HEADERS += MainWindow.h \
            ScriptRunner.h \
            OutputPanel.h \
            FindBar.h \
-           MemTreeView.h \
+           DebugPanel.h \
            Settings.h \
            NspFormatter.h \
            FileBrowser.h

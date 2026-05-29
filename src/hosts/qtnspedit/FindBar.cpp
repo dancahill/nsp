@@ -24,7 +24,7 @@ FindBar::FindBar(QPlainTextEdit *editor, QWidget *parent)
     setFixedHeight(32);
 
     m_searchEdit = new QLineEdit(this);
-    m_searchEdit->setPlaceholderText("Find...");
+    m_searchEdit->setPlaceholderText("Find");
     m_searchEdit->setMaximumWidth(300);
     m_searchEdit->setClearButtonEnabled(true);
     m_searchEdit->setFixedHeight(24);
@@ -59,13 +59,14 @@ FindBar::FindBar(QPlainTextEdit *editor, QWidget *parent)
     layout->addStretch();
     layout->addWidget(closeBtn);
 
-    // Enter in search field triggers find-next
-    connect(m_searchEdit, &QLineEdit::returnPressed, this, &FindBar::findNext);
     // Text changes trigger incremental search
     connect(m_searchEdit, &QLineEdit::textChanged, this, &FindBar::onTextChanged);
     connect(nextBtn, &QToolButton::clicked, this, &FindBar::findNext);
     connect(prevBtn, &QToolButton::clicked, this, &FindBar::findPrev);
     connect(closeBtn, &QToolButton::clicked, this, &QWidget::hide);
+
+    // Prevent Enter/Return and F3 from propagating to the CodeEditor
+    m_searchEdit->installEventFilter(this);
 
     hide();
 }
@@ -142,7 +143,37 @@ void FindBar::keyPressEvent(QKeyEvent *event)
         m_editor->setFocus();
         return;
     }
+    if (event->key() == Qt::Key_F3) {
+        if (event->modifiers() & Qt::ShiftModifier)
+            findPrev();
+        else
+            findNext();
+        return;
+    }
     QFrame::keyPressEvent(event);
+}
+
+// FindBar::eventFilter
+// Intercepts Enter/Return and F3 keys on the search edit so they don't
+// propagate to the CodeEditor. Calls findNext/findPrev directly instead
+// of relying on the returnPressed signal.
+bool FindBar::eventFilter(QObject *obj, QEvent *event)
+{
+    if (obj == m_searchEdit && event->type() == QEvent::KeyPress) {
+        QKeyEvent *ke = static_cast<QKeyEvent *>(event);
+        if (ke->key() == Qt::Key_Enter || ke->key() == Qt::Key_Return) {
+            findNext();
+            return true;
+        }
+        if (ke->key() == Qt::Key_F3) {
+            if (ke->modifiers() & Qt::ShiftModifier)
+                findPrev();
+            else
+                findNext();
+            return true;
+        }
+    }
+    return QFrame::eventFilter(obj, event);
 }
 
 // FindBar::showEvent
