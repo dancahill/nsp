@@ -18,7 +18,7 @@ class testlib2 {
 		//db.rollback();
 		db.query("SELECT * FROM test_table;");
 		printf("db.last_query = \"%s\";\r\n", db.last_query);
-		while ((row=db.getnext())!=null) {
+		while ((row = db.getnext()) != null) {
 			printf("row = %s;\r\n", serialize(row).replace('\r', '').replace('\n', ' ').replace('\t', ''));
 		}
 		db.endquery();
@@ -26,7 +26,7 @@ class testlib2 {
 		db.close();
 	}
 	function fbsql() {
-		ci = { host="localhost", port=3050, username="SYSDBA", password="masterkey", database="/tmp/nstest.fdb" };
+		ci = { host = "localhost", port = 3050, username = "SYSDBA", password = "masterkey", database = "/tmp/nstest.fdb" };
 		lib.file.unlink(ci.database);
 		file.writeall("/tmp/nstest.sql", sprintf("SET SQL DIALECT 3;\r\nCREATE DATABASE '%s'\r\nUSER '%s' PASSWORD '%s'\r\nPAGE_SIZE 16384;\r\n", ci.database, ci.username, ci.password));
 		system("isql-fb -input /tmp/nstest.sql 2> /dev/null");
@@ -34,7 +34,7 @@ class testlib2 {
 		try {
 			dl.load("data");
 			dl.load("fbsql");
-			db=new data.fbsql.client(ci);
+			db = new data.fbsql.client(ci);
 			this.shared_sql_tests(db);
 		} catch (ex) {
 			printf("Exception: %s\r\n", ex.description);
@@ -43,13 +43,13 @@ class testlib2 {
 		return;
 	}
 	function mysql() {
-		ci = { host="localhost", port=3306, username="root", password="test", database="nstest" };
+		ci = { host = "localhost", port = 3306, username = "root", password = "test", database = "nstest" };
 		system(sprintf("mysql -u%s -p%s -e \"DROP DATABASE IF EXISTS nstest\"", ci.username, ci.password));
 		system(sprintf("mysql -u%s -p%s -e \"CREATE DATABASE nstest\"", ci.username, ci.password));
 		try {
 			dl.load("data");
 			dl.load("mysql");
-			db=new data.mysql.client(ci);
+			db = new data.mysql.client(ci);
 			this.shared_sql_tests(db);
 		} catch (ex) {
 			printf("Exception: %s\r\n", ex.description);
@@ -58,13 +58,13 @@ class testlib2 {
 		return;
 	}
 	function pgsql() {
-		ci = { host="localhost", port=5432, username="postgres", password="test", database="nstest" };
+		ci = { host = "localhost", port = 5432, username = "postgres", password = "test", database = "nstest" };
 		system(sprintf("export PGPASSWORD=%s && dropdb -h localhost -U %s %s", ci.password, ci.username, ci.database));
 		system(sprintf("export PGPASSWORD=%s && createdb -h localhost -U %s %s", ci.password, ci.username, ci.database));
 		try {
 			dl.load("data");
 			dl.load("pgsql");
-			db=new data.pgsql.client(ci);
+			db = new data.pgsql.client(ci);
 			this.shared_sql_tests(db);
 		} catch (ex) {
 			printf("Exception: %s\r\n", ex.description);
@@ -73,12 +73,12 @@ class testlib2 {
 		return;
 	}
 	function sqlite() {
-		ci = { database="/tmp/nstest.db" };
+		ci = { database = "/tmp/nstest.db" };
 		lib.file.unlink(ci.database);
 		try {
 			dl.load("data");
 			dl.load("sqlite");
-			db=new data.sqlite.client(ci);
+			db = new data.sqlite.client(ci);
 			this.shared_sql_tests(db);
 		} catch (ex) {
 			printf("Exception: %s\r\n", ex.description);
@@ -87,8 +87,8 @@ class testlib2 {
 	}
 	function mongodb() {
 		function trim(s) {
-			if (s.gettype()=='string') return s;
-			return serialize(s).replace('\t','').replace('\r','').replace('\n',' ');
+			if (s.gettype() == 'string') return s;
+			return serialize(s).replace('\t', '').replace('\r', '').replace('\n', ' ');
 		}
 		class mongo {
 			function constructor() {
@@ -101,7 +101,7 @@ class testlib2 {
 				db.dropDatabase()
 				*/
 
-				conninfo = { url="mongodb://root:test@localhost:27017/", database="nulltest", collection="users" };
+				conninfo = { url = "mongodb://root:test@localhost:27017/", database = "nulltest", collection = "users" };
 				this.client = new data.mongodb.client(conninfo);
 				this.client.open();
 
@@ -174,7 +174,7 @@ class testlib2 {
 				q = '{ "$query": {}, "$orderby": { "time": 1 } }';
 
 				client.collection.find(q);
-				while ((row=client.collection.getnext())!=null) {
+				while ((row = client.collection.getnext()) != null) {
 					//q = sprintf('{ "_id": { "$in": ["%s", { "$oid": "%s" }] } }', row._id, row._id);
 					//r = client.collection.remove(q);
 					printf("\t%s\r\n", trim(row));
@@ -190,7 +190,7 @@ class testlib2 {
 				var todelete = {
 					"5d6edfca7c71de1f7a2cdcf1"
 				};
-				foreach (n,v in todelete) {
+				foreach (n, v in todelete) {
 					q = sprintf('{ "_id": { "$in": ["%s", { "$oid": "%s" }] } }', v, v);
 					r = client.collection.remove(q);
 					printf("\tfirstid = [%s] - collection.remove(q) = %s, r = %s\r\n", firstid, trim(q), r);

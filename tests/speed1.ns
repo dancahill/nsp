@@ -48,49 +48,49 @@ tested on:
 
 
 function test(title, code) {
-	print("\e[01;37;40m",title,"\e[00m\t");
-	oldtime=lib.debug.runtime();
+	print("\e[01;37;40m", title, "\e[00m\t");
+	oldtime = lib.debug.runtime();
 	lib.system(code);
-	t=lib.debug.runtime()-oldtime;
-	if (besttimes[title]==null || tonumber(besttimes[title])>t) besttimes[title]=t;
-//	print("\ttime = ", tostring(t, 3), " (", tostring(t/basetime, 1), "xC)\n");
-	print("\t", lib.string.sub("   "+lib.math.floor(t*1000), -4), "ms (", lib.string.tostring(t/basetime, 1), "xC)\n");
+	t = lib.debug.runtime() - oldtime;
+	if (besttimes[title] == null || tonumber(besttimes[title]) > t) besttimes[title] = t;
+	//	print("\ttime = ", tostring(t, 3), " (", tostring(t/basetime, 1), "xC)\n");
+	print("\t", lib.string.sub("   " + lib.math.floor(t * 1000), -4), "ms (", lib.string.tostring(t / basetime, 1), "xC)\n");
 	return;
 }
 
 function dotests(nloops, rounds) {
-	nstats=lib.math.floor(nloops/5);
-	for (round=0;round<rounds;round++) {
-		lib.file.writeall("timetest.c", "#include <stdio.h>\nint main()\n{\n\tunsigned int i;\n\tfor (i=1;i<"+nloops+";i++) if (i%"+nstats+"==0) printf(\"%d\", i/"+nstats+");\n\treturn 0;\n}\n");
-//		lib.system("cc -O2 -s -static timetest.c -o timetest.bin");
+	nstats = lib.math.floor(nloops / 5);
+	for (round = 0; round < rounds; round++) {
+		lib.file.writeall("timetest.c", "#include <stdio.h>\nint main()\n{\n\tunsigned int i;\n\tfor (i=1;i<" + nloops + ";i++) if (i%" + nstats + "==0) printf(\"%d\", i/" + nstats + ");\n\treturn 0;\n}\n");
+		//		lib.system("cc -O2 -s -static timetest.c -o timetest.bin");
 		lib.system("cc -O2 -s timetest.c -o timetest.bin");
 		print("\n\e[01;37;40mC\e[00m\t");
-		oldtime=lib.debug.runtime();
+		oldtime = lib.debug.runtime();
 		lib.system("./timetest.bin");
-		global basetime=lib.debug.runtime()-oldtime;
+		global basetime = lib.debug.runtime() - oldtime;
 		lib.file.unlink("timetest.c", "timetest.bin");
-		print("\t", lib.string.sub("   "+lib.math.floor(basetime*1000), -4), "ms\n");
-		if (besttimes['C']==null || tonumber(besttimes['C'])>basetime) besttimes['C']=basetime;
+		print("\t", lib.string.sub("   " + lib.math.floor(basetime * 1000), -4), "ms\n");
+		if (besttimes['C'] == null || tonumber(besttimes['C']) > basetime) besttimes['C'] = basetime;
 
-		test("LUA",    "lua    -e \"for i=1,"+nloops+" do if  math.mod(i,"+nstats+")==0 then io.write(i/"+nstats+") end end\"");
-		test("NSP",    "nsp    -b -e \"for (\\$i=1;\\$i<"+nloops+";\\$i++) { if (\\$i%"+nstats+"==0) { print(\\$i/"+nstats+"); } }\"");
-		test("PERL",   "perl   -e \"for (\\$i=1;\\$i<"+nloops+";\\$i++) { if (\\$i%"+nstats+"==0) { print(\\$i/"+nstats+"); } }\"");
-		test("PHP",    "php    -r \"for (\\$i=1;\\$i<"+nloops+";\\$i++) { if (\\$i%"+nstats+"==0) { print(\\$i/"+nstats+"); } }\"");
-		test("Python", "python -c \"import sys\nfor i in range(1,"+nloops+"):\n\tif i%"+nstats+"==0:\n\t\tsys.stdout.write(str(i/"+nstats+"))\"");
-		test("Ruby",   "ruby   -e 'for i in 1 .. "+nloops+"; if (i % "+nstats+") == 0; print i/"+nstats+"; end; end;'");
-		if (rounds>1) {
-			print("\e[2J"+"\e[H");
+		test("LUA", "lua    -e \"for i=1," + nloops + " do if  math.mod(i," + nstats + ")==0 then io.write(i/" + nstats + ") end end\"");
+		test("NSP", "nsp    -b -e \"for (\\$i=1;\\$i<" + nloops + ";\\$i++) { if (\\$i%" + nstats + "==0) { print(\\$i/" + nstats + "); } }\"");
+		test("PERL", "perl   -e \"for (\\$i=1;\\$i<" + nloops + ";\\$i++) { if (\\$i%" + nstats + "==0) { print(\\$i/" + nstats + "); } }\"");
+		test("PHP", "php    -r \"for (\\$i=1;\\$i<" + nloops + ";\\$i++) { if (\\$i%" + nstats + "==0) { print(\\$i/" + nstats + "); } }\"");
+		test("Python", "python -c \"import sys\nfor i in range(1," + nloops + "):\n\tif i%" + nstats + "==0:\n\t\tsys.stdout.write(str(i/" + nstats + "))\"");
+		test("Ruby", "ruby   -e 'for i in 1 .. " + nloops + "; if (i % " + nstats + ") == 0; print i/" + nstats + "; end; end;'");
+		if (rounds > 1) {
+			print("\e[2J" + "\e[H");
 			print("Best Times:\r\n");
-			foreach (n,v in besttimes) {
-				print(string.sub(n+"      ", 0, 7), " = ", tostring(v*1000, 3), " ms\r\n");
+			foreach (n, v in besttimes) {
+				print(string.sub(n + "      ", 0, 7), " = ", tostring(v * 1000, 3), " ms\r\n");
 			}
-			print("\r\n",round+1," runs so far\r\n");
+			print("\r\n", round + 1, " runs so far\r\n");
 		}
 	}
 }
 
 global besttimes = {};
-nloops=100001;
+nloops = 100001;
 //nloops=1000001;
 //nloops=10000001;
 dotests(nloops, 1);

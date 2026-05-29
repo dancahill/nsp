@@ -3,61 +3,62 @@
 class testlib1 {
 	function constructor() {
 		printf("running testlib1 constructor\r\n");
-		if (_ostype_=="wasm/emcc") global _SERVER={ dummy=true };
-		this.starttime=lib.debug.runtime();
+		if (_ostype_ == "wasm/emcc") global _SERVER = { dummy = true };
+		this.starttime = lib.debug.runtime();
 	}
 	function destructor() {
 		printf("running testlib1 destructor\r\n");
 	}
 	function runtests() {
-		global numtests=0;
-		global numerrors=0;
-		global expect=this.expect;
+		global numtests = 0;
+		global numerrors = 0;
+		global expect = this.expect;
 
 		if (!quiet) print("        STARTING TESTS\n");
-		foreach (n,v in testlib1.tests) {
+		foreach (n, v in testlib1.tests) {
+			// lib.debug.break();
 			//if (n=='expect' || n=='runtests') continue;
-			if (n=='load') continue;
+			if (n == 'load') continue;
 			//printf("[%s][%s]\r\n", n, v.gettype());
 			try {
-				if (!quiet) printf("-- %s %s\n", n, "-"*(63-n.length()));
+				if (!quiet) printf("-- %s %s\n", n, "-" * (63 - n.length()));
 				v();
 			} catch (ex) {
-				term=_ENV['TERM'];
+				term = _ENV['TERM'];
 				print("-------------------------------------------------------------------\n");
-				print("\t",(term?"\e[00;31;40m":""),"UNHANDLED EXCEPTION IN '",n,"' -> (",ex.errno,") ",ex.description,(term?"\e[00m":""), "\n");
+				print("\t", (term ? "\e[00;31;40m" : ""), "UNHANDLED EXCEPTION IN '", n, "' -> (", ex.errno, ") ", ex.description, (term ? "\e[00m" : ""), "\n");
 				print("-------------------------------------------------------------------\n");
 				exit;
 			}
 			//if (numerrors>0) break;
 		}
 		print("-------------------------------------------------------------------\n");
-		if (_ENV['HOME']!=null) {
-			var f=_ENV['HOME']+"/test.ns";
-			if (typeof(lib.file.stat(f))=='table') {
+		if (_ENV['HOME'] != null) {
+			var f = _ENV['HOME'] + "/test.ns";
+			if (typeof (lib.file.stat(f)) == 'table') {
 				print("\trunning ", f, "\n");
 				include(f);
 				print("-------------------------------------------------------------------\n");
 			}
 		}
-		if (typeof(sqlquery)=='function') Q=sqlquery("SELECT * FROM nullg_sessions");
-		if (typeof(lib.dirlist)=='function' && _ostype_!="wasm/emcc") D=lib.dirlist(_filepath);
-		x=quiet;
-		global quiet=false;
-		expect("tests passed/total", sprintf("%d/%d", numtests, numtests), sprintf("%d/%d", numtests-numerrors, numtests));
-		if (numerrors>1) numerrors--;
-		global quiet=x;
+		if (typeof (sqlquery) == 'function') Q = sqlquery("SELECT * FROM nullg_sessions");
+		if (typeof (lib.dirlist) == 'function' && _ostype_ != "wasm/emcc") D = lib.dirlist(_filepath);
+		x = quiet;
+		global quiet = false;
+		expect("tests passed/total", sprintf("%d/%d", numtests, numtests), sprintf("%d/%d", numtests - numerrors, numtests));
+		if (numerrors > 1) numerrors--;
+		global quiet = x;
 		numtests--;
 		print("-------------------------------------------------------------------\n");
-		if (!quiet) print("        FINISHED TESTS       = "+(lib.debug.runtime()-this.starttime)+" seconds\n");
-		global decomped_script=null;
-	//	global _ARGS={};
-		global _ENV={};
-		if (typeof(_SERVER)!='table') {
-	//		print("global _GLOBALS = ",serialize(_GLOBALS),";\n");
+		if (!quiet) print("        FINISHED TESTS       = " + (lib.debug.runtime() - this.starttime) + " seconds\n");
+		global decomped_script = null;
+		//	global _ARGS={};
+		global _ENV = {};
+		if (typeof (_SERVER) != 'table') {
+			//		print("global _GLOBALS = ",serialize(_GLOBALS),";\n");
 		}
 		//print(serialize(testlist));
-		if (lib.string.sub(_ostype_, 0, 7)=="Windows" && typeof(_SERVER)!='table' && typeof(lib.io.gets)=='function') {
+		if (lib.string.sub(_ostype_, 0, 7) == "Windows" && typeof (_SERVER) != 'table' && typeof (lib.io.gets) == 'function') {
 			print("\ndone - press enter\n");
 			lib.io.gets();
 		}
@@ -65,41 +66,41 @@ class testlib1 {
 	}
 	// _expect.ns
 	function expect(msg, a, b) {
-		var sp="                              ";
-		msg=msg.tostring();
-		a=a.tostring();
-		b=b.tostring();
+		var sp = "                              ";
+		msg = msg.tostring();
+		a = a.tostring();
+		b = b.tostring();
 		if (_SERVER) {
-			md=sizeof(msg);
-			msg=lib.string.replace(msg, '&', '&amp;');
-			md=sizeof(msg)-md;
-			colour_emph="<FONT COLOR='BLUE'>";
-			colour_good="<FONT COLOR='GREEN'>";
-			colour_fail="<FONT COLOR='RED'>";
-			colour_norm="</FONT>";
+			md = sizeof (msg);
+			msg = lib.string.replace(msg, '&', '&amp;');
+			md = sizeof (msg) - md;
+			colour_emph = "<FONT COLOR='BLUE'>";
+			colour_good = "<FONT COLOR='GREEN'>";
+			colour_fail = "<FONT COLOR='RED'>";
+			colour_norm = "</FONT>";
 		} else if (_ENV['TERM']) {
-			md=0;
-			colour_emph="\e[01;37;40m";
-			colour_good="\e[00;32;40m";
-			colour_fail="\e[00;31;40m";
-			colour_norm="\e[00m";
+			md = 0;
+			colour_emph = "\e[01;37;40m";
+			colour_good = "\e[00;32;40m";
+			colour_fail = "\e[00;31;40m";
+			colour_norm = "\e[00m";
 		} else {
-			md=0;
-			colour_emph="";
-			colour_good="";
-			colour_fail="";
-			colour_norm="";
+			md = 0;
+			colour_emph = "";
+			colour_good = "";
+			colour_fail = "";
+			colour_norm = "";
 		}
-		if (a==b) {
+		if (a == b) {
 			if (!quiet) {
-				print("        ", lib.string.sub(msg+sp, 0, 20+md));
-				print(" = ",colour_emph,"",lib.string.sub(b+sp, 0, 27),colour_norm," ");
-				print("[",colour_good,"  OK  ",colour_norm,"]\n");
+				print("        ", lib.string.sub(msg + sp, 0, 20 + md));
+				print(" = ", colour_emph, "", lib.string.sub(b + sp, 0, 27), colour_norm, " ");
+				print("[", colour_good, "  OK  ", colour_norm, "]\n");
 			}
 		} else {
-			print("        ", lib.string.sub(msg+sp, 0, 20));
-			print(" = ",colour_emph,"",lib.string.sub(b+sp, 0, 27),colour_norm," ");
-			print("[",colour_fail,"FAILED",colour_norm,"] expected [ ", a, " ]\n");
+			print("        ", lib.string.sub(msg + sp, 0, 20));
+			print(" = ", colour_emph, "", lib.string.sub(b + sp, 0, 27), colour_norm, " ");
+			print("[", colour_fail, "FAILED", colour_norm, "] expected [ ", a, " ]\n");
 			global numerrors++;
 		}
 		global numtests++;
@@ -111,10 +112,10 @@ class testlib1 {
 namespace testlib1.tests {
 	// _misc.ns
 	function misc() {
-	//print("including mime.ns",include("lib/_mime.ns"),"\r\n");
-	//print(serialize(mime_types));
+		//print("including mime.ns",include("lib/_mime.ns"),"\r\n");
+		//print(serialize(mime_types));
 
-	/*
+		/*
 		local s_table = {
 			toUpper = function (s) {
 				return lib.string.toupper(s);
@@ -131,134 +132,134 @@ namespace testlib1.tests {
 		print(x.zz(),"\r\n");
 
 	*/
-	//	x=printf("12[%s]34[0x%08x]56[%f]78[%s][%f][%d]\r\n", "asdf", (255<<8), 5.5);
-	//	print(x,"\r\n");
-	//	x=printf("12[%s]34[%d]56[%f]78", "asdf", 5.5, 5.5);
-	//	print(x,"\r\n");
-		x=sprintf("12[%s]34[%d]56[%f]78", "asdf", 5.5, 5.5);
-	//	print(x,"\r\n");
+		//	x=printf("12[%s]34[0x%08x]56[%f]78[%s][%f][%d]\r\n", "asdf", (255<<8), 5.5);
+		//	print(x,"\r\n");
+		//	x=printf("12[%s]34[%d]56[%f]78", "asdf", 5.5, 5.5);
+		//	print(x,"\r\n");
+		x = sprintf("12[%s]34[%d]56[%f]78", "asdf", 5.5, 5.5);
+		//	print(x,"\r\n");
 		expect("sprintf()", "12[asdf]34[5]56[5.5]78", x);
 		return;
 	};
 	// b64.ns
 	function b64() {
-		if (typeof(lib.text.base64)!='table') {
+		if (typeof (lib.text.base64) != 'table') {
 			print("SKIPPING BASE64 TESTS\n");
 			return;
 		}
-		local bx = { p="stuff:null", e="c3R1ZmY6bnVsbA==" };
-		local by = { p="null:stuff", e="bnVsbDpzdHVmZg==" };
-		expect("lib.text.base64.decode(bx.e)", "stuff:null",       lib.text.base64.decode(bx.e));
-		expect("lib.text.base64.decode(by.e)", "null:stuff",       lib.text.base64.decode(by.e));
+		local bx = { p = "stuff:null", e = "c3R1ZmY6bnVsbA==" };
+		local by = { p = "null:stuff", e = "bnVsbDpzdHVmZg==" };
+		expect("lib.text.base64.decode(bx.e)", "stuff:null", lib.text.base64.decode(bx.e));
+		expect("lib.text.base64.decode(by.e)", "null:stuff", lib.text.base64.decode(by.e));
 		expect("lib.text.base64.encode(bx.p)", "c3R1ZmY6bnVsbA==", lib.text.base64.encode(bx.p));
 		expect("lib.text.base64.encode(by.p)", "bnVsbDpzdHVmZg==", lib.text.base64.encode(by.p));
-	//	print("\n", lib.text.base64.decode("UTogV2hhdCdzIHRoZSBkaWZmZXJlbmNlIGJldHdlZW4gYSBjb2NrZXIgc3BhbmllbCBhbmQgYSBwaXRidWxsIGh1bXBpbmcgeW91ciBsZWc/CkE6IFlvdSBsZXQgdGhlIHBpdGJ1bGwgZmluaXNoLg=="), "\n");
+		//	print("\n", lib.text.base64.decode("UTogV2hhdCdzIHRoZSBkaWZmZXJlbmNlIGJldHdlZW4gYSBjb2NrZXIgc3BhbmllbCBhbmQgYSBwaXRidWxsIGh1bXBpbmcgeW91ciBsZWc/CkE6IFlvdSBsZXQgdGhlIHBpdGJ1bGwgZmluaXNoLg=="), "\n");
 		return;
 	};
 	// cmp.ns
 	function cmp() {
 		if (math.asin) {
-			local pi = math.asin(1)*2;
+			local pi = math.asin(1) * 2;
 		} else {
 			local pi = 3.1415926535897932384626433832795029;
 		}
-		expect("2 == 2",  true,  2==2);
-		expect("2 <= 2",  true,  2<=2);
-		expect("2 >= 2",  true,  2>=2);
-		expect("2 != 2",  false, 2!=2);
-		expect("2 < 2",   false, 2<2);
-		expect("2 > 2",   false, 2>2);
-		expect("42",      42,    (42));
-		expect("21",      21,    21);
-		expect("pi - pi", 0,     pi-pi);
-		expect("pi / pi", 1,     pi/pi);
-		expect("pi % pi", 0,     pi%pi);
-		expect("pi & pi", 3,     pi&pi);
-		expect("pi | pi", 3,     pi|pi);
-		expect("pi ^ pi", 0,     pi^pi);
-		expect("3 && 4",  true,  3&&4);
-		expect("3 || 4",  true,  3||4);
+		expect("2 == 2", true, 2 == 2);
+		expect("2 <= 2", true, 2 <= 2);
+		expect("2 >= 2", true, 2 >= 2);
+		expect("2 != 2", false, 2 != 2);
+		expect("2 < 2", false, 2 < 2);
+		expect("2 > 2", false, 2 > 2);
+		expect("42", 42, (42));
+		expect("21", 21, 21);
+		expect("pi - pi", 0, pi - pi);
+		expect("pi / pi", 1, pi / pi);
+		expect("pi % pi", 0, pi % pi);
+		expect("pi & pi", 3, pi&pi);
+		expect("pi | pi", 3, pi|pi);
+		expect("pi ^ pi", 0, pi ^ pi);
+		expect("3 && 4", true, 3 && 4);
+		expect("3 || 4", true, 3 || 4);
 
-		expect("tonumber()", 42,    tonumber("42"));
-		expect("tonumber()", 42.1,  tonumber("42.1"));
-		expect("tonumber()", -42,   tonumber("-42"));
+		expect("tonumber()", 42, tonumber("42"));
+		expect("tonumber()", 42.1, tonumber("42.1"));
+		expect("tonumber()", -42, tonumber("-42"));
 		expect("tonumber()", -42.1, tonumber("-42.1"));
 
-	//	expect("null==false",   true,  null==false);
-		expect("null===false",  false, null===false);
-		expect("false===false", true,  false===false);
-		expect("1===1",         true,  1===1);
-		expect("1===false",     false, 1===false);
-		expect("1===true",      false, 1===true);
+		//	expect("null==false",   true,  null==false);
+		expect("null===false", false, null === false);
+		expect("false===false", true, false === false);
+		expect("1===1", true, 1 === 1);
+		expect("1===false", false, 1 === false);
+		expect("1===true", false, 1 === true);
 
-		var x=0;   if (x==false) x=false; else x=true; expect("(x=0)",   false, x);
-	//	expect("(x=0)", false, 0==false?false:true );
-		var x=1;   if (x==false) x=false; else x=true; expect("(x=1)",   true,  x);
-		var x="";  if (x==false) x=false; else x=true; expect("(x='')",  false, x);
-		var x="x"; if (x==false) x=false; else x=true; expect("(x='x')", true,  x);
+		var x = 0; if (x == false) x = false; else x = true; expect("(x=0)", false, x);
+		//	expect("(x=0)", false, 0==false?false:true );
+		var x = 1; if (x == false) x = false; else x = true; expect("(x=1)", true, x);
+		var x = ""; if (x == false) x = false; else x = true; expect("(x='')", false, x);
+		var x = "x"; if (x == false) x = false; else x = true; expect("(x='x')", true, x);
 
-		expect("x==null", false, x==null);
-		expect("y==null", true,  y==null);
-		expect("x!=null", true,  x!=null);
-		expect("y!=null", false, y!=null);
+		expect("x==null", false, x == null);
+		expect("y==null", true, y == null);
+		expect("x!=null", true, x != null);
+		expect("y!=null", false, y != null);
 
-		expect("42?1:0",              1,  42?1:0);
-		expect("42?0:1",              0,  42?0:1);
-		expect("true?1:0",            1,  true?1:0);
-		expect("false?0:1",           1,  false?0:1);
-		expect("true?1:true?2:3",     1,  true?1:true?2:3);
-		expect("false?1:false?2:3",   3,  false?1:false?2:3);
-		expect("true?1:(true?2:3)",   1,  true?1:(true?2:3));
-		expect("false?1:(false?2:3)", 3,  false?1:(false?2:3));
-		expect("true?(true?1:2):3",   1,  true?(true?1:2):3);
-		expect("false?(false?1:2):3", 3,  false?(false?1:2):3);
-		expect("true?(false?1:2):3",  2,  true?(false?1:2):3);
-		expect("false?(true?1:2):3",  3,  false?(true?1:2):3);
+		expect("42?1:0", 1, 42 ? 1 : 0);
+		expect("42?0:1", 0, 42 ? 0 : 1);
+		expect("true?1:0", 1, true ? 1 : 0);
+		expect("false?0:1", 1, false ? 0 : 1);
+		expect("true?1:true?2:3", 1, true ? 1 : true ? 2 : 3);
+		expect("false?1:false?2:3", 3, false ? 1 : false ? 2 : 3);
+		expect("true?1:(true?2:3)", 1, true ? 1 : (true ? 2 : 3));
+		expect("false?1:(false?2:3)", 3, false ? 1 : (false ? 2 : 3));
+		expect("true?(true?1:2):3", 1, true ? (true ? 1 : 2) : 3);
+		expect("false?(false?1:2):3", 3, false ? (false ? 1 : 2) : 3);
+		expect("true?(false?1:2):3", 2, true ? (false ? 1 : 2) : 3);
+		expect("false?(true?1:2):3", 3, false ? (true ? 1 : 2) : 3);
 
-		x=1;
-		expect("?:",              2,  lib.string.tostring(x?(++x):(--x)));
-		x=0;
-		expect("?:",              -1,  lib.string.tostring(x?(++x):(--x)));
+		x = 1;
+		expect("?:", 2, lib.string.tostring(x ? (++ x) : (-- x)));
+		x = 0;
+		expect("?:", -1, lib.string.tostring(x ? (++ x) : (-- x)));
 
-		expect("!true",  false, !true);
-		expect("!false", true,  !false);
+		expect("!true", false, !true);
+		expect("!false", true, !false);
 
-		x={ 'a', 'b' };
-		y=1?x[0]:x[1];
+		x = { 'a', 'b' };
+		y = 1 ? x[0] : x[1];
 		expect("?:", 'a', y);
-		y=0?x[0]:x[1];
+		y = 0 ? x[0] : x[1];
 		expect("?:", 'b', y);
 
 
-		a=1;b=1;c=0;
-		if (--a && --b) c=1;
-	//	printf("[%d][%d][%d]\r\n", a, b, c);
-		expect("if (--a&&--b) c=1; b=1", 1,  b);
-		a=1;b=1;c=0;
-		if (--a || --b) c=1;
-	//	printf("[%d][%d][%d]\r\n", a, b, c);
-		expect("if (--a||--b) c=1; b=0", 0,  b);
-	//	throw "scene";
+		a = 1; b = 1; c = 0;
+		if (-- a && -- b) c = 1;
+		//	printf("[%d][%d][%d]\r\n", a, b, c);
+		expect("if (--a&&--b) c=1; b=1", 1, b);
+		a = 1; b = 1; c = 0;
+		if (-- a || -- b) c = 1;
+		//	printf("[%d][%d][%d]\r\n", a, b, c);
+		expect("if (--a||--b) c=1; b=0", 0, b);
+		//	throw "scene";
 
 		return;
 	};
 	// crypto.ns
 	function crypto() {
-	//	local key="hex:E76B2413958B00E193";
-	//	local key="hex:E76B2413958B00E1930000000000000000000000000000000000000000000000";
-		local key="hex:40507649a9581e95d503367fe3c90fa1439122d5a55a2218c97b5994b71df243";
+		//	local key="hex:E76B2413958B00E193";
+		//	local key="hex:E76B2413958B00E1930000000000000000000000000000000000000000000000";
+		local key = "hex:40507649a9581e95d503367fe3c90fa1439122d5a55a2218c97b5994b71df243";
 
-		if (typeof(lib.crypto)!='table') {
+		if (typeof (lib.crypto) != 'table') {
 			if (!quiet) print("SKIPPING CRYPTO TESTS\n");
 			return;
 		}
-		filename=_filepath+'/'+_filename;
-		filestat=lib.file.stat(filename);
-		if (typeof(lib.file.md5)!='function') {
+		filename = _filepath + '/' + _filename;
+		filestat = lib.file.stat(filename);
+		if (typeof (lib.file.md5) != 'function') {
 			print("lib.file.md5() missing\n");
 		} else {
 			expect("lib.string.md5", "5fce853b116dcf02c6151d4c10a49d6a", lib.string.md5("lib.string.md5"));
-	/*
+			/*
 			if (typeof(filestat)!='table') {
 				print("test file ", filename, " does not exist.\n");
 			} else {
@@ -267,11 +268,11 @@ namespace testlib1.tests {
 			}
 	*/
 		}
-		if (typeof(lib.file.sha1)!='function') {
+		if (typeof (lib.file.sha1) != 'function') {
 			print("lib.file.sha1() missing\n");
 		} else {
 			expect("lib.string.sha1", "42c2daecd60c6955ebde90314469fec9f1ad60ae", lib.string.sha1("lib.string.sha1"));
-	/*
+			/*
 			if (typeof(filestat)!='table') {
 				print("test file ", filename, " does not exist.\n");
 			} else {
@@ -280,82 +281,82 @@ namespace testlib1.tests {
 			}
 	*/
 		}
-		if (_ostype_=="DOS/turboc") return;
-		if (typeof(lib.crypto.aes_ecb_encrypt)=='function') {
-			x="lib.crypto.aes_ecb_encrypt";
-			x=lib.text.base64.encode(lib.crypto.aes_ecb_encrypt(x, key));
-			x=lib.crypto.aes_ecb_decrypt(lib.text.base64.decode(x), key);
+		if (_ostype_ == "DOS/turboc") return;
+		if (typeof (lib.crypto.aes_ecb_encrypt) == 'function') {
+			x = "lib.crypto.aes_ecb_encrypt";
+			x = lib.text.base64.encode(lib.crypto.aes_ecb_encrypt(x, key));
+			x = lib.crypto.aes_ecb_decrypt(lib.text.base64.decode(x), key);
 			expect("lib.crypto.aes_ecb_encrypt", "lib.crypto.aes_ecb_encrypt", x);
 		}
-		if (typeof(lib.crypto.aes_cbc_encrypt)=='function') {
+		if (typeof (lib.crypto.aes_cbc_encrypt) == 'function') {
 			/* an IV (Initialization Vector) is 16 bytes.
 			 * that means a 32 byte string of hex.  no more and no less.
 			 */
-			iv='a9a47b7d0802b313924900ad1baa6eb0';
+			iv = 'a9a47b7d0802b313924900ad1baa6eb0';
 
-			x="lib.crypto.aes_cbc_encrypt";
-			x=lib.text.base64.encode(lib.crypto.aes_cbc_encrypt(x, key));
-	//		print(x,"\n");
-			x=lib.crypto.aes_cbc_decrypt(lib.text.base64.decode(x), key);
+			x = "lib.crypto.aes_cbc_encrypt";
+			x = lib.text.base64.encode(lib.crypto.aes_cbc_encrypt(x, key));
+			//		print(x,"\n");
+			x = lib.crypto.aes_cbc_decrypt(lib.text.base64.decode(x), key);
 			expect("lib.crypto.aes_cbc_encrypt", "lib.crypto.aes_cbc_encrypt", x);
 
-			x="lib.crypto.aes_cbc_encrypt"; // same as ^^^^^^
-			x=lib.text.base64.encode(lib.crypto.aes_cbc_encrypt(x, key), 128, "");
-	//		print(x,"\n");
-			x=lib.crypto.aes_cbc_decrypt(lib.text.base64.decode(x), key, 128, "");
+			x = "lib.crypto.aes_cbc_encrypt"; // same as ^^^^^^
+			x = lib.text.base64.encode(lib.crypto.aes_cbc_encrypt(x, key), 128, "");
+			//		print(x,"\n");
+			x = lib.crypto.aes_cbc_decrypt(lib.text.base64.decode(x), key, 128, "");
 			expect("lib.crypto.aes_cbc_encrypt", "lib.crypto.aes_cbc_encrypt", x);
 
 			/* extra tests */
-			x="lib.crypto.aes_cbc_encrypt";
-			x=lib.text.base64.encode(lib.crypto.aes_cbc_encrypt(x, key, 128, iv));
-	//		print(x,"\n");
-			x=lib.crypto.aes_cbc_decrypt(lib.text.base64.decode(x), key, 128, iv);
+			x = "lib.crypto.aes_cbc_encrypt";
+			x = lib.text.base64.encode(lib.crypto.aes_cbc_encrypt(x, key, 128, iv));
+			//		print(x,"\n");
+			x = lib.crypto.aes_cbc_decrypt(lib.text.base64.decode(x), key, 128, iv);
 			expect("lib.crypto.aes_cbc_encrypt", "lib.crypto.aes_cbc_encrypt", x);
 
-			x="lib.crypto.aes_cbc_encrypt";
-			x=lib.text.base64.encode(lib.crypto.aes_cbc_encrypt(x, key, 192, iv));
-	//		print(x,"\n");
-			x=lib.crypto.aes_cbc_decrypt(lib.text.base64.decode(x), key, 192, iv);
+			x = "lib.crypto.aes_cbc_encrypt";
+			x = lib.text.base64.encode(lib.crypto.aes_cbc_encrypt(x, key, 192, iv));
+			//		print(x,"\n");
+			x = lib.crypto.aes_cbc_decrypt(lib.text.base64.decode(x), key, 192, iv);
 			expect("lib.crypto.aes_cbc_encrypt", "lib.crypto.aes_cbc_encrypt", x);
 
-			x="lib.crypto.aes_cbc_encrypt";
-			x=lib.text.base64.encode(lib.crypto.aes_cbc_encrypt(x, key, 256, iv));
-	//		print(x,"\n");
-			x=lib.crypto.aes_cbc_decrypt(lib.text.base64.decode(x), key, 256, iv);
+			x = "lib.crypto.aes_cbc_encrypt";
+			x = lib.text.base64.encode(lib.crypto.aes_cbc_encrypt(x, key, 256, iv));
+			//		print(x,"\n");
+			x = lib.crypto.aes_cbc_decrypt(lib.text.base64.decode(x), key, 256, iv);
 			expect("lib.crypto.aes_cbc_encrypt", "lib.crypto.aes_cbc_encrypt", x);
 
 		}
-		if (typeof(lib.crypto.aes_ecb_encrypt)!='function') {
+		if (typeof (lib.crypto.aes_ecb_encrypt) != 'function') {
 			print("lib.crypto.aes_ecb_encrypt() missing\n");
 		} else {
-			if (typeof(filestat)!='table') {
+			if (typeof (filestat) != 'table') {
 				print("test file ", filename, " does not exist.\n");
 			} else {
-				x=lib.file.readall(filename);
-				mx=lib.string.md5(x);
-	//			print("x=[",mx=lib.string.md5(x),"]\n");
-				y=lib.crypto.aes_ecb_encrypt(x, key);
-	//			print("y=[",lib.string.md5(y),"]\n");
-				z=lib.crypto.aes_ecb_decrypt(y, key);
-				mz=lib.string.md5(z);
-	//			print("z=[",mz=lib.string.md5(z),"]\n");
+				x = lib.file.readall(filename);
+				mx = lib.string.md5(x);
+				//			print("x=[",mx=lib.string.md5(x),"]\n");
+				y = lib.crypto.aes_ecb_encrypt(x, key);
+				//			print("y=[",lib.string.md5(y),"]\n");
+				z = lib.crypto.aes_ecb_decrypt(y, key);
+				mz = lib.string.md5(z);
+				//			print("z=[",mz=lib.string.md5(z),"]\n");
 				expect(mx, mz, mx);
 			}
 		}
-		if (typeof(lib.crypto.aes_cbc_encrypt)!='function') {
+		if (typeof (lib.crypto.aes_cbc_encrypt) != 'function') {
 			print("lib.crypto.aes_cbc_encrypt() missing\n");
 		} else {
-			if (typeof(filestat)!='table') {
+			if (typeof (filestat) != 'table') {
 				print("test file ", filename, " does not exist.\n");
 			} else {
-				x=lib.file.readall(filename);
-				mx=lib.string.md5(x);
-	//			print("x=[",mx=lib.string.md5(x),"]\n");
-				y=lib.crypto.aes_cbc_encrypt(x, key);
-	//			print("y=[",lib.string.md5(y),"]\n");
-				z=lib.crypto.aes_cbc_decrypt(y, key);
-				mz=lib.string.md5(z);
-	//			print("z=[",mz=lib.string.md5(z),"]\n");
+				x = lib.file.readall(filename);
+				mx = lib.string.md5(x);
+				//			print("x=[",mx=lib.string.md5(x),"]\n");
+				y = lib.crypto.aes_cbc_encrypt(x, key);
+				//			print("y=[",lib.string.md5(y),"]\n");
+				z = lib.crypto.aes_cbc_decrypt(y, key);
+				mz = lib.string.md5(z);
+				//			print("z=[",mz=lib.string.md5(z),"]\n");
 				expect(mx, mz, mx);
 			}
 		}
@@ -363,26 +364,26 @@ namespace testlib1.tests {
 	};
 	// dl.ns
 	function dl() {
-		if (typeof(lib.load)!='function') return;
-		if (typeof(lib.dirlist)!='function') {
+		if (typeof (lib.load) != 'function') return;
+		if (typeof (lib.dirlist) != 'function') {
 			print("        lib.dirlist doesn't exist\n");
 			return;
 		}
 		if (!quiet) print("        loading libs...\n");
 		lib.io.flush();
 		foreach (f in lib.dirlist(lib.dl.path[0])) {
-			if (f.name=='.'||f.name=='..') continue;
-			x=lib.string.split(f.name, ".");
-			if (x[1]!='so') continue;
-			if (lib.string.sub(x[0], 0, 7)=='libnsp_') x[0]=lib.string.sub(x[0], 7);
-			if (x[0]=='zip') {
+			if (f.name == '.' || f.name == '..') continue;
+			x = lib.string.split(f.name, ".");
+			if (x[1] != 'so') continue;
+			if (lib.string.sub(x[0], 0, 7) == 'libnsp_') x[0] = lib.string.sub(x[0], 7);
+			if (x[0] == 'zip') {
 				if (!quiet) print("\tskipping zip\r\n");
 				continue;
 			}
 			expect(f.name, true, lib.load(x[0]));
 			if (lib.dl.last_error) {
-				print("["+lib.dl.last_error+"]\r\n");
-				lib.dl.last_error="";
+				print("[" + lib.dl.last_error + "]\r\n");
+				lib.dl.last_error = "";
 			}
 		}
 		//expect("test", true, lib.load("test"));
@@ -392,32 +393,32 @@ namespace testlib1.tests {
 	//if (_ostype_!='OpenBSD/gcc') testdl();
 	// eval.ns
 	function eval() {
-		if (typeof(eval)=='function') {
-			expect("eval(\"5*5\")",      25,    eval("5*5"));
-			expect("eval(5*42)",         210,   eval(5*42));
+		if (typeof (eval) == 'function') {
+			expect("eval(\"5*5\")", 25, eval("5*5"));
+			expect("eval(5*42)", 210, eval(5 * 42));
 			expect("eval(\"xx='abc'\")", 'abc', eval("xx='abc'"));
-			expect("eval(\"'def'\")",    'def', eval("'def'"));
-	//		print("[",xx,"]\n"); /* xx _should_ be 'abc' */
+			expect("eval(\"'def'\")", 'def', eval("'def'"));
+			//		print("[",xx,"]\n"); /* xx _should_ be 'abc' */
 
-			z=eval;
+			z = eval;
 			try {
-				x=z("'zzz'");
+				x = z("'zzz'");
 			} catch (e) {
-				if (!quiet) print("this exception is unexceptional -> ",e.description,"\r\n");
-	//			print("        exception[",e.errno,"][",e.description,"]\n");
+				if (!quiet) print("this exception is unexceptional -> ", e.description, "\r\n");
+				//			print("        exception[",e.errno,"][",e.description,"]\n");
 			}
 			expect("z(\"'zzz'\")", false, x);
 			if (!quiet) {
-				x=eval("y=42");
-				print("x=[",x,"]\n");
-				print("y=[",y,"]\n");
+				x = eval("y=42");
+				print("x=[", x, "]\n");
+				print("y=[", y, "]\n");
 				/*
 				 * exec() is a kludge.  an ugly hack.  don't be shocked if it vanishes.
 				 * eval() _should_ be able to do this stuff...
 				 */
-				x=eval("y=42;print(y,'\n');");
-				print("x=[",x,"]\n");
-				print("y=[",y,"]\n");
+				x = eval("y=42;print(y,'\n');");
+				print("x=[", x, "]\n");
+				print("y=[", y, "]\n");
 			}
 		}
 		return;
@@ -425,12 +426,12 @@ namespace testlib1.tests {
 	// function.ns
 	function functions() {
 		local function x() { return 1; }
-		expect("...", 1,  x());
-		x=function () { return 2; }
-		expect("...", 2,  x());
+		expect("...", 1, x());
+		x = function () { return 2; }
+		expect("...", 2, x());
 
 		/* declare a lambda, execute it inline, and return the result */
-		x=function (y) { return y*2; }(21);
+		x = function (y) { return y * 2; }(21);
 		expect("...", 42, x);
 
 		local function hello(s) { printf("%s, ", s); return function (s) { printf("%s!\n", s); } };
@@ -440,23 +441,23 @@ namespace testlib1.tests {
 	};
 	// if.ns
 	function ifelse() {
-		local x=2;
-		local str="";
+		local x = 2;
+		local str = "";
 
-		if (x==1) {
-			str=str+"test 1 (bad)";
-		} else if (x==2) {
-			str=str+"test 2 (good)";
+		if (x == 1) {
+			str = str + "test 1 (bad)";
+		} else if (x == 2) {
+			str = str + "test 2 (good)";
 		} else {
-			str=str+"test 3 (bad)";
+			str = str + "test 3 (bad)";
 		}
 		expect("simple 'if' test", "test 2 (good)", str);
 
-		x=0;
-		if (x==0) {
-		} else if (x==x++) {
-		} else if (x==x++) {
-		} else if (x==x++) {
+		x = 0;
+		if (x == 0) {
+		} else if (x == x++) {
+		} else if (x == x++) {
+		} else if (x == x++) {
 		}
 		# this actually returned 3 in 0.5.0
 		expect("simple 'if' test 2", 0, x);
@@ -465,19 +466,19 @@ namespace testlib1.tests {
 	};
 	// index.ns
 	function indexing() {
-		var sp="                              ";
+		var sp = "                              ";
 
 		if (!quiet) print("        this is a sample of table indexes.\n\n");
-		for (i=0;i<sizeof(_GLOBALS);i++) {
-			local n=lib.table.iname(_GLOBALS, i);
-			local t=typeof(_GLOBALS[n]);
-			if (t=='function') continue;
-			if (t=='table') continue;
+		for (i = 0; i < sizeof (_GLOBALS); i++) {
+			local n = lib.table.iname(_GLOBALS, i);
+			local t = typeof (_GLOBALS[n]);
+			if (t == 'function') continue;
+			if (t == 'table') continue;
 			//print("        ",lib.string.sub(t+sp,0,10),lib.string.sub(n+sp,0,13),_GLOBALS[n],"\n");
 			//print("        ",lib.string.sub(t+sp,0,10),lib.string.sub(n+sp,0,13),ival(_GLOBALS,i),"\n");
 		}
 		/* this will list all available string functions stored in table 'string' */
-	/*
+		/*
 		for (i=0;;i++) {
 			local n=lib.table.iname(string, i);
 			local t=typeof(string[n]);
@@ -489,24 +490,24 @@ namespace testlib1.tests {
 	};
 	// ldap.ns
 	function ldap() {
-		if (typeof(ldap.search)!='function') {
+		if (typeof (ldap.search) != 'function') {
 			if (!quiet) print("SKIPPING LDAP TESTS\n");
 			return;
 		}
-	//	L=ldap.search("localhost", 389, "o=gw.nulllogic.lan", "(cn=*)");
-		L=ldap.search("localhost", 389, "ou=users,ou=people,o=gw.nulllogic.lan", "(sn=Cahill)");
+		//	L=ldap.search("localhost", 389, "o=gw.nulllogic.lan", "(cn=*)");
+		L = ldap.search("localhost", 389, "ou=users,ou=people,o=gw.nulllogic.lan", "(sn=Cahill)");
 		return;
 	};
 	// link.ns
 	function link() {
-		x=1;
-		y=&x;
-		expect("x=1",  1, x);
+		x = 1;
+		y = &x;
+		expect("x=1", 1, x);
 		expect("y=&x", 1, y);
-		z=function (x) { return x=3; } (&x);
+		z = function (x) { return x = 3; } (&x);
 		expect("...", 3, x);
 		expect("...", 3, y);
-		x=*y+1;
+		x = * y + 1;
 		expect("x=*y+1", 4, x);
 		expect("...", 3, y);
 		return;
@@ -515,56 +516,56 @@ namespace testlib1.tests {
 	function load() {
 		include("/etc/nullg/nullg.conf");
 		global junk = { };
-		for (j=0;j<100;j++) {
-			junk[j] = { a=1, b=2, c=3, d="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" };
+		for (j = 0; j < 100; j++) {
+			junk[j] = { a = 1, b = 2, c = 3, d = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" };
 			local x =
-				"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"+
-				"yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"+
-				"zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz";
+			"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
+			"yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy" +
+			"zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz";
 		}
-		global junk=0;
+		global junk = 0;
 		return;
 	};
 	// loops.ns
 	function loop() {
-		local n=10;
+		local n = 10;
 
-		local x=""; while (n>5) { x=x+lib.string.tostring(--n); } expect("while (n>5)", "98765", x);
-		local x=""; for (n=0;n<10;n++) { if (n==5) break; x=x+n.tostring(); }  expect("for (n=0;n<5;n++)", "01234", x);
-		local x=""; for (n=0;n<5;++n)  { x=x+n.tostring(); }  expect("for (n=0;n<5;++n)",  "01234",   x);
-		local x=""; for (n=0;n<5;n+=1) { x=x+n.tostring(); }  expect("for (n=0;n<5;n+=1)", "01234",   x);
-		local x=""; for (n=5;n>0;n--)  { x=x+n.tostring(); }  expect("for (n=5;n>0;n--)",  "54321",   x);
-		local x=""; for (n=5;n>0;--n)  { x=x+n.tostring(); }  expect("for (n=5;n>0;--n)",  "54321",   x);
-		local x=""; for (n=5;n>0;n-=1) { x=x+n.tostring(); }  expect("for (n=5;n>0;n-=1)", "54321",   x);
-		array = { a=1, b=2, c=3, d=4, e=5 };
-		local x=""; foreach (n in array) { x=x+n.tostring(); } expect("foreach (n in array)", "12345",   x);
-		local x=""; foreach (i,n in array) { n=array[i]=6-n; x=x+n.tostring(); } expect("foreach (n in array)", "54321",   x);
+		local x = ""; while (n > 5) { x = x + lib.string.tostring(-- n); } expect("while (n>5)", "98765", x);
+		local x = ""; for (n = 0; n < 10; n++) { if (n == 5) break; x = x + n.tostring(); } expect("for (n=0;n<5;n++)", "01234", x);
+		local x = ""; for (n = 0; n < 5; ++ n) { x = x + n.tostring(); } expect("for (n=0;n<5;++n)", "01234", x);
+		local x = ""; for (n = 0; n < 5; n += 1) { x = x + n.tostring(); } expect("for (n=0;n<5;n+=1)", "01234", x);
+		local x = ""; for (n = 5; n > 0; n--) { x = x + n.tostring(); } expect("for (n=5;n>0;n--)", "54321", x);
+		local x = ""; for (n = 5; n > 0; -- n) { x = x + n.tostring(); } expect("for (n=5;n>0;--n)", "54321", x);
+		local x = ""; for (n = 5; n > 0; n -= 1) { x = x + n.tostring(); } expect("for (n=5;n>0;n-=1)", "54321", x);
+		array = { a = 1, b = 2, c = 3, d = 4, e = 5 };
+		local x = ""; foreach (n in array) { x = x + n.tostring(); } expect("foreach (n in array)", "12345", x);
+		local x = ""; foreach (i, n in array) { n = array[i] = 6 - n; x = x + n.tostring(); } expect("foreach (n in array)", "54321", x);
 		/* resetting array inside foreach used to segfault */
 		try {
 			//local x=""; foreach (n in array) { x=x+n.tostring(); array=0; } expect("foreach (n in array)", "5",   x);
-			local x=""; foreach (n in array) { x=x+n.tostring(); array=0; } expect("foreach (n in array)", "54321",   x);
+			local x = ""; foreach (n in array) { x = x + n.tostring(); array = 0; } expect("foreach (n in array)", "54321", x);
 		} catch (e) {
-			print("this exception is unexceptional -> ",e.description,"\r\n");
+			print("this exception is unexceptional -> ", e.description, "\r\n");
 		}
-		expect("foreach...array=null", '0',   array.tostring());
+		expect("foreach...array=null", '0', array.tostring());
 
 		// this test will catch the return of a bug with freeing tables returned by ival()
-	//	local n="";
-		for (i=0;i<sizeof(_GLOBALS);i++) {
-			nn=lib.table.iname(_GLOBALS, i);
-			local t=typeof(vv);
+		//	local n="";
+		for (i = 0; i < sizeof (_GLOBALS); i++) {
+			nn = lib.table.iname(_GLOBALS, i);
+			local t = typeof (vv);
 			//if (t=='function') continue;
 			//if (t=='table') continue;
 			//vv=ival(_GLOBALS, i);
-			vv=_GLOBALS[n];
+			vv = _GLOBALS[n];
 			//printf("\t%d %d\t%s%s%s\n", sizeof(_GLOBALS), i, lib.string.sub(t+sp,0,10), lib.string.sub(n+sp,0,13), v);
 			//io.flush();
 		}
 
-	//	for (i=0;i<sizeof(_GLOBALS);i++) {
-	//		local nn=iname(_GLOBALS, i);
-	//		local t=typeof(_GLOBALS[nn]);
-	//	}
+		//	for (i=0;i<sizeof(_GLOBALS);i++) {
+		//		local nn=iname(_GLOBALS, i);
+		//		local t=typeof(_GLOBALS[nn]);
+		//	}
 
 		return;
 	};
@@ -586,66 +587,66 @@ namespace testlib1.tests {
 	//#endif
 	function math() {
 		if (math.asin) {
-			local pi = math.asin(1)*2;
+			local pi = math.asin(1) * 2;
 		} else {
 			local pi = 3.1415926535897932384626433832795029;
 		}
-		local n=0;
-		local x=0;
+		local n = 0;
+		local x = 0;
 
 		#operator precedence
 		x = 4 + 5 * 3;
 		expect("4+5*3", 19, x);
-		x=12 % 5 * 2;
+		x = 12 % 5 * 2;
 		expect("12%5*2", 4, x);
 		x = (4 + 5) * 3;
 		expect("(4+5)*3", 27, x);
 
-		x = 5*3+2-1*0;
+		x = 5 * 3 + 2 - 1 * 0;
 		expect("5*3+2-1*0", 17, x);
 
 		x = 25 - (2 * (10 + (8 / 2)));
 		expect("25-(2*(10+(8/2)))", -3, x);
 
-		expect("1+2*4",   9,  1+2*4);
-		expect("(1+2)*4", 12, (1+2)*4);
-		expect("1+(2*4)", 9,  1+(2*4));
+		expect("1+2*4", 9, 1 + 2 * 4);
+		expect("(1+2)*4", 12, (1 + 2) * 4);
+		expect("1+(2*4)", 9, 1 + (2 * 4));
 
-		n=42; expect("n=42",       42,      n);
-		n+=5; expect("n+=5",       47,      n);
-		n-=2; expect("n-=2, n+5",  50,      n+5);
-		      expect("      n+5",  50,      (n+5));
-		n*=3; expect("n*=3",       135,     (n));
-		n/=4; expect("n/=4",       33.75,   (n));
-		n=42; expect("n=42, n--",  "42 41", sprintf("%d %d", n--, n));
-		n=42; expect("n=42, n++",  "42 43", sprintf("%d %d", n++, n));
-		n=42; expect("n=42, --n",  "41 41", sprintf("%d %d", --n, n));
-		n=42; expect("n=42, ++n",  "43 43", sprintf("%d %d", ++n, n));
+		n = 42; expect("n=42", 42, n);
+		n += 5; expect("n+=5", 47, n);
+		n -= 2; expect("n-=2, n+5", 50, n + 5);
+		expect("      n+5", 50, (n + 5));
+		n *= 3; expect("n*=3", 135, (n));
+		n /= 4; expect("n/=4", 33.75, (n));
+		n = 42; expect("n=42, n--", "42 41", sprintf("%d %d", n--, n));
+		n = 42; expect("n=42, n++", "42 43", sprintf("%d %d", n++, n));
+		n = 42; expect("n=42, --n", "41 41", sprintf("%d %d", -- n, n));
+		n = 42; expect("n=42, ++n", "43 43", sprintf("%d %d", ++ n, n));
 
-		expect("(n++)",              43,         (n++));
-		expect("(n--)",              44,         (n--));
-		expect("(n)",                43,         (n));
-		expect("3-1.5",              1.5,        (3-1.5));
-		expect("-4+1.5",             -2.5,       (-4+1.5));
-		expect("-1.5",               -1.5,       -1.5);
-		expect("math.abs(-4.2)",     4.2,        lib.math.abs(-4.2));
-		expect("math.ceil(2.1)",     3,          lib.math.ceil(2.1));
-		expect("math.floor(2.1)",    2,          lib.math.floor(2.1));
-		expect("pi*(2+(1+1))",       "12.56637", pi*(2+(1+1)));
-		if (typeof(math.sqrt)=='function') expect("math.sqrt(2)",       "1.414213", lib.math.sqrt(2));
-		expect("(pi*(4+(4-1+2)))/9", 3.141592,   (pi*(4+(4-1+2)))/9);
+		expect("(n++)", 43, (n++));
+		expect("(n--)", 44, (n--));
+		expect("(n)", 43, (n));
+		expect("3-1.5", 1.5, (3 - 1.5));
+		expect("-4+1.5", -2.5, (-4 + 1.5));
+		expect("-1.5", -1.5, -1.5);
+		expect("math.abs(-4.2)", 4.2, lib.math.abs(-4.2));
+		expect("math.ceil(2.1)", 3, lib.math.ceil(2.1));
+		expect("math.floor(2.1)", 2, lib.math.floor(2.1));
+		expect("pi*(2+(1+1))", "12.56637", pi * (2 + (1 + 1)));
+		if (typeof (math.sqrt) == 'function') expect("math.sqrt(2)", "1.414213", lib.math.sqrt(2));
+		expect("(pi*(4+(4-1+2)))/9", 3.141592, (pi * (4 + (4 - 1 + 2))) / 9);
 		if (!quiet) print("          3.141593, actually, but rounding doesn't work\n");
 		if (!quiet) {
 			print("        math.rand()         = ", lib.math.rand());
-			for (i=0;i<4;i++) print(", ", lib.math.rand());
+			for (i = 0; i < 4; i++) print(", ", lib.math.rand());
 			print("\n");
 			print("        math.rand(10)       = ", lib.math.rand(10));
-			for (i=0;i<11;i++) print(", ", lib.math.rand(10));
+			for (i = 0; i < 11; i++) print(", ", lib.math.rand(10));
 			print("\n");
 		}
 
-	//	print("\nexpect a divided by zero warning and a null return val\n");
-		expect("1/0",                'null',     lib.string.tostring(1/0));
+		//	print("\nexpect a divided by zero warning and a null return val\n");
+		expect("1/0", 'null', lib.string.tostring(1 / 0));
 		return;
 	};
 	// oo.ns
@@ -653,25 +654,25 @@ namespace testlib1.tests {
 		local function str1() {
 			local class str {
 				_constructor = function (val) { this.value = val.tostring(); };
-				_destructor  = function () { this.value = ""; };
-				size  = function () { return sizeof(/*this.*/value); };
+				_destructor = function () { this.value = ""; };
+				size = function () { return sizeof (/*this.*/value); };
 				lower = function () { return lib.string.tolower(this.value); };
 				upper = function () { return lib.string.toupper(this.value); };
-				get   = function () { return this.value; };
-				set   = function (val) { return this.value=val.tostring(); };
+				get = function () { return this.value; };
+				set = function (val) { return this.value = val.tostring(); };
 			};
 			local function dump(obj) {
-				var sp="                              ";
-				print("        ",sizeof(obj)," members\r\n");
-				for (i=0;i<sizeof(obj);i++) {
-					local n=lib.table.iname(obj, i);
-					local t=typeof(obj[n]);
-					print("        ",lib.string.sub(t+sp,0,10),lib.string.sub(n+sp,0,13),obj[n],"\n");
+				var sp = "                              ";
+				print("        ", sizeof (obj), " members\r\n");
+				for (i = 0; i < sizeof (obj); i++) {
+					local n = lib.table.iname(obj, i);
+					local t = typeof (obj[n]);
+					print("        ", lib.string.sub(t + sp, 0, 10), lib.string.sub(n + sp, 0, 13), obj[n], "\n");
 				}
 				return;
 			};
 			if (!quiet) print("\tuser-defined class and methods\r\n");
-			x=new str("AbC");
+			x = new str("AbC");
 			// dump(x);
 
 			//io.flush();
@@ -681,27 +682,27 @@ namespace testlib1.tests {
 
 			x.set("aBcDeF");
 			expect("x.size()", 6, x.size()); // will print 6
-			expect("x.lower()",  "abcdef", x.lower()); // will print abcdef
-			expect("x.upper()",  "ABCDEF", x.upper()); // will print ABCDEF
+			expect("x.lower()", "abcdef", x.lower()); // will print abcdef
+			expect("x.upper()", "ABCDEF", x.upper()); // will print ABCDEF
 			expect("x.value.toupper()", "ABCDEF", x.value.toupper()); // will print ABCDEF using the base string method
 			delete x;
-			expect("typeof(x)", null.tostring(), typeof(x));
+			expect("typeof(x)", null.tostring(), typeof (x));
 			expect("x.gettype(x)", null.tostring(), x.gettype());
 		};
 		local function str2() {
 			if (!quiet) print("\tusing methods for base types\r\n");
-			x="aBcDeF";
-			expect("x=\"aBcDeF\"", "aBcDeF", x="aBcDeF");
-			expect("x.length()",   6,        x.length());
-			expect("x.tolower()",  "abcdef", x.tolower());
-			expect("x.toupper()",  "ABCDEF", x.toupper());
+			x = "aBcDeF";
+			expect("x=\"aBcDeF\"", "aBcDeF", x = "aBcDeF");
+			expect("x.length()", 6, x.length());
+			expect("x.tolower()", "abcdef", x.tolower());
+			expect("x.toupper()", "ABCDEF", x.toupper());
 		};
 		local function str3() {
 			local function noclass() {
-				this.x=42;
-				this.px=function () { if (!quiet) printf("[x.x=%d]\r\n", this.x); };
+				this.x = 42;
+				this.px = function () { if (!quiet) printf("[x.x=%d]\r\n", this.x); };
 			}
-			x=new noclass();
+			x = new noclass();
 			x.px();
 		};
 		str1();
@@ -712,13 +713,13 @@ namespace testlib1.tests {
 	};
 	// regex.ns
 	function regex() {
-		if (_ostype_=="DOS/turboc") return;
-		if (typeof(lib.text.regex)!='table') {
+		if (_ostype_ == "DOS/turboc") return;
+		if (typeof (lib.text.regex) != 'table') {
 			print("SKIPPING REGEX TESTS\n");
 			return;
 		}
-	#	print("REGEX TEST\n\n");
-	/*
+		#	print("REGEX TEST\n\n");
+		/*
 		x=lib.text.regex.match("\\((.*), (.*)\\)", "(a, b)");
 		print("match x=",x,"\n");
 		x=lib.text.regex.match("\\((.*), (.*)\\)", "(a  b)");
@@ -734,9 +735,9 @@ namespace testlib1.tests {
 		x=lib.text.regex.replace("(.*) is (.*)", "[&]\\1 was \\2", "This is a test.");
 		print("replace x=",x,"\n");
 	*/
-	//	p=lib.file.readall(_filepath+'/_regex.txt');
-		p={
-		//	char *re, *str, *ans, *src, *dst;
+		//	p=lib.file.readall(_filepath+'/_regex.txt');
+		p = {
+			//	char *re, *str, *ans, *src, *dst;
 			@"abc	abc	y	&	abc";
 			@"abc	xbc	n	-	-";
 			@"abc	axc	n	-	-";
@@ -867,18 +868,18 @@ namespace testlib1.tests {
 		};
 
 
-//		if (typeof(p)!='string') { print("can't find _regex.txt\n"); return; }
-//		p=lib.string.split(p, '\n');
-		for (i=0;p[i]!=null;i++) {
-			if (sizeof(p[i])==0) break;
-		//	char *re, *str, *ans, *src, *dst;
-//			printf("[%s]\r\n", p[i]);
-			r=lib.string.split(p[i], '\t');
-			re=r[0];
-			str=r[1];
-			ans=r[2];
-			src=r[3];
-			dst=r[4];
+		//		if (typeof(p)!='string') { print("can't find _regex.txt\n"); return; }
+		//		p=lib.string.split(p, '\n');
+		for (i = 0; p[i] != null; i++) {
+			if (sizeof (p[i]) == 0) break;
+			//	char *re, *str, *ans, *src, *dst;
+			//			printf("[%s]\r\n", p[i]);
+			r = lib.string.split(p[i], '\t');
+			re = r[0];
+			str = r[1];
+			ans = r[2];
+			src = r[3];
+			dst = r[4];
 
 			//printf("re=[%s],str=[%s]\r\n", re, str);
 			//debug.break();
@@ -886,12 +887,12 @@ namespace testlib1.tests {
 			//printf("x=[%s]\r\n", x);
 
 
-		//	if (i<100) { p[i]=null; continue; }
-		//	if (i==95) continue; // test 95 seems broken
-//			if (lib.string.sub(p[i], sizeof(p[i])-1)=='\r') {
-//				p[i]=lib.string.sub(p[i], 0, sizeof(p[i])-1);
-//			}
-/*
+			//	if (i<100) { p[i]=null; continue; }
+			//	if (i==95) continue; // test 95 seems broken
+			//			if (lib.string.sub(p[i], sizeof(p[i])-1)=='\r') {
+			//				p[i]=lib.string.sub(p[i], 0, sizeof(p[i])-1);
+			//			}
+			/*
 			if (ans=='c') {
 				// c should fail to compile?
 				continue;
@@ -907,26 +908,26 @@ namespace testlib1.tests {
 				printf("burp %d [%s]\n", i, ans);
 			}
 */
-			if (ans=='c') {
+			if (ans == 'c') {
 				// c should fail to compile?
-				fail=false;
+				fail = false;
 				try {
-					x=lib.text.regex.match(str, re);
+					x = lib.text.regex.match(str, re);
 				} catch (ex) {
-					fail=true;
+					fail = true;
 				}
 				//printf("[%s]should fail .. %s\r\n", re, fail);
-				expect(re+" should fail",  "true", fail);
-			} else if (ans=='n') {
-				x=lib.text.regex.match(str, re);
-				expect(re,  "0", x);
+				expect(re + " should fail", "true", fail);
+			} else if (ans == 'n') {
+				x = lib.text.regex.match(str, re);
+				expect(re, "0", x);
 				//printf("n[%s]\r\n", p[i]);
 			} else {
-				x=lib.text.regex.match(str, re);
-				expect(re,  "1", x);
+				x = lib.text.regex.match(str, re);
+				expect(re, "1", x);
 				//@"\((.*), (.*)\)	(a, b)	y	(\2, \1)	(b, a)";
-				x=lib.text.regex.replace(str, re, src);
-				expect(re,  dst, x);
+				x = lib.text.regex.replace(str, re, src);
+				expect(re, dst, x);
 			}
 		}
 		//p=null;
@@ -934,73 +935,73 @@ namespace testlib1.tests {
 	};
 	// rot13.ns
 	function rot13() {
-		if (typeof(lib.text.rot13)!='function') {
+		if (typeof (lib.text.rot13) != 'function') {
 			print("SKIPPING ROT13 TESTS\n");
 			return;
 		}
-		local rx = { p="123ABCKLMNOPXYZ", e="123NOPXYZABCKLM" };
-		local ry = { p="123abcklmnopxyz", e="123nopxyzabcklm" };
+		local rx = { p = "123ABCKLMNOPXYZ", e = "123NOPXYZABCKLM" };
+		local ry = { p = "123abcklmnopxyz", e = "123nopxyzabcklm" };
 		expect("lib.text.rot13(rx.e)", "123ABCKLMNOPXYZ", lib.text.rot13(rx.e));
 		expect("lib.text.rot13(rx.p)", "123NOPXYZABCKLM", lib.text.rot13(rx.p));
 		expect("lib.text.rot13(ry.e)", "123abcklmnopxyz", lib.text.rot13(ry.e));
 		expect("lib.text.rot13(ry.p)", "123nopxyzabcklm", lib.text.rot13(ry.p));
-	//	print(lib.text.rot13("\nNakvrgl, a.: Gur svefg gvzr lbh pna'g qb vg n frpbaq gvzr.\nCnavp, a.  : Gur frpbaq gvzr lbh pna'g qb vg gur svefg gvzr.\n"));
+		//	print(lib.text.rot13("\nNakvrgl, a.: Gur svefg gvzr lbh pna'g qb vg n frpbaq gvzr.\nCnavp, a.  : Gur frpbaq gvzr lbh pna'g qb vg gur svefg gvzr.\n"));
 		return;
 	};
 	// scope.ns
 	function scope() {
 		local subf1 = function (p1, p2) {
-			local p3="b";
-			expect("testing subscope", "[5][x][b]",     "["+p1.tostring()+"]["+p2.tostring()+"]["+p3.tostring()+"]");
+			local p3 = "b";
+			expect("testing subscope", "[5][x][b]", "[" + p1.tostring() + "][" + p2.tostring() + "][" + p3.tostring() + "]");
 			return;
 		}
 		local subf2 = function (p1, p2, p3) {
-			expect("testing subscope(t)", "[5][x][1][null]",     "["+p1.tostring()+"]["+p2.tostring()+"]["+p3.a.tostring()+"]["+p3.c.tostring()+"]");
+			expect("testing subscope(t)", "[5][x][1][null]", "[" + p1.tostring() + "][" + p2.tostring() + "][" + p3.a.tostring() + "][" + p3.c.tostring() + "]");
 			return;
 		}
 		local subf3 = function (p1, p2, p3) {
-			expect("testing subscope(t)", "[5][x][null][2]",     "["+p1.tostring()+"]["+p2.tostring()+"]["+p3.a.tostring()+"]["+p3.c.tostring()+"]");
+			expect("testing subscope(t)", "[5][x][null][2]", "[" + p1.tostring() + "][" + p2.tostring() + "][" + p3.a.tostring() + "][" + p3.c.tostring() + "]");
 			return;
 		}
 		function subf4(i) {
-			local ack = { aa=1, bb=2 };
+			local ack = { aa = 1, bb = 2 };
 			return ack;
 		}
 		function subf5(i, s) {
-			s+="["+i+"]";
-			if (i<5) subf5(i+1, &s);
-			s+="["+i+"]";
+			s += "[" + i + "]";
+			if (i < 5) subf5(i + 1, &s);
+			s += "[" + i + "]";
 			return 42;
 		}
-		local p3="a";
-		local ack = { a=1, b = { c=2 } };
+		local p3 = "a";
+		local ack = { a = 1, b = { c = 2 } };
 
-		expect("testing scope",    "[null][null][a]",  "["+p1.tostring()+"]["+p2.tostring()+"]["+p3.tostring()+"]");
+		expect("testing scope", "[null][null][a]", "[" + p1.tostring() + "][" + p2.tostring() + "][" + p3.tostring() + "]");
 		subf1(5, "x");
-		expect("testing scope",    "[null][null][a]",  "["+p1.tostring()+"]["+p2.tostring()+"]["+p3.tostring()+"]");
+		expect("testing scope", "[null][null][a]", "[" + p1.tostring() + "][" + p2.tostring() + "][" + p3.tostring() + "]");
 		subf2(5, "x", ack);
 		subf3(5, "x", ack.b);
-		expect("testing scope",    "[null][null][a]",  "["+p1.tostring()+"]["+p2.tostring()+"]["+p3.tostring()+"]");
-		scopetab=subf4(0);
-		expect("testing scopetab", "[table][1][2]",    "["+typeof(scopetab)+"]["+scopetab.aa.tostring()+"]["+scopetab.bb.tostring()+"]");
+		expect("testing scope", "[null][null][a]", "[" + p1.tostring() + "][" + p2.tostring() + "][" + p3.tostring() + "]");
+		scopetab = subf4(0);
+		expect("testing scopetab", "[table][1][2]", "[" + typeof (scopetab) + "][" + scopetab.aa.tostring() + "][" + scopetab.bb.tostring() + "]");
 
-		s="";
-		i=subf5(0, &s);
-		expect("subf5(i, &s)", true,    s=="[0][1][2][3][4][5][5][4][3][2][1][0]");
+		s = "";
+		i = subf5(0, &s);
+		expect("subf5(i, &s)", true, s == "[0][1][2][3][4][5][5][4][3][2][1][0]");
 
-		expect("subtab=subf4(0)",  "(table)2",         "("+typeof(scopetab)+")"+scopetab.bb.tostring());
-		expect("i=subf5(0)",       "(number)42",       "("+typeof(i)+")"+i.tostring());
+		expect("subtab=subf4(0)", "(table)2", "(" + typeof (scopetab) + ")" + scopetab.bb.tostring());
+		expect("i=subf5(0)", "(number)42", "(" + typeof (i) + ")" + i.tostring());
 
-		x=1;    expect("x=1",     1,     x.tostring());
-		x=null; expect("x=null", 'null', x.tostring());
-		x=1;    expect("x=1",     1,     x.tostring());
-		local  x=null; expect("x=null", 'null', x.tostring());
-		local  x=1;    expect("x=1",    1,      x.tostring());
-		local  x=null; expect("x=null", 'null', x.tostring());
+		x = 1; expect("x=1", 1, x.tostring());
+		x = null; expect("x=null", 'null', x.tostring());
+		x = 1; expect("x=1", 1, x.tostring());
+		local x = null; expect("x=null", 'null', x.tostring());
+		local x = 1; expect("x=1", 1, x.tostring());
+		local x = null; expect("x=null", 'null', x.tostring());
 		/* a local null overrides a global val just like any other val would */
-		global x=1;    expect("x=1",    'null', x.tostring());
-		global x=null; expect("x=null", 'null', x.tostring());
-		local  x=1;    expect("x=1",    1,      x.tostring());
+		global x = 1; expect("x=1", 'null', x.tostring());
+		global x = null; expect("x=null", 'null', x.tostring());
+		local x = 1; expect("x=1", 1, x.tostring());
 
 
 
@@ -1012,13 +1013,13 @@ namespace testlib1.tests {
 			A = { c = "1", t = "2" },
 			B = { c = 3 }
 		};
-		t2=lib.text.serialize(t1);
-		t2=lib.string.replace(lib.string.replace(lib.string.replace(lib.string.replace(t2,"\r",""),"\n",""),"\t","")," ","");
+		t2 = lib.text.serialize(t1);
+		t2 = lib.string.replace(lib.string.replace(lib.string.replace(lib.string.replace(t2, "\r", ""), "\n", ""), "\t", ""), " ", "");
 		expect("", '{A={c="1",t="2"},B={c=3}}', t2);
-		t3=lib.eval(t2);
-		t3['B']['c']=4;
-		t3=lib.text.serialize(t3);
-		t3=lib.string.replace(lib.string.replace(lib.string.replace(lib.string.replace(t3,"\r",""),"\n",""),"\t","")," ","");
+		t3 = lib.eval(t2);
+		t3['B']['c'] = 4;
+		t3 = lib.text.serialize(t3);
+		t3 = lib.string.replace(lib.string.replace(lib.string.replace(lib.string.replace(t3, "\r", ""), "\n", ""), "\t", ""), " ", "");
 		expect("", '{A={c="1",t="2"},B={c=4}}', t3);
 		return;
 	};
@@ -1026,96 +1027,96 @@ namespace testlib1.tests {
 	function size() {
 		//include("../samples/_cards.ns");
 		//expect("sizeof(CARDS)", 52, sizeof(CARDS));
-		global CARDS={};
-		expect("sizeof(CARDS)", 0, sizeof(CARDS));
-		global CARDS=null;
-		expect("sizeof(CARDS)", 0, sizeof(CARDS));
+		global CARDS = {};
+		expect("sizeof(CARDS)", 0, sizeof (CARDS));
+		global CARDS = null;
+		expect("sizeof(CARDS)", 0, sizeof (CARDS));
 		return;
 	};
 	// string.ns
 	function strings() {
-		local x=lib.string.cat(lib.string.cat("Aa", "Bb"), "CcDd");
-		expect("x",                     "AaBbCcDd", x);
-		expect("string.sub(x,1,2)",     "aB",     lib.string.sub(x, 1, 2));
-		expect("string.sub(x,4,1)",     "C",      lib.string.sub(x, 4, 1));
-		expect("string.len(x)",         8,        lib.string.len(x));
-		expect("string.cmp(x)",         -32,      lib.string.cmp(x, "aabbccdd"));
-		expect("string.cmp(x)",         32,       lib.string.cmp("aabbccdd", x));
-		expect("string.icmp(x)",        0,        lib.string.icmp(x, "aabbccdd"));
-		expect("string.ncmp(x)",        -32,      lib.string.ncmp(x, "aabb", 4));
-		expect("string.nicmp(x)",       0,        lib.string.nicmp(x, "aabb", 4));
-		expect("string.sub(x)",         "is a",   lib.string.sub("this is a test.", 5, 4));
-		expect("string.sub(x)",         "test",   lib.string.sub("this is a test.", -5, 4));
+		local x = lib.string.cat(lib.string.cat("Aa", "Bb"), "CcDd");
+		expect("x", "AaBbCcDd", x);
+		expect("string.sub(x,1,2)", "aB", lib.string.sub(x, 1, 2));
+		expect("string.sub(x,4,1)", "C", lib.string.sub(x, 4, 1));
+		expect("string.len(x)", 8, lib.string.len(x));
+		expect("string.cmp(x)", -32, lib.string.cmp(x, "aabbccdd"));
+		expect("string.cmp(x)", 32, lib.string.cmp("aabbccdd", x));
+		expect("string.icmp(x)", 0, lib.string.icmp(x, "aabbccdd"));
+		expect("string.ncmp(x)", -32, lib.string.ncmp(x, "aabb", 4));
+		expect("string.nicmp(x)", 0, lib.string.nicmp(x, "aabb", 4));
+		expect("string.sub(x)", "is a", lib.string.sub("this is a test.", 5, 4));
+		expect("string.sub(x)", "test", lib.string.sub("this is a test.", -5, 4));
 
-		expect("x='x'*8",               "xxxxxxxx", 'x'*8);
-		local x='yy';
-		expect("x='yy';x*=3",           "yyyyyy",   x*=3);
+		expect("x='x'*8", "xxxxxxxx", 'x' * 8);
+		local x = 'yy';
+		expect("x='yy';x*=3", "yyyyyy", x *= 3);
 
-		expect("'123'=='456'",          false,    '123'=='456');
-		expect("'123'>='456'",          false,    '123'>='456');
-		expect("'123'>'456'",           false,    '123'>'456');
-		expect("'123'=='123'",          true,     '123'=='123');
-		expect("'123'==123",            true,     '123'==123);
-		expect("123=='123'",            true,     123=='123');
-		expect("'123'!='456'",          true,     '123'!='456');
-		expect("'123'<='456'",          true,     '123'<='456');
-		expect("'123'<'456'",           true,     '123'<'456');
-		expect("'123'+'456'",           "123456", '123'+'456');
-	//	expect("'123\0456'",            "123\0456", '123\0456');
-		expect("123+'456'",             579,      123+'456');
-		expect("1+\"a\"+2+\"b\"+3",     6,        1+"a"+2+"b"+3);
-		expect("1+\"2\"+3+\"4\"+5",     15,       1+"2"+3+"4"+5);
-		expect("\"a\"+1+\"b\"+2+\"c\"", "a1b2c",  "a"+1+"b"+2+"c");
-		expect("tonumber('123')+1", 124,  tonumber('123')+1);
-		x=lib.string.split("aa|bb|cc|dd", "|");
-		expect("string.split()",  "aa+bb+cc+dd+null", x[0]+'+'+x[1]+'+'+x[2]+'+'+x[3]+'+'+x[4].tostring());
-		x=lib.string.split("aa|bb|cc|dd|", "|");
-		expect("string.split()",  "aa+bb+cc+dd+", x[0]+'+'+x[1]+'+'+x[2]+'+'+x[3]+'+'+x[4].tostring());
-		x=lib.string.split("aaz|zbbz|zccz|zddz|z", "z|z");
-		expect("string.split()",  "aa+bb+cc+dd+", x[0]+'+'+x[1]+'+'+x[2]+'+'+x[3]+'+'+x[4].tostring());
+		expect("'123'=='456'", false, '123' == '456');
+		expect("'123'>='456'", false, '123' >= '456');
+		expect("'123'>'456'", false, '123' > '456');
+		expect("'123'=='123'", true, '123' == '123');
+		expect("'123'==123", true, '123' == 123);
+		expect("123=='123'", true, 123 == '123');
+		expect("'123'!='456'", true, '123' != '456');
+		expect("'123'<='456'", true, '123' <= '456');
+		expect("'123'<'456'", true, '123' < '456');
+		expect("'123'+'456'", "123456", '123' + '456');
+		//	expect("'123\0456'",            "123\0456", '123\0456');
+		expect("123+'456'", 579, 123 + '456');
+		expect("1+\"a\"+2+\"b\"+3", 6, 1 + "a" + 2 + "b" + 3);
+		expect("1+\"2\"+3+\"4\"+5", 15, 1 + "2" + 3 + "4" + 5);
+		expect("\"a\"+1+\"b\"+2+\"c\"", "a1b2c", "a" + 1 + "b" + 2 + "c");
+		expect("tonumber('123')+1", 124, tonumber('123') + 1);
+		x = lib.string.split("aa|bb|cc|dd", "|");
+		expect("string.split()", "aa+bb+cc+dd+null", x[0] + '+' + x[1] + '+' + x[2] + '+' + x[3] + '+' + x[4].tostring());
+		x = lib.string.split("aa|bb|cc|dd|", "|");
+		expect("string.split()", "aa+bb+cc+dd+", x[0] + '+' + x[1] + '+' + x[2] + '+' + x[3] + '+' + x[4].tostring());
+		x = lib.string.split("aaz|zbbz|zccz|zddz|z", "z|z");
+		expect("string.split()", "aa+bb+cc+dd+", x[0] + '+' + x[1] + '+' + x[2] + '+' + x[3] + '+' + x[4].tostring());
 
-		var x="1|2|3|4|5";
-		expect("string.str()",  "1|2|3|4|5", x);
-		if ((x=lib.string.str(x, "|"))!=null) x=lib.string.sub(x, 1, 42);
-		expect("string.str()",  "2|3|4|5", x);
-		if ((x=lib.string.str(x, "|"))!=null) x=lib.string.sub(x, 1, 42);
-		expect("string.str()",  "3|4|5", x);
-		if ((x=lib.string.str(x, "|"))!=null) x=lib.string.sub(x, 1, 42);
-		expect("string.str()",  "4|5", x);
-		if ((x=lib.string.str(x, "|"))!=null) x=lib.string.sub(x, 1, 42);
-		expect("string.str()",  "5", x);
-		if ((x=lib.string.str(x, "|"))!=null) x=lib.string.sub(x, 1, 42);
-		expect("string.str()",  false, x);
+		var x = "1|2|3|4|5";
+		expect("string.str()", "1|2|3|4|5", x);
+		if ((x = lib.string.str(x, "|")) != null) x = lib.string.sub(x, 1, 42);
+		expect("string.str()", "2|3|4|5", x);
+		if ((x = lib.string.str(x, "|")) != null) x = lib.string.sub(x, 1, 42);
+		expect("string.str()", "3|4|5", x);
+		if ((x = lib.string.str(x, "|")) != null) x = lib.string.sub(x, 1, 42);
+		expect("string.str()", "4|5", x);
+		if ((x = lib.string.str(x, "|")) != null) x = lib.string.sub(x, 1, 42);
+		expect("string.str()", "5", x);
+		if ((x = lib.string.str(x, "|")) != null) x = lib.string.sub(x, 1, 42);
+		expect("string.str()", false, x);
 
-		expect("string.atoi('abc',0)",  97,         lib.string.atoi("abc", 0));
-		expect("string.atoi('abc',1)",  98,         lib.string.atoi("abc", 1));
-		expect("string.atoi('abc',2)",  99,         lib.string.atoi("abc", 2));
-		expect("string.atoi('abc',3)",  -1,         lib.string.atoi("abc", 3));
-		expect("string.itoa(97)",       'a',        lib.string.itoa(97));
-		expect("split..join",           "ab.*.*cd", lib.string.join(lib.string.split("ab--cd", '-'), '.*'));
+		expect("string.atoi('abc',0)", 97, lib.string.atoi("abc", 0));
+		expect("string.atoi('abc',1)", 98, lib.string.atoi("abc", 1));
+		expect("string.atoi('abc',2)", 99, lib.string.atoi("abc", 2));
+		expect("string.atoi('abc',3)", -1, lib.string.atoi("abc", 3));
+		expect("string.itoa(97)", 'a', lib.string.itoa(97));
+		expect("split..join", "ab.*.*cd", lib.string.join(lib.string.split("ab--cd", '-'), '.*'));
 
-		expect("string.replace",        "ab.*.*cd", lib.string.replace("ab--cd", '-', '.*'));
+		expect("string.replace", "ab.*.*cd", lib.string.replace("ab--cd", '-', '.*'));
 
-		str="abcdef";
-		expect("s.contains(\"bcd\")",   true,  str.contains("bcd"));
-		expect("s.contains(\"bcc\")",   false, str.contains("bcc"));
-		expect("s.startswith(\"abc\")", true,  str.startswith("abc"));
+		str = "abcdef";
+		expect("s.contains(\"bcd\")", true, str.contains("bcd"));
+		expect("s.contains(\"bcc\")", false, str.contains("bcc"));
+		expect("s.startswith(\"abc\")", true, str.startswith("abc"));
 		expect("s.startswith(\"abb\")", false, str.startswith("abb"));
-		expect("s.endswith(\"def\")",   true,  str.endswith("def"));
-		expect("s.endswith(\"dee\")",   false, str.endswith("dee"));
-		expect("s.endswith(\"\")",      true,  str.endswith(""));
+		expect("s.endswith(\"def\")", true, str.endswith("def"));
+		expect("s.endswith(\"dee\")", false, str.endswith("dee"));
+		expect("s.endswith(\"\")", true, str.endswith(""));
 
-		str=" string ";
-		expect("s.trim(\"string\")",      "string",  str.trim());
+		str = " string ";
+		expect("s.trim(\"string\")", "string", str.trim());
 		expect("s.trimstart(\"string\")", "string ", str.trimstart());
-		expect("s.trimend(\"string\")",   " string", str.trimend());
-		expect("s.trim(\"\")",            "abc",     lib.string.trim(" abc "));
-		expect("s.trim(\"\")",            "",        lib.string.trim(""));
-		expect("s.trim(\"\")",            "",        lib.string.trim("  "));
+		expect("s.trimend(\"string\")", " string", str.trimend());
+		expect("s.trim(\"\")", "abc", lib.string.trim(" abc "));
+		expect("s.trim(\"\")", "", lib.string.trim(""));
+		expect("s.trim(\"\")", "", lib.string.trim("  "));
 
-		x=@"verbatim\r\nstring";
-		if (!quiet) print(""+x+"\r\n");
-		if (!quiet) print(@"verbatim\r\nstring2"+"\r\n"+@";-)\r\n"+"\r\n");
+		x = @"verbatim\r\nstring";
+		if (!quiet) print("" + x + "\r\n");
+		if (!quiet) print(@"verbatim\r\nstring2" + "\r\n" + @";-)\r\n" + "\r\n");
 
 		//dbffile=@"C:\D\E\" + "ASDF" + @"\F\G.DBF";
 		//if (!quiet) print(""+dbffile+"\r\n");
@@ -1128,57 +1129,57 @@ namespace testlib1.tests {
 	};
 	// switch.ns
 	function switchcase() {
-		local x=0;
-		local y=0;
+		local x = 0;
+		local y = 0;
 
 		switch ('asdf') {
 		case 'asd':
 			print("bad\r\n");
-			x=1;
+			x = 1;
 			break;
 		case 'asdf':
 			y++;
-			x=2;
+			x = 2;
 			break;
 		default:
 			print("bad\r\n");
-			x=3;
+			x = 3;
 			break;
 		}
 		expect("simple 'switch' test", 2, x);
-		switch (4/2) {
+		switch (4 / 2) {
 		case 1:
 			print("bad\r\n");
-			x=1;
+			x = 1;
 			break;
 		case 2:
 			y++;
-			x=2;
+			x = 2;
 			break;
 		default:
 			print("bad\r\n");
-			x=3;
+			x = 3;
 			break;
 		}
 		expect("simple 'switch' test", 2, x);
 		switch (2) {
 		case 1:
 			print("bad\r\n");
-			x=1;
+			x = 1;
 			break;
 		case 2:
 			y++;
-			x=2;
+			x = 2;
 		default:
 			y++;
-			x=3;
+			x = 3;
 			break;
 		}
 		expect("simple 'switch' test", 3, x);
 		switch (2) {
 		default:
 			y++;
-			x=3;
+			x = 3;
 			break;
 		}
 		expect("simple 'switch' test", 3, x);
@@ -1188,72 +1189,72 @@ namespace testlib1.tests {
 	// tables.ns
 	function tables() {
 		function subf() { return 69; }
-		local sub2 = function () { return { a=1, b=2 }; };
-		local x=1;
-		local ack = { a="x" };
+		local sub2 = function () { return { a = 1, b = 2 }; };
+		local x = 1;
+		local ack = { a = "x" };
 
 		//if (include("../samples/_cards.ns")==false) {
 		//	printf("can't include _cards.ns?\r\n");
 		//}
 		//expect("typeof(CARDS)",      "table",           typeof(CARDS));
-		if (typeof(CARDS)!='table') return;
+		if (typeof (CARDS) != 'table') return;
 		expect("CARDS['1']['name']", "Ace of Diamonds", CARDS['1']['name']);
-		CARDS[1].name="aa";
+		CARDS[1].name = "aa";
 		expect("CARDS[1].name", "aa", CARDS[1].name);
-		expect("CARDS[x]['dealt']", "(null)null", "("+typeof(CARDS[x]['dealt'])+")"+CARDS[x]['dealt'].tostring());
-		CARDS[x]['dealt']=true;
-		expect("CARDS[x]['dealt']", "(boolean)true", "("+typeof(CARDS[x]['dealt'])+")"+CARDS[x]['dealt'].tostring());
+		expect("CARDS[x]['dealt']", "(null)null", "(" + typeof (CARDS[x]['dealt']) + ")" + CARDS[x]['dealt'].tostring());
+		CARDS[x]['dealt'] = true;
+		expect("CARDS[x]['dealt']", "(boolean)true", "(" + typeof (CARDS[x]['dealt']) + ")" + CARDS[x]['dealt'].tostring());
 
 		tab = {
-			{ a1="x", b = pi, [12]=41, [1]=42, 43, 'blah', subf() },
-			{ "x", 'y', x = 41, 42, 43, 'blah', [5]=12, heh=";-)" }
+			{ a1 = "x", b = pi, [12] = 41, [1] = 42, 43, 'blah', subf() },
+			{ "x", 'y', x = 41, 42, 43, 'blah', [5] = 12, heh = ";-)" }
 		};
 		// now add a subtable
 		tab['t'] = {
-			{ a2="x", b = pi, [12]=41, [1]=42, 43, 'blah', subf() },
-			{ "x", 'y', x = 41, 42, 43, 'blah', [5]=12, heh=";-)" }
+			{ a2 = "x", b = pi, [12] = 41, [1] = 42, 43, 'blah', subf() },
+			{ "x", 'y', x = 41, 42, 43, 'blah', [5] = 12, heh = ";-)" }
 		};
 		// overwrite an existing subtable
-		tab['t'] = { [2] = { "x", 'y', x = 41, 42, 43, 'blah', [5]=12, heh=";-)" } };
+		tab['t'] = { [2] = { "x", 'y', x = 41, 42, 43, 'blah', [5] = 12, heh = ";-)" } };
 		// add another sub
-		tab['t'][3] = { "x", 'y', x = 41, 42, 43, 'blah', [5]=12, heh=";-)" };
+		tab['t'][3] = { "x", 'y', x = 41, 42, 43, 'blah', [5] = 12, heh = ";-)" };
 		//print(serialize(_GLOBALS));
 
-		a = { [0]=subf()-1, [1]=subf(), x=+1, y=2, z=-3 };
-		expect("a = { ... }", "68 69 1 2 -3", a[0].tostring()+' '+a[1].tostring()+' '+a['x'].tostring()+' '+a['y'].tostring()+' '+a['z'].tostring());
+		a = { [0] = subf() - 1, [1] = subf(), x = +1, y = 2, z = -3 };
+		expect("a = { ... }", "68 69 1 2 -3", a[0].tostring() + ' ' + a[1].tostring() + ' ' + a['x'].tostring() + ' ' + a['y'].tostring() + ' ' + a['z'].tostring());
 
 		local status_table = {
-			['A'] = { c='1', t='2' };
-			['B'] = { c='3', t='4' };
+			['A'] = { c = '1', t = '2' };
+			['B'] = { c = '3', t = '4' };
 		};
 
 		/* this code failed after the malloc reductions */
-		row={ 1 };
-		expect("row={ 1 };", 'table', typeof(row));
-		if (typeof(row)!='table') x=1;
-		expect("(typeof(row))", 'table', typeof(row));
-		if (row!=null) x=1;
-		expect("(row!=null)", 'table', typeof(row));
-		x=(row={1});
-		expect("x=(row={1})", 'table', typeof(row));
-		if (row={1}) x=1;
-		expect("(row={1})", 'table', typeof(row));
-		if ((row={1})!=null) x=1;
-		expect("((row={1})!=null)", 'table', typeof(row));
-		while ((row={1})!=null) { break; }
-		expect("((row={1})!=null)", 'table', typeof(row));
-		i=0;
+		row = { 1 };
+		expect("row={ 1 };", 'table', typeof (row));
+		if (typeof (row) != 'table') x = 1;
+		expect("(typeof(row))", 'table', typeof (row));
+		if (row != null) x = 1;
+		expect("(row!=null)", 'table', typeof (row));
+		x = (row = {1});
+		expect("x=(row={1})", 'table', typeof (row));
+		if (row = {1}) x = 1;
+		expect("(row={1})", 'table', typeof (row));
+		if ((row = {1}) != null) x = 1;
+		expect("((row={1})!=null)", 'table', typeof (row));
+		while ((row = {1}) != null) { break; }
+		expect("((row={1})!=null)", 'table', typeof (row));
+		i = 0;
 		do {
-			if (row) x=serialize(row);
-			if (++i>2) break;
-		} while ((row={1})!=null);
-		while ((row={1})!=null) {
-			x=serialize(row);
+			if (row) x = serialize(row);
+			if (++ i > 2) break;
+		} while ((row = {1}) != null);
+		while ((row = {1}) != null) {
+			x = serialize(row);
 			break;
 		}
-		expect("((row={1})!=null)", 'table', typeof(row));
+		expect("((row={1})!=null)", 'table', typeof (row));
 
-		x=sub2();
+		x = sub2();
 		expect("x=sub2()", '1', x['a'].tostring());
 
 		// all four are valid ways to declare a function inside a table
@@ -1281,14 +1282,14 @@ namespace testlib1.tests {
 	function tcp() {
 		local test_tcpserv = function () {
 			/* requires _tcpserv.ns to be running */
-			sock=new lib.net.tcp.socket("localhost", 1234, 0);
-			if (typeof(sock)!='sock4') {
+			sock = new lib.net.tcp.socket("localhost", 1234, 0);
+			if (typeof (sock) != 'sock4') {
 				print("can't connect to test server - try running _tcpserv.ns first\n");
 				return;
 			}
-			o=sock.write("ping\r\n");
+			o = sock.write("ping\r\n");
 			print("\twrote ", o, " bytes\n");
-			i=sock.gets();
+			i = sock.gets();
 			print("read: ", i, "\n");
 			sock.close();
 			io.flush();
@@ -1296,28 +1297,28 @@ namespace testlib1.tests {
 		}
 		local test_http = function () {
 			if (!quiet) print("        trying http://nulllogic.ca:80/   - ");
-			sock=new net.tcp.socket();
+			sock = new net.tcp.socket();
 			sock.connect("nulllogic.ca", 80, false);
-			if (typeof(sock.socket)!='sock4') {
+			if (typeof (sock.socket) != 'sock4') {
 				if (!quiet) print("can't connect to http server\n");
 				return;
 			}
-			o=sock.write("GET /nsp/version.php HTTP/1.0\r\n\r\n");
-			i=sock.gets();
-			x=lib.string.str(i, " ");
-			p=lib.string.sub(i, 0, sizeof(i)-sizeof(x));
-			c=lib.string.sub(x, 1, sizeof(x));
-			x=lib.string.str(c, " ");
-			c=lib.string.sub(c, 0, sizeof(c)-sizeof(x));
-			x=lib.string.sub(x, 1, sizeof(x));
+			o = sock.write("GET /nsp/version.php HTTP/1.0\r\n\r\n");
+			i = sock.gets();
+			x = lib.string.str(i, " ");
+			p = lib.string.sub(i, 0, sizeof (i) - sizeof (x));
+			c = lib.string.sub(x, 1, sizeof (x));
+			x = lib.string.str(c, " ");
+			c = lib.string.sub(c, 0, sizeof (c) - sizeof (x));
+			x = lib.string.sub(x, 1, sizeof (x));
 			printf("[%s][%s][%s]\n", p, c, x);
 			while (1) {
-				i=sock.gets();
-				if (i=="") break;
+				i = sock.gets();
+				if (i == "") break;
 			}
 			while (1) {
-				i=sock.read();
-				if (i=="") break;
+				i = sock.read();
+				if (i == "") break;
 			}
 			//print(serialize(sock.info()));
 			sock.close();
@@ -1326,28 +1327,28 @@ namespace testlib1.tests {
 		}
 		local test_https = function () {
 			if (!quiet) print("        trying https://nulllogic.ca:443/ - ");
-			sock=new net.tcp.socket();
+			sock = new net.tcp.socket();
 			sock.connect("nulllogic.ca", 443, true);
-			if (typeof(sock.socket)!='sock4') {
+			if (typeof (sock.socket) != 'sock4') {
 				if (!quiet) print("can't connect to http server\n");
 				return;
 			}
-			o=sock.write("GET / HTTP/1.0\r\n\r\n");
-			i=sock.gets();
-			print("["+i+"]\n");
+			o = sock.write("GET / HTTP/1.0\r\n\r\n");
+			i = sock.gets();
+			print("[" + i + "]\n");
 			io.flush();
 			while (1) {
-				i=sock.gets();
-				if (typeof(i)!='string') break;
-				if (i=="") break;
-				i=lib.string.join(lib.string.split(i, "<"), "&lt;");
+				i = sock.gets();
+				if (typeof (i) != 'string') break;
+				if (i == "") break;
+				i = lib.string.join(lib.string.split(i, "<"), "&lt;");
 			}
 			io.flush();
 			while (1) {
-				i=sock.read();
-				if (typeof(i)!='string') break;
-				if (sizeof(i)==0) break;
-				i=lib.string.join(lib.string.split(i, "<"), "&lt;");
+				i = sock.read();
+				if (typeof (i) != 'string') break;
+				if (sizeof (i) == 0) break;
+				i = lib.string.join(lib.string.split(i, "<"), "&lt;");
 			}
 			//print(serialize(sock.info(sock)));
 			sock.close();
@@ -1355,183 +1356,183 @@ namespace testlib1.tests {
 			return;
 		}
 		local test_ftp = function () {
-			sock=net.tcp.open("localhost", 21, 0);
-			if (typeof(sock)!='sock4') {
+			sock = net.tcp.open("localhost", 21, 0);
+			if (typeof (sock) != 'sock4') {
 				print("can't connect to ftp server\n");
 				return;
 			}
-			i=net.tcp.gets(sock);
+			i = net.tcp.gets(sock);
 			print("read: ", i, "\n");
-			o=net.tcp.write(sock, "USER anonymous\r\n");
-			i=net.tcp.gets(sock);
+			o = net.tcp.write(sock, "USER anonymous\r\n");
+			i = net.tcp.gets(sock);
 			print("read: ", i, "\n");
-			o=net.tcp.write(sock, "PASS nobody@nowhere.com\r\n");
-			i=net.tcp.gets(sock);
+			o = net.tcp.write(sock, "PASS nobody@nowhere.com\r\n");
+			i = net.tcp.gets(sock);
 			print("read: ", i, "\n");
-			o=net.tcp.write(sock, "SYST\r\n");
-			i=net.tcp.gets(sock);
+			o = net.tcp.write(sock, "SYST\r\n");
+			i = net.tcp.gets(sock);
 			print("read: ", i, "\n");
-			o=net.tcp.write(sock, "FEAT\r\n");
+			o = net.tcp.write(sock, "FEAT\r\n");
 			while (1) {
-				i=net.tcp.gets(sock);
+				i = net.tcp.gets(sock);
 				print("read: ", i, "\n");
-				if (lib.string.sub(i, 0, 4)=="211 ") break;
-				if (lib.string.cmp(i, "211")==0) break;
+				if (lib.string.sub(i, 0, 4) == "211 ") break;
+				if (lib.string.cmp(i, "211") == 0) break;
 			}
-			o=net.tcp.write(sock, "PWD\r\n");
-			i=net.tcp.gets(sock);
+			o = net.tcp.write(sock, "PWD\r\n");
+			i = net.tcp.gets(sock);
 			print("read: ", i, "\n");
-			o=net.tcp.write(sock, "TYPE A\r\n");
-			i=net.tcp.gets(sock);
+			o = net.tcp.write(sock, "TYPE A\r\n");
+			i = net.tcp.gets(sock);
 			print("read: ", i, "\n");
-			o=net.tcp.write(sock, "PASV\r\n");
-			i=net.tcp.gets(sock);
+			o = net.tcp.write(sock, "PASV\r\n");
+			i = net.tcp.gets(sock);
 			print("read: ", i, "\n");
-			i=lib.string.split(i, "(");
-			y=lib.string.split(i[1], ")");
-			addr=lib.string.split(y[0], ",");
-			if (sizeof(addr)!=6) {
+			i = lib.string.split(i, "(");
+			y = lib.string.split(i[1], ")");
+			addr = lib.string.split(y[0], ",");
+			if (sizeof (addr) != 6) {
 				print("couldn't parse the host address\n");
 				print(serialize(addr));
-				print(sizeof(addr));
+				print(sizeof (addr));
 			} else {
-				o=net.tcp.write(sock, "LIST\r\n");
-				sock2=net.tcp.open(addr[0]+'.'+addr[1]+'.'+addr[2]+'.'+addr[3], tonumber(addr[4])*256+tonumber(addr[5]), 0);
-				i=net.tcp.read(sock2);
-				print("read ", sizeof(i), " bytes of data:\n", i, "\n");
+				o = net.tcp.write(sock, "LIST\r\n");
+				sock2 = net.tcp.open(addr[0] + '.' + addr[1] + '.' + addr[2] + '.' + addr[3], tonumber(addr[4]) * 256 + tonumber(addr[5]), 0);
+				i = net.tcp.read(sock2);
+				print("read ", sizeof (i), " bytes of data:\n", i, "\n");
 				net.tcp.close(sock2);
 			}
 			while (1) {
-				i=net.tcp.gets(sock);
+				i = net.tcp.gets(sock);
 				print("read: ", i, "\n");
-				if (lib.string.sub(i, 0, 4)=="226 ") break;
-				if (lib.string.cmp(i, "226")==0) break;
+				if (lib.string.sub(i, 0, 4) == "226 ") break;
+				if (lib.string.cmp(i, "226") == 0) break;
 			}
-			o=net.tcp.write(sock, "REST 0\r\n");
-			i=net.tcp.gets(sock);
+			o = net.tcp.write(sock, "REST 0\r\n");
+			i = net.tcp.gets(sock);
 			print("read: ", i, "\n");
-			o=net.tcp.write(sock, "QUIT\r\n");
-			i=net.tcp.gets(sock);
+			o = net.tcp.write(sock, "QUIT\r\n");
+			i = net.tcp.gets(sock);
 			print("read: ", i, "\n");
 			net.tcp.close(sock);
 			io.flush();
 			return;
 		}
 		local test_pop3 = function () {
-			sock=net.tcp.open("localhost", 110, 0);
-			if (typeof(sock)!='sock4') {
+			sock = net.tcp.open("localhost", 110, 0);
+			if (typeof (sock) != 'sock4') {
 				print("can't connect to pop3 server\n");
 				return;
 			}
-			i=net.tcp.gets(sock);
+			i = net.tcp.gets(sock);
 			print("read: ", i, "\n");
 			net.tcp.write(sock, "user null\r\n");
-			i=net.tcp.gets(sock);
+			i = net.tcp.gets(sock);
 			print("read: ", i, "\n");
-			o=net.tcp.write(sock, "pass secret\r\n");
-			i=net.tcp.gets(sock);
+			o = net.tcp.write(sock, "pass secret\r\n");
+			i = net.tcp.gets(sock);
 			print("read: ", i, "\n");
-			if (lib.string.sub(i, 0, 3)=="+OK") {
-				o=net.tcp.write(sock, "list\r\n");
-				i=net.tcp.gets(sock);
+			if (lib.string.sub(i, 0, 3) == "+OK") {
+				o = net.tcp.write(sock, "list\r\n");
+				i = net.tcp.gets(sock);
 				print("read: ", i, "\n");
 			}
-			o=net.tcp.write(sock, "QUIT\r\n");
-			i=net.tcp.gets(sock);
+			o = net.tcp.write(sock, "QUIT\r\n");
+			i = net.tcp.gets(sock);
 			print("read: ", i, "\n");
 			net.tcp.close(sock);
 			io.flush();
 			return;
 		}
 		local test_smtp = function () {
-			sock=lib.net.tcp.open("localhost", 25, 0);
-			if (typeof(sock)!='sock4') {
+			sock = lib.net.tcp.open("localhost", 25, 0);
+			if (typeof (sock) != 'sock4') {
 				print("can't connect to smtp server\n");
 				return;
 			}
-			i=net.tcp.gets(sock);
-			o=net.tcp.write(sock, "HELO <localhost>\r\n");
-			i=net.tcp.gets(sock);
+			i = net.tcp.gets(sock);
+			o = net.tcp.write(sock, "HELO <localhost>\r\n");
+			i = net.tcp.gets(sock);
 			print("read: ", i, "\n");
-			o=net.tcp.write(sock, "MAIL From: <nulllogic@localhost>\r\n");
-			i=net.tcp.gets(sock);
+			o = net.tcp.write(sock, "MAIL From: <nulllogic@localhost>\r\n");
+			i = net.tcp.gets(sock);
 			print("read: ", i, "\n");
-			o=net.tcp.write(sock, "RCPT To: <nulllogic@localhost>\r\n");
-			i=net.tcp.gets(sock);
+			o = net.tcp.write(sock, "RCPT To: <nulllogic@localhost>\r\n");
+			i = net.tcp.gets(sock);
 			print("read: ", i, "\n");
-			o=net.tcp.write(sock, "DATA\r\n");
-			i=net.tcp.gets(sock);
+			o = net.tcp.write(sock, "DATA\r\n");
+			i = net.tcp.gets(sock);
 			print("read: ", i, "\n");
-			o=net.tcp.write(sock, "From: Dan Cahill <nulllogic@localhost>\r\n");
-			o=net.tcp.write(sock, "To: Dan Cahill <nulllogic@localhost>\r\n");
-			o=net.tcp.write(sock, "Subject: Testing\r\n");
-			o=net.tcp.write(sock, "\r\n");
-			o=net.tcp.write(sock, "This is a test.\r\n");
-			o=net.tcp.write(sock, "\r\n.\r\n");
-			i=net.tcp.gets(sock);
+			o = net.tcp.write(sock, "From: Dan Cahill <nulllogic@localhost>\r\n");
+			o = net.tcp.write(sock, "To: Dan Cahill <nulllogic@localhost>\r\n");
+			o = net.tcp.write(sock, "Subject: Testing\r\n");
+			o = net.tcp.write(sock, "\r\n");
+			o = net.tcp.write(sock, "This is a test.\r\n");
+			o = net.tcp.write(sock, "\r\n.\r\n");
+			i = net.tcp.gets(sock);
 			print("read: ", i, "\n");
-			o=net.tcp.write(sock, "QUIT\r\n");
-			i=net.tcp.gets(sock);
+			o = net.tcp.write(sock, "QUIT\r\n");
+			i = net.tcp.gets(sock);
 			print("read: ", i, "\n");
 			net.tcp.close(sock);
 			io.flush();
 			return;
 		}
 
-		if (typeof(lib.net)!='table') {
+		if (typeof (lib.net) != 'table') {
 			if (!quiet) print("SKIPPING TCP TESTS\n");
 			return;
 		}
 		if (!quiet) print("        runtime = ", lib.string.tostring(lib.debug.runtime(), 3), " seconds\n");
-		if (!quiet) if (lib.net.tcp.have_tls) print("        lib.net.tcp.tls_type = '",lib.net.tcp.tls_type,"'\n");
+		if (!quiet) if (lib.net.tcp.have_tls) print("        lib.net.tcp.tls_type = '", lib.net.tcp.tls_type, "'\n");
 		site_url = "http://nulllogic.ca/nsp/version.php";
-		if (!quiet) print("        sucking "+site_url+"\n");
-		hconn=new lib.net.http.client(site_url);
-	//	print("[",typeof(hconn)," ",serialize(hconn),"]");
-		ht=hconn.send();
+		if (!quiet) print("        sucking " + site_url + "\n");
+		hconn = new lib.net.http.client(site_url);
+		//	print("[",typeof(hconn)," ",serialize(hconn),"]");
+		ht = hconn.send();
 		delete hconn;
-	//	htconn=null;
+		//	htconn=null;
 		expect("ht.status", "HTTP/1.1 200 OK", ht.status);
-		if (typeof(ht)=='table') {
-			status=lib.string.split(ht.status, " ");
-			if (tonumber(status[1])==200) {
-				X=lib.data.xml.read(ht.body);
-	//			expect("Latest Version", _version_, X['version'][0]['major'][0]['value']+'.'+X['version'][0]['minor'][0]['value']+'.'+X['version'][0]['point'][0]['value']);
-				expect("Latest Version", _version_, X.version.major.value+'.'+X.version.minor.value+'.'+X.version.point.value);
-	//			print("",ht.body,serialize(X),"\r\n");
+		if (typeof (ht) == 'table') {
+			status = lib.string.split(ht.status, " ");
+			if (tonumber(status[1]) == 200) {
+				X = lib.data.xml.read(ht.body);
+				//			expect("Latest Version", _version_, X['version'][0]['major'][0]['value']+'.'+X['version'][0]['minor'][0]['value']+'.'+X['version'][0]['point'][0]['value']);
+				expect("Latest Version", _version_, X.version.major.value + '.' + X.version.minor.value + '.' + X.version.point.value);
+				//			print("",ht.body,serialize(X),"\r\n");
 			}
 		}
-	//	print("[[[", ht.head, "]]]\n");
-	//	print("[[[", ht.body, "]]]\n");
-	//	print(serialize(ht));
-		if (typeof(lib.net.tcp.socket)=='function') {
-	//		print("        runtime = ", lib.string.tostring(lib.debug.runtime(), 3), " seconds\n");
-	//		test_tcpserv();
+		//	print("[[[", ht.head, "]]]\n");
+		//	print("[[[", ht.body, "]]]\n");
+		//	print(serialize(ht));
+		if (typeof (lib.net.tcp.socket) == 'function') {
+			//		print("        runtime = ", lib.string.tostring(lib.debug.runtime(), 3), " seconds\n");
+			//		test_tcpserv();
 			test_http();
 			if (lib.net.tcp.have_tls) test_https();
-	//		test_ftp();
-	//		test_pop3();
-	//		test_smtp();
+			//		test_ftp();
+			//		test_pop3();
+			//		test_smtp();
 			if (!quiet) print("        runtime = ", lib.string.tostring(lib.debug.runtime(), 3), " seconds\n");
 		}
 		return;
 	};
 	// tcpserv.ns
 	function tcpd() {
-		if (typeof(net.tcp)!='table') {
+		if (typeof (net.tcp) != 'table') {
 			if (!quiet) print("SKIPPING TCPSERV TESTS\n");
 			return;
 		}
-		if (typeof(net.tcp.open)=='function') {
-			bsock=net.tcp.bind("localhost", 1234);
-			print("bsock=", typeof(bsock), "\n");
+		if (typeof (net.tcp.open) == 'function') {
+			bsock = net.tcp.bind("localhost", 1234);
+			print("bsock=", typeof (bsock), "\n");
 			io.flush();
 			while (1) {
-				asock=net.tcp.accept(bsock);
-				if (typeof(asock)=='sock4') {
-					x=net.tcp.gets(asock);
+				asock = net.tcp.accept(bsock);
+				if (typeof (asock) == 'sock4') {
+					x = net.tcp.gets(asock);
 					print("client said: ", x, "\n");
-					if (x=="ping") {
+					if (x == "ping") {
 						net.tcp.write(asock, "pong\r\n");
 						print("i said: pong\n");
 					} else {
@@ -1551,28 +1552,28 @@ namespace testlib1.tests {
 	function trycatch() {
 		//print("        This block _will_ cause errors - That's the point.\n\n");
 		lib.io.flush();
-		trylog="";
+		trylog = "";
 		try {
 			try {
-				trylog+="outer try";
+				trylog += "outer try";
 				//print("        In outer try block...\n");
 				try {
-					trylog+="->inner try";
+					trylog += "->inner try";
 					//print("        In inner try block...\n");
 					throw "Error 325 from inner try block";
 				} catch (e) {
-					trylog+="->inner catch";
+					trylog += "->inner catch";
 					//print("        Inner catch block caught "+e.description+"\n");
 					throw e.description + " re-thrown from inner catch block";
 				} finally {
-					trylog+="->inner finally";
+					trylog += "->inner finally";
 					//print("        In inner finally block...\n");
 				}
 			} catch (e) {
-				trylog+="->outer catch";
+				trylog += "->outer catch";
 				//print("        Outer catch block caught "+e.description+"\n");
 			} finally {
-				trylog+="->outer finally";
+				trylog += "->outer finally";
 				//print("        In outer finally block...\n");
 			}
 			//printf("        [%s]\n", trylog);
@@ -1584,17 +1585,17 @@ namespace testlib1.tests {
 			//print("        finally...\n");
 		}
 		try {
-			x=lib.string.split();
+			x = lib.string.split();
 		} catch (e) {
 			if (!quiet) printf("        Exception: \"%s\"\n", e.description);
 		}
 		try {
-			x=void();
+			x = void();
 		} catch (e) {
 			if (!quiet) printf("        Exception: \"%s\"\n", e.description);
 		}
 		try {
-			a={};x=a.b[1+1].c();
+			a = {}; x = a.b[1 + 1].c();
 		} catch (e) {
 			if (!quiet) printf("        Exception: \"%s\"\n", e.description);
 		}
@@ -1618,33 +1619,33 @@ namespace testlib1.tests {
 	};
 	// types.ns
 	function types() {
-		local a=null;
-		local b=true;
-		local c=42;
-		local d="Guinness";
-		local e = { a=1, b=2, c=3 };
+		local a = null;
+		local b = true;
+		local c = 42;
+		local d = "Guinness";
+		local e = { a = 1, b = 2, c = 3 };
 
-		expect("typeof(a)", "(null)null",       "("+typeof(a)+")"+a.tostring());
-		expect("sizeof(a)", 0,                  sizeof(a));
-		expect("typeof(b)", "(boolean)true",    "("+typeof(b)+")"+b.tostring());
-		expect("sizeof(b)", 1,                  sizeof(b));
-		expect("typeof(c)", "(number)42",       "("+typeof(c)+")"+c.tostring());
-		expect("sizeof(c)", 1,                  sizeof(c));
-		expect("typeof(d)", "(string)Guinness", "("+typeof(d)+")"+d.tostring());
-		expect("sizeof(d)", 8,                  sizeof(d));
-		expect("typeof(e)", "(table)",          "("+typeof(e)+")"+e.tostring());
-		expect("sizeof(e)", 3,                  sizeof(e));
+		expect("typeof(a)", "(null)null", "(" + typeof (a) + ")" + a.tostring());
+		expect("sizeof(a)", 0, sizeof (a));
+		expect("typeof(b)", "(boolean)true", "(" + typeof (b) + ")" + b.tostring());
+		expect("sizeof(b)", 1, sizeof (b));
+		expect("typeof(c)", "(number)42", "(" + typeof (c) + ")" + c.tostring());
+		expect("sizeof(c)", 1, sizeof (c));
+		expect("typeof(d)", "(string)Guinness", "(" + typeof (d) + ")" + d.tostring());
+		expect("sizeof(d)", 8, sizeof (d));
+		expect("typeof(e)", "(table)", "(" + typeof (e) + ")" + e.tostring());
+		expect("sizeof(e)", 3, sizeof (e));
 		return;
 	};
 	// xml.ns
 	function xml() {
-		if (typeof(data.xml)!='table') {
+		if (typeof (data.xml) != 'table') {
 			if (!quiet) print("SKIPPING XML TESTS\n");
 			return;
 		}
-	#	print("XML TEST\n\n");
+		#	print("XML TEST\n\n");
 		local xstr = {
-	"<?xml version='1.0'?>
+			"<?xml version='1.0'?>
 	<moldb>
 		<molecule>
 			<name>Alanine</name>
@@ -1659,8 +1660,8 @@ namespace testlib1.tests {
 			<type>charged</type>
 		</molecule>
 	</moldb>"
-	,
-	"<?xml version='1.0'?>
+			,
+			"<?xml version='1.0'?>
 	<!DOCTYPE chapter SYSTEM '/just/a/test.dtd' [
 	<!ENTITY plainEntity 'FOO entity'>
 	<!ENTITY systemEntity SYSTEM 'xmltest2.xml'>
@@ -1687,8 +1688,8 @@ namespace testlib1.tests {
 	  </para>
 	 </section>
 	</chapter>"
-	,
-	"<?xml version='1.0' encoding='ISO-8859-1'?>
+			,
+			"<?xml version='1.0' encoding='ISO-8859-1'?>
 	<FileZilla>
 	<Sites>
 	<Folder Name='local'>
@@ -1715,8 +1716,8 @@ namespace testlib1.tests {
 	<TransferQueue/>
 	<RecentServers/>
 	</FileZilla>"
-	,
-	"<DoDirectPaymentResponse xmlns='urn:ebay:api:PayPalAPI'>
+			,
+			"<DoDirectPaymentResponse xmlns='urn:ebay:api:PayPalAPI'>
 	<Timestamp xmlns='urn:ebay:apis:eBLBaseComponents'>2005-08-26T01:07:03Z</Timestamp>
 	<Ack xmlns='urn:ebay:apis:eBLBaseComponents'>Success</Ack>
 	<Version xmlns='urn:ebay:apis:eBLBaseComponents'>1.000000</Version>
@@ -1726,19 +1727,19 @@ namespace testlib1.tests {
 	<CVV2Code xsi:type='xs:string'>M</CVV2Code>
 	<TransactionID>33638616GW718753G</TransactionID>
 	</DoDirectPaymentResponse>"
-	};
+		};
 
-		X=data.xml.read(xstr[0], true);
-	//	expect("data.xml.read(...)", "Lysine", X['moldb'][0]['molecule'][1]['name'][0]['value']);
+		X = data.xml.read(xstr[0], true);
+		//	expect("data.xml.read(...)", "Lysine", X['moldb'][0]['molecule'][1]['name'][0]['value']);
 		expect("data.xml.read(...)", "Lysine", X['moldb']['molecule'][1]['name']['value']);
-		X=data.xml.read(xstr[1], true);
-	//	expect("data.xml.read(...)", "a1", X['chapter'][0]['para'][0]['informaltable'][0]['tgroup'][0]['tbody'][0]['row'][0]['entry'][0]['value']);
+		X = data.xml.read(xstr[1], true);
+		//	expect("data.xml.read(...)", "a1", X['chapter'][0]['para'][0]['informaltable'][0]['tgroup'][0]['tbody'][0]['row'][0]['entry'][0]['value']);
 		expect("data.xml.read(...)", "a1", X['chapter']['para']['informaltable']['tgroup']['tbody']['row'][0]['entry'][0]['value']);
-		X=data.xml.read(xstr[2], true);
-	//	expect("data.xml.read(...)", "local", X['FileZilla'][0]['Sites'][0]['Folder'][0]['!attributes']['Name']);
+		X = data.xml.read(xstr[2], true);
+		//	expect("data.xml.read(...)", "local", X['FileZilla'][0]['Sites'][0]['Folder'][0]['!attributes']['Name']);
 		expect("data.xml.read(...)", "local", X['FileZilla']['Sites']['Folder']['@attributes']['Name']);
-		X=data.xml.read(xstr[3], true);
-	//	expect("data.xml.read(...)", "33638616GW718753G", X['DoDirectPaymentResponse'][0]['TransactionID'][0]['value']);
+		X = data.xml.read(xstr[3], true);
+		//	expect("data.xml.read(...)", "33638616GW718753G", X['DoDirectPaymentResponse'][0]['TransactionID'][0]['value']);
 		expect("data.xml.read(...)", "33638616GW718753G", X['DoDirectPaymentResponse']['TransactionID']['value']);
 		return;
 	};
@@ -1750,25 +1751,25 @@ namespace testlib1.tests {
 		local function f2() {
 			return 42;
 		}
-		local a={ a=1, b=2, f=f1 };
-		local b={};
+		local a = { a = 1, b = 2, f = f1 };
+		local b = {};
 
 		lib.table.zlink(b, a);
-		expect("a['a']", 1,      a['a']);
-		expect("b['a']", 1,      b['a']);
-		a['c']=3;
-		expect("a['c']", 3,      a['c']);
-		expect("b['c']", 3,      b['c']);
-		b['d']=10;
+		expect("a['a']", 1, a['a']);
+		expect("b['a']", 1, b['a']);
+		a['c'] = 3;
+		expect("a['c']", 3, a['c']);
+		expect("b['c']", 3, b['c']);
+		b['d'] = 10;
 		expect("a['d']", 'null', a['d'].tostring());
-		expect("b['d']", 10,     b['d']);
-		b['f']=f2;
-		expect("a.f()",  41,     a.f());
-		expect("b.f()",  42,     b.f());
-		b={};
+		expect("b['d']", 10, b['d']);
+		b['f'] = f2;
+		expect("a.f()", 41, a.f());
+		expect("b.f()", 42, b.f());
+		b = {};
 		expect("b['c']", 'null', b['c'].tostring());
 		lib.table.zlink(b, a);
-		expect("b['c']", 3,      b['c']);
+		expect("b['c']", 3, b['c']);
 		return;
 	};
 };
